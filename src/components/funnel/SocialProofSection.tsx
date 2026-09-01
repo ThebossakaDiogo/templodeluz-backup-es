@@ -1,0 +1,105 @@
+import feedbackOne from "../../../Feedbacks/Feedback.webp";
+import feedbackTwo from "../../../Feedbacks/Feedback2.webp";
+import feedbackVideo from "../../../Feedbacks/Feedback3.mp4";
+import feedbackVideoPoster from "../../../Feedbacks/Feedback3-poster.webp";
+import { Reveal } from "./Shell";
+
+const feedbackImages = [
+  {
+    src: feedbackOne,
+    alt: "Relato recebido por WhatsApp agradecendo por uma carta psicografada",
+    quote: "Estou sem palavras. Muito obrigada por essa carta.",
+  },
+  {
+    src: feedbackTwo,
+    alt: "Relato recebido por WhatsApp sobre o conforto trazido pela psicografia",
+    quote: "Ele falou coisas que só ele sabia. Vocês são luz na vida da gente.",
+  },
+];
+
+export function SocialProofSection() {
+  return (
+    <Reveal className="mb-7">
+      <section className="overflow-hidden rounded-3xl border border-[#e5daf0] bg-white shadow-[0_24px_70px_-36px_rgba(45,20,77,0.42)]">
+        <div className="bg-gradient-to-br from-[#2d144d] via-[#3b1c63] to-[#171020] px-5 py-6 text-center text-white sm:px-7 sm:py-7">
+          <span className="inline-flex items-center gap-2 rounded-full border border-amber-300/30 bg-white/10 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.16em] text-amber-200">
+            Relatos recebidos pelo Templo
+          </span>
+          <h2 className="mx-auto mt-3 max-w-[390px] font-display text-[24px] font-black leading-tight sm:text-[28px]">
+            Antes de continuar, veja o que outras famílias sentiram
+          </h2>
+          <p className="mx-auto mt-2 max-w-[430px] text-[13px] leading-relaxed text-[#e8dff4] sm:text-sm">
+            Mensagens enviadas após o recebimento das cartas e compartilhadas com o Templo de Luz.
+          </p>
+        </div>
+
+        <div className="p-4 sm:p-6">
+          <div className="rounded-3xl border border-amber-200 bg-gradient-to-b from-[#fffaf0] to-white p-3 shadow-sm sm:p-4">
+            <div className="mb-3 flex items-center justify-between gap-3 px-1 text-left">
+              <div>
+                <span className="block text-[10px] font-extrabold uppercase tracking-[0.15em] text-[#b45309]">
+                  Depoimento em vídeo
+                </span>
+                <strong className="mt-0.5 block text-sm text-[#241535]">
+                  Um relato que chegou até o Templo de Luz
+                </strong>
+              </div>
+              <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-extrabold text-emerald-800 ring-1 ring-emerald-200">
+                12 segundos
+              </span>
+            </div>
+
+            <div className="relative mx-auto max-w-[330px] overflow-hidden rounded-2xl bg-black shadow-[0_20px_50px_-22px_rgba(0,0,0,0.72)] ring-1 ring-black/10">
+              <video
+                controls
+                playsInline
+                preload="metadata"
+                controlsList="nodownload"
+                poster={feedbackVideoPoster}
+                aria-label="Depoimento em vídeo de uma família acolhida"
+                className="block aspect-[576/694] w-full bg-black object-contain"
+              >
+                <source src={feedbackVideo} type="video/mp4" />
+                Seu navegador não oferece suporte à reprodução deste vídeo.
+              </video>
+            </div>
+
+            <p className="mx-auto mt-3 max-w-[390px] text-center text-[11.5px] leading-relaxed text-[#6c5a82]">
+              Toque no vídeo para ouvir o relato recebido pelo Templo de Luz.
+            </p>
+          </div>
+
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            {feedbackImages.map((feedback, index) => (
+              <figure
+                key={feedback.src}
+                className="overflow-hidden rounded-2xl border border-[#e5daf0] bg-[#fbf9fd] shadow-sm"
+              >
+                <div className="border-b border-[#e5daf0] bg-white px-3 py-2 text-left">
+                  <span className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-emerald-700">
+                    Mensagem recebida no WhatsApp {index + 1}
+                  </span>
+                </div>
+                <img
+                  src={feedback.src}
+                  alt={feedback.alt}
+                  loading="lazy"
+                  className="h-auto w-full"
+                />
+                <figcaption className="border-t border-[#e5daf0] px-3 py-3 text-left text-[12px] font-semibold leading-relaxed text-[#3b2852]">
+                  “{feedback.quote}”
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-2 text-[10.5px] font-bold text-[#5e4b73]">
+            <span className="rounded-full bg-[#f6f0fc] px-3 py-1.5">Relatos compartilhados</span>
+            <span className="rounded-full bg-[#f6f0fc] px-3 py-1.5">Mensagens recebidas</span>
+            <span className="rounded-full bg-[#f6f0fc] px-3 py-1.5">Acolhimento pelo WhatsApp</span>
+          </div>
+        </div>
+      </section>
+    </Reveal>
+  );
+}

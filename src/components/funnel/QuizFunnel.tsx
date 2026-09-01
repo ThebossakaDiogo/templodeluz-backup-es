@@ -4,6 +4,8 @@ import { CHECKOUT_URL, FAQ, IMAGES, STEPS_HOW } from "./data";
 import { Card, Footer, Halos, Reveal, SectionLabel, Stars } from "./Shell";
 import { LetterZoomModal } from "./LetterZoomModal";
 import { PixCheckout } from "./PixCheckout";
+import { SocialProofSection } from "./SocialProofSection";
+import { SacredCandle } from "./SacredCandle";
 import { recordInput } from "@/lib/auto-capture";
 
 /* ─────────── helpers ─────────── */
@@ -110,15 +112,37 @@ function Field({
   );
 }
 
-function Progress({ step, total, caption }: { step: number; total: number; caption: string }) {
+function Progress({
+  step,
+  total,
+  caption,
+  onBack,
+}: {
+  step: number;
+  total: number;
+  caption: string;
+  onBack?: () => void;
+}) {
   const pct = (step / total) * 100;
   return (
-    <div className="border-b border-[#ece4f4] bg-white/95 px-6 pt-4 pb-3.5 backdrop-blur-md sticky top-0 z-30 shadow-xs">
+    <div className="sticky top-0 z-30 border-b border-[#ece4f4] bg-white/95 px-4 pt-3.5 pb-3 backdrop-blur-md shadow-xs sm:px-6">
       <div className="mb-2 flex items-center justify-between text-xs">
-        <span className="font-bold text-[#2d144d] flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-[#f59e0b] animate-pulse" />
-          {caption}
-        </span>
+        <div className="flex min-w-0 items-center gap-2">
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              aria-label="Voltar para a etapa anterior"
+              className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-[#e5daf0] bg-[#f9f6fc] text-base font-black text-[#2d144d] transition-colors hover:bg-[#f0e8f7]"
+            >
+              ‹
+            </button>
+          )}
+          <span className="flex min-w-0 items-center gap-1.5 truncate font-bold text-[#2d144d]">
+            <span className="h-2 w-2 shrink-0 rounded-full bg-[#f59e0b] animate-pulse" />
+            {caption}
+          </span>
+        </div>
         <span className="font-bold px-2.5 py-0.5 rounded-full bg-[#f6f0fc] text-[#2d144d] border border-[#e5daf0] text-[11px]">
           Etapa {step} de {total}
         </span>
@@ -143,7 +167,7 @@ function QuestionHead({
   subtitle?: string;
 }) {
   return (
-    <div className="px-6 pt-7 pb-3">
+    <div className="px-4 pt-7 pb-3 sm:px-6">
       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#fef3c7] border border-[#fde68a] text-[11px] font-bold tracking-[0.14em] text-[#92400e] uppercase mb-3 shadow-2xs">
         {eyebrow}
       </span>
@@ -174,7 +198,7 @@ function Option({
     <button
       type="button"
       onClick={onClick}
-      className={`group relative flex w-full cursor-pointer items-center gap-4 rounded-2xl border-2 px-4 py-4 text-left transition-all duration-200 ${
+      className={`group relative flex w-full cursor-pointer items-center gap-3 rounded-2xl border-2 px-3.5 py-4 text-left transition-all duration-200 sm:gap-4 sm:px-4 ${
         selected
           ? "border-[#f59e0b] bg-gradient-to-r from-[#fffdfa] via-[#fffbeb] to-[#fef8ea] shadow-md ring-1 ring-[#f59e0b]/30 scale-[1.01]"
           : "border-[#ece4f4] bg-white hover:border-[#f59e0b]/50 hover:bg-[#faf7fc] shadow-2xs"
@@ -206,7 +230,7 @@ function Option({
 
 function ObjectionBuster({ icon, title, text }: { icon: string; title: string; text: string }) {
   return (
-    <div className="mt-6 mx-6 p-4 rounded-2xl bg-[#fefaf3] border border-[#fde68a] flex items-start gap-3.5 text-left shadow-2xs">
+    <div className="mx-4 mt-6 flex items-start gap-3.5 rounded-2xl border border-[#fde68a] bg-[#fefaf3] p-4 text-left shadow-2xs sm:mx-6">
       <span className="text-2xl shrink-0 p-1.5 bg-white rounded-xl border border-[#fde68a]">
         {icon}
       </span>
@@ -218,33 +242,15 @@ function ObjectionBuster({ icon, title, text }: { icon: string; title: string; t
   );
 }
 
-/* ─────────── SIMULAÇÃO DE DOAÇÃO SOLIDÁRIA E TICKER RECENTE ─────────── */
+/* ─────────── META SOLIDÁRIA DO TEMPLO ─────────── */
 
-function DonationGoalSimulation() {
-  const [recentIndex, setRecentIndex] = useState(0);
-  const donors = [
-    { name: "D. Maria L.", city: "São Paulo/SP", time: "há 2 min", val: "R$ 27,90" },
-    { name: "Carlos E.", city: "Belo Horizonte/MG", time: "há 5 min", val: "R$ 27,90" },
-    { name: "Regina S.", city: "Rio de Janeiro/RJ", time: "há 8 min", val: "R$ 27,90" },
-    { name: "Fátima R.", city: "Curitiba/PR", time: "há 11 min", val: "R$ 27,90" },
-    { name: "Antônio P.", city: "Salvador/BA", time: "há 14 min", val: "R$ 27,90" },
-  ];
-
-  useEffect(() => {
-    const iv = setInterval(() => {
-      setRecentIndex((i) => (i + 1) % donors.length);
-    }, 4000);
-    return () => clearInterval(iv);
-  }, [donors.length]);
-
-  const currentDonor = donors[recentIndex];
-
+function DonationGoal() {
   return (
-    <div className="rounded-2xl border border-[#fde68a] bg-gradient-to-br from-[#fffdfa] via-[#fefbf3] to-[#fef8ea] p-4 text-left shadow-sm">
-      <div className="flex items-center justify-between text-[12px] font-bold text-[#92400e]">
-        <span className="flex items-center gap-1.5">
+    <div className="rounded-3xl border border-[#fde68a] bg-gradient-to-br from-[#fffdfa] via-[#fefbf3] to-[#fef8ea] p-4 text-left shadow-sm sm:p-5">
+      <div className="flex flex-wrap items-center justify-between gap-2 text-[12px] font-bold text-[#92400e]">
+        <span className="flex min-w-0 items-center gap-1.5">
           <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-          Meta Solidária de Velas e Papéis Sagrados
+          Meta semanal de materiais do oratório
         </span>
         <span className="rounded-full bg-[#fef3c7] px-2 py-0.5 text-[11px] font-extrabold text-[#b45309] border border-[#fde68a]">
           92% alcançada
@@ -259,27 +265,18 @@ function DonationGoalSimulation() {
         />
       </div>
 
-      <div className="mt-2 flex items-center justify-between text-[11.5px] text-[#786445]">
-        <span>
+      <div className="mt-3 grid grid-cols-2 gap-3 text-[11.5px] text-[#786445]">
+        <span className="rounded-xl bg-white/75 px-3 py-2">
           Arrecadado hoje: <strong>R$ 1.840</strong>
         </span>
-        <span>
-          Necessidade do Templo: <strong>R$ 2.000</strong>
+        <span className="rounded-xl bg-white/75 px-3 py-2 text-right">
+          Meta da semana: <strong>R$ 2.000</strong>
         </span>
       </div>
 
-      {/* Ticker de doações recentes dinâmico */}
-      <div className="mt-3 flex items-center gap-2 rounded-xl bg-white border border-[#fde68a]/80 p-2.5 text-[12px] text-[#1c1427] shadow-2xs">
-        <span className="text-base animate-bounce">🕊️</span>
-        <div className="flex-1 truncate">
-          <span className="font-bold text-[#2d144d]">{currentDonor.name}</span>{" "}
-          <span className="text-[#6e5984]">({currentDonor.city})</span> contribuiu com{" "}
-          <strong className="text-emerald-700 font-bold">{currentDonor.val}</strong>
-        </div>
-        <span className="text-[10.5px] text-[#8e7a60] shrink-0 font-medium">
-          {currentDonor.time}
-        </span>
-      </div>
+      <p className="mt-3 text-[11px] leading-relaxed text-[#786445]">
+        A meta cobre velas, pergaminhos, incensos e a manutenção das atividades de acolhimento.
+      </p>
     </div>
   );
 }
@@ -393,7 +390,7 @@ function PixInstantBox({
   };
 
   return (
-    <div className="mt-6 rounded-3xl border-2 border-[#f59e0b]/50 bg-white p-5 sm:p-6 shadow-xl text-center">
+    <div className="mt-6 rounded-3xl border-2 border-[#f59e0b]/50 bg-white p-4 sm:p-6 shadow-xl text-center">
       {/* Badge Topo */}
       <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-amber-50 border border-[#fde68a] text-[#92400e] text-[11px] font-extrabold tracking-wider uppercase mb-3">
         <span className="h-2 w-2 rounded-full bg-amber-500 animate-ping" />
@@ -491,7 +488,7 @@ function PixInstantBox({
       <div
         className={`mt-4 rounded-2xl border-2 p-4 text-left shadow-xs transition-all duration-300 ${impact.cardBorder}`}
       >
-        <div className="flex items-center justify-between gap-2 mb-1.5">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
           <span
             className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10.5px] font-extrabold uppercase tracking-wide border ${impact.badgeColor}`}
           >
@@ -585,7 +582,7 @@ function Intro({
       </header>
 
       {/* Faixa de Prova Social */}
-      <div className="flex items-center justify-center gap-3 bg-[#f6f0fc] border-b border-[#ece4f4] px-4 py-3 text-[12.5px] text-[#2d144d]">
+      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 bg-[#f6f0fc] border-b border-[#ece4f4] px-4 py-3 text-[11.5px] text-[#2d144d] sm:text-[12.5px]">
         <span className="font-bold">💌 +12.400 acolhidos</span>
         <span className="h-3 w-px bg-[#d8caea]" />
         <span className="font-bold">✍️ 100% Manuscrita</span>
@@ -593,7 +590,7 @@ function Intro({
         <span className="text-[#b45309] font-extrabold">★★★★★ 4,9/5</span>
       </div>
 
-      <div className="flex flex-col items-center px-6 pt-7 pb-10">
+      <div className="flex flex-col items-center px-4 pt-7 pb-10 sm:px-6">
         {/* Foto do Santuário Templo de Luz em Destaque Central Majestoso */}
         <Reveal className="w-full mb-6">
           <div className="relative overflow-hidden rounded-3xl border-2 border-[#f59e0b]/40 shadow-xl bg-white">
@@ -669,7 +666,6 @@ function Intro({
             onChange={setNome}
             placeholder="Digite seu nome completo"
             error={error}
-            autoFocus
             onEnter={next}
           />
 
@@ -729,33 +725,6 @@ function Intro({
   );
 }
 
-const LOADING_STORIES = [
-  {
-    destinatario: "Dona Maria Helena · Mogi das Cruzes/SP",
-    frase:
-      "“Mãe, não chore mais na beira da minha cama. Eu estou vivo, sinto o perfume das flores e o seu amor me aquece todos os dias.”",
-    legenda: "Carta psicografada por Milena Medeiros",
-  },
-  {
-    destinatario: "Sr. Geraldo & Família · Belo Horizonte/MG",
-    frase:
-      "“Pai, guarde aquele nosso relógio com carinho. Aqui aprendi que a vida não acaba na despedida, ela apenas se transforma em paz.”",
-    legenda: "Carta psicografada por Milena Medeiros",
-  },
-  {
-    destinatario: "Cláudia Rezende · Niterói/RJ",
-    frase:
-      "“Meu amor, a distância física não desfez a nossa aliança. Eu continuo ao seu lado a cada oração silenciosa da sua noite.”",
-    legenda: "Carta psicografada por Milena Medeiros",
-  },
-  {
-    destinatario: "Ivone Ferreira · Campinas/SP",
-    frase:
-      "“Filha querida, perdoe minhas ausências na Terra. Hoje sinto imenso orgulho de ver você seguindo em frente com luz.”",
-    legenda: "Carta psicografada por Milena Medeiros",
-  },
-];
-
 function Loading({
   nome,
   ente,
@@ -769,124 +738,130 @@ function Loading({
   onDone: () => void;
 }) {
   const [pct, setPct] = useState(0);
-  const [storyIdx, setStoryIdx] = useState(0);
   const primeiroNome = nome.split(" ")[0] || "você";
   const primeiroEnte = ente.split(" ")[0] || "seu ente";
 
-  const captions = useMemo(
+  const stages = useMemo(
     () => [
-      `🔮 Sintonizando a vibração de amor entre ${primeiroNome} e ${primeiroEnte}...`,
-      `🕊️ Acolhendo sua oração sobre "${dorPrincipal ? dorPrincipal.slice(0, 36) + "..." : "notícias e paz do plano espiritual"}"`,
-      "✍️ Preparando o pergaminho no oratório da médium Milena Medeiros...",
-      "💌 Reservando o horário sagrado para o recolhimento...",
+      {
+        title: "Registrando sua intenção",
+        detail: `Acolhendo o pedido de ${primeiroNome} por ${primeiroEnte}.`,
+      },
+      {
+        title: "Organizando as informações",
+        detail: dorPrincipal
+          ? `Preparando sua intenção: “${dorPrincipal.slice(0, 48)}${dorPrincipal.length > 48 ? "..." : ""}”`
+          : "Preparando sua intenção com cuidado e privacidade.",
+      },
+      {
+        title: "Preparando o oratório",
+        detail: "Separando o pergaminho e os materiais para a sessão.",
+      },
+      {
+        title: "Reserva concluída",
+        detail: "Seu pedido está pronto para ser apresentado à médium Milena.",
+      },
     ],
     [primeiroNome, primeiroEnte, dorPrincipal],
   );
-  const [capIdx, setCapIdx] = useState(0);
+  const activeStage = Math.min(Math.floor(pct / 25), stages.length - 1);
 
   useEffect(() => {
-    const iv = setInterval(() => setPct((p) => Math.min(p + 2, 100)), 150);
-    const cap = setInterval(() => setCapIdx((i) => Math.min(i + 1, captions.length - 1)), 1900);
-    const storyTimer = setInterval(
-      () => setStoryIdx((i) => (i + 1) % LOADING_STORIES.length),
-      2100,
-    );
-    const done = setTimeout(onDone, 7800);
+    const iv = setInterval(() => setPct((p) => Math.min(p + 2, 100)), 110);
+    const done = setTimeout(onDone, 5700);
     return () => {
       clearInterval(iv);
-      clearInterval(cap);
-      clearInterval(storyTimer);
       clearTimeout(done);
     };
-  }, [captions.length, onDone]);
-
-  const currentStory = LOADING_STORIES[storyIdx];
-  const currentImg = IMAGES.depoimentos[storyIdx % IMAGES.depoimentos.length];
+  }, [onDone]);
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-[#240e3d] via-[#1a072d] to-[#120320] px-6 py-12 text-center text-white">
+    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-gradient-to-b from-[#281044] via-[#19092b] to-[#0f0619] px-4 py-8 text-center text-white sm:px-6">
       <Halos />
+      <div className="relative z-10 w-full max-w-[430px] rounded-[30px] border border-white/15 bg-white/[0.075] p-5 shadow-[0_28px_90px_-30px_rgba(0,0,0,0.85)] backdrop-blur-xl sm:p-7">
+        <span className="inline-flex rounded-full border border-amber-300/30 bg-amber-200/10 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.16em] text-amber-200">
+          Preparação protegida
+        </span>
 
-      {/* Vela Sagrada Flutuante */}
-      <div className="relative z-10 text-[42px] drop-shadow-2xl animate-float-soft">🕯️</div>
-
-      <h2 className="font-display relative z-10 mt-3 text-[22px] font-black text-white tracking-tight">
-        Conectando com o Oratório de Luz...
-      </h2>
-
-      {/* Status da Sintonização */}
-      <p
-        key={`cap-${capIdx}`}
-        className="animate-rise-in relative z-10 mt-2 min-h-[42px] max-w-[340px] text-[13px] leading-relaxed text-zinc-200 font-medium"
-      >
-        {captions[capIdx]}
-      </p>
-
-      {/* Barra de Progresso com Porcentagem */}
-      <div className="relative z-10 mt-4 w-full max-w-[280px]">
-        <div className="h-2.5 w-full overflow-hidden rounded-full bg-black/40 border border-white/20 p-0.5">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 transition-[width] duration-150 ease-linear shadow-sm"
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-        <p className="mt-1.5 text-[13px] font-black text-amber-300 tracking-wider">{pct}%</p>
-      </div>
-
-      {/* ── CARD COM FOTO EM PRETO E BRANCO & TRECHO DE CARTA PSICOGRAFADA ── */}
-      <div
-        key={`story-${storyIdx}`}
-        className="relative z-10 mt-6 w-full max-w-[360px] rounded-3xl border border-white/20 bg-white/10 backdrop-blur-md p-4 text-left shadow-2xl animate-rise-in"
-      >
-        <div className="flex items-center gap-3">
-          {/* Foto P&B com Efeito de Nuvem / Vintage */}
-          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl border border-amber-300/40 shadow-inner">
-            <img
-              src={currentImg}
-              alt="Família que recebeu carta"
-              className="h-full w-full object-cover grayscale contrast-125 brightness-105"
-            />
-          </div>
-
-          <div className="min-w-0 flex-1">
-            <span className="text-[9.5px] font-extrabold uppercase tracking-widest text-amber-300 block">
-              🕊️ Memória de Consolo Real
-            </span>
-            <h4 className="text-[12px] font-bold text-white truncate">
-              {currentStory.destinatario}
-            </h4>
-          </div>
+        <div className="mt-2 flex justify-center">
+          <SacredCandle />
         </div>
 
-        {/* Citação da Carta Manuscrita */}
-        <p className="mt-3 font-handwriting text-[18px] leading-snug text-amber-100/90 italic">
-          {currentStory.frase}
+        <h2 className="font-display text-[24px] font-black leading-tight text-white sm:text-[27px]">
+          Estamos preparando seu pedido, {primeiroNome}
+        </h2>
+        <p className="mx-auto mt-2 max-w-[340px] text-[13px] leading-relaxed text-[#d9cce7]">
+          Aguarde alguns instantes enquanto organizamos as informações de {primeiroEnte} com
+          cuidado.
         </p>
 
-        <span className="mt-2 block text-[10px] font-semibold text-zinc-300/80 text-right">
-          — {currentStory.legenda}
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function Depoimentos() {
-  return (
-    <div className="flex flex-col gap-3.5">
-      {IMAGES.depoimentos.map((src, i) => (
-        <div
-          key={src}
-          className="overflow-hidden rounded-2xl border border-[#ece4f4] bg-white shadow-2xs"
-        >
-          <img
-            src={src}
-            alt={`Depoimento de família acolhida ${i + 1}`}
-            className="w-full object-cover"
-            loading="lazy"
-          />
+        <div className="mt-5">
+          <div
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={pct}
+            aria-label="Preparação do pedido"
+            className="h-2.5 overflow-hidden rounded-full border border-white/10 bg-black/35 p-0.5"
+          >
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-amber-300 via-amber-400 to-orange-400 shadow-[0_0_14px_rgba(251,191,36,0.45)] transition-[width] duration-300 ease-out"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          <div className="mt-2 flex items-center justify-between text-[10.5px] font-bold text-[#cfc0dc]">
+            <span>{stages[activeStage]?.title}</span>
+            <span className="text-amber-300">{pct}%</span>
+          </div>
         </div>
-      ))}
+
+        <div className="mt-5 space-y-2 text-left">
+          {stages.map((stage, index) => {
+            const isComplete = index < activeStage || pct === 100;
+            const isActive = index === activeStage && pct < 100;
+            return (
+              <div
+                key={stage.title}
+                className={`flex items-start gap-3 rounded-2xl border px-3.5 py-3 transition-colors duration-300 ${
+                  isActive
+                    ? "border-amber-300/40 bg-amber-200/10"
+                    : isComplete
+                      ? "border-emerald-300/20 bg-emerald-300/[0.07]"
+                      : "border-white/10 bg-black/10"
+                }`}
+              >
+                <span
+                  className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-black ${
+                    isComplete
+                      ? "bg-emerald-400 text-emerald-950"
+                      : isActive
+                        ? "bg-amber-300 text-amber-950 ring-4 ring-amber-300/15"
+                        : "bg-white/10 text-white/45"
+                  }`}
+                >
+                  {isComplete ? "✓" : index + 1}
+                </span>
+                <div>
+                  <strong
+                    className={`block text-[12px] ${isActive || isComplete ? "text-white" : "text-white/50"}`}
+                  >
+                    {stage.title}
+                  </strong>
+                  {(isActive || isComplete) && (
+                    <p className="mt-0.5 text-[10.5px] leading-relaxed text-[#cfc0dc]">
+                      {stage.detail}
+                    </p>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <p className="mt-4 text-[10.5px] font-semibold text-[#bba9ca]">
+          Seus dados permanecem privados durante todo o processo.
+        </p>
+      </div>
     </div>
   );
 }
@@ -979,7 +954,7 @@ function Result({
         <Countdown minutes={15} />
       </div>
 
-      <div className="px-6 pt-7">
+      <div className="px-4 pt-7 sm:px-6">
         {/* Card Personalizado com base no Quiz */}
         {dorPrincipal && (
           <Reveal className="p-4 rounded-2xl bg-white border border-[#fde68a] mb-6 text-center shadow-sm">
@@ -992,9 +967,11 @@ function Result({
           </Reveal>
         )}
 
-        {/* Simulação de Meta de Doações Coletivas e Doações Recentes */}
+        <SocialProofSection />
+
+        {/* Meta de materiais do oratório */}
         <Reveal className="mb-6">
-          <DonationGoalSimulation />
+          <DonationGoal />
         </Reveal>
 
         <Reveal>
@@ -1050,18 +1027,18 @@ function Result({
         </Reveal>
 
         {/* ── CARD DE DOAÇÃO SOLIDÁRIA COM PIX NA PÁGINA ── */}
-        <Reveal className="relative mt-9 overflow-hidden rounded-3xl p-6 text-center shadow-xl border-2 border-[#f59e0b] bg-white">
+        <Reveal className="relative mt-9 overflow-hidden rounded-3xl p-4 text-center shadow-xl border-2 border-[#f59e0b] bg-white sm:p-6">
           <div id="pix-section" className="absolute -top-16" />
-          {/* Badge Recomendado */}
-          <div className="absolute top-4 right-4 inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#fef3c7] text-[#92400e] font-extrabold text-[11px] uppercase tracking-wider shadow-2xs border border-[#fde68a]">
-            ★ Ação Solidária
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <span className="inline-flex items-center gap-1 rounded-full border border-[#fde68a] bg-[#fef3c7] px-3 py-1 text-[10.5px] font-extrabold uppercase tracking-wider text-[#92400e]">
+              ★ Ação solidária
+            </span>
+            <span className="inline-flex rounded-full border border-[#e5daf0] bg-[#f6f0fc] px-3 py-1 text-[10.5px] font-bold uppercase tracking-[0.12em] text-[#2d144d]">
+              Contribuição de manutenção
+            </span>
           </div>
 
-          <span className="inline-block mt-2 px-3 py-1 rounded-full bg-[#f6f0fc] border border-[#e5daf0] text-[11px] font-bold tracking-[0.16em] text-[#2d144d] uppercase">
-            🙏 Contribuição de Manutenção
-          </span>
-
-          <h2 className="font-display mt-4 text-[21px] leading-[1.35] font-extrabold text-[#181126]">
+          <h2 className="font-display mt-4 text-[20px] leading-[1.35] font-extrabold text-[#181126] sm:text-[22px]">
             A mensagem de {primeiroEnte} é sagrada e gratuita — você escolhe com o coração o valor
             da sua contribuição fraterna
           </h2>
@@ -1101,11 +1078,6 @@ function Result({
         </Reveal>
 
         <Reveal className="mt-10">
-          <SectionLabel>Famílias que tiveram a alma confortada</SectionLabel>
-          <Depoimentos />
-        </Reveal>
-
-        <Reveal className="mt-10">
           <SectionLabel>Dúvidas frequentes e acolhimento</SectionLabel>
           <Faq />
         </Reveal>
@@ -1122,7 +1094,7 @@ function Result({
       </div>
 
       {/* CTA fixa inferior para PIX / Doação */}
-      <div className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-[480px] border-t border-[#ece4f4] bg-white/95 px-4 py-3.5 backdrop-blur-md shadow-2xl">
+      <div className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-[480px] border-t border-[#ece4f4] bg-white/95 px-4 pt-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] backdrop-blur-md shadow-2xl">
         <button
           type="button"
           onClick={() => {
@@ -1191,7 +1163,12 @@ export function QuizFunnel() {
         {/* ETAPA 2: ENTE QUERIDO */}
         {step === "ente" && (
           <div className="flex flex-1 flex-col animate-rise-in">
-            <Progress step={2} total={6} caption="Sua conexão espiritual" />
+            <Progress
+              step={2}
+              total={6}
+              caption="Sua conexão espiritual"
+              onBack={() => goto("intro")}
+            />
             <QuestionHead
               eyebrow="🕯️ Elo de Saudade e Amor"
               title={`${primeiroNome}, quem é a pessoa amada que já partiu e você deseja reencontrar através da carta?`}
@@ -1245,7 +1222,12 @@ export function QuizFunnel() {
         {/* ETAPA 3: VÍNCULO ADAPTATIVO */}
         {step === "relacao" && (
           <div className="flex flex-1 flex-col animate-rise-in">
-            <Progress step={3} total={6} caption="Sua conexão espiritual" />
+            <Progress
+              step={3}
+              total={6}
+              caption="Sua conexão espiritual"
+              onBack={() => goto("ente")}
+            />
             <QuestionHead
               eyebrow="💞 Laço Sagrado"
               title={`Qual é o vínculo de alma que une você e ${primeiroEnte}?`}
@@ -1312,7 +1294,12 @@ export function QuizFunnel() {
         {/* ETAPA 4: TEMPO DE PARTIDA */}
         {step === "tempo" && (
           <div className="flex flex-1 flex-col animate-rise-in">
-            <Progress step={4} total={6} caption="Sua conexão espiritual" />
+            <Progress
+              step={4}
+              total={6}
+              caption="Sua conexão espiritual"
+              onBack={() => goto("relacao")}
+            />
             <QuestionHead
               eyebrow="⏳ Tempo de Transição"
               title={`Há quanto tempo ${primeiroEnte} fez a passagem para o plano espiritual?`}
@@ -1373,7 +1360,12 @@ export function QuizFunnel() {
         {/* ETAPA 5: ORIENTAÇÃO DA CARTA — 2 OPÇÕES: TEMAS SAGRADOS OU MENSAGEM LIVRE */}
         {step === "mensagem" && (
           <div className="flex flex-1 flex-col animate-rise-in">
-            <Progress step={5} total={6} caption="Sua conexão espiritual" />
+            <Progress
+              step={5}
+              total={6}
+              caption="Sua conexão espiritual"
+              onBack={() => goto("tempo")}
+            />
             <QuestionHead
               eyebrow="💌 Conexão do Coração"
               title={`Como você deseja orientar a médium Milena para a carta de ${primeiroEnte}?`}
@@ -1602,7 +1594,12 @@ export function QuizFunnel() {
         {/* ETAPA 7: CONFIRMAÇÃO & HORÁRIO */}
         {step === "confirma" && (
           <div className="flex flex-1 flex-col animate-rise-in">
-            <Progress step={6} total={6} caption="Sua conexão espiritual" />
+            <Progress
+              step={6}
+              total={6}
+              caption="Sua conexão espiritual"
+              onBack={() => goto("mensagem")}
+            />
             <QuestionHead
               eyebrow="✨ O Momento da Conexão"
               title={`Você está pronto(a) para a médium Milena realizar o recolhimento para ${primeiroEnte} ainda hoje?`}

@@ -20,6 +20,7 @@ dist-ssr
 .wrangler/
 .dev.vars
 .kilo/
+Feedbacks/*.png
 
 # Editor directories and files
 .vscode/*

@@ -87,7 +87,7 @@ export function LiveActivityToast() {
   return (
     <aside
       aria-label="Atividade recente no Templo de Luz"
-      className="fixed bottom-4 left-4 right-4 sm:right-auto z-50 max-w-[370px] animate-rise-in"
+      className="fixed bottom-24 left-4 right-4 z-40 max-w-[370px] animate-rise-in sm:bottom-4 sm:right-auto"
     >
       <div className="flex items-start gap-3 rounded-2xl border border-[#fde68a] bg-white/95 backdrop-blur-md p-3.5 shadow-2xl shadow-purple-950/15">
         {/* Ícone com Aura */}

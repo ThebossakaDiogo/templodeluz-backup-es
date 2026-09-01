@@ -1,12 +1,3 @@
-import depo1 from "@/assets/depoimento-1.jpeg";
-import depo2 from "@/assets/depoimento-2.jpeg";
-import depo3 from "@/assets/depoimento-3.jpeg";
-import depo4 from "@/assets/depoimento-4.jpeg";
-import depo5 from "@/assets/depoimento-5.jpeg";
-import depo6 from "@/assets/depoimento-6.jpeg";
-import depo7 from "@/assets/depoimento-7.jpeg";
-import depo8 from "@/assets/depoimento-8.jpeg";
-import depo9 from "@/assets/depoimento-9.jpeg";
 import cartaExemplo from "@/assets/exemplo-carta.jpeg";
 import logoTemplo from "@/assets/logo-templo-de-luz.png";
 import mediumMilena from "@/assets/medium-milena.jpeg";
@@ -19,7 +10,6 @@ export const IMAGES = {
   carta: cartaExemplo,
   medium: mediumMilena,
   milenaCatarata: milenaEmocionada,
-  depoimentos: [depo1, depo2, depo3, depo4, depo5, depo6, depo7, depo8, depo9],
 };
 
 export const CHECKOUT_URL = "https://pay.cakto.com.br/amnpmje_1071513";

@@ -207,6 +207,85 @@
     transform: translateY(-9px);
   }
 }
+
+@keyframes sacred-flame-dance {
+  0%,
+  100% {
+    transform: translateX(-50%) rotate(-2deg) scaleX(0.96) scaleY(1);
+  }
+  35% {
+    transform: translateX(-50%) rotate(3deg) scaleX(1.04) scaleY(1.08);
+  }
+  70% {
+    transform: translateX(-50%) rotate(-1deg) scaleX(0.92) scaleY(0.96);
+  }
+}
+
+@keyframes sacred-aura-breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: translateX(-50%) scale(0.88);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.12);
+  }
+}
+
+@keyframes sacred-ember-rise {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0) scale(0.7);
+  }
+  25% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--ember-drift), -48px, 0) scale(0.15);
+  }
+}
+
+.sacred-candle-flame {
+  animation: sacred-flame-dance 1.45s ease-in-out infinite;
+  will-change: transform;
+}
+
+.sacred-candle-aura {
+  animation: sacred-aura-breathe 2.6s ease-in-out infinite;
+  will-change: opacity, transform;
+}
+
+.sacred-candle-ember {
+  --ember-drift: 8px;
+  position: absolute;
+  left: 50%;
+  top: 38px;
+  z-index: 2;
+  height: 3px;
+  width: 3px;
+  border-radius: 999px;
+  background: #fde68a;
+  box-shadow: 0 0 8px 2px rgb(251 191 36 / 55%);
+  animation: sacred-ember-rise 2.8s linear infinite;
+}
+
+.sacred-candle-ember-one {
+  margin-left: -17px;
+}
+
+.sacred-candle-ember-two {
+  --ember-drift: -11px;
+  margin-left: 14px;
+  animation-delay: 0.9s;
+}
+
+.sacred-candle-ember-three {
+  --ember-drift: 4px;
+  margin-left: 4px;
+  animation-delay: 1.7s;
+}
 @keyframes pulse-cta {
   0%,
   100% {

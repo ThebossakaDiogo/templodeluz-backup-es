@@ -14,7 +14,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "Responda 4 perguntas e agende sua carta psicografada. Escrita à mão, com garantia de 7 dias.",
+          "Responda algumas perguntas e agende sua carta psicografada. Escrita à mão, com garantia de 7 dias.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
