@@ -1,0 +1,79 @@
+export interface PixClientConfig {
+  supabaseUrl: string;
+  supabaseAnonKey: string;
+}
+
+export interface PixCustomer {
+  name: string;
+}
+
+export interface PixCharge {
+  orderId: string;
+  statusToken: string;
+  pixPayload: string;
+  qrCodeBase64: string | null;
+  expiresAt: string | null;
+}
+
+export type PixPaymentStatus =
+  | "creating"
+  | "pending"
+  | "paid"
+  | "failed"
+  | "expired"
+  | "in_dispute"
+  | "chargeback";
+
+function functionUrl(config: PixClientConfig, name: string) {
+  return `${config.supabaseUrl.replace(/\/$/, "")}/functions/v1/${name}`;
+}
+
+async function readJson<T>(response: Response): Promise<T> {
+  const body = (await response.json().catch(() => null)) as (T & { error?: string }) | null;
+  if (!response.ok || !body) {
+    throw new Error(body?.error ?? "Falha ao comunicar com a API PIX.");
+  }
+  return body;
+}
+
+export async function createPixCharge(
+  config: PixClientConfig,
+  input: { productId: string; amountCents: number; customer: PixCustomer },
+): Promise<PixCharge> {
+  const statusToken = `${crypto.randomUUID()}${crypto.randomUUID()}`;
+  const response = await fetch(functionUrl(config, "create-connectpay-pix"), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: config.supabaseAnonKey,
+      Authorization: `Bearer ${config.supabaseAnonKey}`,
+    },
+    body: JSON.stringify({
+      productId: input.productId,
+      amountCents: input.amountCents,
+      customerName: input.customer.name,
+      idempotencyKey: crypto.randomUUID(),
+      statusToken,
+    }),
+  });
+  const charge = await readJson<Omit<PixCharge, "statusToken">>(response);
+  return { ...charge, statusToken };
+}
+
+export async function getPixStatus(config: PixClientConfig, charge: PixCharge) {
+  const response = await fetch(functionUrl(config, "get-connectpay-pix-status"), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: config.supabaseAnonKey,
+      Authorization: `Bearer ${config.supabaseAnonKey}`,
+    },
+    body: JSON.stringify({ orderId: charge.orderId, statusToken: charge.statusToken }),
+  });
+  return readJson<{
+    status: PixPaymentStatus;
+    paid: boolean;
+    expiresAt: string | null;
+    updatedAt: string;
+  }>(response);
+}

@@ -1,0 +1,703 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "PlayAndWinQuizApp",
+  "version": "1.0.0",
+  "description": "Schema funcional do quiz mobile inspirado na referência visual enviada.",
+  "locale": "en-US",
+  "app": {
+    "id": "play-and-win",
+    "title": "Play and Win",
+    "default_route": "home",
+    "navigation": {
+      "type": "bottom_tab",
+      "items": [
+        {
+          "id": "home",
+          "label": "Home",
+          "icon": "home"
+        },
+        {
+          "id": "stats",
+          "label": "Stats",
+          "icon": "bar-chart"
+        },
+        {
+          "id": "favorites",
+          "label": "Favorites",
+          "icon": "heart"
+        },
+        {
+          "id": "profile",
+          "label": "Profile",
+          "icon": "user"
+        }
+      ]
+    }
+  },
+  "state": {
+    "user": {
+      "id": "user_kenzy",
+      "name": "Kenzy",
+      "avatar": "avatar-default",
+      "points": 200
+    },
+    "quiz": {
+      "active_category": "math",
+      "current_question_index": 5,
+      "answers": {},
+      "score": 0,
+      "completed": false
+    }
+  },
+  "data": {
+    "categories": [
+      {
+        "id": "math",
+        "label": "Math",
+        "icon": "geometry",
+        "accent": "violet"
+      },
+      {
+        "id": "chemistry",
+        "label": "Chemistry",
+        "icon": "flask",
+        "accent": "pink"
+      },
+      {
+        "id": "physics",
+        "label": "Physics",
+        "icon": "atom",
+        "accent": "lavender"
+      }
+    ],
+    "recent_quizzes": [
+      {
+        "id": "biology",
+        "title": "Biology",
+        "question_count": 12,
+        "status": "completed",
+        "icon": "flask"
+      },
+      {
+        "id": "geography",
+        "title": "Geography",
+        "question_count": 20,
+        "status": "incomplete",
+        "icon": "map"
+      }
+    ],
+    "quizzes": [
+      {
+        "id": "math",
+        "title": "Math",
+        "question_count": 20,
+        "time_per_question_seconds": 25,
+        "points_per_correct_answer": 10,
+        "allow_back": false,
+        "shuffle_questions": false,
+        "shuffle_options": false,
+        "questions": [
+          {
+            "id": "q1",
+            "prompt": "What is 12 + 8?",
+            "options": [
+              {
+                "id": "a",
+                "label": "18"
+              },
+              {
+                "id": "b",
+                "label": "20"
+              },
+              {
+                "id": "c",
+                "label": "22"
+              },
+              {
+                "id": "d",
+                "label": "24"
+              }
+            ],
+            "correct_option_id": "b",
+            "explanation": "12 + 8 = 20."
+          },
+          {
+            "id": "q2",
+            "prompt": "What is 9 × 6?",
+            "options": [
+              {
+                "id": "a",
+                "label": "45"
+              },
+              {
+                "id": "b",
+                "label": "48"
+              },
+              {
+                "id": "c",
+                "label": "54"
+              },
+              {
+                "id": "d",
+                "label": "56"
+              }
+            ],
+            "correct_option_id": "c",
+            "explanation": "9 × 6 = 54."
+          },
+          {
+            "id": "q3",
+            "prompt": "What is 72 ÷ 8?",
+            "options": [
+              {
+                "id": "a",
+                "label": "8"
+              },
+              {
+                "id": "b",
+                "label": "9"
+              },
+              {
+                "id": "c",
+                "label": "10"
+              },
+              {
+                "id": "d",
+                "label": "12"
+              }
+            ],
+            "correct_option_id": "b",
+            "explanation": "72 ÷ 8 = 9."
+          },
+          {
+            "id": "q4",
+            "prompt": "Which number is a prime number?",
+            "options": [
+              {
+                "id": "a",
+                "label": "21"
+              },
+              {
+                "id": "b",
+                "label": "27"
+              },
+              {
+                "id": "c",
+                "label": "29"
+              },
+              {
+                "id": "d",
+                "label": "33"
+              }
+            ],
+            "correct_option_id": "c",
+            "explanation": "29 has exactly two positive divisors: 1 and 29."
+          },
+          {
+            "id": "q5",
+            "prompt": "What is 3² + 4²?",
+            "options": [
+              {
+                "id": "a",
+                "label": "12"
+              },
+              {
+                "id": "b",
+                "label": "18"
+              },
+              {
+                "id": "c",
+                "label": "24"
+              },
+              {
+                "id": "d",
+                "label": "25"
+              }
+            ],
+            "correct_option_id": "d",
+            "explanation": "3² + 4² = 9 + 16 = 25."
+          },
+          {
+            "id": "q6",
+            "prompt": "Which 3 numbers have the same answer whether they're added or multiplied together?",
+            "options": [
+              {
+                "id": "a",
+                "label": "6, 3 and 4"
+              },
+              {
+                "id": "b",
+                "label": "1, 2 and 3"
+              },
+              {
+                "id": "c",
+                "label": "2, 4 and 6"
+              },
+              {
+                "id": "d",
+                "label": "1, 2 and 4"
+              }
+            ],
+            "correct_option_id": "b",
+            "explanation": "1 + 2 + 3 = 6 and 1 × 2 × 3 = 6."
+          },
+          {
+            "id": "q7",
+            "prompt": "What is 15% of 200?",
+            "options": [
+              {
+                "id": "a",
+                "label": "20"
+              },
+              {
+                "id": "b",
+                "label": "25"
+              },
+              {
+                "id": "c",
+                "label": "30"
+              },
+              {
+                "id": "d",
+                "label": "35"
+              }
+            ],
+            "correct_option_id": "c",
+            "explanation": "0.15 × 200 = 30."
+          },
+          {
+            "id": "q8",
+            "prompt": "Solve: x + 7 = 19.",
+            "options": [
+              {
+                "id": "a",
+                "label": "10"
+              },
+              {
+                "id": "b",
+                "label": "11"
+              },
+              {
+                "id": "c",
+                "label": "12"
+              },
+              {
+                "id": "d",
+                "label": "13"
+              }
+            ],
+            "correct_option_id": "c",
+            "explanation": "x = 19 − 7 = 12."
+          },
+          {
+            "id": "q9",
+            "prompt": "What is the perimeter of a square with side length 7?",
+            "options": [
+              {
+                "id": "a",
+                "label": "14"
+              },
+              {
+                "id": "b",
+                "label": "21"
+              },
+              {
+                "id": "c",
+                "label": "28"
+              },
+              {
+                "id": "d",
+                "label": "49"
+              }
+            ],
+            "correct_option_id": "c",
+            "explanation": "A square has four equal sides, so 4 × 7 = 28."
+          },
+          {
+            "id": "q10",
+            "prompt": "What is the value of 5 × (3 + 2)?",
+            "options": [
+              {
+                "id": "a",
+                "label": "15"
+              },
+              {
+                "id": "b",
+                "label": "20"
+              },
+              {
+                "id": "c",
+                "label": "25"
+              },
+              {
+                "id": "d",
+                "label": "30"
+              }
+            ],
+            "correct_option_id": "c",
+            "explanation": "3 + 2 = 5, then 5 × 5 = 25."
+          },
+          {
+            "id": "q11",
+            "prompt": "Which fraction is equivalent to 0.75?",
+            "options": [
+              {
+                "id": "a",
+                "label": "1/2"
+              },
+              {
+                "id": "b",
+                "label": "2/3"
+              },
+              {
+                "id": "c",
+                "label": "3/4"
+              },
+              {
+                "id": "d",
+                "label": "4/5"
+              }
+            ],
+            "correct_option_id": "c",
+            "explanation": "3 ÷ 4 = 0.75."
+          },
+          {
+            "id": "q12",
+            "prompt": "What is the next number in the sequence 2, 4, 8, 16, ...?",
+            "options": [
+              {
+                "id": "a",
+                "label": "20"
+              },
+              {
+                "id": "b",
+                "label": "24"
+              },
+              {
+                "id": "c",
+                "label": "30"
+              },
+              {
+                "id": "d",
+                "label": "32"
+              }
+            ],
+            "correct_option_id": "d",
+            "explanation": "Each term doubles, so 16 × 2 = 32."
+          },
+          {
+            "id": "q13",
+            "prompt": "What is 100 − 37?",
+            "options": [
+              {
+                "id": "a",
+                "label": "53"
+              },
+              {
+                "id": "b",
+                "label": "63"
+              },
+              {
+                "id": "c",
+                "label": "67"
+              },
+              {
+                "id": "d",
+                "label": "73"
+              }
+            ],
+            "correct_option_id": "b",
+            "explanation": "100 − 37 = 63."
+          },
+          {
+            "id": "q14",
+            "prompt": "If a triangle has angles 90° and 35°, what is the third angle?",
+            "options": [
+              {
+                "id": "a",
+                "label": "45°"
+              },
+              {
+                "id": "b",
+                "label": "50°"
+              },
+              {
+                "id": "c",
+                "label": "55°"
+              },
+              {
+                "id": "d",
+                "label": "65°"
+              }
+            ],
+            "correct_option_id": "c",
+            "explanation": "Triangle angles total 180°, so 180° − 90° − 35° = 55°."
+          },
+          {
+            "id": "q15",
+            "prompt": "What is the greatest common factor of 18 and 24?",
+            "options": [
+              {
+                "id": "a",
+                "label": "3"
+              },
+              {
+                "id": "b",
+                "label": "6"
+              },
+              {
+                "id": "c",
+                "label": "9"
+              },
+              {
+                "id": "d",
+                "label": "12"
+              }
+            ],
+            "correct_option_id": "b",
+            "explanation": "6 is the largest integer that divides both 18 and 24."
+          },
+          {
+            "id": "q16",
+            "prompt": "What is 2⁵?",
+            "options": [
+              {
+                "id": "a",
+                "label": "10"
+              },
+              {
+                "id": "b",
+                "label": "16"
+              },
+              {
+                "id": "c",
+                "label": "25"
+              },
+              {
+                "id": "d",
+                "label": "32"
+              }
+            ],
+            "correct_option_id": "d",
+            "explanation": "2⁵ = 2 × 2 × 2 × 2 × 2 = 32."
+          },
+          {
+            "id": "q17",
+            "prompt": "A rectangle is 8 units long and 5 units wide. What is its area?",
+            "options": [
+              {
+                "id": "a",
+                "label": "13"
+              },
+              {
+                "id": "b",
+                "label": "26"
+              },
+              {
+                "id": "c",
+                "label": "40"
+              },
+              {
+                "id": "d",
+                "label": "80"
+              }
+            ],
+            "correct_option_id": "c",
+            "explanation": "Area = length × width = 8 × 5 = 40."
+          },
+          {
+            "id": "q18",
+            "prompt": "What is 1.5 + 2.75?",
+            "options": [
+              {
+                "id": "a",
+                "label": "3.25"
+              },
+              {
+                "id": "b",
+                "label": "4.00"
+              },
+              {
+                "id": "c",
+                "label": "4.25"
+              },
+              {
+                "id": "d",
+                "label": "4.50"
+              }
+            ],
+            "correct_option_id": "c",
+            "explanation": "1.50 + 2.75 = 4.25."
+          },
+          {
+            "id": "q19",
+            "prompt": "If 4 notebooks cost $12, what is the cost of one notebook?",
+            "options": [
+              {
+                "id": "a",
+                "label": "$2"
+              },
+              {
+                "id": "b",
+                "label": "$3"
+              },
+              {
+                "id": "c",
+                "label": "$4"
+              },
+              {
+                "id": "d",
+                "label": "$6"
+              }
+            ],
+            "correct_option_id": "b",
+            "explanation": "$12 ÷ 4 = $3."
+          },
+          {
+            "id": "q20",
+            "prompt": "What is the square root of 144?",
+            "options": [
+              {
+                "id": "a",
+                "label": "10"
+              },
+              {
+                "id": "b",
+                "label": "11"
+              },
+              {
+                "id": "c",
+                "label": "12"
+              },
+              {
+                "id": "d",
+                "label": "14"
+              }
+            ],
+            "correct_option_id": "c",
+            "explanation": "12 × 12 = 144."
+          }
+        ]
+      }
+    ]
+  },
+  "screens": {
+    "home": {
+      "route": "/",
+      "type": "home",
+      "sections": [
+        {
+          "id": "header",
+          "type": "user_header",
+          "title_template": "Hi, {{user.name}}",
+          "subtitle": "Ready to play",
+          "show_points": true
+        },
+        {
+          "id": "search",
+          "type": "search",
+          "placeholder": "Search for a quiz"
+        },
+        {
+          "id": "hero",
+          "type": "promo_banner",
+          "title": "Play and Win",
+          "subtitle": "Start a quiz now and enjoy",
+          "cta": {
+            "label": "Get Started",
+            "action": "start_quiz",
+            "quiz_id": "math"
+          }
+        },
+        {
+          "id": "categories",
+          "type": "horizontal_categories",
+          "title": "Categories",
+          "show_all_label": "See all",
+          "source": "data.categories"
+        },
+        {
+          "id": "recent",
+          "type": "recent_quizzes",
+          "title": "Recent",
+          "source": "data.recent_quizzes"
+        }
+      ]
+    },
+    "quiz": {
+      "route": "/quiz/:quizId",
+      "type": "question",
+      "header": {
+        "show_back": true,
+        "title_source": "activeQuiz.title"
+      },
+      "progress": {
+        "label_template": "Question",
+        "counter_template": "{{current}}/{{total}}",
+        "show_bar": true,
+        "show_timer": true,
+        "timer_seconds_source": "activeQuiz.time_per_question_seconds"
+      },
+      "question_card": {
+        "source": "currentQuestion.prompt"
+      },
+      "answers": {
+        "type": "single_select",
+        "source": "currentQuestion.options",
+        "selected_state": "outlined"
+      },
+      "primary_action": {
+        "label": "Next",
+        "action": "submit_and_next",
+        "disabled_until_answered": true
+      }
+    },
+    "result": {
+      "route": "/quiz/:quizId/result",
+      "type": "result",
+      "celebration": true,
+      "score_template": "{{score}}/{{total}}",
+      "title_rules": [
+        {
+          "min_percent": 90,
+          "title": "Congratulations!"
+        },
+        {
+          "min_percent": 70,
+          "title": "Great job!"
+        },
+        {
+          "min_percent": 0,
+          "title": "Keep practicing!"
+        }
+      ],
+      "subtitle_template": "Great job, {{user.name}}! You have done well",
+      "points_earned_template": "{{earnedPoints}} Points",
+      "primary_action": {
+        "label": "Back to Home",
+        "action": "go_home"
+      }
+    }
+  },
+  "logic": {
+    "on_start_quiz": [
+      "set quiz.current_question_index = 0",
+      "set quiz.answers = {}",
+      "set quiz.score = 0",
+      "set quiz.completed = false",
+      "navigate to /quiz/math"
+    ],
+    "on_select_answer": ["store selected option id by question id", "enable Next button"],
+    "on_submit_and_next": [
+      "if selected option matches correct_option_id, increment score",
+      "if there is a next question, increment current_question_index",
+      "otherwise set completed = true and navigate to result"
+    ],
+    "result_calculation": {
+      "score": "number of correct answers",
+      "total": "activeQuiz.question_count",
+      "earnedPoints": "score * activeQuiz.points_per_correct_answer",
+      "percentage": "(score / total) * 100"
+    }
+  }
+}

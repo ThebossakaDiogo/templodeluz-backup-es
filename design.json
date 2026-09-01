@@ -1,0 +1,359 @@
+{
+  "name": "PlayAndWinQuizDesign",
+  "version": "1.0.0",
+  "reference_style": "clean playful mobile quiz UI, white cards, soft lavender canvas, strong indigo CTA, pink accents",
+  "tokens": {
+    "colors": {
+      "canvas": "#ECE9FA",
+      "surface": "#FFFFFF",
+      "surface_muted": "#F7F7F8",
+      "surface_soft_violet": "#F1EDFF",
+      "surface_soft_pink": "#FCE6FA",
+      "primary": "#2612C7",
+      "primary_dark": "#1D0BA6",
+      "primary_soft": "#E7E1FF",
+      "pink": "#E944E8",
+      "pink_soft": "#F8D9F7",
+      "text_primary": "#17171C",
+      "text_secondary": "#75757D",
+      "text_on_primary": "#FFFFFF",
+      "border": "#E8E6ED",
+      "success": "#35B86B",
+      "success_bg": "#DFF6E8",
+      "warning": "#EEA13A",
+      "warning_bg": "#FFF0DD",
+      "icon_muted": "#A9A9B0"
+    },
+    "typography": {
+      "font_family": "Inter, SF Pro Display, system-ui, sans-serif",
+      "weights": {
+        "regular": 400,
+        "medium": 500,
+        "semibold": 600,
+        "bold": 700
+      },
+      "styles": {
+        "display": {
+          "size": 28,
+          "line_height": 34,
+          "weight": 700
+        },
+        "h1": {
+          "size": 24,
+          "line_height": 30,
+          "weight": 700
+        },
+        "h2": {
+          "size": 20,
+          "line_height": 26,
+          "weight": 700
+        },
+        "h3": {
+          "size": 17,
+          "line_height": 22,
+          "weight": 700
+        },
+        "body": {
+          "size": 15,
+          "line_height": 22,
+          "weight": 400
+        },
+        "body_small": {
+          "size": 13,
+          "line_height": 18,
+          "weight": 400
+        },
+        "caption": {
+          "size": 11,
+          "line_height": 15,
+          "weight": 500
+        },
+        "button": {
+          "size": 15,
+          "line_height": 20,
+          "weight": 600
+        }
+      }
+    },
+    "spacing": {
+      "xs": 4,
+      "sm": 8,
+      "md": 12,
+      "lg": 16,
+      "xl": 24,
+      "2xl": 32,
+      "3xl": 40
+    },
+    "radius": {
+      "sm": 8,
+      "md": 12,
+      "lg": 18,
+      "xl": 24,
+      "2xl": 32,
+      "pill": 999
+    },
+    "shadow": {
+      "card": "0 8px 24px rgba(46, 34, 120, 0.06)",
+      "floating": "0 12px 30px rgba(46, 34, 120, 0.10)"
+    },
+    "stroke": {
+      "thin": 1,
+      "selected": 1.5
+    }
+  },
+  "viewport": {
+    "reference_mobile_width": 390,
+    "reference_mobile_height": 844,
+    "safe_area": true,
+    "page_background": "{tokens.colors.canvas}"
+  },
+  "components": {
+    "mobile_shell": {
+      "background": "{tokens.colors.surface}",
+      "radius": 32,
+      "padding_horizontal": 20,
+      "padding_top": 28,
+      "padding_bottom": 18,
+      "shadow": "{tokens.shadow.card}"
+    },
+    "avatar": {
+      "size": 48,
+      "border_width": 1.5,
+      "border_color": "{tokens.colors.pink}",
+      "radius": 999
+    },
+    "points_badge": {
+      "height": 36,
+      "padding_horizontal": 12,
+      "background": "#FBF8FF",
+      "radius": 10,
+      "icon": "diamond",
+      "icon_color": "{tokens.colors.pink}",
+      "text_color": "{tokens.colors.primary}"
+    },
+    "search": {
+      "height": 44,
+      "background": "#F4F4F5",
+      "radius": 10,
+      "padding_horizontal": 14,
+      "icon_color": "{tokens.colors.text_secondary}",
+      "placeholder_color": "#A3A3A8"
+    },
+    "promo_banner": {
+      "height": 126,
+      "background": "linear-gradient(135deg, #2410C8 0%, #3810CF 65%, #4B0CC6 100%)",
+      "radius": 16,
+      "padding": 20,
+      "title_style": "{tokens.typography.styles.h2}",
+      "title_color": "#FFFFFF",
+      "subtitle_color": "#DAD4FF",
+      "decorations": [
+        {
+          "type": "circle",
+          "position": "right_center",
+          "opacity": 0.16
+        },
+        {
+          "type": "circle",
+          "position": "right_bottom",
+          "opacity": 0.1
+        }
+      ]
+    },
+    "secondary_cta": {
+      "height": 34,
+      "background": "#FFFFFF",
+      "text_color": "{tokens.colors.primary}",
+      "radius": 8,
+      "padding_horizontal": 12
+    },
+    "category_card": {
+      "width": 126,
+      "height": 98,
+      "background": "linear-gradient(145deg, #FAE7FB 0%, #F4EEFF 100%)",
+      "radius": 12,
+      "padding": 14,
+      "title_style": "{tokens.typography.styles.body_small}",
+      "title_color": "{tokens.colors.primary}",
+      "illustration_style": "thin line art, violet and pink"
+    },
+    "recent_row": {
+      "height": 76,
+      "background": "#F8F7FD",
+      "radius": 14,
+      "padding": 14,
+      "icon_box": {
+        "size": 46,
+        "background": "#EFEAFE",
+        "radius": 10
+      }
+    },
+    "status_badges": {
+      "completed": {
+        "background": "{tokens.colors.success_bg}",
+        "text_color": "{tokens.colors.success}",
+        "radius": 7
+      },
+      "incomplete": {
+        "background": "{tokens.colors.warning_bg}",
+        "text_color": "{tokens.colors.warning}",
+        "radius": 7
+      }
+    },
+    "bottom_nav": {
+      "height": 66,
+      "background": "#FFFFFF",
+      "border_top": "1px solid #F1F0F5",
+      "active_color": "{tokens.colors.primary}",
+      "inactive_color": "{tokens.colors.icon_muted}",
+      "icon_size": 22
+    },
+    "quiz_header": {
+      "height": 32,
+      "back_icon_size": 20,
+      "title_style": "{tokens.typography.styles.h3}"
+    },
+    "question_counter": {
+      "label_color": "{tokens.colors.text_primary}",
+      "current_color": "{tokens.colors.pink}",
+      "total_color": "{tokens.colors.text_primary}",
+      "number_size": 24,
+      "number_weight": 700
+    },
+    "timer_ring": {
+      "size": 56,
+      "stroke_width": 4,
+      "track_color": "#E6E3EF",
+      "progress_color": "{tokens.colors.primary}",
+      "text_style": "{tokens.typography.styles.caption}"
+    },
+    "progress_bar": {
+      "height": 4,
+      "track_color": "#E7E4EF",
+      "fill_color": "{tokens.colors.primary}",
+      "radius": 999
+    },
+    "question_card": {
+      "background": "linear-gradient(135deg, #F9DDFC 0%, #F6E5F8 100%)",
+      "radius": 8,
+      "padding": 16,
+      "min_height": 90,
+      "text_style": "{tokens.typography.styles.h3}",
+      "decorative_line_art": true
+    },
+    "answer_option": {
+      "height": 54,
+      "background": "#F7F7F8",
+      "radius": 8,
+      "padding_horizontal": 14,
+      "gap": 12,
+      "label_chip": {
+        "size": 22,
+        "radius": 999,
+        "background": "#F7D9F5",
+        "text_color": "{tokens.colors.text_primary}"
+      },
+      "selected": {
+        "background": "#EEEBF8",
+        "border": "1.5px solid #321FC1"
+      }
+    },
+    "primary_button": {
+      "height": 54,
+      "background": "{tokens.colors.primary}",
+      "background_pressed": "{tokens.colors.primary_dark}",
+      "text_color": "#FFFFFF",
+      "radius": 12,
+      "text_style": "{tokens.typography.styles.button}"
+    },
+    "result_celebration": {
+      "center_avatar_size": 116,
+      "ring_colors": ["#FAD8F7", "#F7BFF2", "#F6A9EF"],
+      "decorations": ["star", "party_popper"],
+      "decoration_color": "{tokens.colors.pink}"
+    },
+    "score": {
+      "label_style": "{tokens.typography.styles.caption}",
+      "value_style": {
+        "size": 26,
+        "line_height": 32,
+        "weight": 700
+      },
+      "value_color": "{tokens.colors.primary}"
+    },
+    "result_title": {
+      "style": "{tokens.typography.styles.display}",
+      "color": "{tokens.colors.primary}",
+      "align": "center"
+    }
+  },
+  "screens": {
+    "home": {
+      "layout": {
+        "type": "vertical",
+        "gap": 18,
+        "sections": [
+          "user_header",
+          "search",
+          "promo_banner",
+          "categories",
+          "recent_quizzes",
+          "bottom_nav"
+        ]
+      },
+      "category_scroll": {
+        "direction": "horizontal",
+        "gap": 12,
+        "peek_next_card": true
+      },
+      "recent_gap": 10
+    },
+    "quiz": {
+      "layout": {
+        "type": "vertical",
+        "gap": 18,
+        "top": ["quiz_header", "question_progress", "question_card", "answer_list"],
+        "bottom_fixed": ["primary_button"]
+      },
+      "content_padding_bottom": 84,
+      "answer_gap": 12
+    },
+    "result": {
+      "layout": {
+        "type": "vertical",
+        "align": "center",
+        "top_spacer": 72,
+        "sections": [
+          "result_celebration",
+          "score",
+          "result_title",
+          "result_subtitle",
+          "points_badge"
+        ],
+        "bottom_fixed": ["primary_button"]
+      }
+    }
+  },
+  "responsive": {
+    "mobile": {
+      "max_width": 430,
+      "shell_radius": 0,
+      "page_background": "#FFFFFF"
+    },
+    "preview_collage": {
+      "min_width": 1100,
+      "shell_width": 330,
+      "shell_gap": 54,
+      "shell_radius": 32,
+      "page_background": "{tokens.colors.canvas}"
+    }
+  },
+  "implementation_notes": [
+    "Prioritize mobile-first layout.",
+    "Keep primary CTA fixed near the bottom on quiz and result screens.",
+    "Use subtle line-art illustrations rather than heavy 3D assets.",
+    "Selected answer uses a light lavender fill plus indigo border.",
+    "Question 6 intentionally mirrors the text shown in the supplied visual reference.",
+    "The result screen is dynamic even though the visual reference shows 19/20 and 200 Points."
+  ]
+}
