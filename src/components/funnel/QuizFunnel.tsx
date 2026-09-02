@@ -247,37 +247,70 @@ function ObjectionBuster({ icon, title, text }: { icon: string; title: string; t
 
 function DonationGoal() {
   return (
-    <div className="rounded-3xl border border-[#fde68a] bg-gradient-to-br from-[#fffdfa] via-[#fefbf3] to-[#fef8ea] p-4 text-left shadow-sm sm:p-5">
-      <div className="flex flex-wrap items-center justify-between gap-2 text-[12px] font-bold text-[#92400e]">
-        <span className="flex min-w-0 items-center gap-1.5">
+    <div className="relative overflow-hidden rounded-3xl border-2 border-[#f59e0b]/40 bg-gradient-to-b from-[#fffef9] via-[#fefbf2] to-[#fbf6ea] p-5 text-left shadow-lg sm:p-6">
+      {/* Detalhe de fundo suave */}
+      <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-amber-200/30 blur-2xl" />
+
+      {/* Header com Badge e Indicador Vivo */}
+      <div className="flex flex-wrap items-center justify-between gap-2.5">
+        <div className="flex items-center gap-2">
+          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-100/80 border border-amber-300 text-sm shadow-2xs">
+            🕯️
+          </span>
+          <div>
+            <span className="block text-[12.5px] font-extrabold text-[#2d144d] leading-tight">
+              Materiais & Insumos do Oratório
+            </span>
+            <span className="block text-[11px] font-semibold text-[#8a7251]">
+              Meta semanal para velas sagradas de 7 dias
+            </span>
+          </div>
+        </div>
+
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 px-3 py-1 text-[11px] font-extrabold text-emerald-800 shadow-2xs">
           <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-          Meta semanal de materiais do oratório
-        </span>
-        <span className="rounded-full bg-[#fef3c7] px-2 py-0.5 text-[11px] font-extrabold text-[#b45309] border border-[#fde68a]">
           53% alcançada
         </span>
       </div>
 
-      {/* Barra de Progresso da Doação */}
-      <div className="mt-2.5 h-3 overflow-hidden rounded-full bg-[#f6eee0] p-0.5 border border-[#ecdac2]">
-        <div
-          className="h-full rounded-full bg-gradient-to-r from-amber-400 via-amber-500 to-emerald-500 transition-all duration-1000 shadow-xs"
-          style={{ width: "53%" }}
-        />
+      {/* Barra de Progresso com Gradiente Dourado-Esmeralda */}
+      <div className="mt-4">
+        <div className="h-3.5 w-full overflow-hidden rounded-full bg-[#f3e9d8] p-0.5 border border-[#e5d4be] shadow-inner">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-amber-400 via-amber-500 to-emerald-500 transition-all duration-1000 shadow-xs"
+            style={{ width: "53%" }}
+          />
+        </div>
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-3 text-[11.5px] text-[#786445]">
-        <span className="rounded-xl bg-white/75 px-3 py-2">
-          Arrecadado: <strong>R$ 187</strong>
-        </span>
-        <span className="rounded-xl bg-white/75 px-3 py-2 text-right">
-          Meta semanal: <strong>R$ 350</strong>
-        </span>
+      {/* Estatísticas em Cards Claros */}
+      <div className="mt-3.5 grid grid-cols-2 gap-2.5 text-[12px]">
+        <div className="rounded-2xl border border-amber-200/60 bg-white/90 p-3 shadow-2xs">
+          <span className="block text-[10.5px] font-bold uppercase tracking-wider text-[#92400e]">
+            Arrecadado esta semana
+          </span>
+          <span className="font-display mt-0.5 block text-lg font-black text-emerald-700">
+            R$ 187,00
+          </span>
+        </div>
+
+        <div className="rounded-2xl border border-amber-200/60 bg-white/90 p-3 text-right shadow-2xs">
+          <span className="block text-[10.5px] font-bold uppercase tracking-wider text-[#786445]">
+            Objetivo semanal
+          </span>
+          <span className="font-display mt-0.5 block text-lg font-black text-[#2d144d]">
+            R$ 350,00
+          </span>
+        </div>
       </div>
 
-      <p className="mt-3 text-[11px] leading-relaxed text-[#786445]">
-        A meta cobre velas, pergaminhos, incensos e a manutenção das atividades de acolhimento.
-      </p>
+      {/* Nota de Transparência */}
+      <div className="mt-3 flex items-start gap-2 pt-2 border-t border-amber-200/50 text-[11px] text-[#786445] leading-relaxed">
+        <span className="shrink-0 text-xs">🤍</span>
+        <p>
+          O Templo de Luz opera por caridade. As doações cobrem as velas de cera virgem, folhas de pergaminho puro e óleos de sintonização mediúnica.
+        </p>
+      </div>
     </div>
   );
 }
@@ -984,11 +1017,6 @@ function Result({
 
         <SocialProofSection />
 
-        {/* Meta de materiais do oratório */}
-        <Reveal className="mb-6">
-          <DonationGoal />
-        </Reveal>
-
         <Reveal>
           <SectionLabel>A médium responsável</SectionLabel>
           <h2 className="font-display text-[25px] font-extrabold text-[#181126]">
@@ -1041,8 +1069,13 @@ function Result({
           ))}
         </Reveal>
 
+        {/* ── META DE MATERIAIS DO ORATÓRIO (APÓS A APRESENTAÇÃO DE MILENA) ── */}
+        <Reveal delay={140} className="mt-7">
+          <DonationGoal />
+        </Reveal>
+
         {/* ── CARD DE DOAÇÃO SOLIDÁRIA COM PIX NA PÁGINA ── */}
-        <Reveal className="relative mt-9 overflow-hidden rounded-3xl p-4 text-center shadow-xl border-2 border-[#f59e0b] bg-white sm:p-6">
+        <Reveal className="relative mt-8 overflow-hidden rounded-3xl p-4 text-center shadow-xl border-2 border-[#f59e0b] bg-white sm:p-6">
           <div id="pix-section" className="absolute -top-16" />
           <div className="flex flex-wrap items-center justify-center gap-2">
             <span className="inline-flex items-center gap-1 rounded-full border border-[#fde68a] bg-[#fef3c7] px-3 py-1 text-[10.5px] font-extrabold uppercase tracking-wider text-[#92400e]">
