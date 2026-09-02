@@ -57,10 +57,10 @@ function getSurgeryPsychologicalImpact(amount: number) {
       isValid: false,
     };
   }
-  if (amount < 20) {
+  if (amount < 15) {
     return {
       icon: "💧",
-      badge: "Gesto de Solidariedade",
+      badge: "Colírios e Preparação",
       title: "Colírios e Preparação Ocular",
       description:
         "Custeia a medicação pré-operatória e os exames de mapeamento de retina essenciais para a cirurgia de catarata de Milena.",
@@ -69,7 +69,7 @@ function getSurgeryPsychologicalImpact(amount: number) {
       isValid: true,
     };
   }
-  if (amount < 40) {
+  if (amount < 25) {
     return {
       icon: "✨",
       badge: "⭐ Mais Escolhido pelo Coração",
@@ -81,19 +81,19 @@ function getSurgeryPsychologicalImpact(amount: number) {
       isValid: true,
     };
   }
-  if (amount < 80) {
+  if (amount < 35) {
     return {
       icon: "👁️",
       badge: "Protetor da Visão de Milena",
-      title: "Custeio do Procedimento Cirúrgico",
+      title: "Insumos Hospitalares de Facoemulsificação",
       description:
-        "Garante os insumos cirúrgicos hospitalares de facoemulsificação para recuperar a visão do olho direito da médium.",
+        "Garante os insumos cirúrgicos hospitalares para recuperar a visão do olho direito da médium.",
       badgeColor: "bg-purple-100 text-purple-900 border-purple-300",
       cardBorder: "border-purple-300 bg-purple-50/40",
       isValid: true,
     };
   }
-  if (amount < 130) {
+  if (amount < 50) {
     return {
       icon: "🕊️",
       badge: "Mantenedor da Cura",
@@ -309,11 +309,11 @@ export function AjudaMilenaPage() {
               </label>
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { val: 19, tag: "Solidariedade" },
-                  { val: 29, tag: "⭐ Mais Escolhido", highlight: true },
-                  { val: 49, tag: "👁️ Protetor(a)" },
-                  { val: 97, tag: "🕊️ Mantenedor" },
-                  { val: 150, tag: "👑 Anjo Guardião" },
+                  { val: 10, tag: "Colírios" },
+                  { val: 15, tag: "Exames Básicos" },
+                  { val: 19, tag: "⭐ Mais Escolhido", highlight: true },
+                  { val: 29, tag: "Lente Intraocular" },
+                  { val: 47, tag: "Aporte Cirúrgico" },
                 ].map((item) => {
                   const isSelected = !isCustom && selectedAmount === item.val;
                   return (
@@ -347,7 +347,7 @@ export function AjudaMilenaPage() {
                   type="button"
                   onClick={() => {
                     setIsCustom(true);
-                    if (!customInput) setCustomInput("50");
+                    if (!customInput) setCustomInput("35");
                   }}
                   className={`py-2.5 px-2 rounded-2xl text-center transition-all duration-200 border-2 cursor-pointer ${
                     isCustom

@@ -295,55 +295,55 @@ function getDonationPsychologicalImpact(
       badge: "Insumos Sagrados Mínimos",
       title: "Mínimo Fraterno de R$ 10,00",
       description:
-        "O Templo de Luz não visa lucro. Este valor mínimo de R$ 10,00 custeia estritamente a vela de cera virgem 7 dias, a folha de pergaminho de algodão puro sem química e os óleos de sintonização.",
+        "O Templo de Luz não visa lucro. Este valor de R$ 10,00 custeia a vela de cera virgem de 7 dias, a folha de pergaminho de algodão puro e os óleos de sintonização.",
       badgeColor: "bg-red-50 text-red-800 border-red-200",
       cardBorder: "border-red-300 bg-red-50/40",
       isValid: false,
     };
   }
-  if (amount < 20) {
+  if (amount < 15) {
     return {
       tier: "basic",
       icon: "🕯️",
-      badge: "Cobertura Sagrada Básica",
+      badge: "Vela & Pergaminho",
       title: `Materiais e Consagração para ${primeiroEnte}`,
-      description: `Custeia a vela de cera virgem de 7 dias, a folha de pergaminho de algodão sagrado e o incenso aromático para o momento de oração de ${primeiroEnte}.`,
+      description: `Custeia a vela de 7 dias e a folha de pergaminho sagrado para a sessão de psicografia de ${primeiroEnte}.`,
       badgeColor: "bg-zinc-100 text-zinc-800 border-zinc-300",
       cardBorder: "border-zinc-200 bg-zinc-50/50",
       isValid: true,
     };
   }
-  if (amount < 40) {
+  if (amount < 25) {
     return {
       tier: "heart",
       icon: "✨",
       badge: "⭐ Mais Escolhido pelo Coração",
       title: "Consagração Completa & Oração Dedicada",
-      description: `Cobre todos os materiais físicos no oratório, óleos sagrados de unção e garante a vigília de oração com velas dedicadas exclusivamente à paz e elevação espiritual de ${primeiroEnte}.`,
+      description: `Cobre todos os insumos sagrados no oratório e garante a vigília de preces dedicada à paz e acolhimento espiritual de ${primeiroEnte}.`,
       badgeColor: "bg-amber-100 text-[#92400e] border-[#f59e0b]/50",
       cardBorder: "border-[#f59e0b] bg-[#fefaf3]",
       isValid: true,
     };
   }
-  if (amount < 80) {
+  if (amount < 35) {
     return {
       tier: "light",
       icon: "🌟",
-      badge: "Corrente de Luz Multiplicada",
-      title: "Luz Estendida a Almas Desamparadas",
-      description: `Além de garantir todos os insumos sagrados para a mensagem de ${primeiroEnte}, sua doação acende velas fraternas no oratório por espíritos desencarnados que não têm ninguém para orar por eles.`,
+      badge: "Luz Ampliada no Oratório",
+      title: "Velas de Vigília & Preces Fraternas",
+      description: `Além de garantir todos os insumos para ${primeiroEnte}, sua doação acende velas e irradiações de luz para os familiares.`,
       badgeColor: "bg-purple-100 text-purple-900 border-purple-300",
       cardBorder: "border-purple-300 bg-purple-50/40",
       isValid: true,
     };
   }
-  if (amount < 130) {
+  if (amount < 50) {
     return {
       tier: "guardian",
       icon: "🕊️",
-      badge: "Protetor(a) da Caridade do Templo",
-      title: "Sustentação da Obra & Alimento aos Necessitados",
-      description: `Garante a consagração especial de ${primeiroEnte}, apoia a manutenção do oratório de cartas e ajuda diretamente a custear as marmitas e sopões solidários servidos semanalmente a famílias carentes.`,
+      badge: "Protetor(a) da Obra de Acolhimento",
+      title: "Sustentação do Oratório e Marmitas Solidárias",
+      description: `Garante a consagração especial de ${primeiroEnte} e apoia a manutenção do templo e auxílio alimentar a famílias necessitadas.`,
       badgeColor: "bg-emerald-100 text-emerald-900 border-emerald-300",
       cardBorder: "border-emerald-400 bg-emerald-50/50",
       isValid: true,
@@ -353,9 +353,9 @@ function getDonationPsychologicalImpact(
   return {
     tier: "eternal",
     icon: "👑",
-    badge: "Bênção Suprema & Mantenedor Perpétuo",
-    title: "Inscrição no Livro Sagrado de Orações Diárias",
-    description: `Um gesto sublime de amor e caridade. Os nomes de ${primeiroNome || "você"} e de ${primeiroEnte} serão inscritos no Livro Sagrado do Altar Principal para receberem preces diárias e irradiação de luz por 1 ano.`,
+    badge: "Bênção Suprema de Gratidão",
+    title: "Inscrição no Livro Sagrado de Orações",
+    description: `Um gesto sublime de caridade. Os nomes de ${primeiroNome || "você"} e de ${primeiroEnte} serão inscritos no Livro Sagrado do Altar para preces de luz.`,
     badgeColor:
       "bg-gradient-to-r from-amber-200 to-amber-300 text-amber-950 border-amber-400 shadow-xs",
     cardBorder: "border-amber-400 bg-gradient-to-br from-[#fffbeb] via-[#fffdfa] to-[#fef3c7]",
@@ -370,7 +370,7 @@ function PixInstantBox({
   primeiroNome: string;
   primeiroEnte: string;
 }) {
-  const [selectedAmount, setSelectedAmount] = useState<number>(29);
+  const [selectedAmount, setSelectedAmount] = useState<number>(19);
   const [customInput, setCustomInput] = useState<string>("");
   const [isCustom, setIsCustom] = useState<boolean>(false);
 
@@ -412,11 +412,11 @@ function PixInstantBox({
         </span>
         <div className="grid grid-cols-3 gap-2">
           {[
-            { val: 19, tag: "Básico" },
-            { val: 29, tag: "⭐ Mais Escolhido", highlight: true },
-            { val: 49, tag: "🌟 Luz Expandida" },
-            { val: 97, tag: "🕊️ Protetor(a)" },
-            { val: 150, tag: "👑 Guardião" },
+            { val: 10, tag: "Simbólico" },
+            { val: 15, tag: "Vela & Papel" },
+            { val: 19, tag: "⭐ Mais Escolhido", highlight: true },
+            { val: 27, tag: "Consagração" },
+            { val: 37, tag: "Luz Especial" },
           ].map((item) => {
             const isSelected = !isCustom && selectedAmount === item.val;
             return (
@@ -448,7 +448,7 @@ function PixInstantBox({
             type="button"
             onClick={() => {
               setIsCustom(true);
-              if (!customInput) setCustomInput("35");
+              if (!customInput) setCustomInput("25");
             }}
             className={`py-2.5 px-2 rounded-2xl text-center transition-all duration-200 border-2 cursor-pointer ${
               isCustom
