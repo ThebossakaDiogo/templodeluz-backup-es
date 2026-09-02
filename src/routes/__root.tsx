@@ -111,6 +111,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 import { LiveActivityToast } from "@/components/funnel/LiveActivityToast";
 import { captureAndStoreUtms } from "@/lib/utmify";
+import { initMetaPixel } from "@/lib/metaPixel";
 import { useEffect } from "react";
 
 function RootShell({ children }: { readonly children: ReactNode }) {
@@ -184,6 +185,7 @@ function RootComponent() {
 
   useEffect(() => {
     captureAndStoreUtms();
+    initMetaPixel();
   }, []);
 
   return (

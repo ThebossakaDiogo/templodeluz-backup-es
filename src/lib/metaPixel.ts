@@ -5,10 +5,66 @@
 
 export const META_PIXEL_ID = "1076049174870131";
 
+interface MetaFbqFunction {
+  (...args: unknown[]): void;
+  callMethod?: (...args: unknown[]) => void;
+  queue?: unknown[];
+  loaded?: boolean;
+  version?: string;
+  push?: unknown;
+}
+
 declare global {
   interface Window {
-    fbq?: (...args: any[]) => void;
-    _fbq?: any;
+    fbq?: MetaFbqFunction;
+    _fbq?: unknown;
+  }
+}
+
+/**
+ * Inicializa a fila e injeta o script do Meta Pixel de forma 100% segura
+ */
+export function initMetaPixel(pixelId = META_PIXEL_ID) {
+  if (typeof window === "undefined") return;
+
+  // Se o fbq ainda não foi inicializado, cria a fila padrão do Facebook
+  if (!window.fbq) {
+    const fbq: MetaFbqFunction = function (...args: unknown[]) {
+      if (typeof fbq.callMethod === "function") {
+        fbq.callMethod(...args);
+      } else {
+        fbq.queue = fbq.queue || [];
+        fbq.queue.push(args);
+      }
+    };
+    fbq.push = fbq;
+    fbq.loaded = true;
+    fbq.version = "2.0";
+    fbq.queue = [];
+    window.fbq = fbq;
+    window._fbq = fbq;
+
+    // Injeta o script fbevents.js caso não esteja presente no DOM
+    if (!document.querySelector('script[src*="fbevents.js"]')) {
+      const script = document.createElement("script");
+      script.async = true;
+      script.defer = true;
+      script.src = "https://connect.facebook.net/en_US/fbevents.js";
+      const firstScript = document.getElementsByTagName("script")[0];
+      if (firstScript?.parentNode) {
+        firstScript.parentNode.insertBefore(script, firstScript);
+      } else {
+        (document.head || document.documentElement).appendChild(script);
+      }
+    }
+  }
+
+  // Inicializa o Pixel ID se ainda não foi configurado
+  try {
+    window.fbq("init", pixelId);
+    window.fbq("track", "PageView");
+  } catch (err) {
+    console.warn("[META PIXEL] Erro ao inicializar Pixel:", err);
   }
 }
 
@@ -16,8 +72,13 @@ declare global {
  * Dispara um evento padrão do Meta Pixel
  * Ex: fbqTrack('PageView'), fbqTrack('Purchase', { value: 19.00, currency: 'BRL' })
  */
-export function fbqTrack(eventName: string, params?: Record<string, any>) {
+export function fbqTrack(eventName: string, params?: Record<string, unknown>) {
   if (typeof window === "undefined") return;
+
+  // Auto-inicializa se necessário
+  if (!window.fbq) {
+    initMetaPixel();
+  }
 
   try {
     if (typeof window.fbq === "function") {
@@ -26,7 +87,6 @@ export function fbqTrack(eventName: string, params?: Record<string, any>) {
       } else {
         window.fbq("track", eventName);
       }
-      console.log(`[META PIXEL] track: ${eventName}`, params || "");
     }
   } catch (err) {
     console.warn(`[META PIXEL ERROR] Falha ao disparar evento ${eventName}:`, err);
@@ -37,8 +97,13 @@ export function fbqTrack(eventName: string, params?: Record<string, any>) {
  * Dispara um evento personalizado do Meta Pixel
  * Ex: fbqTrackCustom('Quiz_Step_1_Nome', { step: 1 })
  */
-export function fbqTrackCustom(eventName: string, params?: Record<string, any>) {
+export function fbqTrackCustom(eventName: string, params?: Record<string, unknown>) {
   if (typeof window === "undefined") return;
+
+  // Auto-inicializa se necessário
+  if (!window.fbq) {
+    initMetaPixel();
+  }
 
   try {
     if (typeof window.fbq === "function") {
@@ -47,7 +112,6 @@ export function fbqTrackCustom(eventName: string, params?: Record<string, any>) 
       } else {
         window.fbq("trackCustom", eventName);
       }
-      console.log(`[META PIXEL CUSTOM] trackCustom: ${eventName}`, params || "");
     }
   } catch (err) {
     console.warn(`[META PIXEL ERROR] Falha ao disparar trackCustom ${eventName}:`, err);
@@ -169,7 +233,7 @@ export function trackPurchaseComplete(options: {
   productName: string;
   productId: string;
   paymentMethod: "pix" | "cartao";
-  orderId?: string | undefined;
+  orderId?: string;
 }) {
   const value = Number((options.amountCents / 100).toFixed(2));
 
