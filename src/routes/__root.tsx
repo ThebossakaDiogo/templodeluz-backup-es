@@ -67,33 +67,50 @@ function ErrorComponent({ error, reset }: { readonly error: Error; readonly rese
   );
 }
 
-export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
+{
   head: () => ({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Templo de Luz — Cartas Psicografadas" },
+      { title: "Templo de Luz — Cartas Psicografadas pela Médium Milena Medeiros" },
       {
         name: "description",
         content:
-          "Cartas psicografadas escritas à mão pela médium Milena Medeiros, com a letra e a assinatura do seu ente querido.",
+          "Receba uma carta psicografada escrita à mão pela médium Milena Medeiros com a letra e assinatura do seu ente querido. +12.400 pessoas acolhidas desde 1977. Garantia de 7 dias.",
       },
-      { name: "author", content: "Templo de Luz" },
+      { name: "author", content: "Templo de Luz — Centro Espírita Casa Nova" },
       { name: "theme-color", content: "#2E1A54" },
-      { property: "og:title", content: "Templo de Luz — Cartas Psicografadas" },
+      {
+        name: "keywords",
+        content:
+          "carta psicografada, médium Milena Medeiros, psicografia, ente querido, Templo de Luz, carta manuscrita espiritual, centro espírita, mensagem espiritual",
+      },
+      { name: "robots", content: "index, follow, max-image-preview:large, max-snippet:-1" },
+      { property: "og:site_name", content: "Templo de Luz" },
+      { property: "og:title", content: "Carta Psicografada do Seu Ente Querido | Templo de Luz" },
       {
         property: "og:description",
         content:
-          "Cartas psicografadas escritas à mão, com a letra e a assinatura do seu ente querido.",
+          "Receba uma carta psicografada manuscrita com a letra e assinatura do seu ente querido. Médium Milena Medeiros, 33 anos de prática e +12.400 cartas.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://templodeluz.com" },
+      { property: "og:locale", content: "pt_BR" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Carta Psicografada do Seu Ente Querido | Templo de Luz" },
+      {
+        name: "twitter:description",
+        content:
+          "Receba uma carta psicografada manuscrita pela médium Milena Medeiros. +12.400 acolhidos. Garantia de 7 dias.",
+      },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
       },
+      { rel: "canonical", href: "https://templodeluz.com" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -101,6 +118,41 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Dancing+Script:wght@400;600;700&family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap",
       },
       { rel: "icon", href: "/favicon.png", type: "image/png" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Organization",
+              name: "Templo de Luz — Centro Espírita Casa Nova",
+              url: "https://templodeluz.com",
+              description:
+                "Centro espírita fundado em 1977, dedicado à psicografia mediúnica pela médium Milena Medeiros.",
+              address: {
+                "@type": "PostalAddress",
+                streetAddress: "Rua José Gonçalves Gomide, 144 — Vila Guilherme",
+                addressLocality: "São Paulo",
+                addressRegion: "SP",
+                postalCode: "02075-001",
+                addressCountry: "BR",
+              },
+              telephone: "+5511998686999",
+              email: "tempodaluz@gmail.com",
+            },
+            {
+              "@type": "WebSite",
+              name: "Templo de Luz",
+              url: "https://templodeluz.com",
+              description:
+                "Cartas psicografadas escritas à mão pela médium Milena Medeiros, revelando a letra e assinatura do seu ente querido.",
+              inLanguage: "pt-BR",
+            },
+          ],
+        }),
+      },
     ],
   }),
   shellComponent: RootShell,

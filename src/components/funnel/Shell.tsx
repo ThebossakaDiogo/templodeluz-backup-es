@@ -130,6 +130,13 @@ export function Footer() {
           Termos de Uso
         </Link>
       </div>
+
+      {/* Disclaimer de não-afiliação à Meta */}
+      <p className="mt-5 mx-auto max-w-[340px] text-[8.5px] leading-[1.4] text-[#b0a3b8] font-normal select-none">
+        Este site não é parte, nem é endossado pelo Facebook, Instagram ou Meta Platforms, Inc.
+        Todo o conteúdo aqui expresso é de inteira responsabilidade do Templo de Luz / Centro Espírita Casa Nova.
+        O Facebook e o Instagram são marcas registradas da Meta Platforms, Inc.
+      </p>
     </footer>
   );
 }
