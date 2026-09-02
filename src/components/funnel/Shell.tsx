@@ -5,11 +5,11 @@ export function Reveal({
   children,
   delay = 0,
   className = "",
-}: {
+}: Readonly<{
   children: ReactNode;
   delay?: number;
   className?: string;
-}) {
+}>) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [shown, setShown] = useState(false);
 
@@ -46,7 +46,7 @@ export function Reveal({
   );
 }
 
-export function Stars({ className = "" }: { className?: string }) {
+export function Stars({ className = "" }: Readonly<{ className?: string }>) {
   return (
     <div
       className={`text-gold text-[15px] tracking-[0.7em] opacity-80 select-none ${className}`}
@@ -66,7 +66,7 @@ export function Halos() {
   );
 }
 
-export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
+export function Card({ children, className = "" }: Readonly<{ children: ReactNode; className?: string }>) {
   return (
     <div
       className={`rounded-2xl border border-[#ece4f4] bg-white p-5 shadow-sm text-[#181126] ${className}`}
@@ -76,7 +76,7 @@ export function Card({ children, className = "" }: { children: ReactNode; classN
   );
 }
 
-export function SectionLabel({ children }: { children: ReactNode }) {
+export function SectionLabel({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <p className="mb-2 text-[11px] font-bold tracking-[0.2em] text-[#b45309] uppercase">
       {children}

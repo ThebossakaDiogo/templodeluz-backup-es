@@ -8,7 +8,7 @@ const stepSchema = z
 
 export const Route = createFileRoute("/")({
   validateSearch: (search: Record<string, unknown>) => ({
-    step: stepSchema.parse(search.step ?? "intro"),
+    step: stepSchema.parse(search["step"] ?? "intro"),
   }),
   head: () => ({
     meta: [
