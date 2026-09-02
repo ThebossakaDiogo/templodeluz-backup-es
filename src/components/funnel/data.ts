@@ -3,6 +3,8 @@ import logoTemplo from "@/assets/logo-templo-de-luz.png";
 import mediumMilena from "@/assets/medium-milena.jpeg";
 import milenaEmocionada from "@/assets/milena.webp";
 import heroTemplo from "@/assets/templodeluz-hero.webp";
+import seloCheckout from "@/assets/checkout-selo.png";
+import seloPomba from "@/assets/pomba-seguro.png";
 
 export const IMAGES = {
   hero: heroTemplo,
@@ -10,6 +12,8 @@ export const IMAGES = {
   carta: cartaExemplo,
   medium: mediumMilena,
   milenaCatarata: milenaEmocionada,
+  seloCheckout: seloCheckout,
+  seloPomba: seloPomba,
 };
 
 export const CHECKOUT_URL = "https://pay.cakto.com.br/amnpmje_1071513";

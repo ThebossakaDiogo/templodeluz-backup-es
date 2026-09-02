@@ -590,74 +590,58 @@ function PixInstantBox({
 
 function SecurityGuaranteeSeal() {
   return (
-    <div className="mt-6 overflow-hidden rounded-3xl border-2 border-amber-300/80 bg-gradient-to-b from-[#fffef7] via-[#fffaf0] to-[#fef6dc] p-5 sm:p-6 text-left shadow-xl shadow-amber-500/5">
-      {/* Header do Selo de Garantia */}
-      <div className="flex items-center gap-3.5 pb-4 border-b border-amber-200/80">
-        <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#f59e0b] to-[#b45309] text-2xl text-white shadow-md shadow-amber-600/30">
-          🛡️
-        </div>
-        <div>
-          <div className="flex items-center gap-1.5">
-            <span className="inline-block rounded-full bg-[#b45309] px-2.5 py-0.5 text-[9.5px] font-black tracking-widest text-white uppercase">
-              100% Protegido
-            </span>
-            <span className="text-[11px] font-bold text-amber-900">
-              Compromisso Fraterno
-            </span>
-          </div>
-          <h4 className="font-display mt-0.5 text-[17px] font-extrabold leading-tight text-[#181126]">
-            Garantia Sagrada Incondicional de 7 Dias
-          </h4>
-        </div>
+    <div className="mt-7 pt-5 border-t border-[#ece4f4] space-y-3.5 text-left">
+      {/* Título da Seção dos Selos */}
+      <div className="text-center">
+        <span className="text-[10.5px] font-extrabold uppercase tracking-[0.18em] text-[#b45309]">
+          ✦ Compromisso e Segurança ✦
+        </span>
+        <h3 className="font-display text-[16px] font-extrabold text-[#181126] mt-0.5">
+          Sua Contribuição Protegida e Abençoada
+        </h3>
       </div>
 
-      {/* Descrição acolhedora */}
-      <p className="mt-3.5 text-[13px] leading-relaxed text-[#5e4b73] font-medium">
-        Se a carta psicografada manuscrita não trouxer consolo real e paz profunda ao seu coração, ou se você não reconhecer o seu ente querido nas palavras, <strong className="text-[#92400e] font-bold">devolvemos 100% da sua contribuição fraterna imediatamente</strong>. Sem burocracia e sem questionamentos.
-      </p>
-
-      {/* Pilares de Segurança e Acolhimento */}
-      <div className="mt-4 grid grid-cols-1 gap-2.5 pt-3 border-t border-amber-200/60">
-        <div className="flex items-center gap-3 rounded-2xl bg-white/90 p-3 border border-amber-200/70 shadow-2xs">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-base">
-            🔒
-          </span>
-          <div>
-            <span className="block text-[12.5px] font-bold text-[#181126]">
-              Segurança Bancária Máxima
-            </span>
-            <span className="block text-[11.5px] text-[#786445] font-normal">
-              Ambiente protegido com criptografia SSL e processamento bancário seguro
-            </span>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+        {/* Card 1: Selo da Paz */}
+        <div className="flex flex-col items-center rounded-2xl border border-amber-200/80 bg-gradient-to-b from-[#fffef9] to-[#fef8ea] p-4 text-center shadow-xs transition-transform duration-300 hover:scale-[1.01]">
+          <div className="relative mb-2 flex items-center justify-center">
+            <img
+              src={IMAGES.seloPomba}
+              alt="Selo de Paz Espiritual e Fé - Templo de Luz"
+              className="h-28 w-28 object-contain drop-shadow-sm transition-transform duration-300 hover:scale-105"
+              loading="lazy"
+            />
           </div>
+          <span className="text-[9.5px] font-black uppercase tracking-widest text-[#b45309] block">
+            Paz & Acolhimento
+          </span>
+          <h4 className="font-display text-[14.5px] font-extrabold text-[#181126] leading-tight mt-0.5">
+            Selo de Paz Espiritual
+          </h4>
+          <p className="mt-1 text-[11.5px] text-[#786445] leading-relaxed">
+            Consagração com oração e vela sagrada acesa no oratório para o seu ente querido.
+          </p>
         </div>
 
-        <div className="flex items-center gap-3 rounded-2xl bg-white/90 p-3 border border-amber-200/70 shadow-2xs">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-base">
-            💬
-          </span>
-          <div>
-            <span className="block text-[12.5px] font-bold text-[#181126]">
-              Acompanhamento Direto pelo WhatsApp
-            </span>
-            <span className="block text-[11.5px] text-[#786445] font-normal">
-              Você recebe a confirmação e o envio da psicografia no seu WhatsApp
-            </span>
+        {/* Card 2: Selo de Garantia */}
+        <div className="flex flex-col items-center rounded-2xl border border-blue-200/80 bg-gradient-to-b from-[#fbfcff] to-[#f1f5fc] p-4 text-center shadow-xs transition-transform duration-300 hover:scale-[1.01]">
+          <div className="relative mb-2 flex items-center justify-center">
+            <img
+              src={IMAGES.seloCheckout}
+              alt="Selo de Garantia Incondicional de 7 Dias"
+              className="h-28 w-28 object-contain drop-shadow-sm transition-transform duration-300 hover:scale-105"
+              loading="lazy"
+            />
           </div>
-        </div>
-
-        <div className="flex items-center gap-3 rounded-2xl bg-white/90 p-3 border border-amber-200/70 shadow-2xs">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-purple-100 text-base">
-            🕯️
+          <span className="text-[9.5px] font-black uppercase tracking-widest text-blue-800 block">
+            100% Protegido
           </span>
-          <div>
-            <span className="block text-[12.5px] font-bold text-[#181126]">
-              Vela Sagrada e Consagração Real
-            </span>
-            <span className="block text-[11.5px] text-[#786445] font-normal">
-              Trabalho mediúnico 100% manuscrito no oratório pela médium Milena Medeiros
-            </span>
-          </div>
+          <h4 className="font-display text-[14.5px] font-extrabold text-[#181126] leading-tight mt-0.5">
+            Selo de Garantia de 7 Dias
+          </h4>
+          <p className="mt-1 text-[11.5px] text-[#5e4b73] leading-relaxed">
+            Se a mensagem não trouxer paz ao seu coração, devolvemos 100% da sua contribuição.
+          </p>
         </div>
       </div>
     </div>
