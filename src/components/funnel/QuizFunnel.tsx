@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useSearch, useNavigate } from "@tanstack/react-router";
 import { CHECKOUT_URL, FAQ, IMAGES, STEPS_HOW } from "./data";
 import { Card, Footer, Halos, Reveal, SectionLabel, Stars } from "./Shell";
 import { LetterZoomModal } from "./LetterZoomModal";
@@ -526,7 +526,7 @@ function PixInstantBox({
       {/* Botão Pós-PIX com Acesso Imediato */}
       <div className="mt-5 pt-4 border-t border-[#ece4f4]">
         <Link
-          to="/ajuda-milena"
+          to="/apoio-milena"
           className="w-full block py-4 px-4 rounded-2xl bg-[#2d144d] hover:bg-[#1f0c36] text-white font-extrabold text-[14px] uppercase tracking-wide transition-colors shadow-md text-center"
         >
           ✅ Já realizei o PIX · Confirmar e Prosseguir ›
@@ -1118,7 +1118,9 @@ function Result({
 type Step = "intro" | "ente" | "relacao" | "tempo" | "mensagem" | "confirma" | "loading" | "result";
 
 export function QuizFunnel() {
-  const [step, setStep] = useState<Step>("intro");
+  const search = useSearch({ from: "/" });
+  const navigate = useNavigate({ from: "/" });
+  const [step, setStep] = useState<Step>((search.step as Step) || "intro");
   const [nome, setNome] = useState("");
   const [ente, setEnte] = useState("");
   const [relacao, setRelacao] = useState("");
@@ -1133,6 +1135,7 @@ export function QuizFunnel() {
 
   const goto = (s: Step) => {
     setStep(s);
+    navigate({ search: { step: s }, replace: true });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 

@@ -84,6 +84,12 @@ export function PixCheckout({ productId, amountCents }: PixCheckoutProps) {
     };
   }, [charge, status]);
 
+  useEffect(() => {
+    if (status === "paid") {
+      sessionStorage.setItem("templodeluz:pix-paid", "true");
+    }
+  }, [status]);
+
   const generatePix = async () => {
     setError("");
     if (!config.supabaseUrl || !config.supabaseAnonKey) {

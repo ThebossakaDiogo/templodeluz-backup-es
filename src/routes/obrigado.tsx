@@ -196,7 +196,7 @@ function ObrigadoPage() {
               cartas psicografadas.
             </p>
             <Link
-              to="/upsell"
+              to="/apoio-milena"
               className="inline-flex w-full items-center justify-center py-2.5 px-3 rounded-xl bg-white border border-[#fde68a] text-[#b45309] font-extrabold text-xs shadow-2xs hover:bg-[#fffbeb] transition-colors"
             >
               🤍 Conhecer a Campanha e Apoiar a Cirurgia ›

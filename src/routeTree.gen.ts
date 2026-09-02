@@ -11,11 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AjudaMilenaRouteImport } from './routes/ajuda-milena'
+import { Route as ApoioMilenaRouteImport } from './routes/apoio-milena'
 import { Route as EscreverCartaRouteImport } from './routes/escrever-carta'
 import { Route as ObrigadoRouteImport } from './routes/obrigado'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as TermosRouteImport } from './routes/termos'
-import { Route as UpsellRouteImport } from './routes/upsell'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -25,6 +25,11 @@ const IndexRoute = IndexRouteImport.update({
 const AjudaMilenaRoute = AjudaMilenaRouteImport.update({
   id: '/ajuda-milena',
   path: '/ajuda-milena',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApoioMilenaRoute = ApoioMilenaRouteImport.update({
+  id: '/apoio-milena',
+  path: '/apoio-milena',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EscreverCartaRoute = EscreverCartaRouteImport.update({
@@ -47,78 +52,73 @@ const TermosRoute = TermosRouteImport.update({
   path: '/termos',
   getParentRoute: () => rootRouteImport,
 } as any)
-const UpsellRoute = UpsellRouteImport.update({
-  id: '/upsell',
-  path: '/upsell',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/ajuda-milena': typeof AjudaMilenaRoute
+  '/apoio-milena': typeof ApoioMilenaRoute
   '/escrever-carta': typeof EscreverCartaRoute
   '/obrigado': typeof ObrigadoRoute
   '/privacidade': typeof PrivacidadeRoute
   '/termos': typeof TermosRoute
-  '/upsell': typeof UpsellRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/ajuda-milena': typeof AjudaMilenaRoute
+  '/apoio-milena': typeof ApoioMilenaRoute
   '/escrever-carta': typeof EscreverCartaRoute
   '/obrigado': typeof ObrigadoRoute
   '/privacidade': typeof PrivacidadeRoute
   '/termos': typeof TermosRoute
-  '/upsell': typeof UpsellRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/ajuda-milena': typeof AjudaMilenaRoute
+  '/apoio-milena': typeof ApoioMilenaRoute
   '/escrever-carta': typeof EscreverCartaRoute
   '/obrigado': typeof ObrigadoRoute
   '/privacidade': typeof PrivacidadeRoute
   '/termos': typeof TermosRoute
-  '/upsell': typeof UpsellRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/ajuda-milena'
+    | '/apoio-milena'
     | '/escrever-carta'
     | '/obrigado'
     | '/privacidade'
     | '/termos'
-    | '/upsell'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/ajuda-milena'
+    | '/apoio-milena'
     | '/escrever-carta'
     | '/obrigado'
     | '/privacidade'
     | '/termos'
-    | '/upsell'
   id:
     | '__root__'
     | '/'
     | '/ajuda-milena'
+    | '/apoio-milena'
     | '/escrever-carta'
     | '/obrigado'
     | '/privacidade'
     | '/termos'
-    | '/upsell'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AjudaMilenaRoute: typeof AjudaMilenaRoute
+  ApoioMilenaRoute: typeof ApoioMilenaRoute
   EscreverCartaRoute: typeof EscreverCartaRoute
   ObrigadoRoute: typeof ObrigadoRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   TermosRoute: typeof TermosRoute
-  UpsellRoute: typeof UpsellRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -135,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/ajuda-milena'
       fullPath: '/ajuda-milena'
       preLoaderRoute: typeof AjudaMilenaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/apoio-milena': {
+      id: '/apoio-milena'
+      path: '/apoio-milena'
+      fullPath: '/apoio-milena'
+      preLoaderRoute: typeof ApoioMilenaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/escrever-carta': {
@@ -165,24 +172,17 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermosRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/upsell': {
-      id: '/upsell'
-      path: '/upsell'
-      fullPath: '/upsell'
-      preLoaderRoute: typeof UpsellRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AjudaMilenaRoute: AjudaMilenaRoute,
+  ApoioMilenaRoute: ApoioMilenaRoute,
   EscreverCartaRoute: EscreverCartaRoute,
   ObrigadoRoute: ObrigadoRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   TermosRoute: TermosRoute,
-  UpsellRoute: UpsellRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

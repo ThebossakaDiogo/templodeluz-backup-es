@@ -1,7 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { z } from "zod";
 import { QuizFunnel } from "@/components/funnel/QuizFunnel";
 
+const stepSchema = z
+  .enum(["intro", "ente", "relacao", "tempo", "mensagem", "confirma", "loading", "result"])
+  .catch("intro");
+
 export const Route = createFileRoute("/")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    step: stepSchema.parse(search.step ?? "intro"),
+  }),
   head: () => ({
     meta: [
       { title: "Carta Psicografada do Seu Ente Querido | Templo de Luz" },
