@@ -139,7 +139,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
                 postalCode: "02075-001",
                 addressCountry: "BR",
               },
-              telephone: "+5511998686999",
+              telephone: "+5519998316353",
               email: "tempodaluz@gmail.com",
             },
             {

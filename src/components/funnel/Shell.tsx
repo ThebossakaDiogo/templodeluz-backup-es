@@ -110,8 +110,8 @@ export function Footer() {
           tempodaluz@gmail.com
         </a>{" "}
         ·{" "}
-        <a className="font-semibold text-[#2d144d] hover:underline" href="tel:+5511998686999">
-          (11) 99868-6999
+        <a className="font-semibold text-[#2d144d] hover:underline" href="tel:+5519998316353">
+          (19) 99831-6353
         </a>
       </p>
 

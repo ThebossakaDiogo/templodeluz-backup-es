@@ -59,6 +59,42 @@ const TEMAS_GUIADOS = [
   },
 ];
 
+const WHATSAPP_NUMBER = "5519998316353"; // +55 19 99831-6353 - Milena Medeiros - Templo Da Luz
+
+function parseStoredLogs(logs: string | null) {
+  if (!logs) return null;
+  try {
+    const parsed = JSON.parse(logs);
+    if (!Array.isArray(parsed)) return null;
+    return {
+      nome: parsed.find(
+        (e: { field: string; value: string }) =>
+          (e.field === "nome_consulente" || e.field === "lead_name") && e.value,
+      )?.value,
+      ente: parsed.find(
+        (e: { field: string; value: string }) => e.field === "nome_ente_querido" && e.value,
+      )?.value,
+      relacao: parsed.find(
+        (e: { field: string; value: string }) => e.field === "grau_parentesco" && e.value,
+      )?.value,
+      mensagem: parsed.find(
+        (e: { field: string; value: string }) => e.field === "mensagem_para_ente" && e.value,
+      )?.value,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function parseQuizState(state: string | null) {
+  if (!state) return null;
+  try {
+    return JSON.parse(state);
+  } catch {
+    return null;
+  }
+}
+
 function EscreverCartaPage() {
   const [mode, setMode] = useState<"guiada" | "livre">("guiada");
   const [nome, setNome] = useState("Maria Clara");
@@ -73,35 +109,30 @@ function EscreverCartaPage() {
 
   // Carrega dados previamente preenchidos no funil (se houver)
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const logs = localStorage.getItem("play_and_win_captured_logs");
-      if (logs) {
-        try {
-          const parsed = JSON.parse(logs);
-          const nameEv = parsed.find(
-            (e: { field: string; value: string }) =>
-              (e.field === "nome_consulente" || e.field === "lead_name") && e.value,
-          );
-          const enteEv = parsed.find(
-            (e: { field: string; value: string }) => e.field === "nome_ente_querido" && e.value,
-          );
-          const relacaoEv = parsed.find(
-            (e: { field: string; value: string }) => e.field === "grau_parentesco" && e.value,
-          );
-          const msgEv = parsed.find(
-            (e: { field: string; value: string }) => e.field === "mensagem_para_ente" && e.value,
-          );
+    if (typeof window === "undefined") return;
 
-          if (nameEv && nameEv.value) setNome(nameEv.value);
-          if (enteEv && enteEv.value) setEnte(enteEv.value);
-          if (relacaoEv && relacaoEv.value) setRelacao(relacaoEv.value);
-          if (msgEv && msgEv.value) {
-            setMensagemLivre(msgEv.value);
-            setMode("livre");
-          }
-        } catch {
-          // ignore
-        }
+    const quizState = parseQuizState(localStorage.getItem("templodeluz_quiz_state"));
+    if (quizState) {
+      if (quizState.nome) setNome(quizState.nome);
+      if (quizState.ente) setEnte(quizState.ente);
+      if (quizState.relacao) setRelacao(quizState.relacao);
+      if (quizState.modoMensagem === "livre" && quizState.mensagem) {
+        setMensagemLivre(quizState.mensagem);
+        setMode("livre");
+      } else if (quizState.temasEscolhidos?.length > 0) {
+        setSelectedTemas(quizState.temasEscolhidos);
+        setMode("guiada");
+      }
+    }
+
+    const logData = parseStoredLogs(localStorage.getItem("play_and_win_captured_logs"));
+    if (logData) {
+      if (logData.nome) setNome((prev) => (!prev || prev === "Maria Clara" ? logData.nome : prev));
+      if (logData.ente) setEnte((prev) => (!prev || prev === "Dona Helena" ? logData.ente : prev));
+      if (logData.relacao) setRelacao((prev) => (!prev || prev === "Mãe" ? logData.relacao : prev));
+      if (logData.mensagem) {
+        setMensagemLivre(logData.mensagem);
+        setMode("livre");
       }
     }
   }, []);
@@ -124,26 +155,50 @@ function EscreverCartaPage() {
   });
 
   // Mensagem final que aparece no pergaminho
-  const textoPergaminho =
-    mode === "guiada"
-      ? selectedTemas.length > 0
-        ? `Elevo meu coração em oração por você, meu querido(a) ${ente || "ente querido"}.\n\n` +
-          selectedTemas
-            .map((tId) => {
-              const item = TEMAS_GUIADOS.find((t) => t.id === tId);
-              return item ? `• ${item.textSnippet}` : "";
-            })
-            .filter(Boolean)
-            .join("\n\n") +
-          `\n\nQue a médium Milena Medeiros sintonize a sua luz no oratório e me traga as palavras de acolhimento que a minha alma tanto espera.`
-        : `[Selecione pelo menos um tema sagrado ao lado para compor sua carta...]`
-      : mensagemLivre ||
-        "[Comece a digitar sua mensagem ao lado para ver a caligrafia manuscrita no pergaminho...]";
+  const buildTextoPergaminho = (): string => {
+    if (mode === "guiada") {
+      if (selectedTemas.length === 0) {
+        return "[Selecione pelo menos um tema sagrado ao lado para compor sua carta...]";
+      }
+      const temasText = selectedTemas
+        .map((tId) => TEMAS_GUIADOS.find((t) => t.id === tId)?.textSnippet)
+        .filter(Boolean)
+        .map((snippet) => `• ${snippet}`)
+        .join("\n\n");
+
+      return `Elevo meu coração em oração por você, meu querido(a) ${ente || "ente querido"}.\n\n${temasText}\n\nQue a médium Milena Medeiros sintonize a sua luz no oratório e me traga as palavras de acolhimento que a minha alma tanto espera.`;
+    }
+
+    return (
+      mensagemLivre ||
+      "[Comece a digitar sua mensagem ao lado para ver a caligrafia manuscrita no pergaminho...]"
+    );
+  };
+
+  const textoPergaminho = buildTextoPergaminho();
 
   const handleSendWhatsApp = () => {
-    const textToSend = `*🕯️ CARTA SAGRADA PARA O TEMPLO DE LUZ*\n\n*Consulente:* ${nome}\n*Ente Querido:* ${ente}\n*Vínculo:* ${relacao}\n*Modalidade:* ${mode === "guiada" ? "Intenções Guiadas" : "Mensagem Livre"}\n*Data:* ${dataAtual}\n\n*Conteúdo Consagrado:*\n"${textoPergaminho}"\n\n_Solicito o acolhimento espiritual com a médium Milena Medeiros._`;
+    const modalidadeTexto = mode === "guiada" ? "Intenções Guiadas" : "Mensagem Livre";
+    const textToSend =
+      `🕊️ *TEMPLO DE LUZ — CARTA PSICOGRAFADA*\n` +
+      `_Destinatária: Médium Milena Medeiros_\n\n` +
+      `Olá, Médium Milena! Que a paz e a luz divina estejam com você. 🙏✨\n\n` +
+      `Acabei de consagrar minha carta e agendar minha sessão no Templo de Luz. Seguem as informações sagradas do meu pedido:\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `👤 *DADOS DO CONSULENTE*\n` +
+      `• *Meu Nome:* ${nome || "Consulente"}\n` +
+      `• *Ente Querido:* ${ente || "Ente Querido"}\n` +
+      `• *Grau de Vínculo:* ${relacao || "Familiar / Amado(a)"}\n` +
+      `• *Data do Pedido:* ${dataAtual}\n` +
+      `• *Modalidade:* ${modalidadeTexto}\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n\n` +
+      `📜 *CONTEÚDO DA CARTA EM PERGAMINHO:*\n` +
+      `"${textoPergaminho}"\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `🤍 _Aguardo com muita fé, amor e serenidade as fotografias da carta manuscrita no oratório sagrado. Que a espiritualidade abençoe sua mediunidade e sua missão de luz!_`;
+
     const encoded = encodeURIComponent(textToSend);
-    window.open(`https://api.whatsapp.com/send?text=${encoded}`, "_blank");
+    window.open(`https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encoded}`, "_blank");
   };
 
   const handleCopy = () => {
@@ -163,6 +218,7 @@ function EscreverCartaPage() {
       <header className="max-w-5xl mx-auto flex items-center justify-between mb-6 pb-4 border-b border-white/15">
         <Link
           to="/"
+          search={{ step: "intro" }}
           className="flex items-center gap-2 text-xs font-semibold text-white/70 hover:text-white transition-colors"
         >
           <span>‹ Voltar para o Funil Principal</span>
@@ -230,10 +286,14 @@ function EscreverCartaPage() {
           {/* Dados Principais */}
           <div className="grid grid-cols-2 gap-2.5">
             <div>
-              <label className="block text-[10.5px] font-bold text-[#f2c15c] uppercase mb-1">
+              <label
+                htmlFor="input-seu-nome"
+                className="block text-[10.5px] font-bold text-[#f2c15c] uppercase mb-1"
+              >
                 Seu Nome
               </label>
               <input
+                id="input-seu-nome"
                 type="text"
                 value={nome}
                 onChange={(e) => {
@@ -246,10 +306,14 @@ function EscreverCartaPage() {
               />
             </div>
             <div>
-              <label className="block text-[10.5px] font-bold text-[#f2c15c] uppercase mb-1">
+              <label
+                htmlFor="input-nome-ente"
+                className="block text-[10.5px] font-bold text-[#f2c15c] uppercase mb-1"
+              >
                 Nome do Ente Querido
               </label>
               <input
+                id="input-nome-ente"
                 type="text"
                 value={ente}
                 onChange={(e) => {
@@ -310,7 +374,10 @@ function EscreverCartaPage() {
             <div className="space-y-3 pt-1">
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-[11px] font-bold text-[#f2c15c] uppercase">
+                  <label
+                    htmlFor="textarea-mensagem-livre"
+                    className="block text-[11px] font-bold text-[#f2c15c] uppercase"
+                  >
                     Sua Mensagem do Coração
                   </label>
                   <div className="flex items-center gap-1">
@@ -339,6 +406,7 @@ function EscreverCartaPage() {
                   </div>
                 </div>
                 <textarea
+                  id="textarea-mensagem-livre"
                   rows={6}
                   value={mensagemLivre}
                   onChange={(e) => {
