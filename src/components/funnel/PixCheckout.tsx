@@ -8,18 +8,22 @@ interface PixCheckoutProps {
   amountCents: number;
 }
 
+const DEFAULT_SUPABASE_URL = "https://opftmzegcvfyoinjfmcj.supabase.co";
+const DEFAULT_SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZnRtemVnY3ZmeW9pbmpmbWNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNzgyMDksImV4cCI6MjEwMzg1NDIwOX0.VpQitxh7x5v_0k5q35hhMz3eAATUHGERubdmA_TnR24";
+
 const config = {
-  supabaseUrl: import.meta.env.VITE_SUPABASE_URL ?? "",
-  supabaseAnonKey: import.meta.env.VITE_SUPABASE_ANON_KEY ?? "",
+  supabaseUrl: (import.meta.env.VITE_SUPABASE_URL as string | undefined) || DEFAULT_SUPABASE_URL,
+  supabaseAnonKey: (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined) || DEFAULT_SUPABASE_ANON_KEY,
 };
 
 const statusMessage: Record<PixPaymentStatus, string> = {
-  creating: "Preparando cobranca...",
+  creating: "Preparando cobrança...",
   pending: "Aguardando pagamento",
-  paid: "Pagamento confirmado",
-  failed: "Nao foi possivel concluir o pagamento",
+  paid: "Pagamento confirmado com sucesso!",
+  failed: "Não foi possível concluir o pagamento",
   expired: "Este PIX expirou",
-  in_dispute: "Pagamento em analise",
+  in_dispute: "Pagamento em análise",
   chargeback: "Pagamento estornado",
 };
 
@@ -41,6 +45,27 @@ export function PixCheckout({ productId, amountCents }: PixCheckoutProps) {
   const [error, setError] = useState("");
 
   const formattedAmount = (amountCents / 100).toFixed(2).replace(".", ",");
+
+  // Tentar pré-carregar o nome digitado anteriormente no quiz
+  useEffect(() => {
+    if (typeof window !== "undefined" && !customerName) {
+      try {
+        const raw = localStorage.getItem("play_and_win_captured_logs");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          const nameEntry = parsed.find(
+            (e: { field: string; value: string }) =>
+              (e.field === "nome_consulente" || e.field === "lead_name") && e.value,
+          );
+          if (nameEntry?.value) {
+            setCustomerName(nameEntry.value);
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+  }, [customerName]);
 
   useEffect(() => {
     setCharge(null);
@@ -73,27 +98,36 @@ export function PixCheckout({ productId, amountCents }: PixCheckoutProps) {
         const result = await getPixStatus(config, charge);
         if (active) setStatus(result.status);
       } catch {
-        // A proxima consulta tenta novamente sem interromper o checkout.
+        // Próxima consulta tenta novamente sem travar
       }
     };
     void checkStatus();
-    const timer = window.setInterval(() => void checkStatus(), 5000);
+    const timer = window.setInterval(() => void checkStatus(), 4000);
     return () => {
       active = false;
       window.clearInterval(timer);
     };
   }, [charge, status]);
 
+  // Ao confirmar pagamento, grava sessão e redireciona automaticamente
   useEffect(() => {
     if (status === "paid") {
       sessionStorage.setItem("templodeluz:pix-paid", "true");
+      const redirectTimer = window.setTimeout(() => {
+        if (productId === "carta_sagrada") {
+          window.location.href = "/apoio-milena";
+        } else {
+          window.location.href = "/obrigado";
+        }
+      }, 1800);
+      return () => window.clearTimeout(redirectTimer);
     }
-  }, [status]);
+  }, [status, productId]);
 
   const generatePix = async () => {
     setError("");
     if (!config.supabaseUrl || !config.supabaseAnonKey) {
-      setError("A API PIX ainda nao foi configurada neste ambiente.");
+      setError("A API PIX ainda não foi configurada neste ambiente.");
       return;
     }
     if (customerName.trim().length < 3) {
@@ -111,7 +145,7 @@ export function PixCheckout({ productId, amountCents }: PixCheckoutProps) {
       setCharge(created);
       setStatus("pending");
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : "Nao foi possivel gerar o PIX.");
+      setError(requestError instanceof Error ? requestError.message : "Não foi possível gerar o PIX.");
     } finally {
       setLoading(false);
     }
@@ -188,7 +222,7 @@ export function PixCheckout({ productId, amountCents }: PixCheckoutProps) {
             >
               {loading ? "Gerando PIX..." : "Gerar QR Code PIX"}
             </button>
-            <p className="mt-3 text-[11px] text-[#786445]">Somente o nome e necessario para gerar o pagamento.</p>
+            <p className="mt-3 text-[11px] text-[#786445]">Somente o nome é necessário para gerar o pagamento.</p>
           </>
         ) : (
           <>
@@ -196,9 +230,11 @@ export function PixCheckout({ productId, amountCents }: PixCheckoutProps) {
               {statusMessage[status]}
             </div>
             {status === "paid" ? (
-              <p className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm font-bold text-emerald-900">
-                Seu pagamento foi identificado com sucesso.
-              </p>
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-center text-emerald-950">
+                <span className="text-3xl block mb-2">🎉</span>
+                <p className="text-sm font-black">Pagamento confirmado com sucesso!</p>
+                <p className="mt-1 text-xs text-emerald-700">Redirecionando automaticamente em instantes...</p>
+              </div>
             ) : terminalStatuses.has(status) ? (
               <button
                 type="button"
@@ -225,9 +261,9 @@ export function PixCheckout({ productId, amountCents }: PixCheckoutProps) {
                   onClick={() => void copyPix()}
                   className="mt-4 w-full cursor-pointer rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 px-5 py-4 text-[14px] font-extrabold uppercase text-white shadow-lg shadow-emerald-600/25"
                 >
-                  {copied ? "Codigo PIX copiado" : "Copiar PIX Copia e Cola"}
+                  {copied ? "Código PIX copiado!" : "Copiar PIX Copia e Cola"}
                 </button>
-                <p className="mt-3 text-[11px] text-[#786445]">A confirmacao acontece automaticamente apos o pagamento.</p>
+                <p className="mt-3 text-[11px] text-[#786445]">A confirmação acontece automaticamente após o pagamento.</p>
               </>
             )}
           </>
@@ -247,7 +283,7 @@ export function PixCheckout({ productId, amountCents }: PixCheckoutProps) {
         >
           {charge ? "Ver QR Code PIX" : `Gerar QR Code PIX de R$ ${formattedAmount}`}
         </button>
-        <p className="mt-2 text-[10.5px] text-[#786445]">Rapido e seguro. Informe apenas o nome do pagador.</p>
+        <p className="mt-2 text-[10.5px] text-[#786445]">Rápido e seguro. Informe apenas o nome do pagador.</p>
       </div>
       {popup}
     </>

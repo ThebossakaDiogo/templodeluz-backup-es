@@ -253,7 +253,7 @@ function DonationGoal() {
           Meta semanal de materiais do oratório
         </span>
         <span className="rounded-full bg-[#fef3c7] px-2 py-0.5 text-[11px] font-extrabold text-[#b45309] border border-[#fde68a]">
-          92% alcançada
+          53% alcançada
         </span>
       </div>
 
@@ -261,16 +261,16 @@ function DonationGoal() {
       <div className="mt-2.5 h-3 overflow-hidden rounded-full bg-[#f6eee0] p-0.5 border border-[#ecdac2]">
         <div
           className="h-full rounded-full bg-gradient-to-r from-amber-400 via-amber-500 to-emerald-500 transition-all duration-1000 shadow-xs"
-          style={{ width: "92%" }}
+          style={{ width: "53%" }}
         />
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-3 text-[11.5px] text-[#786445]">
         <span className="rounded-xl bg-white/75 px-3 py-2">
-          Arrecadado hoje: <strong>R$ 1.840</strong>
+          Arrecadado: <strong>R$ 187</strong>
         </span>
         <span className="rounded-xl bg-white/75 px-3 py-2 text-right">
-          Meta da semana: <strong>R$ 2.000</strong>
+          Meta semanal: <strong>R$ 350</strong>
         </span>
       </div>
 
@@ -523,17 +523,11 @@ function PixInstantBox({
         </div>
       )}
 
-      {/* Botão Pós-PIX com Acesso Imediato */}
+      {/* Info pós-PIX */}
       <div className="mt-5 pt-4 border-t border-[#ece4f4]">
-        <Link
-          to="/apoio-milena"
-          className="w-full block py-4 px-4 rounded-2xl bg-[#2d144d] hover:bg-[#1f0c36] text-white font-extrabold text-[14px] uppercase tracking-wide transition-colors shadow-md text-center"
-        >
-          ✅ Já realizei o PIX · Confirmar e Prosseguir ›
-        </Link>
-        <span className="mt-2 block text-[11.5px] text-[#786445]">
-          A médium Milena Medeiros já iniciará a canalização sagrada para {primeiroEnte}.
-        </span>
+        <p className="text-[12px] text-[#786445] text-center leading-relaxed">
+          ✨ Após confirmar o pagamento PIX, você será redirecionado(a) automaticamente.
+        </p>
       </div>
     </div>
   );

@@ -7,13 +7,11 @@ import { Reveal } from "./Shell";
 const feedbackImages = [
   {
     src: feedbackOne,
-    alt: "Relato recebido por WhatsApp agradecendo por uma carta psicografada",
-    quote: "Estou sem palavras. Muito obrigada por essa carta.",
+    alt: "Relato de agradecimento por carta psicografada recebido via WhatsApp",
   },
   {
     src: feedbackTwo,
-    alt: "Relato recebido por WhatsApp sobre o conforto trazido pela psicografia",
-    quote: "Ele falou coisas que só ele sabia. Vocês são luz na vida da gente.",
+    alt: "Depoimento real de conforto espiritual recebido via WhatsApp",
   },
 ];
 
@@ -29,7 +27,7 @@ export function SocialProofSection() {
             Antes de continuar, veja o que outras famílias sentiram
           </h2>
           <p className="mx-auto mt-2 max-w-[430px] text-[13px] leading-relaxed text-[#e8dff4] sm:text-sm">
-            Mensagens enviadas após o recebimento das cartas e compartilhadas com o Templo de Luz.
+            Mensagens reais enviadas após o acolhimento espiritual e cartas manuscritas da médium Milena.
           </p>
         </div>
 
@@ -70,26 +68,18 @@ export function SocialProofSection() {
           </div>
 
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
-            {feedbackImages.map((feedback, index) => (
-              <figure
-                key={feedback.src}
-                className="overflow-hidden rounded-2xl border border-[#e5daf0] bg-[#fbf9fd] shadow-sm"
+            {feedbackImages.map((feedback, idx) => (
+              <div
+                key={idx}
+                className="overflow-hidden rounded-2xl border border-[#e5daf0] bg-white shadow-sm"
               >
-                <div className="border-b border-[#e5daf0] bg-white px-3 py-2 text-left">
-                  <span className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-emerald-700">
-                    Mensagem recebida no WhatsApp {index + 1}
-                  </span>
-                </div>
                 <img
                   src={feedback.src}
                   alt={feedback.alt}
                   loading="lazy"
-                  className="h-auto w-full"
+                  className="h-auto w-full block object-contain"
                 />
-                <figcaption className="border-t border-[#e5daf0] px-3 py-3 text-left text-[12px] font-semibold leading-relaxed text-[#3b2852]">
-                  “{feedback.quote}”
-                </figcaption>
-              </figure>
+              </div>
             ))}
           </div>
 

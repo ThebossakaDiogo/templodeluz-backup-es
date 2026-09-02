@@ -434,26 +434,15 @@ export function AjudaMilenaPage() {
               💳 Prefere doar no Cartão de Crédito ou Parcelar? Clique aqui ›
             </a>
 
-            {/* Botão Confirmação */}
+            {/* Info pós-PIX */}
             <div className="mt-5 pt-4 border-t border-[#ece4f4]">
-              <Link
-                to="/obrigado"
-                className="w-full block py-4 px-4 rounded-2xl bg-[#2d144d] hover:bg-[#1f0c36] text-white font-extrabold text-[14px] uppercase tracking-wide transition-colors shadow-md text-center"
-              >
-                ✅ Já enviei minha doação · Ir para Minha Carta e WhatsApp ›
-              </Link>
+              <p className="text-[12px] text-[#786445] text-center leading-relaxed">
+                ✨ Após confirmar o pagamento PIX, você será redirecionado(a) automaticamente.
+              </p>
             </div>
           </Reveal>
 
-          {/* Link Discreto para Seguir sem doar */}
-          <div className="mt-6 text-center">
-            <Link
-              to="/obrigado"
-              className="text-[12.5px] font-medium text-[#786445] underline decoration-[#786445]/40 underline-offset-4 hover:text-[#181126]"
-            >
-              Não posso contribuir agora, apenas prosseguir para minha carta e WhatsApp ›
-            </Link>
-          </div>
+
         </div>
 
         <Footer />
