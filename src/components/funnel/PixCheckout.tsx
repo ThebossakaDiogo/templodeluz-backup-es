@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { QRCodeSVG } from "qrcode.react";
 import { createPixCharge, getPixStatus, type PixCharge, type PixPaymentStatus } from "@/lib/pix";
 import { sendUtmifyOrder } from "@/lib/utmify";
+import { trackInitiateDonation, trackPurchaseComplete } from "@/lib/metaPixel";
 
 interface PixCheckoutProps {
   productId: "carta_sagrada" | "cirurgia_milena";
@@ -14,8 +15,8 @@ const DEFAULT_SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZnRtemVnY3ZmeW9pbmpmbWNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNzgyMDksImV4cCI6MjEwMzg1NDIwOX0.VpQitxh7x5v_0k5q35hhMz3eAATUHGERubdmA_TnR24";
 
 const config = {
-  supabaseUrl: (import.meta.env.VITE_SUPABASE_URL as string | undefined) || DEFAULT_SUPABASE_URL,
-  supabaseAnonKey: (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined) || DEFAULT_SUPABASE_ANON_KEY,
+  supabaseUrl: (import.meta.env["VITE_SUPABASE_URL"] as string | undefined) || DEFAULT_SUPABASE_URL,
+  supabaseAnonKey: (import.meta.env["VITE_SUPABASE_ANON_KEY"] as string | undefined) || DEFAULT_SUPABASE_ANON_KEY,
 };
 
 const statusMessage: Record<PixPaymentStatus, string> = {
@@ -110,12 +111,17 @@ export function PixCheckout({ productId, amountCents }: PixCheckoutProps) {
     };
   }, [charge, status]);
 
-  // Ao confirmar pagamento, grava sessão, envia evento UTMify e redireciona automaticamente
+  // Ao confirmar pagamento, grava sessão, envia evento UTMify e Meta Pixel e redireciona automaticamente
   useEffect(() => {
     if (status === "paid") {
       sessionStorage.setItem("templodeluz:pix-paid", "true");
 
-      // Dispara evento de compra para a UTMify com o máximo de detalhes
+      const prodName =
+        productId === "carta_sagrada"
+          ? "Carta Psicografada Sagrada"
+          : "Campanha Solidária - Cirurgia Médium Milena";
+
+      // 1. Dispara evento de compra para a UTMify
       void sendUtmifyOrder({
         orderId: charge?.orderId || `pix_${Date.now()}`,
         platform: "TemploDeLuz",
@@ -127,14 +133,20 @@ export function PixCheckout({ productId, amountCents }: PixCheckoutProps) {
         products: [
           {
             id: productId,
-            name:
-              productId === "carta_sagrada"
-                ? "Carta Psicografada Sagrada"
-                : "Campanha Solidária - Cirurgia Médium Milena",
+            name: prodName,
             quantity: 1,
             priceInCents: amountCents,
           },
         ],
+      });
+
+      // 2. Dispara evento de compra e doação para o Meta Pixel com o valor monetário exato
+      trackPurchaseComplete({
+        amountCents,
+        productName: prodName,
+        productId,
+        paymentMethod: "pix",
+        orderId: charge?.orderId,
       });
 
       const redirectTimer = window.setTimeout(() => {
@@ -146,6 +158,7 @@ export function PixCheckout({ productId, amountCents }: PixCheckoutProps) {
       }, 1800);
       return () => window.clearTimeout(redirectTimer);
     }
+    return undefined;
   }, [status, productId, charge, customerName, amountCents]);
 
   const generatePix = async () => {
@@ -168,6 +181,17 @@ export function PixCheckout({ productId, amountCents }: PixCheckoutProps) {
       });
       setCharge(created);
       setStatus("pending");
+
+      // Rastreia início de doação (InitiateCheckout) com valor no Meta Pixel
+      trackInitiateDonation({
+        amountCents,
+        productName:
+          productId === "carta_sagrada"
+            ? "Carta Psicografada Sagrada"
+            : "Campanha Solidária - Cirurgia Médium Milena",
+        productId,
+        paymentMethod: "pix",
+      });
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "Não foi possível gerar o PIX.");
     } finally {
@@ -242,7 +266,7 @@ export function PixCheckout({ productId, amountCents }: PixCheckoutProps) {
               type="button"
               onClick={() => void generatePix()}
               disabled={loading}
-              className="mt-4 w-full cursor-pointer rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 px-6 py-4 text-[14px] font-extrabold uppercase text-white shadow-lg shadow-emerald-600/25 disabled:cursor-wait disabled:opacity-70"
+              className="utmify-initiate-checkout mt-4 w-full cursor-pointer rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 px-6 py-4 text-[14px] font-extrabold uppercase text-white shadow-lg shadow-emerald-600/25 disabled:cursor-wait disabled:opacity-70"
             >
               {loading ? "Gerando PIX..." : "Gerar QR Code PIX"}
             </button>
@@ -303,7 +327,7 @@ export function PixCheckout({ productId, amountCents }: PixCheckoutProps) {
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="w-full cursor-pointer rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 px-6 py-4 text-[14px] font-extrabold uppercase text-white shadow-lg shadow-emerald-600/25 transition-transform hover:scale-[1.01] active:scale-[0.99]"
+          className="utmify-initiate-checkout w-full cursor-pointer rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 px-6 py-4 text-[14px] font-extrabold uppercase text-white shadow-lg shadow-emerald-600/25 transition-transform hover:scale-[1.01] active:scale-[0.99]"
         >
           {charge ? "Ver QR Code PIX" : `Gerar QR Code PIX de R$ ${formattedAmount}`}
         </button>

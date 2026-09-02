@@ -17,6 +17,7 @@ export const Route = createFileRoute("/apoio-milena")({
 });
 
 import { sendUtmifyOrder } from "@/lib/utmify";
+import { trackPurchaseComplete } from "@/lib/metaPixel";
 
 function ApoioMilenaGate() {
   const [paid, setPaid] = useState<boolean | null>(null);
@@ -30,10 +31,11 @@ function ApoioMilenaGate() {
         sessionStorage.setItem("templodeluz:pix-paid", "true");
         setPaid(true);
 
-        // Garante que o evento Stripe seja enviado apenas 1 vez para a UTMify
+        // Garante que o evento Stripe seja enviado apenas 1 vez para a UTMify e Meta Pixel
         const alreadySent = sessionStorage.getItem("utmify_sent_stripe_carta");
         if (!alreadySent) {
           sessionStorage.setItem("utmify_sent_stripe_carta", "true");
+
           void sendUtmifyOrder({
             orderId: urlParams.get("session_id") || `stripe_carta_${Date.now()}`,
             platform: "TemploDeLuz",
@@ -50,6 +52,14 @@ function ApoioMilenaGate() {
                 priceInCents: 1900,
               },
             ],
+          });
+
+          trackPurchaseComplete({
+            amountCents: 1900,
+            productName: "Carta Psicografada Sagrada",
+            productId: "carta_sagrada",
+            paymentMethod: "cartao",
+            orderId: urlParams.get("session_id") || `stripe_carta_${Date.now()}`,
           });
         }
         return;

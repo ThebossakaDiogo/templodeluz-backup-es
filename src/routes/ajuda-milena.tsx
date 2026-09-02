@@ -1,9 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Halos, Reveal, Stars, Footer } from "@/components/funnel/Shell";
 import { PixCheckout } from "@/components/funnel/PixCheckout";
 import { StripeCardModal } from "@/components/funnel/StripeCardModal";
-import { IMAGES, CHECKOUT_URL } from "@/components/funnel/data";
+import { IMAGES } from "@/components/funnel/data";
 
 export const Route = createFileRoute("/ajuda-milena")({
   head: () => ({
@@ -23,95 +23,88 @@ const RECENT_DONORS_LIST = [
   {
     name: "Dona Neusa F.",
     city: "Campinas/SP",
-    msg: "Que Deus abençoe seus olhos, querida Milena!",
-  },
-  { name: "Sr. Geraldo M.", city: "Belo Horizonte/MG", msg: "Por gratidão à carta do meu filho." },
-  {
-    name: "Cláudia R.",
-    city: "Rio de Janeiro/RJ",
-    msg: "Força, Milena! Você ainda vai consolar muitos corações.",
+    msg: "Que Jesus ilumine seus olhos, Milena querida!",
+    val: "R$ 29,00",
   },
   {
-    name: "Marcos V.",
-    city: "Porto Alegre/RS",
-    msg: "Minha pequena contribuição com todo o amor.",
+    name: "Carlos Eduardo M.",
+    city: "Belo Horizonte/MG",
+    msg: "Pelo consolo que me deu com a carta do meu filho.",
+    val: "R$ 47,00",
   },
-  { name: "Helena S.", city: "Brasília/DF", msg: "Em oração pela sua cura e pelo Templo de Luz." },
   {
-    name: "Paulo H.",
+    name: "Maria Aparecida S.",
     city: "Curitiba/PR",
-    msg: "Deus restaure sua visão para continuar essa missão.",
+    msg: "Uma bênção de amor. Força, Milena!",
+    val: "R$ 19,00",
   },
-  { name: "Terezinha B.", city: "Salvador/BA", msg: "Gratidão eterna pelas palavras de paz." },
+  {
+    name: "Helena R.",
+    city: "Rio de Janeiro/RJ",
+    msg: "Gratidão eterna pelas palavras de paz.",
+    val: "R$ 35,00",
+  },
 ];
 
-function getSurgeryPsychologicalImpact(amount: number) {
+interface SurgeryPsychologicalImpact {
+  tier: "eye_drops" | "exams" | "lens" | "complete";
+  icon: string;
+  badge: string;
+  title: string;
+  description: string;
+  badgeColor: string;
+  cardBorder: string;
+  isValid: boolean;
+}
+
+function getSurgeryPsychologicalImpact(amount: number): SurgeryPsychologicalImpact {
   if (amount < 10) {
     return {
-      icon: "⚠️",
-      badge: "Contribuição Mínima Fraterna",
-      title: "Mínimo de R$ 10,00",
-      description:
-        "Este valor mínimo de R$ 10,00 ajuda a custear os colírios pré-operatórios de assepsia e exames básicos de biometria ocular para a cirurgia de Milena.",
-      badgeColor: "bg-red-50 text-red-800 border-red-200",
-      cardBorder: "border-red-300 bg-red-50/40",
-      isValid: false,
-    };
-  }
-  if (amount < 15) {
-    return {
+      tier: "eye_drops",
       icon: "💧",
-      badge: "Colírios e Preparação",
-      title: "Colírios e Preparação Ocular",
+      badge: "Ajuda Simbólica",
+      title: "Colírios e Assepsia Pré-Operatória",
       description:
-        "Custeia a medicação pré-operatória e os exames de mapeamento de retina essenciais para a cirurgia de catarata de Milena.",
-      badgeColor: "bg-zinc-100 text-zinc-800 border-zinc-300",
-      cardBorder: "border-zinc-200 bg-zinc-50/50",
-      isValid: true,
+        "Sua contribuição fraterna ajuda nos medicamentos preparatórios para o procedimento cirúrgico de Milena.",
+      badgeColor: "bg-amber-50 text-[#92400e] border-[#fde68a]",
+      cardBorder: "border-amber-200 bg-amber-50/40",
+      isValid: false,
     };
   }
   if (amount < 25) {
     return {
-      icon: "✨",
-      badge: "⭐ Mais Escolhido pelo Coração",
-      title: "Aporte Cirúrgico & Lente Intraocular",
+      tier: "exams",
+      icon: "🔬",
+      badge: "⭐ Escolha Solidária Popular",
+      title: "Exames de Mapeamento de Retina",
       description:
-        "Contribui diretamente para a compra da lente intraocular dobrável de alta precisão que devolverá a nitidez da escrita de Milena.",
+        "Cobre o custo de biomicroscopia e exames essenciais para que o cirurgião planeje a cirurgia de Milena.",
       badgeColor: "bg-amber-100 text-[#92400e] border-[#f59e0b]/50",
       cardBorder: "border-[#f59e0b] bg-[#fefaf3]",
       isValid: true,
     };
   }
-  if (amount < 35) {
+  if (amount < 45) {
     return {
+      tier: "lens",
       icon: "👁️",
-      badge: "Protetor da Visão de Milena",
-      title: "Insumos Hospitalares de Facoemulsificação",
+      badge: "Lente Intraocular Dobrável",
+      title: "Aporte Direto na Lente Intraocular",
       description:
-        "Garante os insumos cirúrgicos hospitalares para recuperar a visão do olho direito da médium.",
+        "Ajuda a custear a prótese óptica que substituirá o cristalino opaco, devolvendo a visão nítida para a médium.",
       badgeColor: "bg-purple-100 text-purple-900 border-purple-300",
       cardBorder: "border-purple-300 bg-purple-50/40",
       isValid: true,
     };
   }
-  if (amount < 50) {
-    return {
-      icon: "🕊️",
-      badge: "Mantenedor da Cura",
-      title: "Cirurgia Completa & Pós-Operatório",
-      description:
-        "Cobre uma parte expressiva da equipe médica e do pós-operatório, garantindo que Milena retome as cartas manuscritas sem dor.",
-      badgeColor: "bg-emerald-100 text-emerald-900 border-emerald-300",
-      cardBorder: "border-emerald-400 bg-emerald-50/50",
-      isValid: true,
-    };
-  }
+
   return {
-    icon: "👑",
-    badge: "Anjo Protetor da Missão Sagrada",
-    title: "Bênção Maior · Oração Perpétua de Milena",
+    tier: "complete",
+    icon: "🕊️",
+    badge: "Bênção de Luz e Cura",
+    title: "Apoio Amplo à Cirurgia e Pós-Operatório",
     description:
-      "Um ato divino de amor. Milena colocará pessoalmente seu nome em sua primeira vigília de oração com a visão totalmente restaurada.",
+      "Um gesto grandioso de gratidão. Garante o procedimento cirúrgico e todo o repouso necessário para Milena voltar a psicografar com plenitude.",
     badgeColor:
       "bg-gradient-to-r from-amber-200 to-amber-300 text-amber-950 border-amber-400 shadow-xs",
     cardBorder: "border-amber-400 bg-gradient-to-br from-[#fffbeb] via-[#fffdfa] to-[#fef3c7]",
@@ -119,9 +112,10 @@ function getSurgeryPsychologicalImpact(amount: number) {
   };
 }
 
+const DONATION_INCREMENTS = [8.5, 14.2, 6.75, 12.0, 9.4, 15.6, 7.8, 11.3];
+
 export function AjudaMilenaPage() {
   const META_TOTAL = 8500.0;
-  // Inicia com 109.87 conforme solicitado
   const [arrecadado, setArrecadado] = useState(109.87);
   const [selectedAmount, setSelectedAmount] = useState<number>(19);
   const [customInput, setCustomInput] = useState<string>("");
@@ -129,11 +123,11 @@ export function AjudaMilenaPage() {
   const [donorIdx, setDonorIdx] = useState(0);
   const [stripeModalOpen, setStripeModalOpen] = useState(false);
 
-  // Simulação realista: sobe entre R$ 3,00 e R$ 16,00 a cada 15 segundos
   useEffect(() => {
+    let tick = 0;
     const timer = setInterval(() => {
-      const incremento =
-        Math.floor(Math.random() * (16 - 3 + 1)) + 3 + Math.floor(Math.random() * 90) / 100;
+      const incremento = DONATION_INCREMENTS[tick % DONATION_INCREMENTS.length] ?? 10;
+      tick += 1;
       setArrecadado((prev) => Math.min(prev + incremento, META_TOTAL));
       setDonorIdx((prev) => (prev + 1) % RECENT_DONORS_LIST.length);
     }, 15000);
@@ -144,7 +138,7 @@ export function AjudaMilenaPage() {
   const activeAmount = isCustom ? Number(customInput) || 0 : selectedAmount;
   const impact = getSurgeryPsychologicalImpact(activeAmount);
   const pct = Math.min(Math.round((arrecadado / META_TOTAL) * 100), 100);
-  const currentDonor = RECENT_DONORS_LIST[donorIdx];
+  const currentDonor = RECENT_DONORS_LIST[donorIdx] ?? RECENT_DONORS_LIST[0]!;
 
   const handleSelectPreset = (val: number) => {
     setSelectedAmount(val);
@@ -153,7 +147,7 @@ export function AjudaMilenaPage() {
   };
 
   const handleCustomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value.replace(/[^0-9]/g, "");
+    const raw = e.target.value.replace(/\D/g, "");
     setIsCustom(true);
     setCustomInput(raw);
   };
@@ -174,7 +168,7 @@ export function AjudaMilenaPage() {
             <Stars />
             <span className="mt-2.5 inline-flex items-center gap-2 rounded-full border border-amber-400/50 bg-white/10 backdrop-blur-md px-4 py-1.5 text-[11px] font-bold tracking-[0.2em] text-amber-300 uppercase shadow-md">
               <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping shadow-xs shadow-amber-400" />
-              🙏 Um Pedido do Coração
+              <span>🙏 Um Pedido do Coração</span>
             </span>
 
             <h1 className="font-display mt-5 text-[25px] leading-[1.25] font-black text-white tracking-tight drop-shadow-md">
@@ -306,9 +300,9 @@ export function AjudaMilenaPage() {
 
             {/* Seletor de Valor da Doação */}
             <div className="mt-6 text-left">
-              <label className="block text-[11.5px] font-bold tracking-wider text-[#2d144d] uppercase mb-2">
+              <p className="block text-[11.5px] font-bold tracking-wider text-[#2d144d] uppercase mb-2">
                 Escolha o valor que o seu coração deseja doar:
-              </label>
+              </p>
               <div className="grid grid-cols-3 gap-2">
                 {[
                   { val: 10, tag: "Colírios" },
@@ -368,12 +362,13 @@ export function AjudaMilenaPage() {
             {/* Input de Valor Personalizado */}
             {isCustom && (
               <div className="mt-3.5 p-3 rounded-2xl bg-[#fbf9f5] border border-[#fde68a] text-left animate-rise-in">
-                <label className="block text-[11.5px] font-bold text-[#2d144d] mb-1">
+                <label htmlFor="ajuda-custom-amount" className="block text-[11.5px] font-bold text-[#2d144d] mb-1">
                   Digite o valor da sua contribuição (mínimo de R$ 10,00):
                 </label>
                 <div className="relative flex items-center">
                   <span className="absolute left-3.5 text-base font-black text-[#2d144d]">R$</span>
                   <input
+                    id="ajuda-custom-amount"
                     type="text"
                     inputMode="numeric"
                     value={customInput}
@@ -432,7 +427,7 @@ export function AjudaMilenaPage() {
             <button
               type="button"
               onClick={() => setStripeModalOpen(true)}
-              className="mt-4 block w-full py-3.5 px-4 rounded-2xl border-2 border-[#d5c3ea] bg-[#f9f5fd] hover:bg-[#f2eafb] text-[#2d144d] font-bold text-[13px] transition-all text-center cursor-pointer shadow-2xs"
+              className="utmify-initiate-checkout mt-4 block w-full py-3.5 px-4 rounded-2xl border-2 border-[#d5c3ea] bg-[#f9f5fd] hover:bg-[#f2eafb] text-[#2d144d] font-bold text-[13px] transition-all text-center cursor-pointer shadow-2xs"
             >
               💳 Prefere doar no Cartão de Crédito ou Parcelar? Clique aqui ›
             </button>

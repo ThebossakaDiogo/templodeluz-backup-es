@@ -1,13 +1,14 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useSearch, useNavigate } from "@tanstack/react-router";
 import { CHECKOUT_URL, FAQ, IMAGES, STEPS_HOW } from "./data";
-import { Card, Footer, Halos, Reveal, SectionLabel, Stars } from "./Shell";
+import { Footer, Halos, Reveal, SectionLabel, Stars } from "./Shell";
 import { LetterZoomModal } from "./LetterZoomModal";
 import { PixCheckout } from "./PixCheckout";
 import { SocialProofSection } from "./SocialProofSection";
 import { SacredCandle } from "./SacredCandle";
 import { StripeCardModal } from "./StripeCardModal";
 import { recordInput } from "@/lib/auto-capture";
+import { trackQuizStep } from "@/lib/metaPixel";
 
 /* ─────────── helpers ─────────── */
 
@@ -398,11 +399,11 @@ function getDonationPsychologicalImpact(
 }
 
 function PixInstantBox({
-  primeiroNome,
-  primeiroEnte,
+  primeiroNome = "Você",
+  primeiroEnte = "seu ente querido",
 }: {
-  primeiroNome: string;
-  primeiroEnte: string;
+  readonly primeiroNome?: string;
+  readonly primeiroEnte?: string;
 }) {
   const [selectedAmount, setSelectedAmount] = useState<number>(19);
   const [customInput, setCustomInput] = useState<string>("");
@@ -562,7 +563,7 @@ function PixInstantBox({
         <button
           type="button"
           onClick={() => setStripeModalOpen(true)}
-          className="inline-flex w-full items-center justify-center gap-2 py-3.5 px-4 rounded-2xl border-2 border-[#d5c3ea] bg-[#f9f5fd] hover:bg-[#f2eafb] text-[#2d144d] font-bold text-[13px] transition-all cursor-pointer shadow-2xs"
+          className="utmify-initiate-checkout inline-flex w-full items-center justify-center gap-2 py-3.5 px-4 rounded-2xl border-2 border-[#d5c3ea] bg-[#f9f5fd] hover:bg-[#f2eafb] text-[#2d144d] font-bold text-[13px] transition-all cursor-pointer shadow-2xs"
         >
           <span>💳</span>
           <span>Prefere doar no Cartão de Crédito? Clique aqui ›</span>
@@ -582,6 +583,82 @@ function PixInstantBox({
         <p className="text-[12px] text-[#786445] text-center leading-relaxed">
           ✨ Após confirmar o pagamento PIX ou Cartão, você será redirecionado(a) automaticamente.
         </p>
+      </div>
+    </div>
+  );
+}
+
+function SecurityGuaranteeSeal() {
+  return (
+    <div className="mt-6 overflow-hidden rounded-3xl border-2 border-amber-300/80 bg-gradient-to-b from-[#fffef7] via-[#fffaf0] to-[#fef6dc] p-5 sm:p-6 text-left shadow-xl shadow-amber-500/5">
+      {/* Header do Selo de Garantia */}
+      <div className="flex items-center gap-3.5 pb-4 border-b border-amber-200/80">
+        <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#f59e0b] to-[#b45309] text-2xl text-white shadow-md shadow-amber-600/30">
+          🛡️
+        </div>
+        <div>
+          <div className="flex items-center gap-1.5">
+            <span className="inline-block rounded-full bg-[#b45309] px-2.5 py-0.5 text-[9.5px] font-black tracking-widest text-white uppercase">
+              100% Protegido
+            </span>
+            <span className="text-[11px] font-bold text-amber-900">
+              Compromisso Fraterno
+            </span>
+          </div>
+          <h4 className="font-display mt-0.5 text-[17px] font-extrabold leading-tight text-[#181126]">
+            Garantia Sagrada Incondicional de 7 Dias
+          </h4>
+        </div>
+      </div>
+
+      {/* Descrição acolhedora */}
+      <p className="mt-3.5 text-[13px] leading-relaxed text-[#5e4b73] font-medium">
+        Se a carta psicografada manuscrita não trouxer consolo real e paz profunda ao seu coração, ou se você não reconhecer o seu ente querido nas palavras, <strong className="text-[#92400e] font-bold">devolvemos 100% da sua contribuição fraterna imediatamente</strong>. Sem burocracia e sem questionamentos.
+      </p>
+
+      {/* Pilares de Segurança e Acolhimento */}
+      <div className="mt-4 grid grid-cols-1 gap-2.5 pt-3 border-t border-amber-200/60">
+        <div className="flex items-center gap-3 rounded-2xl bg-white/90 p-3 border border-amber-200/70 shadow-2xs">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-base">
+            🔒
+          </span>
+          <div>
+            <span className="block text-[12.5px] font-bold text-[#181126]">
+              Segurança Bancária Máxima
+            </span>
+            <span className="block text-[11.5px] text-[#786445] font-normal">
+              Ambiente protegido com criptografia SSL e processamento bancário seguro
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 rounded-2xl bg-white/90 p-3 border border-amber-200/70 shadow-2xs">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-base">
+            💬
+          </span>
+          <div>
+            <span className="block text-[12.5px] font-bold text-[#181126]">
+              Acompanhamento Direto pelo WhatsApp
+            </span>
+            <span className="block text-[11.5px] text-[#786445] font-normal">
+              Você recebe a confirmação e o envio da psicografia no seu WhatsApp
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 rounded-2xl bg-white/90 p-3 border border-amber-200/70 shadow-2xs">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-purple-100 text-base">
+            🕯️
+          </span>
+          <div>
+            <span className="block text-[12.5px] font-bold text-[#181126]">
+              Vela Sagrada e Consagração Real
+            </span>
+            <span className="block text-[11.5px] text-[#786445] font-normal">
+              Trabalho mediúnico 100% manuscrito no oratório pela médium Milena Medeiros
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -958,23 +1035,23 @@ function Countdown({ minutes }: { minutes: number }) {
 }
 
 function Result({
-  nome,
-  ente,
-  relacao,
-  dorPrincipal,
-  horario,
+  nome = "",
+  ente = "",
+  relacao = "",
+  dorPrincipal = "",
+  horario = "",
 }: {
-  nome: string;
-  ente: string;
-  relacao: string;
-  dorPrincipal: string;
-  horario: string;
+  readonly nome?: string;
+  readonly ente?: string;
+  readonly relacao?: string;
+  readonly dorPrincipal?: string;
+  readonly horario?: string;
 }) {
   const go = () => redirectWithParams(CHECKOUT_URL);
-  const primeiro = nome?.trim() ? nome.trim().split(" ")[0] : "Você";
-  const primeiroEnte = ente?.trim() ? ente.trim().split(" ")[0] : "seu ente querido";
-  const nomeEnteCompleto = ente?.trim() || "seu ente querido";
-  const horarioExibicao = horario?.trim() || horarioAgendamento();
+  const primeiro: string = (nome?.trim() ? nome.trim().split(" ")[0] : "Você") || "Você";
+  const primeiroEnte: string = (ente?.trim() ? ente.trim().split(" ")[0] : "seu ente querido") || "seu ente querido";
+  const nomeEnteCompleto: string = ente?.trim() || "seu ente querido";
+  const horarioExibicao: string = horario?.trim() || horarioAgendamento();
 
   return (
     <div className="animate-rise-in pb-28 text-[#181126] bg-[#fbf9f5]">
@@ -1105,45 +1182,22 @@ function Result({
           {/* Integração do Seletor de Doação Livre & PIX Instantâneo */}
           <PixInstantBox primeiroNome={primeiro} primeiroEnte={primeiroEnte} />
 
-          {/* Opção Cartão de Crédito / Checkout Cakto */}
-          <div className="mt-4 pt-3 border-t border-[#ece4f4]">
-            <a
-              href={CHECKOUT_URL}
-              className="inline-flex items-center justify-center gap-1.5 text-xs text-[#5e4b73] hover:text-[#2d144d] font-semibold underline decoration-[#d8caea] underline-offset-4 transition-colors"
-            >
-              💳 Prefere contribuir via Cartão de Crédito? Clique aqui
-            </a>
-          </div>
+          {/* Selo de Garantia Sagrada e Segurança Premium */}
+          <SecurityGuaranteeSeal />
 
           {/* Link para o simulador de carta em pergaminho */}
           <Link
             to="/escrever-carta"
-            className="mt-4 block text-center text-xs font-bold text-[#b45309] underline decoration-[#f59e0b]/40 underline-offset-4 hover:decoration-[#f59e0b]"
+            className="mt-5 block text-center text-xs font-bold text-[#b45309] underline decoration-[#f59e0b]/40 underline-offset-4 hover:decoration-[#f59e0b]"
           >
             ✍️ Ou clique aqui para redigir sua carta no simulador de pergaminho ›
           </Link>
-
-          <div className="mt-5 flex flex-wrap justify-center gap-x-5 gap-y-1.5 text-[12px] font-medium text-[#786445]">
-            <span>🛡️ 7 dias de Garantia Sagrada</span>
-            <span>🔒 Doação segura e transparente</span>
-            <span>💬 Acompanhamento no WhatsApp</span>
-          </div>
         </Reveal>
 
         <Reveal className="mt-10">
           <SectionLabel>Dúvidas frequentes e acolhimento</SectionLabel>
           <Faq />
         </Reveal>
-
-        <div className="mt-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-center text-emerald-900 shadow-2xs">
-          <p className="text-[13px] leading-relaxed font-medium">
-            <strong className="text-emerald-800">
-              Garantia Sagrada e Incondicional de 7 dias.
-            </strong>{" "}
-            Se as palavras da carta não tocarem profundamente o seu coração e não trouxerem paz,
-            devolvemos 100% da sua doação imediatamente.
-          </p>
-        </div>
       </div>
 
       {/* CTA fixa inferior para PIX / Doação */}
@@ -1155,7 +1209,7 @@ function Result({
             if (el) el.scrollIntoView({ behavior: "smooth" });
             else go();
           }}
-          className="cta-hot w-full cursor-pointer rounded-xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 px-5 py-3.5 text-[14.5px] font-extrabold tracking-wide text-white uppercase shadow-lg shadow-emerald-600/25 transition-transform hover:-translate-y-0.5"
+          className="utmify-initiate-checkout cta-hot w-full cursor-pointer rounded-xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 px-5 py-3.5 text-[14.5px] font-extrabold tracking-wide text-white uppercase shadow-lg shadow-emerald-600/25 transition-transform hover:-translate-y-0.5"
         >
           <span className="relative z-10 flex items-center justify-center gap-2">
             🕯️ Fazer Doação Fraterna de {primeiroEnte}
@@ -1299,6 +1353,17 @@ export function QuizFunnel() {
       // ignore
     }
   }, [nome, ente, relacao, tempo, dorPrincipal, mensagem, modoMensagem, temasEscolhidos, horario]);
+
+  // Rastreia no Meta Pixel cada etapa do Quiz
+  useEffect(() => {
+    trackQuizStep(step, {
+      nome_consulente: nome || undefined,
+      nome_ente: ente || undefined,
+      relacao: relacao || undefined,
+      tempo: tempo || undefined,
+      dor: dorPrincipal || undefined,
+    });
+  }, [step]);
 
   const goto = (s: Step) => {
     setStep(s);

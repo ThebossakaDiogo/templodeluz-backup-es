@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import confetti from "canvas-confetti";
 import { Halos, Reveal, Stars, Card } from "@/components/funnel/Shell";
 import { IMAGES } from "@/components/funnel/data";
+import { trackPurchaseComplete } from "@/lib/metaPixel";
 
 export const Route = createFileRoute("/obrigado")({
   head: () => ({
@@ -69,6 +70,14 @@ function ObrigadoPage() {
                 priceInCents: 1900,
               },
             ],
+          });
+
+          trackPurchaseComplete({
+            amountCents: 1900,
+            productName: "Campanha Solidária - Cirurgia Médium Milena",
+            productId: "cirurgia_milena",
+            paymentMethod: "cartao",
+            orderId: urlParams.get("session_id") || `stripe_cirurgia_${Date.now()}`,
           });
         }
       }
