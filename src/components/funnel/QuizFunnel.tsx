@@ -6,6 +6,7 @@ import { LetterZoomModal } from "./LetterZoomModal";
 import { PixCheckout } from "./PixCheckout";
 import { SocialProofSection } from "./SocialProofSection";
 import { SacredCandle } from "./SacredCandle";
+import { StripeCardModal } from "./StripeCardModal";
 import { recordInput } from "@/lib/auto-capture";
 
 /* ─────────── helpers ─────────── */
@@ -373,6 +374,7 @@ function PixInstantBox({
   const [selectedAmount, setSelectedAmount] = useState<number>(19);
   const [customInput, setCustomInput] = useState<string>("");
   const [isCustom, setIsCustom] = useState<boolean>(false);
+  const [stripeModalOpen, setStripeModalOpen] = useState<boolean>(false);
 
   const activeAmount = isCustom ? Number(customInput) || 0 : selectedAmount;
   const impact = getDonationPsychologicalImpact(activeAmount, primeiroEnte, primeiroNome);
@@ -477,14 +479,14 @@ function PixInstantBox({
               inputMode="numeric"
               value={customInput}
               onChange={handleCustomChange}
-              placeholder="Ex: 50"
+              placeholder="Ex: 25"
               className="w-full pl-11 pr-4 py-2.5 rounded-xl border-2 border-[#e5daf0] focus:border-[#f59e0b] bg-white text-[16px] font-black text-[#181126] outline-hidden shadow-2xs"
             />
           </div>
         </div>
       )}
 
-      {/* ── CARD PSICOLÓGICO DINÂMICO CONFORME O VALOR ESCOLHIDO ── */}
+      {/* CARD PSICOLÓGICO DINÂMICO CONFORME O VALOR ESCOLHIDO */}
       <div
         className={`mt-4 rounded-2xl border-2 p-4 text-left shadow-xs transition-all duration-300 ${impact.cardBorder}`}
       >
@@ -506,7 +508,6 @@ function PixInstantBox({
         <h4 className="text-[13.5px] font-extrabold text-[#181126] leading-snug">{impact.title}</h4>
         <p className="text-[12px] text-[#5e4b73] mt-1 leading-relaxed">{impact.description}</p>
 
-        {/* Motivo transparente do mínimo de R$ 10 */}
         {activeAmount < 10 && (
           <div className="mt-2.5 p-2 rounded-xl bg-red-100/70 border border-red-200 text-red-900 text-[11.5px] font-bold leading-tight">
             ⚠️ O valor mínimo de R$ 10,00 é necessário apenas para cobrir a vela de 7 dias e o
@@ -523,10 +524,30 @@ function PixInstantBox({
         </div>
       )}
 
+      {/* Opção Cartão de Crédito com Modal de Confirmação Stripe */}
+      <div className="mt-4 pt-3 border-t border-[#ece4f4]">
+        <button
+          type="button"
+          onClick={() => setStripeModalOpen(true)}
+          className="inline-flex w-full items-center justify-center gap-2 py-3.5 px-4 rounded-2xl border-2 border-[#d5c3ea] bg-[#f9f5fd] hover:bg-[#f2eafb] text-[#2d144d] font-bold text-[13px] transition-all cursor-pointer shadow-2xs"
+        >
+          <span>💳</span>
+          <span>Prefere doar no Cartão de Crédito? Clique aqui ›</span>
+        </button>
+      </div>
+
+      <StripeCardModal
+        isOpen={stripeModalOpen}
+        onClose={() => setStripeModalOpen(false)}
+        productId="carta_sagrada"
+        amountCents={Math.round((activeAmount >= 10 ? activeAmount : 19) * 100)}
+        primeiroEnte={primeiroEnte}
+      />
+
       {/* Info pós-PIX */}
       <div className="mt-5 pt-4 border-t border-[#ece4f4]">
         <p className="text-[12px] text-[#786445] text-center leading-relaxed">
-          ✨ Após confirmar o pagamento PIX, você será redirecionado(a) automaticamente.
+          ✨ Após confirmar o pagamento PIX ou Cartão, você será redirecionado(a) automaticamente.
         </p>
       </div>
     </div>

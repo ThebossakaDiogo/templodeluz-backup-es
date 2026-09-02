@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Halos, Reveal, Stars, Footer } from "@/components/funnel/Shell";
 import { PixCheckout } from "@/components/funnel/PixCheckout";
+import { StripeCardModal } from "@/components/funnel/StripeCardModal";
 import { IMAGES, CHECKOUT_URL } from "@/components/funnel/data";
 
 export const Route = createFileRoute("/ajuda-milena")({
@@ -122,10 +123,11 @@ export function AjudaMilenaPage() {
   const META_TOTAL = 8500.0;
   // Inicia com 109.87 conforme solicitado
   const [arrecadado, setArrecadado] = useState(109.87);
-  const [selectedAmount, setSelectedAmount] = useState<number>(29);
+  const [selectedAmount, setSelectedAmount] = useState<number>(19);
   const [customInput, setCustomInput] = useState<string>("");
   const [isCustom, setIsCustom] = useState<boolean>(false);
   const [donorIdx, setDonorIdx] = useState(0);
+  const [stripeModalOpen, setStripeModalOpen] = useState(false);
 
   // Simulação realista: sobe entre R$ 3,00 e R$ 16,00 a cada 15 segundos
   useEffect(() => {
@@ -427,17 +429,25 @@ export function AjudaMilenaPage() {
             )}
 
             {/* Opção Doar com Cartão */}
-            <a
-              href={CHECKOUT_URL}
-              className="mt-4 block w-full py-3.5 px-4 rounded-2xl border-2 border-[#d5c3ea] bg-[#f9f5fd] hover:bg-[#f2eafb] text-[#2d144d] font-bold text-[13px] transition-all text-center shadow-2xs"
+            <button
+              type="button"
+              onClick={() => setStripeModalOpen(true)}
+              className="mt-4 block w-full py-3.5 px-4 rounded-2xl border-2 border-[#d5c3ea] bg-[#f9f5fd] hover:bg-[#f2eafb] text-[#2d144d] font-bold text-[13px] transition-all text-center cursor-pointer shadow-2xs"
             >
               💳 Prefere doar no Cartão de Crédito ou Parcelar? Clique aqui ›
-            </a>
+            </button>
+
+            <StripeCardModal
+              isOpen={stripeModalOpen}
+              onClose={() => setStripeModalOpen(false)}
+              productId="cirurgia_milena"
+              amountCents={Math.round((activeAmount >= 10 ? activeAmount : 19) * 100)}
+            />
 
             {/* Info pós-PIX */}
             <div className="mt-5 pt-4 border-t border-[#ece4f4]">
               <p className="text-[12px] text-[#786445] text-center leading-relaxed">
-                ✨ Após confirmar o pagamento PIX, você será redirecionado(a) automaticamente.
+                ✨ Após confirmar o pagamento PIX ou Cartão, você será redirecionado(a) automaticamente.
               </p>
             </div>
           </Reveal>

@@ -20,6 +20,14 @@ function ApoioMilenaGate() {
   const [paid, setPaid] = useState<boolean | null>(null);
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("payment") === "stripe_success" || urlParams.get("session_id")) {
+        sessionStorage.setItem("templodeluz:pix-paid", "true");
+        setPaid(true);
+        return;
+      }
+    }
     const flag = sessionStorage.getItem("templodeluz:pix-paid");
     setPaid(flag === "true");
   }, []);
