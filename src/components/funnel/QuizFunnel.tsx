@@ -971,8 +971,10 @@ function Result({
   horario: string;
 }) {
   const go = () => redirectWithParams(CHECKOUT_URL);
-  const primeiro = nome.split(" ")[0] || "você";
-  const primeiroEnte = ente.split(" ")[0] || "seu ente querido";
+  const primeiro = nome?.trim() ? nome.trim().split(" ")[0] : "Você";
+  const primeiroEnte = ente?.trim() ? ente.trim().split(" ")[0] : "seu ente querido";
+  const nomeEnteCompleto = ente?.trim() || "seu ente querido";
+  const horarioExibicao = horario?.trim() || horarioAgendamento();
 
   return (
     <div className="animate-rise-in pb-28 text-[#181126] bg-[#fbf9f5]">
@@ -985,8 +987,11 @@ function Result({
           </span>
           <div className="animate-float-soft mt-5 text-[52px]">🕊️</div>
           <h1 className="font-display mt-3 text-[26px] leading-snug font-extrabold text-white">
-            {primeiro}, a psicografia de <em className="text-[#fde68a] not-italic">{ente}</em> foi
-            agendada para <span className="text-shimmer">{horario}</span>
+            {primeiro}, a psicografia de{" "}
+            <em className="text-[#fde68a] not-italic underline decoration-amber-400/60 decoration-2 underline-offset-4">
+              {nomeEnteCompleto}
+            </em>{" "}
+            foi agendada para <span className="text-shimmer">{horarioExibicao}</span>
           </h1>
           <p className="mx-auto mt-3.5 max-w-[330px] text-[14px] leading-relaxed text-zinc-200 font-normal">
             Guarde este momento no coração: é quando a médium Milena Medeiros entra em recolhimento
@@ -1165,21 +1170,135 @@ function Result({
 
 type Step = "intro" | "ente" | "relacao" | "tempo" | "mensagem" | "confirma" | "loading" | "result";
 
+const QUIZ_STORAGE_KEY = "templodeluz_quiz_state";
+
 export function QuizFunnel() {
   const search = useSearch({ from: "/" });
   const navigate = useNavigate({ from: "/" });
   const [step, setStep] = useState<Step>((search.step as Step) || "intro");
-  const [nome, setNome] = useState("");
-  const [ente, setEnte] = useState("");
-  const [relacao, setRelacao] = useState("");
-  const [tempo, setTempo] = useState("");
-  const [dorPrincipal, setDorPrincipal] = useState("");
-  const [mensagem, setMensagem] = useState("");
-  const [modoMensagem, setModoMensagem] = useState<"temas" | "livre">("temas");
-  const [temasEscolhidos, setTemasEscolhidos] = useState<string[]>([]);
+
+  const [nome, setNome] = useState<string>(() => {
+    if (typeof window === "undefined") return "";
+    try {
+      const saved = localStorage.getItem(QUIZ_STORAGE_KEY);
+      return saved ? JSON.parse(saved).nome || "" : "";
+    } catch {
+      return "";
+    }
+  });
+
+  const [ente, setEnte] = useState<string>(() => {
+    if (typeof window === "undefined") return "";
+    try {
+      const saved = localStorage.getItem(QUIZ_STORAGE_KEY);
+      return saved ? JSON.parse(saved).ente || "" : "";
+    } catch {
+      return "";
+    }
+  });
+
+  const [relacao, setRelacao] = useState<string>(() => {
+    if (typeof window === "undefined") return "";
+    try {
+      const saved = localStorage.getItem(QUIZ_STORAGE_KEY);
+      return saved ? JSON.parse(saved).relacao || "" : "";
+    } catch {
+      return "";
+    }
+  });
+
+  const [tempo, setTempo] = useState<string>(() => {
+    if (typeof window === "undefined") return "";
+    try {
+      const saved = localStorage.getItem(QUIZ_STORAGE_KEY);
+      return saved ? JSON.parse(saved).tempo || "" : "";
+    } catch {
+      return "";
+    }
+  });
+
+  const [dorPrincipal, setDorPrincipal] = useState<string>(() => {
+    if (typeof window === "undefined") return "";
+    try {
+      const saved = localStorage.getItem(QUIZ_STORAGE_KEY);
+      return saved ? JSON.parse(saved).dorPrincipal || "" : "";
+    } catch {
+      return "";
+    }
+  });
+
+  const [mensagem, setMensagem] = useState<string>(() => {
+    if (typeof window === "undefined") return "";
+    try {
+      const saved = localStorage.getItem(QUIZ_STORAGE_KEY);
+      return saved ? JSON.parse(saved).mensagem || "" : "";
+    } catch {
+      return "";
+    }
+  });
+
+  const [modoMensagem, setModoMensagem] = useState<"temas" | "livre">(() => {
+    if (typeof window === "undefined") return "temas";
+    try {
+      const saved = localStorage.getItem(QUIZ_STORAGE_KEY);
+      return saved ? JSON.parse(saved).modoMensagem || "temas" : "temas";
+    } catch {
+      return "temas";
+    }
+  });
+
+  const [temasEscolhidos, setTemasEscolhidos] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const saved = localStorage.getItem(QUIZ_STORAGE_KEY);
+      return saved ? JSON.parse(saved).temasEscolhidos || [] : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [horario, setHorario] = useState<string>(() => {
+    if (typeof window === "undefined") return "";
+    try {
+      const saved = localStorage.getItem(QUIZ_STORAGE_KEY);
+      return saved ? JSON.parse(saved).horario || "" : "";
+    } catch {
+      return "";
+    }
+  });
+
   const [erroNome, setErroNome] = useState<string>();
   const [erroEnte, setErroEnte] = useState<string>();
-  const [horario, setHorario] = useState("");
+
+  // Sincroniza step com search param caso a URL mude externamente
+  useEffect(() => {
+    if (search.step && search.step !== step) {
+      setStep(search.step as Step);
+    }
+  }, [search.step]);
+
+  // Salva no localStorage em tempo real qualquer alteração
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.setItem(
+        QUIZ_STORAGE_KEY,
+        JSON.stringify({
+          nome,
+          ente,
+          relacao,
+          tempo,
+          dorPrincipal,
+          mensagem,
+          modoMensagem,
+          temasEscolhidos,
+          horario,
+        }),
+      );
+    } catch {
+      // ignore
+    }
+  }, [nome, ente, relacao, tempo, dorPrincipal, mensagem, modoMensagem, temasEscolhidos, horario]);
 
   const goto = (s: Step) => {
     setStep(s);
@@ -1187,8 +1306,8 @@ export function QuizFunnel() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const primeiroEnte = ente.split(" ")[0] || "seu ente querido";
-  const primeiroNome = nome.split(" ")[0] || "você";
+  const primeiroEnte = ente?.trim() ? ente.trim().split(" ")[0] : "seu ente querido";
+  const primeiroNome = nome?.trim() ? nome.trim().split(" ")[0] : "você";
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-[480px] flex-col bg-[#fbf9f5] text-[#181126] shadow-2xl border-x border-[#ece4f4]">
