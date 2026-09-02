@@ -665,28 +665,45 @@ function Intro({
 
   return (
     <div className="animate-rise-in bg-[#fbf9f5]">
-      {/* Top Hero com Destaque Central do Santuário Templo de Luz */}
-      <header className="relative overflow-hidden bg-gradient-to-b from-[#2d144d] via-[#1f0c36] to-[#120422] px-6 pt-10 pb-9 text-center text-white">
+      {/* Top Hero com Imagem Totalmente Visível e Texto Posicionado Abaixo */}
+      <header className="relative bg-[#180829] text-white overflow-hidden">
+        {/* Bloco da Imagem: Ampla, Nítida e Sem Nenhuma Letra Cobrindo */}
+        <div className="relative w-full h-[310px] sm:h-[350px] overflow-hidden bg-black">
+          <img
+            src={IMAGES.heroBg}
+            alt="Mãe acolhida com a presença de seu ente querido"
+            className="w-full h-full object-cover object-top"
+          />
+          {/* Badge no topo sobre a foto */}
+          <div className="absolute top-4 inset-x-0 flex justify-center z-10 px-4">
+            <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/80 bg-black/65 backdrop-blur-md px-4 py-1.5 text-[11px] font-bold tracking-[0.2em] text-amber-300 uppercase shadow-2xl">
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping shadow-xs shadow-amber-400" />
+              🕊️ Templo de Luz · Desde 1977
+            </span>
+          </div>
+          {/* Transição suave na base da foto */}
+          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#180829] to-transparent pointer-events-none" />
+        </div>
+
         <Halos />
-        <div className="relative z-10 flex flex-col items-center">
-          <Stars />
-          <span className="mt-2.5 inline-flex items-center gap-2 rounded-full border border-amber-400/50 bg-white/10 backdrop-blur-md px-4 py-1.5 text-[11px] font-bold tracking-[0.2em] text-amber-300 uppercase shadow-md">
-            <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping shadow-xs shadow-amber-400" />
-            🕊️ Templo de Luz · Desde 1977
-          </span>
 
-          <h1 className="font-display mt-5 text-[28px] leading-[1.2] font-black text-white tracking-tight drop-shadow-md">
-            Receba hoje uma{" "}
-            <span className="text-[#fde68a] not-italic underline decoration-amber-400/60 decoration-2 underline-offset-4">
-              carta psicografada
-            </span>{" "}
-            de quem você ama e partiu para a luz
-          </h1>
+        {/* Card do Texto Posicionado Abaixo da Foto (não tampa os rostos) */}
+        <div className="relative z-10 px-4 pb-7 -mt-4">
+          <div className="mx-auto max-w-[420px] rounded-3xl border border-amber-400/35 bg-[#1a082e] p-5 sm:p-6 shadow-2xl text-center">
+            <Stars className="mb-2" />
+            <h1 className="font-display text-[23px] sm:text-[25px] leading-[1.25] font-black text-white tracking-tight">
+              Receba hoje uma{" "}
+              <span className="text-[#fde68a] not-italic underline decoration-amber-400 decoration-2 underline-offset-4">
+                carta psicografada
+              </span>{" "}
+              de quem você ama e partiu para a luz
+            </h1>
 
-          <p className="mt-3 max-w-[350px] text-[14.5px] leading-relaxed text-zinc-200 font-normal">
-            Escrita à mão pela médium Milena Medeiros no santuário sagrado — revelando a letra, a
-            assinatura e as lembranças íntimas que provam que a vida continua.
-          </p>
+            <p className="mt-3 text-[13.5px] leading-relaxed text-zinc-200 font-normal">
+              Escrita à mão pela médium Milena Medeiros no santuário sagrado — revelando a letra, a
+              assinatura e as lembranças íntimas que provam que a vida continua.
+            </p>
+          </div>
         </div>
       </header>
 
@@ -1039,26 +1056,42 @@ function Result({
 
   return (
     <div className="animate-rise-in pb-28 text-[#181126] bg-[#fbf9f5]">
-      {/* Header com Confirmação Espiritual */}
-      <header className="relative overflow-hidden bg-gradient-to-b from-[#2d144d] via-[#1f0c36] to-[#120422] px-6 pt-10 pb-9 text-center text-white border-b border-[#ece4f4]">
+      {/* Header com Confirmação Espiritual com a Foto Nítida e Card de Texto */}
+      <header className="relative bg-[#180829] text-white overflow-hidden border-b border-[#ece4f4]">
+        {/* Bloco da Foto Ampla no Topo */}
+        <div className="relative w-full h-[280px] sm:h-[320px] overflow-hidden bg-black">
+          <img
+            src={IMAGES.heroBg}
+            alt="Agendamento Espiritual Confirmado"
+            className="w-full h-full object-cover object-top"
+          />
+          <div className="absolute top-4 inset-x-0 flex justify-center z-10 px-4">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/80 bg-black/65 px-4 py-1 text-[11px] font-bold tracking-[0.16em] text-amber-300 uppercase shadow-2xl backdrop-blur-md">
+              📅 Agendamento Espiritual Confirmado
+            </span>
+          </div>
+          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#180829] to-transparent pointer-events-none" />
+        </div>
+
         <Halos />
-        <div className="relative z-10">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-white/10 px-4 py-1 text-[11px] font-bold tracking-[0.16em] text-amber-300 uppercase shadow-md">
-            📅 Agendamento Espiritual Confirmado
-          </span>
-          <div className="animate-float-soft mt-5 text-[52px]">🕊️</div>
-          <h1 className="font-display mt-3 text-[26px] leading-snug font-extrabold text-white">
-            {primeiro}, a psicografia de{" "}
-            <em className="text-[#fde68a] not-italic underline decoration-amber-400/60 decoration-2 underline-offset-4">
-              {nomeEnteCompleto}
-            </em>{" "}
-            foi agendada para <span className="text-shimmer">{horarioExibicao}</span>
-          </h1>
-          <p className="mx-auto mt-3.5 max-w-[330px] text-[14px] leading-relaxed text-zinc-200 font-normal">
-            Guarde este momento no coração: é quando a médium Milena Medeiros entra em recolhimento
-            sagrado para psicografar a mensagem de {primeiroEnte} ({relacao || "ente querido"}) para
-            você.
-          </p>
+
+        {/* Card com Fundo Escuro para a Escrita (não sobrepõe a imagem) */}
+        <div className="relative z-10 px-4 pb-7 -mt-4">
+          <div className="mx-auto max-w-[420px] rounded-3xl border border-amber-400/35 bg-[#1a082e] p-5 sm:p-6 shadow-2xl text-center">
+            <div className="animate-float-soft text-[40px] mb-1">🕊️</div>
+            <h1 className="font-display text-[23px] sm:text-[25px] leading-snug font-extrabold text-white">
+              {primeiro}, a psicografia de{" "}
+              <em className="text-[#fde68a] not-italic underline decoration-amber-400 decoration-2 underline-offset-4">
+                {nomeEnteCompleto}
+              </em>{" "}
+              foi agendada para <span className="text-shimmer">{horarioExibicao}</span>
+            </h1>
+            <p className="mx-auto mt-3 text-[13.5px] leading-relaxed text-zinc-200 font-normal">
+              Guarde este momento no coração: é quando a médium Milena Medeiros entra em recolhimento
+              sagrado para psicografar a mensagem de {primeiroEnte} ({relacao || "ente querido"}) para
+              você.
+            </p>
+          </div>
         </div>
       </header>
 

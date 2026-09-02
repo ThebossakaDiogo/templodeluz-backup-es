@@ -22,6 +22,7 @@ dist-ssr
 .kilo/
 Feedbacks/*.png
 selos/
+/hero-image.jpeg
 
 # Editor directories and files
 .vscode/*

@@ -5,6 +5,7 @@ import milenaEmocionada from "@/assets/milena.webp";
 import heroTemplo from "@/assets/templodeluz-hero.webp";
 import seloCheckout from "@/assets/checkout-selo.png";
 import seloPomba from "@/assets/pomba-seguro.png";
+import heroBgImage from "@/assets/hero-image.jpeg";
 
 export const IMAGES = {
   hero: heroTemplo,
@@ -14,6 +15,7 @@ export const IMAGES = {
   milenaCatarata: milenaEmocionada,
   seloCheckout: seloCheckout,
   seloPomba: seloPomba,
+  heroBg: heroBgImage,
 };
 
 export const CHECKOUT_URL = "https://pay.cakto.com.br/amnpmje_1071513";
