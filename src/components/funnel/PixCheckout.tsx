@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { QRCodeSVG } from "qrcode.react";
 import { createPixCharge, getPixStatus, type PixCharge, type PixPaymentStatus } from "@/lib/pix";
+import { sendUtmifyOrder } from "@/lib/utmify";
 
 interface PixCheckoutProps {
   productId: "carta_sagrada" | "cirurgia_milena";
@@ -109,10 +110,33 @@ export function PixCheckout({ productId, amountCents }: PixCheckoutProps) {
     };
   }, [charge, status]);
 
-  // Ao confirmar pagamento, grava sessão e redireciona automaticamente
+  // Ao confirmar pagamento, grava sessão, envia evento UTMify e redireciona automaticamente
   useEffect(() => {
     if (status === "paid") {
       sessionStorage.setItem("templodeluz:pix-paid", "true");
+
+      // Dispara evento de compra para a UTMify com o máximo de detalhes
+      void sendUtmifyOrder({
+        orderId: charge?.orderId || `pix_${Date.now()}`,
+        platform: "TemploDeLuz",
+        paymentMethod: "pix",
+        status: "paid",
+        customer: {
+          name: customerName || "Consulente Templo de Luz",
+        },
+        products: [
+          {
+            id: productId,
+            name:
+              productId === "carta_sagrada"
+                ? "Carta Psicografada Sagrada"
+                : "Campanha Solidária - Cirurgia Médium Milena",
+            quantity: 1,
+            priceInCents: amountCents,
+          },
+        ],
+      });
+
       const redirectTimer = window.setTimeout(() => {
         if (productId === "carta_sagrada") {
           window.location.href = "/apoio-milena";
@@ -122,7 +146,7 @@ export function PixCheckout({ productId, amountCents }: PixCheckoutProps) {
       }, 1800);
       return () => window.clearTimeout(redirectTimer);
     }
-  }, [status, productId]);
+  }, [status, productId, charge, customerName, amountCents]);
 
   const generatePix = async () => {
     setError("");

@@ -110,11 +110,34 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
+import { LiveActivityToast } from "@/components/funnel/LiveActivityToast";
+import { captureAndStoreUtms } from "@/lib/utmify";
+import { useEffect } from "react";
+
 function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="pt-BR">
       <head>
         <HeadContent />
+        {/* ─── UTMIFY TRACKING SCRIPTS ─── */}
+        <script
+          src="https://cdn.utmify.com.br/scripts/utms/latest.js"
+          data-utmify-prevent-subids
+          async
+          defer
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.pixelId = "Szz1ObkJ95rX3A8C3M7VcjACLPHBRAr5HGx4";
+              var a = document.createElement("script");
+              a.setAttribute("async", "");
+              a.setAttribute("defer", "");
+              a.src = "https://cdn.utmify.com.br/scripts/pixel/pixel.js";
+              document.head.appendChild(a);
+            `,
+          }}
+        />
       </head>
       <body suppressHydrationWarning>
         {children}
@@ -124,10 +147,12 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
-import { LiveActivityToast } from "@/components/funnel/LiveActivityToast";
-
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  useEffect(() => {
+    captureAndStoreUtms();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

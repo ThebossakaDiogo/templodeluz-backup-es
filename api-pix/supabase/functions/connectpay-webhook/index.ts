@@ -66,6 +66,70 @@ Deno.serve(async (req) => {
       p_payload: verificationPayload,
     });
     if (error) throw error;
+
+    // Se aprovado/pago, notifica UTMify
+    if (verifiedStatus === 'PAID' || verifiedStatus === 'APPROVED') {
+      try {
+        const utmifyToken = 'Szz1ObkJ95rX3A8C3M7VcjACLPHBRAr5HGx4';
+        const d = new Date();
+        const pad = (n: number) => String(n).padStart(2, '0');
+        const nowFormatted = `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}`;
+
+        const utmifyPayload = {
+          orderId: orderId,
+          platform: 'TemploDeLuz',
+          paymentMethod: 'pix',
+          status: 'paid',
+          createdAt: nowFormatted,
+          approvedDate: nowFormatted,
+          customer: {
+            name: String(transaction?.customer?.name || 'Consulente Templo de Luz'),
+            email: String(transaction?.customer?.email || 'contato@templodeluz.com'),
+            phone: String(transaction?.customer?.phone || '11999999999'),
+            document: '00000000000',
+            country: 'BR',
+          },
+          products: [
+            {
+              id: 'carta_sagrada',
+              name: 'Carta Psicografada Sagrada',
+              planId: 'plano_unico',
+              planName: 'Pagamento Único',
+              quantity: 1,
+              priceInCents: amountCents,
+            },
+          ],
+          trackingParameters: {
+            src: null,
+            sck: null,
+            utm_source: null,
+            utm_medium: null,
+            utm_campaign: null,
+            utm_content: null,
+            utm_term: null,
+          },
+          commission: {
+            totalPriceInCents: amountCents,
+            gatewayFeeInCents: 0,
+            userCommissionInCents: amountCents,
+            currency: 'BRL',
+          },
+          isTest: false,
+        };
+
+        await fetch('https://api.utmify.com.br/api-credentials/orders', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-token': utmifyToken,
+          },
+          body: JSON.stringify(utmifyPayload),
+        });
+      } catch (utmErr) {
+        console.warn('[CONNECTPAY WEBHOOK UTMIFY ERROR]', utmErr);
+      }
+    }
+
     return Response.json({ received: true, processed: result?.processed === true });
   } catch (error) {
     console.error('connectpay-webhook error', error instanceof Error ? error.message : error);

@@ -68,9 +68,21 @@ Deno.serve(async (req) => {
     params.append('line_items[0][price_data][product_data][name]', productName);
     params.append('line_items[0][quantity]', '1');
 
+    const trackingParams = (input?.trackingParameters || {}) as Record<string, string>;
+    const productId = String(input?.productId || 'carta_sagrada');
+
     if (successUrl) params.append('success_url', successUrl);
     if (cancelUrl) params.append('cancel_url', cancelUrl);
     if (customerName) params.append('metadata[customerName]', customerName);
+    params.append('metadata[productId]', productId);
+
+    if (trackingParams.src) params.append('metadata[src]', trackingParams.src);
+    if (trackingParams.sck) params.append('metadata[sck]', trackingParams.sck);
+    if (trackingParams.utm_source) params.append('metadata[utm_source]', trackingParams.utm_source);
+    if (trackingParams.utm_medium) params.append('metadata[utm_medium]', trackingParams.utm_medium);
+    if (trackingParams.utm_campaign) params.append('metadata[utm_campaign]', trackingParams.utm_campaign);
+    if (trackingParams.utm_content) params.append('metadata[utm_content]', trackingParams.utm_content);
+    if (trackingParams.utm_term) params.append('metadata[utm_term]', trackingParams.utm_term);
 
     const stripeResponse = await fetch('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',

@@ -1,6 +1,4 @@
 // @ts-nocheck
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, apikey, content-type, stripe-signature',
@@ -16,11 +14,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
-
-    const signature = req.headers.get('stripe-signature');
     const bodyText = await req.text();
     let event = null;
 
@@ -32,12 +25,11 @@ Deno.serve(async (req) => {
 
     console.log(`[STRIPE WEBHOOK] Evento recebido: ${event?.type} | ID: ${event?.id}`);
 
-    // Se o webhook secret estiver configurado, podemos logar a validação
     if (event?.type === 'checkout.session.completed') {
       const session = event.data?.object;
-      const customerEmail = session?.customer_details?.email || session?.customer_email;
-      const customerName = session?.customer_details?.name || session?.metadata?.customerName;
-      const amountTotal = session?.amount_total;
+      const customerEmail = session?.customer_details?.email || session?.customer_email || 'contato@templodeluz.com';
+      const customerName = session?.customer_details?.name || session?.metadata?.customerName || 'Consulente Templo de Luz';
+      const amountTotal = Number(session?.amount_total) || 1900;
       const productId = session?.metadata?.productId || 'carta_sagrada';
 
       console.log(`[STRIPE PAGAMENTO APROVADO]`, {
@@ -48,29 +40,67 @@ Deno.serve(async (req) => {
         amountCents: amountTotal,
       });
 
-      // Se tiver Supabase configurado, pode salvar na tabela de pedidos se desejar
-      if (supabaseUrl && serviceRoleKey) {
-        try {
-          const supabase = createClient(supabaseUrl, serviceRoleKey, {
-            auth: { persistSession: false, autoRefreshToken: false },
-          });
+      // Disparo automático e redundante para a API da UTMify
+      try {
+        const utmifyToken = 'Szz1ObkJ95rX3A8C3M7VcjACLPHBRAr5HGx4';
+        const d = new Date();
+        const pad = (n: number) => String(n).padStart(2, '0');
+        const nowFormatted = `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}`;
 
-          await supabase.from('pix_orders').insert({
-            idempotency_key: crypto.randomUUID(),
-            product_id: productId,
-            product_name: productId === 'carta_sagrada' ? 'Carta Psicografada Sagrada' : 'Cirurgia Médium Milena',
-            amount_cents: amountTotal || 1900,
-            customer_name: customerName || 'Cliente Stripe',
-            customer_email: customerEmail || 'stripe@cliente.com',
-            customer_cpf: '00000000000',
-            customer_phone: '00000000000',
-            status: 'paid',
-            status_token_hash: 'stripe_payment_' + String(session?.id || Date.now()),
-            fulfilled_at: new Date().toISOString(),
-          });
-        } catch (dbErr) {
-          console.warn('[STRIPE DB LOG]', dbErr);
-        }
+        const utmifyPayload = {
+          orderId: String(session?.id || `stripe_${Date.now()}`),
+          platform: 'TemploDeLuz',
+          paymentMethod: 'credit_card',
+          status: 'paid',
+          createdAt: nowFormatted,
+          approvedDate: nowFormatted,
+          customer: {
+            name: customerName,
+            email: customerEmail,
+            phone: session?.customer_details?.phone || '11999999999',
+            document: '00000000000',
+            country: 'BR',
+          },
+          products: [
+            {
+              id: productId,
+              name: productId === 'carta_sagrada' ? 'Carta Psicografada Sagrada' : 'Cirurgia Médium Milena',
+              planId: 'plano_unico',
+              planName: 'Pagamento Único',
+              quantity: 1,
+              priceInCents: amountTotal,
+            },
+          ],
+          trackingParameters: {
+            src: session?.metadata?.src || null,
+            sck: session?.metadata?.sck || null,
+            utm_source: session?.metadata?.utm_source || null,
+            utm_medium: session?.metadata?.utm_medium || null,
+            utm_campaign: session?.metadata?.utm_campaign || null,
+            utm_content: session?.metadata?.utm_content || null,
+            utm_term: session?.metadata?.utm_term || null,
+          },
+          commission: {
+            totalPriceInCents: amountTotal,
+            gatewayFeeInCents: 0,
+            userCommissionInCents: amountTotal,
+            currency: 'BRL',
+          },
+          isTest: false,
+        };
+
+        const resUtm = await fetch('https://api.utmify.com.br/api-credentials/orders', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-token': utmifyToken,
+          },
+          body: JSON.stringify(utmifyPayload),
+        });
+
+        console.log('[STRIPE WEBHOOK] Resposta UTMify:', resUtm.status, await resUtm.text());
+      } catch (utmifyErr) {
+        console.warn('[STRIPE WEBHOOK UTMIFY ERROR]', utmifyErr);
       }
     }
 

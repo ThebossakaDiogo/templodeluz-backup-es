@@ -16,15 +16,42 @@ export const Route = createFileRoute("/apoio-milena")({
   component: ApoioMilenaGate,
 });
 
+import { sendUtmifyOrder } from "@/lib/utmify";
+
 function ApoioMilenaGate() {
   const [paid, setPaid] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get("payment") === "stripe_success" || urlParams.get("session_id")) {
+      const isStripe = urlParams.get("payment") === "stripe_success" || urlParams.get("session_id");
+
+      if (isStripe) {
         sessionStorage.setItem("templodeluz:pix-paid", "true");
         setPaid(true);
+
+        // Garante que o evento Stripe seja enviado apenas 1 vez para a UTMify
+        const alreadySent = sessionStorage.getItem("utmify_sent_stripe_carta");
+        if (!alreadySent) {
+          sessionStorage.setItem("utmify_sent_stripe_carta", "true");
+          void sendUtmifyOrder({
+            orderId: urlParams.get("session_id") || `stripe_carta_${Date.now()}`,
+            platform: "TemploDeLuz",
+            paymentMethod: "credit_card",
+            status: "paid",
+            customer: {
+              name: "Consulente Templo de Luz",
+            },
+            products: [
+              {
+                id: "carta_sagrada",
+                name: "Carta Psicografada Sagrada",
+                quantity: 1,
+                priceInCents: 1900,
+              },
+            ],
+          });
+        }
         return;
       }
     }
