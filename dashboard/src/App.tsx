@@ -235,7 +235,7 @@ export function App() {
   const [authLoading, setAuthLoading] = useState(true);
 
   const [theme, setTheme] = useState<"light" | "dark">(() => {
-    return (localStorage.getItem("tl-theme") as "light" | "dark") || "dark";
+    return (localStorage.getItem("tl-theme") as "light" | "dark") || "light";
   });
 
   const [section, setSection] = useState<Section>(getSectionFromPath);

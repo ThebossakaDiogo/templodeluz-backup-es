@@ -376,8 +376,8 @@ body {
 
   /* Main com respiro na base para a barra inferior */
   .dashboard-main {
-    padding: 12px 12px calc(env(safe-area-inset-bottom, 20px) + 76px) !important;
-    gap: 14px !important;
+    padding: 14px 14px calc(env(safe-area-inset-bottom, 20px) + 80px) !important;
+    gap: 16px !important;
     height: auto !important;
     min-height: calc(100dvh - 56px) !important;
     overflow-y: auto !important;
@@ -385,6 +385,14 @@ body {
     max-width: 100% !important;
     width: 100% !important;
     -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* Impede que cards sejam esmagados pelo flexbox */
+  .dashboard-main > * {
+    flex-shrink: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   /* Topbar adaptada com 2 linhas e fundo solido */
@@ -471,6 +479,7 @@ body {
 
   .funnel-stage-title {
     font-size: 12.5px !important;
+    letter-spacing: -0.01em !important;
   }
 
   .funnel-stage-metrics {
@@ -485,20 +494,26 @@ body {
     min-width: 52px !important;
   }
 
-  /* Grades de metricas */
+  /* Grades de metricas: 1 coluna no mobile para visual amplo e limpo */
   .metric-cards-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
   }
 
   .conversion-overview-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+    padding: 18px 16px !important;
+  }
+
+  .analytics-trio-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
   }
 
   .card {
-    padding: 14px !important;
-    border-radius: 14px !important;
+    padding: 18px 16px !important;
+    border-radius: 16px !important;
     max-width: 100% !important;
     overflow: hidden !important;
     box-sizing: border-box !important;
@@ -507,7 +522,7 @@ body {
 
 @media (max-width: 480px) {
   .metric-cards-grid {
-    grid-template-columns: 1fr;
-    gap: 10px;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
   }
 }
