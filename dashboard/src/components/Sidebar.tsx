@@ -6,6 +6,8 @@ import {
   FileBarChart2,
   LogOut,
   MessageCircle,
+  X,
+  User,
 } from "lucide-react";
 import { PwaInstallPrompt } from "./PwaInstallPrompt";
 
@@ -15,6 +17,8 @@ interface SidebarProps {
   onlineCount: number;
   currentUserEmail?: string;
   onSignOut?: () => void;
+  isOpenMobile?: boolean;
+  onCloseMobile?: () => void;
 }
 
 const ITEMS: {
@@ -65,102 +69,159 @@ const ITEMS: {
     Icon: MessageCircle,
     accent: "#22c55e", // WhatsApp Green
   },
+  {
+    id: "perfil",
+    slug: "/perfil",
+    label: "Meu Perfil",
+    sub: "Alterar Senha & Acesso",
+    Icon: User,
+    accent: "#a855f7", // Purple Neon
+  },
 ];
 
-export function Sidebar({ section, onSelect, onlineCount, currentUserEmail, onSignOut }: SidebarProps) {
+export function Sidebar({
+  section,
+  onSelect,
+  onlineCount,
+  currentUserEmail,
+  onSignOut,
+  isOpenMobile,
+  onCloseMobile,
+}: SidebarProps) {
   return (
-    <aside
-      style={{
-        width: "245px",
-        minWidth: "245px",
-        height: "100vh",
-        maxHeight: "100vh",
-        background: "#050a14",
-        display: "flex",
-        flexDirection: "column",
-        borderRight: "1px solid #16233b",
-        position: "sticky",
-        top: 0,
-        left: 0,
-        overflowY: "auto",
-        overflowX: "hidden",
-        flexShrink: 0,
-        zIndex: 20,
-      }}
-    >
-      {/* Glow de fundo */}
-      <div
-        style={{
-          position: "absolute",
-          top: "-50px",
-          left: "-50px",
-          width: "180px",
-          height: "180px",
-          background: "radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 70%)",
-          pointerEvents: "none",
-        }}
-      />
+    <>
+      {/* Backdrop para mobile */}
+      {isOpenMobile && (
+        <div
+          onClick={onCloseMobile}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0, 0, 0, 0.75)",
+            backdropFilter: "blur(6px)",
+            WebkitBackdropFilter: "blur(6px)",
+            zIndex: 1000,
+          }}
+          className="mobile-sidebar-backdrop"
+        />
+      )}
 
-      {/* Logo OD METRICS */}
-      <div
+      <aside
+        className={`dashboard-sidebar ${isOpenMobile ? "mobile-open" : ""}`}
         style={{
-          padding: "22px 20px 18px",
-          borderBottom: "1px solid #142036",
+          width: "245px",
+          minWidth: "245px",
+          height: "100vh",
+          maxHeight: "100vh",
+          background: "#050a14",
           display: "flex",
-          alignItems: "center",
-          gap: "11px",
+          flexDirection: "column",
+          borderRight: "1px solid #16233b",
+          position: "sticky",
+          top: 0,
+          left: 0,
+          overflowY: "auto",
+          overflowX: "hidden",
+          flexShrink: 0,
+          zIndex: 1001,
+          transition: "transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
         }}
       >
+        {/* Glow de fundo */}
         <div
           style={{
-            width: "36px",
-            height: "36px",
-            borderRadius: "10px",
-            background: "linear-gradient(135deg, #059669 0%, #10b981 50%, #06b6d4 100%)",
-            border: "1px solid rgba(255, 255, 255, 0.25)",
+            position: "absolute",
+            top: "-50px",
+            left: "-50px",
+            width: "180px",
+            height: "180px",
+            background: "radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 70%)",
+            pointerEvents: "none",
+          }}
+        />
+
+        {/* Logo OD METRICS */}
+        <div
+          style={{
+            padding: "22px 20px 18px",
+            borderBottom: "1px solid #142036",
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
-            boxShadow: "0 0 16px rgba(16, 185, 129, 0.4)",
-            flexShrink: 0,
-            fontFamily: "'Space Grotesk', sans-serif",
-            fontWeight: 900,
-            fontSize: "14px",
-            color: "#ffffff",
-            letterSpacing: "-0.05em",
+            gap: "11px",
           }}
         >
-          OD
-        </div>
-        <div>
-          <span
+          <div
             style={{
-              display: "block",
-              fontFamily: "'Space Grotesk', 'Plus Jakarta Sans', sans-serif",
-              fontSize: "15px",
+              width: "36px",
+              height: "36px",
+              borderRadius: "10px",
+              background: "linear-gradient(135deg, #059669 0%, #10b981 50%, #06b6d4 100%)",
+              border: "1px solid rgba(255, 255, 255, 0.25)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 0 16px rgba(16, 185, 129, 0.4)",
+              flexShrink: 0,
+              fontFamily: "'Space Grotesk', sans-serif",
               fontWeight: 900,
+              fontSize: "14px",
               color: "#ffffff",
-              letterSpacing: "-0.02em",
-              lineHeight: 1.1,
+              letterSpacing: "-0.05em",
             }}
           >
-            OD <span style={{ color: "#10b981" }}>METRICS</span>
-          </span>
-          <span
-            style={{
-              fontSize: "9.5px",
-              color: "#94a3b8",
-              fontWeight: 700,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              display: "block",
-              marginTop: "2px",
-            }}
-          >
-            Inteligência & Tracking
-          </span>
+            OD
+          </div>
+          <div>
+            <span
+              style={{
+                display: "block",
+                fontFamily: "'Space Grotesk', 'Plus Jakarta Sans', sans-serif",
+                fontSize: "15px",
+                fontWeight: 900,
+                color: "#ffffff",
+                letterSpacing: "-0.02em",
+                lineHeight: 1.1,
+              }}
+            >
+              OD <span style={{ color: "#10b981" }}>METRICS</span>
+            </span>
+            <span
+              style={{
+                fontSize: "9.5px",
+                color: "#94a3b8",
+                fontWeight: 700,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                display: "block",
+                marginTop: "2px",
+              }}
+            >
+              Inteligência & Tracking
+            </span>
+          </div>
+
+          {onCloseMobile && (
+            <button
+              onClick={onCloseMobile}
+              className="mobile-close-btn"
+              style={{
+                marginLeft: "auto",
+                background: "rgba(255, 255, 255, 0.08)",
+                border: "none",
+                borderRadius: "8px",
+                width: "30px",
+                height: "30px",
+                color: "#94a3b8",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <X style={{ width: "16px", height: "16px" }} />
+            </button>
+          )}
         </div>
-      </div>
 
       {/* Navegação por Slugs */}
       <nav style={{ flex: 1, padding: "16px 12px" }}>
@@ -183,7 +244,10 @@ export function Sidebar({ section, onSelect, onlineCount, currentUserEmail, onSi
           return (
             <button
               key={id}
-              onClick={() => onSelect(id)}
+              onClick={() => {
+                onSelect(id);
+                onCloseMobile?.();
+              }}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -344,7 +408,29 @@ export function Sidebar({ section, onSelect, onlineCount, currentUserEmail, onSi
             gap: "8px",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0 }}>
+          <div
+            onClick={() => {
+              onSelect("perfil");
+              onCloseMobile?.();
+            }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              minWidth: 0,
+              cursor: "pointer",
+              padding: "2px 4px",
+              borderRadius: "6px",
+              transition: "background 0.15s ease",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLDivElement).style.background = "rgba(16, 185, 129, 0.1)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLDivElement).style.background = "transparent";
+            }}
+            title="Gerenciar meu perfil e alterar senha"
+          >
             <div
               style={{
                 width: "28px",
@@ -438,5 +524,6 @@ export function Sidebar({ section, onSelect, onlineCount, currentUserEmail, onSi
         </span>
       </div>
     </aside>
+  </>
   );
 }

@@ -1,4 +1,4 @@
-import { Sun, Moon, RefreshCw, Download, Users } from "lucide-react";
+import { Sun, Moon, RefreshCw, Download, Users, Menu } from "lucide-react";
 import { DateRangeSelector, type DateRangeValue } from "./DateRangeSelector";
 import type { Section } from "../App";
 
@@ -13,6 +13,7 @@ interface TopbarProps {
   dateRange: DateRangeValue;
   onDateRangeChange: (val: DateRangeValue) => void;
   onlineCount: number;
+  onOpenMenu?: () => void;
 }
 
 const SECTION_LABELS: Record<Section, string> = {
@@ -21,6 +22,7 @@ const SECTION_LABELS: Record<Section, string> = {
   "pedidos":      "Auditoria de Pedidos (PIX & Cartão)",
   "relatorios":   "Relatórios de Canais & UTMs",
   "whatsapp":     "WhatsApp Tracker & Conversas",
+  "perfil":       "Meu Perfil & Segurança",
   "login":        "Acesso Administrativo",
 };
 
@@ -30,6 +32,7 @@ const SECTION_DESCRIPTIONS: Record<Section, string> = {
   "pedidos":      "Auditoria em tempo real de doações pagas, pendentes e gateways",
   "relatorios":   "Desempenho por fonte de tráfego, campanha e exportação consolidada",
   "whatsapp":     "Metrificação de clientes que enviaram mensagens e forma de pagamento",
+  "perfil":       "Gerenciamento de conta, alteração de credenciais e segurança",
   "login":        "Terminal seguro de autenticação",
 };
 
@@ -52,9 +55,11 @@ export function Topbar({
   dateRange,
   onDateRangeChange,
   onlineCount,
+  onOpenMenu,
 }: TopbarProps) {
   return (
     <header
+      className="dashboard-topbar"
       style={{
         height: "64px",
         background: "var(--bg-surface)",
@@ -72,32 +77,47 @@ export function Topbar({
       }}
     >
       {/* Título e Descrição da Seção */}
-      <div style={{ minWidth: "190px" }}>
-        <h1
-          style={{
-            fontSize: "14px",
-            fontWeight: 800,
-            color: "var(--text-primary)",
-            margin: 0,
-            letterSpacing: "-0.01em",
-          }}
-        >
-          {SECTION_LABELS[section]}
-        </h1>
-        <p
-          style={{
-            fontSize: "10.5px",
-            color: "var(--text-muted)",
-            margin: "2px 0 0",
-            fontWeight: 500,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            maxWidth: "320px",
-          }}
-        >
-          {SECTION_DESCRIPTIONS[section]}
-        </p>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
+        {onOpenMenu && (
+          <button
+            onClick={onOpenMenu}
+            className="mobile-menu-trigger btn"
+            style={{ padding: "6px 8px" }}
+            title="Abrir Menu"
+          >
+            <Menu style={{ width: "16px", height: "16px" }} />
+          </button>
+        )}
+        <div style={{ minWidth: 0 }}>
+          <h1
+            style={{
+              fontSize: "14px",
+              fontWeight: 800,
+              color: "var(--text-primary)",
+              margin: 0,
+              letterSpacing: "-0.01em",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {SECTION_LABELS[section]}
+          </h1>
+          <p
+            style={{
+              fontSize: "10.5px",
+              color: "var(--text-muted)",
+              margin: "2px 0 0",
+              fontWeight: 500,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              maxWidth: "320px",
+            }}
+          >
+            {SECTION_DESCRIPTIONS[section]}
+          </p>
+        </div>
       </div>
 
       {/* Bloco Central e Controles da Direita */}

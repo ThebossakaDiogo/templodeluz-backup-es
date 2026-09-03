@@ -32,12 +32,9 @@ export function ConversionOverview({ leads, orders, loading }: ConversionOvervie
 
   return (
     <div
-      className="card"
+      className="card conversion-overview-grid"
       style={{
         padding: "20px 24px",
-        display: "grid",
-        gridTemplateColumns: "repeat(5, 1fr)",
-        gap: "16px",
         position: "relative",
         overflow: "hidden",
       }}

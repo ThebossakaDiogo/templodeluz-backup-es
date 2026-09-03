@@ -12,6 +12,8 @@ import { TrafficPieChart } from "./components/TrafficPieChart";
 import { PaymentMethodsPieChart } from "./components/PaymentMethodsPieChart";
 import { ConversionOverview } from "./components/ConversionOverview";
 import { WhatsAppTracker } from "./components/WhatsAppTracker";
+import { ProfileView } from "./components/ProfileView";
+import { MobileBottomNav } from "./components/MobileBottomNav";
 import { LoginPage } from "./components/LoginPage";
 import { supabase } from "./lib/supabase";
 import type { Session } from "@supabase/supabase-js";
@@ -193,7 +195,7 @@ function buildLeadsChartRange(
 }
 
 // ─── Secções & Slugs do painel ───────────────────────────────────────────────
-export type Section = "visao-geral" | "rastreamento" | "pedidos" | "relatorios" | "whatsapp" | "login";
+export type Section = "visao-geral" | "rastreamento" | "pedidos" | "relatorios" | "whatsapp" | "perfil" | "login";
 
 const SLUG_TO_SECTION: Record<string, Section> = {
   "/": "visao-geral",
@@ -202,6 +204,7 @@ const SLUG_TO_SECTION: Record<string, Section> = {
   "/pedidos": "pedidos",
   "/relatorios": "relatorios",
   "/whatsapp": "whatsapp",
+  "/perfil": "perfil",
   "/login": "login",
 };
 
@@ -211,6 +214,7 @@ const SECTION_TO_SLUG: Record<Section, string> = {
   "pedidos": "/pedidos",
   "relatorios": "/relatorios",
   "whatsapp": "/whatsapp",
+  "perfil": "/perfil",
   "login": "/login",
 };
 
@@ -235,6 +239,7 @@ export function App() {
   });
 
   const [section, setSection] = useState<Section>(getSectionFromPath);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Verificação e sincronização de sessão de Administrador
   useEffect(() => {
@@ -581,13 +586,15 @@ export function App() {
   }
 
   return (
-    <div style={{ display: "flex", height: "100vh", width: "100vw", overflow: "hidden", background: "var(--bg-root)" }}>
+    <div style={{ display: "flex", height: "100vh", width: "100vw", overflow: "hidden", background: "var(--bg-root)", position: "relative" }}>
       <Sidebar
         section={section}
         onSelect={handleNavigate}
         onlineCount={onlineCount}
         currentUserEmail={session.user.email}
         onSignOut={handleSignOut}
+        isOpenMobile={isMobileMenuOpen}
+        onCloseMobile={() => setIsMobileMenuOpen(false)}
       />
 
       <div style={{ flex: 1, height: "100vh", display: "flex", flexDirection: "column", overflow: "hidden", minWidth: 0 }}>
@@ -602,9 +609,11 @@ export function App() {
           dateRange={dateRange}
           onDateRangeChange={setDateRange}
           onlineCount={onlineCount}
+          onOpenMenu={() => setIsMobileMenuOpen(true)}
         />
 
         <main
+          className="dashboard-main"
           style={{
             flex: 1,
             height: "calc(100vh - 64px)",
@@ -637,7 +646,7 @@ export function App() {
               <FunnelViz leads={filteredLeads.length > 0 ? filteredLeads : allLeads} loading={loading} />
 
               {/* TRIO DE GRÁFICOS ANALÍTICOS: Métodos (PIX vs Cartão), Status e Origem UTM */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "20px" }}>
+              <div className="analytics-trio-grid">
                 <PaymentMethodsPieChart orders={filteredOrders} loading={loading} />
                 <StatusPieChart orders={filteredOrders} loading={loading} />
                 <TrafficPieChart leads={filteredLeads} loading={loading} />
@@ -690,8 +699,24 @@ export function App() {
               onRefresh={fetchData}
             />
           )}
+
+          {/* SLUG: /perfil */}
+          {section === "perfil" && (
+            <ProfileView
+              currentUserEmail={session.user.email}
+              onSignOut={handleSignOut}
+            />
+          )}
         </main>
       </div>
+
+      {/* Barra de Navegação Inferior Móvel (Fixa no Mobile / iPhones) */}
+      <MobileBottomNav
+        currentSection={section}
+        onSelect={handleNavigate}
+        onOpenMenu={() => setIsMobileMenuOpen(true)}
+        unreadWhatsAppCount={allWhatsApp.length}
+      />
     </div>
   );
 }

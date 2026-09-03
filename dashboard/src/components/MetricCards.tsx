@@ -121,13 +121,7 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
   ];
 
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(4, 1fr)",
-        gap: "18px",
-      }}
-    >
+    <div className="metric-cards-grid">
       {cards.map((c) => (
         <div
           key={c.id}

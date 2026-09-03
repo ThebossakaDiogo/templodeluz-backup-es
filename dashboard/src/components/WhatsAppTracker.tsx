@@ -52,7 +52,7 @@ export function WhatsAppTracker({ messages, loading, onRefresh }: WhatsAppTracke
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
       {/* Cards de Métricas do WhatsApp */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "18px" }}>
+      <div className="metric-cards-grid">
         {/* Total de Mensagens */}
         <div className="card" style={{ padding: "20px 22px", display: "flex", flexDirection: "column", gap: "8px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
