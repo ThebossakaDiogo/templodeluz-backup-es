@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { Sidebar } from "@/components/Sidebar";
 import { Topbar } from "@/components/Topbar";
+import { FloatingDockNav } from "@/components/FloatingDockNav";
 import { MetricCards } from "@/components/MetricCards";
 import { RevenueChart } from "@/components/RevenueChart";
 import { LeadsChart } from "@/components/LeadsChart";
@@ -13,7 +13,6 @@ import { PaymentMethodsPieChart } from "@/components/PaymentMethodsPieChart";
 import { ConversionOverview } from "@/components/ConversionOverview";
 import { WhatsAppTracker } from "@/components/WhatsAppTracker";
 import { ProfileView } from "@/components/ProfileView";
-import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { LoginPage } from "@/components/LoginPage";
 import { supabase } from "@/lib/supabase";
 import type { Session } from "@supabase/supabase-js";
@@ -239,7 +238,6 @@ export function App() {
   });
 
   const [section, setSection] = useState<Section>(getSectionFromPath);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Verificação e sincronização de sessão de Administrador
   useEffect(() => {
@@ -588,46 +586,38 @@ export function App() {
   }
 
   return (
-    <div className="dashboard-root">
-      <Sidebar
+    <div className="dashboard-root" style={{ flexDirection: "column", height: "100vh", overflow: "hidden" }}>
+      {/* Barra Superior de Alta Precisão */}
+      <Topbar
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        onRefresh={fetchData}
+        loading={loading}
+        lastUpdate={lastUpdate}
         section={section}
-        onSelect={handleNavigate}
+        onNavigate={handleNavigate}
+        onExportCsv={exportCsv}
+        dateRange={dateRange}
+        onDateRangeChange={setDateRange}
         onlineCount={onlineCount}
-        currentUserEmail={session.user.email}
-        onSignOut={handleSignOut}
-        isOpenMobile={isMobileMenuOpen}
-        onCloseMobile={() => setIsMobileMenuOpen(false)}
       />
 
-      <div className="dashboard-content-area">
-        <Topbar
-          theme={theme}
-          onToggleTheme={toggleTheme}
-          onRefresh={fetchData}
-          loading={loading}
-          lastUpdate={lastUpdate}
-          section={section}
-          onExportCsv={exportCsv}
-          dateRange={dateRange}
-          onDateRangeChange={setDateRange}
-          onlineCount={onlineCount}
-          onOpenMenu={() => setIsMobileMenuOpen(true)}
-        />
-
-        <main
-          className="dashboard-main"
-          style={{
-            flex: 1,
-            height: "calc(100vh - 64px)",
-            overflowY: "auto",
-            overflowX: "hidden",
-            padding: "26px 32px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "24px",
-            minWidth: 0,
-          }}
-        >
+      {/* Área Principal de Conteúdo em Largura Total */}
+      <main
+        className="dashboard-main"
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          overflowX: "hidden",
+          padding: "24px 32px 120px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "22px",
+          width: "100%",
+          maxWidth: "1440px",
+          margin: "0 auto",
+        }}
+      >
           {/* SLUG: /visao-geral */}
           {section === "visao-geral" && (
             <>
@@ -710,14 +700,16 @@ export function App() {
             />
           )}
         </main>
-      </div>
 
-      {/* Barra de Navegação Inferior Móvel (Fixa no Mobile / iPhones) */}
-      <MobileBottomNav
-        currentSection={section}
+      {/* Menu de Rodapé Flutuante Ultra-Premium (Floating Dock) */}
+      <FloatingDockNav
+        section={section}
         onSelect={handleNavigate}
-        onOpenMenu={() => setIsMobileMenuOpen(true)}
-        unreadWhatsAppCount={allWhatsApp.length}
+        onlineCount={onlineCount}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        currentUserEmail={session.user.email}
+        onSignOut={handleSignOut}
       />
     </div>
   );

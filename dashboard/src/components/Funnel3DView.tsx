@@ -159,19 +159,19 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
         width: "100%",
         maxWidth: "100%",
         boxSizing: "border-box",
-        background: "#0D0E17",
-        border: "1px solid #232532",
+        background: "var(--surface-card)",
+        border: "1px solid var(--border-subtle)",
         borderRadius: "18px",
         padding: "22px 24px",
       }}
     >
-      {/* ─── 1. Header do Painel Principal (Inspirado no 'Your active stakings' da referência) ─── */}
+      {/* ─── 1. Header do Painel Principal ─── */}
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          borderBottom: "1px solid #1E202B",
+          borderBottom: "1px solid var(--border-subtle)",
           paddingBottom: "16px",
           flexWrap: "wrap",
           gap: "12px",
@@ -179,16 +179,16 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
       >
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "3px" }}>
-            <span style={{ fontSize: "11px", color: "#747786" }}>
+            <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>
               Última atualização — tempo real
             </span>
-            <Clock style={{ width: "11px", height: "11px", color: "#747786" }} />
+            <Clock style={{ width: "11px", height: "11px", color: "var(--text-muted)" }} />
           </div>
           <h3
             style={{
               fontSize: "18px",
               fontWeight: 600,
-              color: "#F5F4FA",
+              color: "var(--text-primary)",
               margin: 0,
               letterSpacing: "-0.015em",
             }}
@@ -197,42 +197,42 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
           </h3>
         </div>
 
-        {/* Controles de Ação à Direita (Inspirados nos ícones gráficos, refresh e configurações da referência) */}
+        {/* Controles de Ação à Direita */}
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           {/* Badges de Resumo Executivo */}
           <div className="funnel-header-cards">
             <div
               className="funnel-stat-card"
               style={{
-                background: "#161722",
-                border: "1px solid #282A36",
+                background: "var(--surface-1)",
+                border: "1px solid var(--border-subtle)",
                 borderRadius: "8px",
                 padding: "5px 10px",
                 textAlign: "center",
               }}
             >
-              <span style={{ fontSize: "9.5px", fontWeight: 500, color: "#747786", textTransform: "uppercase", display: "block" }}>
+              <span style={{ fontSize: "9.5px", fontWeight: 500, color: "var(--text-muted)", textTransform: "uppercase", display: "block" }}>
                 Entradas
               </span>
-              <span className="font-numeric" style={{ fontSize: "13.5px", fontWeight: 600, color: "#F5F4FA" }}>
-                {totalStarted} <span style={{ fontSize: "9.5px", fontWeight: 400, color: "#747786" }}>leads</span>
+              <span className="font-numeric" style={{ fontSize: "13.5px", fontWeight: 600, color: "var(--text-primary)" }}>
+                {totalStarted} <span style={{ fontSize: "9.5px", fontWeight: 400, color: "var(--text-muted)" }}>leads</span>
               </span>
             </div>
 
             <div
               className="funnel-stat-card"
               style={{
-                background: "rgba(46, 219, 111, 0.10)",
+                background: "var(--success-soft)",
                 border: "1px solid rgba(46, 219, 111, 0.25)",
                 borderRadius: "8px",
                 padding: "5px 10px",
                 textAlign: "center",
               }}
             >
-              <span style={{ fontSize: "9.5px", fontWeight: 500, color: "#2EDB6F", textTransform: "uppercase", display: "block" }}>
+              <span style={{ fontSize: "9.5px", fontWeight: 500, color: "var(--success)", textTransform: "uppercase", display: "block" }}>
                 Doações
               </span>
-              <span className="font-numeric" style={{ fontSize: "13.5px", fontWeight: 600, color: "#2EDB6F" }}>
+              <span className="font-numeric" style={{ fontSize: "13.5px", fontWeight: 600, color: "var(--success)" }}>
                 {totalConverted} <span style={{ fontSize: "9.5px", fontWeight: 500 }}>pagos</span>
               </span>
             </div>
@@ -240,17 +240,17 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
             <div
               className="funnel-stat-card"
               style={{
-                background: "rgba(189, 180, 239, 0.10)",
-                border: "1px solid rgba(189, 180, 239, 0.25)",
+                background: "var(--accent-soft-bg)",
+                border: "1px solid var(--accent-border)",
                 borderRadius: "8px",
                 padding: "5px 10px",
                 textAlign: "center",
               }}
             >
-              <span style={{ fontSize: "9.5px", fontWeight: 500, color: "#BDB4EF", textTransform: "uppercase", display: "block" }}>
+              <span style={{ fontSize: "9.5px", fontWeight: 500, color: "var(--accent-strong)", textTransform: "uppercase", display: "block" }}>
                 Taxa Global
               </span>
-              <span className="font-numeric" style={{ fontSize: "13.5px", fontWeight: 600, color: "#BDB4EF" }}>
+              <span className="font-numeric" style={{ fontSize: "13.5px", fontWeight: 600, color: "var(--accent-strong)" }}>
                 {globalConversionRate}%
               </span>
             </div>
@@ -266,8 +266,8 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
           alignItems: "center",
           flexWrap: "wrap",
           gap: "20px",
-          background: "#11121A",
-          border: "1px solid #232532",
+          background: "var(--surface-1)",
+          border: "1px solid var(--border-subtle)",
           borderRadius: "14px",
           padding: "18px 20px",
         }}
@@ -280,25 +280,25 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
                 width: "22px",
                 height: "22px",
                 borderRadius: "6px",
-                background: "rgba(240, 93, 102, 0.15)",
+                background: "var(--danger-soft)",
                 border: "1px solid rgba(240, 93, 102, 0.35)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "#F05D66",
+                color: "var(--danger)",
               }}
             >
               <Filter style={{ width: "11px", height: "11px" }} />
             </div>
-            <span style={{ fontSize: "15px", fontWeight: 600, color: "#F5F4FA" }}>
+            <span style={{ fontSize: "15px", fontWeight: 600, color: "var(--text-primary)" }}>
               Quiz Espírita — Carta Psicografada
             </span>
             <span
               style={{
                 fontSize: "9.5px",
                 fontWeight: 600,
-                color: "#2EDB6F",
-                background: "rgba(46, 219, 111, 0.12)",
+                color: "var(--success)",
+                background: "var(--success-soft)",
                 padding: "1px 6px",
                 borderRadius: "999px",
               }}
@@ -307,18 +307,18 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
             </span>
           </div>
 
-          <span style={{ fontSize: "11px", color: "#747786", fontWeight: 400 }}>
+          <span style={{ fontSize: "11px", color: "var(--text-muted)", fontWeight: 400 }}>
             Taxa de Retenção & Conversão Global
           </span>
 
-          {/* Métrica Monumental (Inspirada no 31.39686 da referência) */}
+          {/* Métrica Monumental */}
           <div style={{ display: "flex", alignItems: "center", gap: "14px", marginTop: "4px" }}>
             <span
               className="font-numeric"
               style={{
                 fontSize: "36px",
                 fontWeight: 600,
-                color: "#F5F4FA",
+                color: "var(--text-primary)",
                 letterSpacing: "-0.03em",
                 lineHeight: 1.1,
               }}
@@ -342,54 +342,54 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
           </div>
         </div>
 
-        {/* Linha do Tempo da Jornada (Inspirada no 'Investment Period' da referência) */}
+        {/* Linha do Tempo da Jornada */}
         <div style={{ minWidth: "220px", flex: "0 1 auto" }}>
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", marginBottom: "6px" }}>
-            <span style={{ color: "#A7A9B5", fontWeight: 500 }}>Progresso da Jornada</span>
-            <span style={{ color: "#BDB4EF", fontWeight: 600 }}>8 Etapas Mapeadas</span>
+            <span style={{ color: "var(--text-secondary)", fontWeight: 500 }}>Progresso da Jornada</span>
+            <span style={{ color: "var(--accent-strong)", fontWeight: 600 }}>8 Etapas Mapeadas</span>
           </div>
-          <div style={{ height: "4px", background: "#1E202B", borderRadius: "999px", position: "relative" }}>
+          <div style={{ height: "4px", background: "var(--surface-3)", borderRadius: "999px", position: "relative" }}>
             <div
               style={{
                 width: `${Math.min(100, Math.max(10, Number(globalConversionRate) * 3))}%`,
                 height: "100%",
-                background: "#8A79FF",
+                background: "var(--accent-strong)",
                 borderRadius: "999px",
               }}
             />
           </div>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: "#747786", marginTop: "5px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: "var(--text-muted)", marginTop: "5px" }}>
             <span>Etapa 1: Início</span>
             <span>Etapa 8: Checkout</span>
           </div>
         </div>
       </div>
 
-      {/* ─── 3. Faixa de 4 Indicadores Discretos (Inspirada no Momentum, General, Risk, Reward da referência) ─── */}
+      {/* ─── 3. Faixa de 4 Indicadores Discretos ─── */}
       <div
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(4, 1fr)",
           gap: "10px",
-          borderBottom: "1px solid #1E202B",
+          borderBottom: "1px solid var(--border-subtle)",
           paddingBottom: "14px",
         }}
       >
         <div style={{ fontSize: "11px" }}>
-          <span style={{ color: "#747786", display: "block" }}>Velocidade do Fluxo</span>
-          <span style={{ color: "#F5F4FA", fontWeight: 500 }}>Tempo Real</span>
+          <span style={{ color: "var(--text-muted)", display: "block" }}>Velocidade do Fluxo</span>
+          <span style={{ color: "var(--text-primary)", fontWeight: 500 }}>Tempo Real</span>
         </div>
         <div style={{ fontSize: "11px" }}>
-          <span style={{ color: "#747786", display: "block" }}>Retenção Passo a Passo</span>
-          <span style={{ color: "#2EDB6F", fontWeight: 500 }}>Alta Aderência</span>
+          <span style={{ color: "var(--text-muted)", display: "block" }}>Retenção Passo a Passo</span>
+          <span style={{ color: "var(--success)", fontWeight: 500 }}>Alta Aderência</span>
         </div>
         <div style={{ fontSize: "11px" }}>
-          <span style={{ color: "#747786", display: "block" }}>Gargalo Crítico</span>
-          <span style={{ color: "#BDB4EF", fontWeight: 500 }}>Etapa 7 (Preparação)</span>
+          <span style={{ color: "var(--text-muted)", display: "block" }}>Gargalo Crítico</span>
+          <span style={{ color: "var(--accent-strong)", fontWeight: 500 }}>Etapa 7 (Preparação)</span>
         </div>
         <div style={{ fontSize: "11px" }}>
-          <span style={{ color: "#747786", display: "block" }}>Eficiência no Checkout</span>
-          <span style={{ color: "#F5F4FA", fontWeight: 500 }}>PIX & Stripe</span>
+          <span style={{ color: "var(--text-muted)", display: "block" }}>Eficiência no Checkout</span>
+          <span style={{ color: "var(--text-primary)", fontWeight: 500 }}>PIX & Stripe</span>
         </div>
       </div>
 
@@ -875,21 +875,21 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
         </div>
       </div>
 
-      {/* ─── 4. Rodapé do Painel com 4 Mini Cards (Idêntico ao rodapé do painel da referência) ─── */}
+      {/* ─── 4. Rodapé do Painel com 4 Mini Cards ─── */}
       <div
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
           gap: "12px",
-          borderTop: "1px solid #1E202B",
+          borderTop: "1px solid var(--border-subtle)",
           paddingTop: "16px",
         }}
       >
         {/* Mini Card 1: Tendência de Leads */}
         <div
           style={{
-            background: "#11121A",
-            border: "1px solid #232532",
+            background: "var(--surface-1)",
+            border: "1px solid var(--border-subtle)",
             borderRadius: "12px",
             padding: "12px 14px",
             display: "flex",
@@ -898,26 +898,26 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
           }}
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-            <span style={{ fontSize: "10.5px", color: "#747786", fontWeight: 400 }}>
+            <span style={{ fontSize: "10.5px", color: "var(--text-muted)", fontWeight: 400 }}>
               Tendência de Leads
             </span>
-            <span style={{ fontSize: "9px", color: "#A7A9B5", background: "#161722", border: "1px solid #282A36", padding: "1px 5px", borderRadius: "4px" }}>
+            <span style={{ fontSize: "9px", color: "var(--text-secondary)", background: "var(--surface-3)", border: "1px solid var(--border-subtle)", padding: "1px 5px", borderRadius: "4px" }}>
               24H
             </span>
           </div>
           <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
-            <span className="font-numeric" style={{ fontSize: "18px", fontWeight: 600, color: "#2EDB6F" }}>
+            <span className="font-numeric" style={{ fontSize: "18px", fontWeight: 600, color: "var(--success)" }}>
               +{totalStarted > 0 ? "14.2%" : "0.0%"}
             </span>
-            <span style={{ fontSize: "10px", color: "#747786" }}>vs anterior</span>
+            <span style={{ fontSize: "10px", color: "var(--text-muted)" }}>vs anterior</span>
           </div>
         </div>
 
         {/* Mini Card 2: Ticket Médio */}
         <div
           style={{
-            background: "#11121A",
-            border: "1px solid #232532",
+            background: "var(--surface-1)",
+            border: "1px solid var(--border-subtle)",
             borderRadius: "12px",
             padding: "12px 14px",
             display: "flex",
@@ -926,26 +926,26 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
           }}
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-            <span style={{ fontSize: "10.5px", color: "#747786", fontWeight: 400 }}>
+            <span style={{ fontSize: "10.5px", color: "var(--text-muted)", fontWeight: 400 }}>
               Ticket Médio Geral
             </span>
-            <span style={{ fontSize: "9px", color: "#A7A9B5", background: "#161722", border: "1px solid #282A36", padding: "1px 5px", borderRadius: "4px" }}>
+            <span style={{ fontSize: "9px", color: "var(--text-secondary)", background: "var(--surface-3)", border: "1px solid var(--border-subtle)", padding: "1px 5px", borderRadius: "4px" }}>
               24H
             </span>
           </div>
           <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
-            <span className="font-numeric" style={{ fontSize: "18px", fontWeight: 600, color: "#F5F4FA" }}>
+            <span className="font-numeric" style={{ fontSize: "18px", fontWeight: 600, color: "var(--text-primary)" }}>
               R$ 47,80
             </span>
-            <span style={{ fontSize: "10px", color: "#2EDB6F" }}>+2.4%</span>
+            <span style={{ fontSize: "10px", color: "var(--success)" }}>+2.4%</span>
           </div>
         </div>
 
         {/* Mini Card 3: Conclusão do Quiz */}
         <div
           style={{
-            background: "#11121A",
-            border: "1px solid #232532",
+            background: "var(--surface-1)",
+            border: "1px solid var(--border-subtle)",
             borderRadius: "12px",
             padding: "12px 14px",
             display: "flex",
@@ -954,26 +954,26 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
           }}
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-            <span style={{ fontSize: "10.5px", color: "#747786", fontWeight: 400 }}>
+            <span style={{ fontSize: "10.5px", color: "var(--text-muted)", fontWeight: 400 }}>
               Conclusão do Quiz
             </span>
-            <span style={{ fontSize: "9px", color: "#A7A9B5", background: "#161722", border: "1px solid #282A36", padding: "1px 5px", borderRadius: "4px" }}>
+            <span style={{ fontSize: "9px", color: "var(--text-secondary)", background: "var(--surface-3)", border: "1px solid var(--border-subtle)", padding: "1px 5px", borderRadius: "4px" }}>
               24H
             </span>
           </div>
           <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
-            <span className="font-numeric" style={{ fontSize: "18px", fontWeight: 600, color: "#BDB4EF" }}>
+            <span className="font-numeric" style={{ fontSize: "18px", fontWeight: 600, color: "var(--accent-strong)" }}>
               {globalConversionRate}%
             </span>
-            <span style={{ fontSize: "10px", color: "#747786" }}>chegaram ao fim</span>
+            <span style={{ fontSize: "10px", color: "var(--text-muted)" }}>chegaram ao fim</span>
           </div>
         </div>
 
-        {/* Mini Card 4: Eficiência de Pagamento com Timeline */}
+        {/* Mini Card 4: Eficiência de Pagamento */}
         <div
           style={{
-            background: "#11121A",
-            border: "1px solid #232532",
+            background: "var(--surface-1)",
+            border: "1px solid var(--border-subtle)",
             borderRadius: "12px",
             padding: "12px 14px",
             display: "flex",
@@ -982,20 +982,20 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
           }}
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-            <span style={{ fontSize: "10.5px", color: "#747786", fontWeight: 400 }}>
+            <span style={{ fontSize: "10.5px", color: "var(--text-muted)", fontWeight: 400 }}>
               Eficiência Checkout
             </span>
-            <span style={{ fontSize: "9px", color: "#2EDB6F", background: "rgba(46, 219, 111, 0.12)", padding: "1px 5px", borderRadius: "4px" }}>
+            <span style={{ fontSize: "9px", color: "var(--success)", background: "var(--success-soft)", padding: "1px 5px", borderRadius: "4px" }}>
               Ativo
             </span>
           </div>
           <div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: "#747786", marginBottom: "4px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: "var(--text-muted)", marginBottom: "4px" }}>
               <span>PIX: 84%</span>
               <span>Stripe: 92%</span>
             </div>
-            <div style={{ height: "3px", background: "#1E202B", borderRadius: "99px", overflow: "hidden" }}>
-              <div style={{ width: "88%", height: "100%", background: "#2EDB6F", borderRadius: "99px" }} />
+            <div style={{ height: "3px", background: "var(--surface-3)", borderRadius: "99px", overflow: "hidden" }}>
+              <div style={{ width: "88%", height: "100%", background: "var(--success)", borderRadius: "99px" }} />
             </div>
           </div>
         </div>

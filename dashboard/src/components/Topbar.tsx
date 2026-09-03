@@ -1,6 +1,16 @@
 import { useState } from "react";
-import { Sun, Moon, RefreshCw, Download, Users, Menu, Bell, Search, ShieldCheck, ChevronDown } from "lucide-react";
+import {
+  Sun,
+  Moon,
+  RefreshCw,
+  Download,
+  Users,
+  Search,
+  ShieldCheck,
+  ChevronDown,
+} from "lucide-react";
 import { DateRangeSelector, type DateRangeValue } from "./DateRangeSelector";
+import { NotificationCenter } from "./NotificationCenter";
 import type { Section } from "../App";
 
 interface TopbarProps {
@@ -10,16 +20,16 @@ interface TopbarProps {
   loading: boolean;
   lastUpdate: Date | null;
   section: Section;
+  onNavigate?: (section: Section) => void;
   onExportCsv: () => void;
   dateRange: DateRangeValue;
   onDateRangeChange: (val: DateRangeValue) => void;
   onlineCount: number;
-  onOpenMenu?: () => void;
 }
 
 const SECTION_LABELS: Record<Section, string> = {
   "visao-geral":  "Visão Geral",
-  "rastreamento": "Rastreamento",
+  "rastreamento": "Funil & Telemetria",
   "pedidos":      "Auditoria de Pedidos",
   "relatorios":   "Relatórios & UTMs",
   "whatsapp":     "WhatsApp Tracker",
@@ -34,11 +44,11 @@ export function Topbar({
   loading,
   lastUpdate,
   section,
+  onNavigate,
   onExportCsv,
   dateRange,
   onDateRangeChange,
   onlineCount,
-  onOpenMenu,
 }: TopbarProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -46,105 +56,98 @@ export function Topbar({
     <header
       className="dashboard-topbar"
       style={{
-        height: "64px",
-        background: "#0D0F15",
-        borderBottom: "1px solid #1E202B",
-        padding: "0 24px",
+        height: "62px",
+        background: "var(--topbar-bg, rgba(13, 15, 21, 0.85))",
+        backdropFilter: "blur(20px) saturate(180%)",
+        WebkitBackdropFilter: "blur(20px) saturate(180%)",
+        borderBottom: "1px solid var(--border-subtle, #1E202B)",
+        padding: "0 28px",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        gap: "14px",
+        gap: "16px",
         zIndex: 100,
+        position: "sticky",
+        top: 0,
       }}
     >
-      {/* ─── LADO ESQUERDO: Perfil do Administrador + Status Ao Vivo ─── */}
-      <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0 }}>
-        {onOpenMenu && (
-          <button
-            onClick={onOpenMenu}
-            className="mobile-menu-trigger btn"
-            style={{ padding: "6px 8px", borderRadius: "8px", flexShrink: 0 }}
-            title="Abrir Menu"
-          >
-            <Menu style={{ width: "18px", height: "18px" }} />
-          </button>
-        )}
-
-        {/* Pill de Usuário Administrador (Inspirado no perfil @ryan997 da referência) */}
+      {/* ─── LADO ESQUERDO: Marca OD METRICS + Seletor de Modo + Status Ao Vivo ─── */}
+      <div style={{ display: "flex", alignItems: "center", gap: "14px", minWidth: 0 }}>
+        {/* Logo OD METRICS Minimalista */}
         <div
+          onClick={() => onNavigate && onNavigate("visao-geral")}
           style={{
             display: "flex",
             alignItems: "center",
             gap: "8px",
-            background: "#12131D",
-            border: "1px solid #232534",
-            borderRadius: "999px",
-            padding: "4px 10px 4px 5px",
             cursor: "pointer",
+            userSelect: "none",
           }}
         >
           <div
             style={{
-              width: "24px",
-              height: "24px",
-              borderRadius: "50%",
-              background: "linear-gradient(135deg, #1F2133, #323550)",
-              border: "1px solid #3E4260",
+              width: "28px",
+              height: "28px",
+              borderRadius: "8px",
+              background: "var(--surface-3, #161722)",
+              border: "1px solid var(--accent-border, rgba(189, 180, 239, 0.35))",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: "11px",
-              fontWeight: 600,
-              color: "#BDB4EF",
+              color: "var(--accent-primary, #BDB4EF)",
+              fontWeight: 700,
+              fontSize: "12px",
+              boxShadow: "0 2px 8px rgba(124, 92, 255, 0.18)",
             }}
           >
-            D
+            OD
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            <span style={{ fontSize: "11.5px", color: "#8A8D9F", fontWeight: 400 }}>
-              @theboss
-            </span>
-            <span
-              style={{
-                fontSize: "8.5px",
-                fontWeight: 700,
-                color: "#2EDB6F",
-                background: "rgba(46, 219, 111, 0.12)",
-                padding: "1px 4px",
-                borderRadius: "3px",
-              }}
-            >
-              PRO
-            </span>
-            <span style={{ fontSize: "12px", fontWeight: 600, color: "#F5F4FA" }}>
-              Diogo
-            </span>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+              <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.01em" }}>
+                OD Metrics
+              </span>
+              <span style={{ fontSize: "9px", color: "var(--accent-strong)", fontWeight: 600 }}>PRO</span>
+            </div>
           </div>
-          <ChevronDown style={{ width: "11px", height: "11px", color: "#707281" }} />
         </div>
 
-        {/* Botão de Status Operacional (Inspirado no botão 'Deposit' com cadeado da referência) */}
+        <div style={{ width: "1px", height: "18px", background: "var(--border-subtle)" }} className="desktop-only-control" />
+
+        {/* Pílula de Status Operacional Ao Vivo */}
         <div
           className="desktop-only-control"
           style={{
             display: "flex",
             alignItems: "center",
             gap: "6px",
-            background: "#161722",
-            border: "1px solid #282A38",
+            background: "var(--surface-1)",
+            border: "1px solid var(--border-subtle)",
             borderRadius: "999px",
-            padding: "5px 12px",
-            fontSize: "11.5px",
+            padding: "4px 11px",
+            fontSize: "11px",
             fontWeight: 500,
-            color: "#F5F4FA",
+            color: "var(--text-primary)",
           }}
         >
           <div className="pulse-emerald" />
-          <ShieldCheck style={{ width: "13px", height: "13px", color: "#2EDB6F" }} />
+          <ShieldCheck style={{ width: "12px", height: "12px", color: "#2EDB6F" }} />
           <span>Telemetria Ao Vivo</span>
-          <span style={{ fontSize: "10px", color: "#BDB4EF", background: "rgba(189, 180, 239, 0.12)", padding: "1px 6px", borderRadius: "99px", marginLeft: "2px", display: "inline-flex", alignItems: "center", gap: "3px" }}>
-            <Users style={{ width: "10px", height: "10px" }} />
-            {onlineCount} ativos
+          <span
+            style={{
+              fontSize: "10px",
+              color: "var(--accent-primary)",
+              background: "var(--accent-soft-bg)",
+              padding: "1px 6px",
+              borderRadius: "99px",
+              marginLeft: "2px",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "3px",
+            }}
+          >
+            <Users style={{ width: "9px", height: "9px" }} />
+            {onlineCount}
           </span>
         </div>
 
@@ -154,9 +157,9 @@ export function Topbar({
           style={{
             fontSize: "11px",
             fontWeight: 500,
-            color: "#A7A9B5",
-            background: "#12131D",
-            border: "1px solid #232534",
+            color: "var(--text-muted)",
+            background: "var(--surface-1)",
+            border: "1px solid var(--border-subtle)",
             padding: "3px 9px",
             borderRadius: "999px",
           }}
@@ -165,49 +168,9 @@ export function Topbar({
         </span>
       </div>
 
-      {/* ─── LADO DIREITO: Notificações, Busca, Filtro de Data e Ações ─── */}
+      {/* ─── LADO DIREITO: Busca, Notificações Funcionais, Filtro de Data e Ações ─── */}
       <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
-        {/* Notificações com Badge (Inspirado no sininho com '2' da referência) */}
-        <div
-          style={{
-            position: "relative",
-            width: "32px",
-            height: "32px",
-            borderRadius: "8px",
-            background: "#12131D",
-            border: "1px solid #232534",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#A2A3AE",
-            cursor: "pointer",
-          }}
-          title="Notificações do Sistema"
-        >
-          <Bell style={{ width: "14px", height: "14px" }} />
-          <span
-            style={{
-              position: "absolute",
-              top: "-3px",
-              right: "-3px",
-              width: "15px",
-              height: "15px",
-              borderRadius: "50%",
-              background: "#7C5CFF",
-              color: "#ffffff",
-              fontSize: "9px",
-              fontWeight: 700,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              border: "2px solid #0D0F15",
-            }}
-          >
-            2
-          </span>
-        </div>
-
-        {/* Input de Busca Compacto (Inspirado no 'Search...' da referência) */}
+        {/* Input de Busca Compacto */}
         <div className="desktop-only-control" style={{ position: "relative" }}>
           <Search
             style={{
@@ -217,37 +180,39 @@ export function Topbar({
               transform: "translateY(-50%)",
               width: "12px",
               height: "12px",
-              color: "#707281",
+              color: "var(--text-muted)",
               pointerEvents: "none",
             }}
           />
           <input
             type="text"
-            placeholder="Buscar..."
+            placeholder="Buscar consulente, UTM, pedido..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{
               fontSize: "11.5px",
               padding: "5px 10px 5px 27px",
               borderRadius: "8px",
-              border: "1px solid #232534",
-              background: "#12131D",
-              color: "#F5F4FA",
-              width: "140px",
+              border: "1px solid var(--border-subtle)",
+              background: "var(--surface-1)",
+              color: "var(--text-primary)",
+              width: "150px",
               outline: "none",
-              fontFamily: "inherit",
               transition: "width 0.2s ease, border-color 0.2s ease",
             }}
             onFocus={(e) => {
-              e.currentTarget.style.width = "180px";
-              e.currentTarget.style.borderColor = "rgba(189, 180, 239, 0.4)";
+              e.currentTarget.style.width = "210px";
+              e.currentTarget.style.borderColor = "var(--accent-strong)";
             }}
             onBlur={(e) => {
-              e.currentTarget.style.width = "140px";
-              e.currentTarget.style.borderColor = "#232534";
+              e.currentTarget.style.width = "150px";
+              e.currentTarget.style.borderColor = "var(--border-subtle)";
             }}
           />
         </div>
+
+        {/* Central de Notificações com Dropdown Popover */}
+        <NotificationCenter onNavigate={onNavigate} onlineCount={onlineCount} />
 
         {/* Seletor de Período / Datas no Desktop */}
         {section === "visao-geral" && (
@@ -260,47 +225,84 @@ export function Topbar({
         <button
           onClick={onExportCsv}
           className="btn desktop-only-control"
-          style={{ height: "32px", padding: "0 10px", fontSize: "11.5px", gap: "5px" }}
+          style={{ height: "34px", padding: "0 11px", fontSize: "11.5px", gap: "5px" }}
           title="Exportar dados do período em CSV"
         >
-          <Download style={{ width: "12px", height: "12px", color: "#A2A3AE" }} />
+          <Download style={{ width: "12px", height: "12px", color: "var(--text-secondary)" }} />
           Exportar
         </button>
 
-        {/* Botão Refresh / Sync */}
+        {/* Botão Refresh / Sync com Tooltip Informativo */}
         <button
           onClick={onRefresh}
           disabled={loading}
           className="btn"
           title={lastUpdate ? `Última sincronização: ${lastUpdate.toLocaleTimeString("pt-BR")}. Clique para atualizar.` : "Atualizar dados agora"}
-          style={{ width: "32px", height: "32px", padding: 0, borderRadius: "8px" }}
+          style={{ width: "34px", height: "34px", padding: 0, borderRadius: "9px" }}
         >
           <RefreshCw
             style={{
               width: "12px",
               height: "12px",
-              color: "#A2A3AE",
+              color: "var(--text-secondary)",
               animation: loading ? "spin 1s linear infinite" : "none",
             }}
           />
         </button>
 
-        {/* Alternador de Tema Discreto */}
+        {/* Alternador de Tema Claro / Escuro */}
         <button
           onClick={onToggleTheme}
           className="btn"
           title={`Alternar para modo ${theme === "light" ? "escuro" : "claro"}`}
-          style={{ width: "32px", height: "32px", padding: 0, borderRadius: "8px" }}
+          style={{ width: "34px", height: "34px", padding: 0, borderRadius: "9px" }}
         >
           {theme === "light" ? (
-            <Moon style={{ width: "12px", height: "12px" }} />
+            <Moon style={{ width: "13px", height: "13px", color: "var(--text-secondary)" }} />
           ) : (
-            <Sun style={{ width: "12px", height: "12px" }} />
+            <Sun style={{ width: "13px", height: "13px", color: "var(--text-secondary)" }} />
           )}
         </button>
+
+        {/* Pill de Usuário Administrador */}
+        <div
+          onClick={() => onNavigate && onNavigate("perfil")}
+          className="desktop-only-control"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "7px",
+            background: "var(--surface-1)",
+            border: "1px solid var(--border-subtle)",
+            borderRadius: "999px",
+            padding: "4px 10px 4px 4px",
+            cursor: "pointer",
+          }}
+        >
+          <div
+            style={{
+              width: "24px",
+              height: "24px",
+              borderRadius: "50%",
+              background: "var(--accent-strong)",
+              color: "#FFFFFF",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "11px",
+              fontWeight: 600,
+            }}
+          >
+            D
+          </div>
+          <span style={{ fontSize: "11.5px", fontWeight: 500, color: "var(--text-primary)" }}>
+            Diogo
+          </span>
+          <ChevronDown style={{ width: "11px", height: "11px", color: "var(--text-muted)" }} />
+        </div>
       </div>
 
-      {/* ─── Linha 2: Barra de Datas no Mobile ─── */}
+      {/* Barra de Datas no Mobile */}
       {section === "visao-geral" && (
         <div className="mobile-date-subbar">
           <DateRangeSelector value={dateRange} onChange={onDateRangeChange} />

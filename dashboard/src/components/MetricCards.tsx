@@ -25,7 +25,7 @@ function formatBRL(val: number): string {
 export function MetricCards({ stats, loading }: MetricCardsProps) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-      {/* ─── Cabeçalho da Seção (Inspirado no 'Top Staking Assets' da referência) ─── */}
+      {/* ─── Cabeçalho da Seção ─── */}
       <div
         style={{
           display: "flex",
@@ -36,18 +36,18 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
         }}
       >
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
-            <span style={{ fontSize: "11.5px", color: "#747786", fontWeight: 400 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "3px" }}>
+            <span style={{ fontSize: "11px", color: "var(--text-muted)", fontWeight: 400 }}>
               Métricas consolidadas em tempo real
             </span>
-            <Clock style={{ width: "11px", height: "11px", color: "#747786" }} />
+            <Clock style={{ width: "11px", height: "11px", color: "var(--text-muted)" }} />
             <span
               style={{
                 fontSize: "10px",
                 fontWeight: 600,
-                color: "#A7A9B5",
-                background: "#12131D",
-                border: "1px solid #232532",
+                color: "var(--text-secondary)",
+                background: "var(--surface-1)",
+                border: "1px solid var(--border-subtle)",
                 padding: "1px 6px",
                 borderRadius: "999px",
               }}
@@ -57,31 +57,30 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
           </div>
           <h2
             style={{
-              fontSize: "22px",
+              fontSize: "20px",
               fontWeight: 600,
-              color: "#F5F4FA",
+              color: "var(--text-primary)",
               margin: 0,
-              letterSpacing: "-0.02em",
+              letterSpacing: "-0.015em",
             }}
           >
             Visão Geral & Faturamento
           </h2>
         </div>
 
-        {/* Filtros em Pílulas (Inspirado nos botões 24H, Proof of Stake, Desc da referência) */}
+        {/* Filtros Discretos em Pílulas */}
         <div className="desktop-only-control" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
           <div
             style={{
               display: "flex",
               alignItems: "center",
               gap: "4px",
-              background: "#0D0E17",
-              border: "1px solid #232532",
+              background: "var(--surface-1)",
+              border: "1px solid var(--border-subtle)",
               borderRadius: "8px",
               padding: "4px 10px",
               fontSize: "11px",
-              color: "#A7A9B5",
-              cursor: "pointer",
+              color: "var(--text-secondary)",
             }}
           >
             <span>Período Ativo</span>
@@ -91,13 +90,12 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
               display: "flex",
               alignItems: "center",
               gap: "4px",
-              background: "#0D0E17",
-              border: "1px solid #232532",
+              background: "var(--surface-1)",
+              border: "1px solid var(--border-subtle)",
               borderRadius: "8px",
               padding: "4px 10px",
               fontSize: "11px",
-              color: "#A7A9B5",
-              cursor: "pointer",
+              color: "var(--text-secondary)",
             }}
           >
             <span>Todos Gateways</span>
@@ -107,13 +105,12 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
               display: "flex",
               alignItems: "center",
               gap: "4px",
-              background: "#0D0E17",
-              border: "1px solid #232532",
+              background: "var(--surface-1)",
+              border: "1px solid var(--border-subtle)",
               borderRadius: "8px",
               padding: "4px 10px",
               fontSize: "11px",
-              color: "#A7A9B5",
-              cursor: "pointer",
+              color: "var(--text-secondary)",
             }}
           >
             <span>Consolidado</span>
@@ -121,7 +118,7 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
         </div>
       </div>
 
-      {/* ─── Grid de Cards da Primeira Dobra (3 Cards + 1 Featured Panel) ─── */}
+      {/* ─── Grid de Cards da Primeira Dobra ─── */}
       <div
         style={{
           display: "grid",
@@ -134,40 +131,37 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
           className="card"
           style={{
             padding: "16px 18px",
-            background: "#11121A",
-            border: "1px solid #232532",
-            borderRadius: "16px",
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
             position: "relative",
-            minHeight: "185px",
+            minHeight: "180px",
           }}
         >
           <div>
             {/* Topo: Ícone Tile + Categoria + Seta ↗ */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
                 <div
                   style={{
                     width: "30px",
                     height: "30px",
                     borderRadius: "8px",
-                    background: "rgba(189, 180, 239, 0.12)",
-                    border: "1px solid rgba(189, 180, 239, 0.25)",
+                    background: "var(--accent-soft-bg)",
+                    border: "1px solid var(--accent-border)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    color: "#BDB4EF",
+                    color: "var(--accent-strong)",
                   }}
                 >
-                  <DollarSign style={{ width: "15px", height: "15px" }} strokeWidth={2.0} />
+                  <DollarSign style={{ width: "15px", height: "15px" }} strokeWidth={1.8} />
                 </div>
                 <div>
-                  <span style={{ fontSize: "10px", color: "#747786", textTransform: "uppercase", letterSpacing: "0.04em", display: "block" }}>
+                  <span style={{ fontSize: "10px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.04em", display: "block" }}>
                     Volume Geral
                   </span>
-                  <span style={{ fontSize: "12.5px", fontWeight: 600, color: "#F5F4FA" }}>
+                  <span style={{ fontSize: "12.5px", fontWeight: 600, color: "var(--text-primary)" }}>
                     Faturamento Total
                   </span>
                 </div>
@@ -178,31 +172,31 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
                   width: "22px",
                   height: "22px",
                   borderRadius: "50%",
-                  background: "#161722",
-                  border: "1px solid #282A36",
+                  background: "var(--surface-1)",
+                  border: "1px solid var(--border-subtle)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  color: "#747786",
+                  color: "var(--text-muted)",
                 }}
               >
                 <ArrowUpRight style={{ width: "11px", height: "11px" }} />
               </div>
             </div>
 
-            {/* Taxa / Métrica Principal */}
+            {/* Métrica Principal */}
             <div>
-              <span style={{ fontSize: "10px", color: "#747786", fontWeight: 400 }}>
+              <span style={{ fontSize: "10px", color: "var(--text-muted)", fontWeight: 400 }}>
                 Receita Liquidada
               </span>
               <div style={{ display: "flex", alignItems: "baseline", gap: "8px", marginTop: "2px" }}>
                 <span
                   className="font-numeric"
                   style={{
-                    fontSize: "24px",
+                    fontSize: "23px",
                     fontWeight: 600,
-                    color: "#F5F4FA",
-                    letterSpacing: "-0.025em",
+                    color: "var(--text-primary)",
+                    letterSpacing: "-0.02em",
                   }}
                 >
                   {loading ? "—" : formatBRL(stats.totalRevenue)}
@@ -212,7 +206,7 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
                     style={{
                       fontSize: "10.5px",
                       fontWeight: 600,
-                      color: stats.totalRevenueDiff >= 0 ? "#2EDB6F" : "#F05D66",
+                      color: stats.totalRevenueDiff >= 0 ? "var(--success)" : "var(--danger)",
                       display: "flex",
                       alignItems: "center",
                       gap: "2px",
@@ -225,39 +219,38 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
             </div>
           </div>
 
-          {/* Sparkline Fluido Estilo Stakent com Badge Flutuante */}
-          <div style={{ position: "relative", width: "100%", height: "45px", marginTop: "10px" }}>
-            <svg viewBox="0 0 200 45" style={{ width: "100%", height: "100%", overflow: "visible" }}>
+          {/* Sparkline Fluido com Badge */}
+          <div style={{ position: "relative", width: "100%", height: "42px", marginTop: "8px" }}>
+            <svg viewBox="0 0 200 42" style={{ width: "100%", height: "100%", overflow: "visible" }}>
               <defs>
                 <linearGradient id="gradTotal" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#8A79FF" stopOpacity="0.25" />
-                  <stop offset="100%" stopColor="#8A79FF" stopOpacity="0.0" />
+                  <stop offset="0%" stopColor="var(--chart-line-primary)" stopOpacity="0.25" />
+                  <stop offset="100%" stopColor="var(--chart-line-primary)" stopOpacity="0.0" />
                 </linearGradient>
               </defs>
               <path
-                d="M 0,38 Q 45,35 80,24 T 150,15 T 200,6"
+                d="M 0,35 Q 45,32 80,22 T 150,14 T 200,6"
                 fill="none"
-                stroke="#8A79FF"
+                stroke="var(--chart-line-primary)"
                 strokeWidth="1.8"
               />
               <path
-                d="M 0,38 Q 45,35 80,24 T 150,15 T 200,6 L 200,45 L 0,45 Z"
+                d="M 0,35 Q 45,32 80,22 T 150,14 T 200,6 L 200,42 L 0,42 Z"
                 fill="url(#gradTotal)"
               />
-              {/* Ponto Luminoso de Pico */}
-              <circle cx="200" cy="6" r="3" fill="#BDB4EF" />
-              <circle cx="200" cy="6" r="6" fill="#8A79FF" opacity="0.4" />
+              <circle cx="200" cy="6" r="3" fill="var(--accent-primary)" />
+              <circle cx="200" cy="6" r="6" fill="var(--chart-line-primary)" opacity="0.4" />
             </svg>
             <span
               style={{
                 position: "absolute",
                 top: "-4px",
-                right: "12px",
+                right: "10px",
                 fontSize: "9.5px",
                 fontWeight: 600,
-                color: "#BDB4EF",
-                background: "#161725",
-                border: "1px solid #2D2F44",
+                color: "var(--accent-strong)",
+                background: "var(--surface-1)",
+                border: "1px solid var(--border-subtle)",
                 borderRadius: "999px",
                 padding: "1px 6px",
               }}
@@ -272,40 +265,37 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
           className="card"
           style={{
             padding: "16px 18px",
-            background: "#11121A",
-            border: "1px solid #232532",
-            borderRadius: "16px",
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
             position: "relative",
-            minHeight: "185px",
+            minHeight: "180px",
           }}
         >
           <div>
-            {/* Topo: Ícone Tile + Categoria + Seta ↗ */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
+            {/* Topo */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
                 <div
                   style={{
                     width: "30px",
                     height: "30px",
                     borderRadius: "8px",
-                    background: "rgba(46, 219, 111, 0.12)",
+                    background: "var(--success-soft)",
                     border: "1px solid rgba(46, 219, 111, 0.25)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    color: "#2EDB6F",
+                    color: "var(--success)",
                   }}
                 >
-                  <QrCode style={{ width: "15px", height: "15px" }} strokeWidth={2.0} />
+                  <QrCode style={{ width: "15px", height: "15px" }} strokeWidth={1.8} />
                 </div>
                 <div>
-                  <span style={{ fontSize: "10px", color: "#747786", textTransform: "uppercase", letterSpacing: "0.04em", display: "block" }}>
+                  <span style={{ fontSize: "10px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.04em", display: "block" }}>
                     Banco Central
                   </span>
-                  <span style={{ fontSize: "12.5px", fontWeight: 600, color: "#F5F4FA" }}>
+                  <span style={{ fontSize: "12.5px", fontWeight: 600, color: "var(--text-primary)" }}>
                     Conversões no PIX
                   </span>
                 </div>
@@ -316,31 +306,31 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
                   width: "22px",
                   height: "22px",
                   borderRadius: "50%",
-                  background: "#161722",
-                  border: "1px solid #282A36",
+                  background: "var(--surface-1)",
+                  border: "1px solid var(--border-subtle)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  color: "#747786",
+                  color: "var(--text-muted)",
                 }}
               >
                 <ArrowUpRight style={{ width: "11px", height: "11px" }} />
               </div>
             </div>
 
-            {/* Taxa / Métrica Principal */}
+            {/* Métrica */}
             <div>
-              <span style={{ fontSize: "10px", color: "#747786", fontWeight: 400 }}>
+              <span style={{ fontSize: "10px", color: "var(--text-muted)", fontWeight: 400 }}>
                 Volume Liquidado
               </span>
               <div style={{ display: "flex", alignItems: "baseline", gap: "8px", marginTop: "2px" }}>
                 <span
                   className="font-numeric"
                   style={{
-                    fontSize: "24px",
+                    fontSize: "23px",
                     fontWeight: 600,
-                    color: "#2EDB6F",
-                    letterSpacing: "-0.025em",
+                    color: "var(--success)",
+                    letterSpacing: "-0.02em",
                   }}
                 >
                   {loading ? "—" : formatBRL(stats.pixRevenue)}
@@ -349,7 +339,7 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
                   style={{
                     fontSize: "10.5px",
                     fontWeight: 600,
-                    color: "#2EDB6F",
+                    color: "var(--success)",
                     display: "flex",
                     alignItems: "center",
                     gap: "2px",
@@ -361,9 +351,9 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
             </div>
           </div>
 
-          {/* Sparkline Fluido Verde com Badge Flutuante */}
-          <div style={{ position: "relative", width: "100%", height: "45px", marginTop: "10px" }}>
-            <svg viewBox="0 0 200 45" style={{ width: "100%", height: "100%", overflow: "visible" }}>
+          {/* Sparkline Verde */}
+          <div style={{ position: "relative", width: "100%", height: "42px", marginTop: "8px" }}>
+            <svg viewBox="0 0 200 42" style={{ width: "100%", height: "100%", overflow: "visible" }}>
               <defs>
                 <linearGradient id="gradPix" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#2EDB6F" stopOpacity="0.25" />
@@ -371,13 +361,13 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
                 </linearGradient>
               </defs>
               <path
-                d="M 0,34 Q 50,30 95,20 T 155,12 T 200,4"
+                d="M 0,32 Q 50,28 95,18 T 155,10 T 200,4"
                 fill="none"
                 stroke="#2EDB6F"
                 strokeWidth="1.8"
               />
               <path
-                d="M 0,34 Q 50,30 95,20 T 155,12 T 200,4 L 200,45 L 0,45 Z"
+                d="M 0,32 Q 50,28 95,18 T 155,10 T 200,4 L 200,42 L 0,42 Z"
                 fill="url(#gradPix)"
               />
               <circle cx="200" cy="4" r="3" fill="#2EDB6F" />
@@ -387,11 +377,11 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
               style={{
                 position: "absolute",
                 top: "-4px",
-                right: "12px",
+                right: "10px",
                 fontSize: "9.5px",
                 fontWeight: 600,
-                color: "#2EDB6F",
-                background: "rgba(46, 219, 111, 0.12)",
+                color: "var(--success)",
+                background: "var(--success-soft)",
                 border: "1px solid rgba(46, 219, 111, 0.28)",
                 borderRadius: "999px",
                 padding: "1px 6px",
@@ -407,40 +397,37 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
           className="card"
           style={{
             padding: "16px 18px",
-            background: "#11121A",
-            border: "1px solid #232532",
-            borderRadius: "16px",
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
             position: "relative",
-            minHeight: "185px",
+            minHeight: "180px",
           }}
         >
           <div>
-            {/* Topo: Ícone Tile + Categoria + Seta ↗ */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
+            {/* Topo */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
                 <div
                   style={{
                     width: "30px",
                     height: "30px",
                     borderRadius: "8px",
-                    background: "rgba(124, 92, 255, 0.12)",
-                    border: "1px solid rgba(124, 92, 255, 0.25)",
+                    background: "var(--accent-soft-bg)",
+                    border: "1px solid var(--accent-border)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    color: "#C4BAFF",
+                    color: "var(--accent-strong)",
                   }}
                 >
-                  <CreditCard style={{ width: "15px", height: "15px" }} strokeWidth={2.0} />
+                  <CreditCard style={{ width: "15px", height: "15px" }} strokeWidth={1.8} />
                 </div>
                 <div>
-                  <span style={{ fontSize: "10px", color: "#747786", textTransform: "uppercase", letterSpacing: "0.04em", display: "block" }}>
+                  <span style={{ fontSize: "10px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.04em", display: "block" }}>
                     Stripe Gateway
                   </span>
-                  <span style={{ fontSize: "12.5px", fontWeight: 600, color: "#F5F4FA" }}>
+                  <span style={{ fontSize: "12.5px", fontWeight: 600, color: "var(--text-primary)" }}>
                     Cartão de Crédito
                   </span>
                 </div>
@@ -451,31 +438,31 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
                   width: "22px",
                   height: "22px",
                   borderRadius: "50%",
-                  background: "#161722",
-                  border: "1px solid #282A36",
+                  background: "var(--surface-1)",
+                  border: "1px solid var(--border-subtle)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  color: "#747786",
+                  color: "var(--text-muted)",
                 }}
               >
                 <ArrowUpRight style={{ width: "11px", height: "11px" }} />
               </div>
             </div>
 
-            {/* Taxa / Métrica Principal */}
+            {/* Métrica */}
             <div>
-              <span style={{ fontSize: "10px", color: "#747786", fontWeight: 400 }}>
+              <span style={{ fontSize: "10px", color: "var(--text-muted)", fontWeight: 400 }}>
                 Volume Aprovado
               </span>
               <div style={{ display: "flex", alignItems: "baseline", gap: "8px", marginTop: "2px" }}>
                 <span
                   className="font-numeric"
                   style={{
-                    fontSize: "24px",
+                    fontSize: "23px",
                     fontWeight: 600,
-                    color: "#C4BAFF",
-                    letterSpacing: "-0.025em",
+                    color: "var(--accent-strong)",
+                    letterSpacing: "-0.02em",
                   }}
                 >
                   {loading ? "—" : formatBRL(stats.cardRevenue)}
@@ -484,7 +471,7 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
                   style={{
                     fontSize: "10.5px",
                     fontWeight: 600,
-                    color: "#C4BAFF",
+                    color: "var(--accent-strong)",
                     display: "flex",
                     alignItems: "center",
                     gap: "2px",
@@ -496,9 +483,9 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
             </div>
           </div>
 
-          {/* Sparkline Fluido Roxo/Lavender com Ponto */}
-          <div style={{ position: "relative", width: "100%", height: "45px", marginTop: "10px" }}>
-            <svg viewBox="0 0 200 45" style={{ width: "100%", height: "100%", overflow: "visible" }}>
+          {/* Sparkline Roxo */}
+          <div style={{ position: "relative", width: "100%", height: "42px", marginTop: "8px" }}>
+            <svg viewBox="0 0 200 42" style={{ width: "100%", height: "100%", overflow: "visible" }}>
               <defs>
                 <linearGradient id="gradCard" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#7C5CFF" stopOpacity="0.25" />
@@ -506,28 +493,28 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
                 </linearGradient>
               </defs>
               <path
-                d="M 0,36 Q 55,32 110,22 T 165,14 T 200,8"
+                d="M 0,34 Q 55,30 110,20 T 165,12 T 200,6"
                 fill="none"
                 stroke="#7C5CFF"
                 strokeWidth="1.8"
               />
               <path
-                d="M 0,36 Q 55,32 110,22 T 165,14 T 200,8 L 200,45 L 0,45 Z"
+                d="M 0,34 Q 55,30 110,20 T 165,12 T 200,6 L 200,42 L 0,42 Z"
                 fill="url(#gradCard)"
               />
-              <circle cx="200" cy="8" r="3" fill="#C4BAFF" />
-              <circle cx="200" cy="8" r="6" fill="#7C5CFF" opacity="0.4" />
+              <circle cx="200" cy="6" r="3" fill="#C4BAFF" />
+              <circle cx="200" cy="6" r="6" fill="#7C5CFF" opacity="0.4" />
             </svg>
             <span
               style={{
                 position: "absolute",
                 top: "-4px",
-                right: "12px",
+                right: "10px",
                 fontSize: "9.5px",
                 fontWeight: 600,
-                color: "#C4BAFF",
-                background: "rgba(124, 92, 255, 0.12)",
-                border: "1px solid rgba(124, 92, 255, 0.28)",
+                color: "var(--accent-strong)",
+                background: "var(--surface-1)",
+                border: "1px solid var(--border-subtle)",
                 borderRadius: "999px",
                 padding: "1px 6px",
               }}
@@ -537,40 +524,39 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
           </div>
         </div>
 
-        {/* CARD 4: Featured Panel (Inspirado no 'Liquid Staking Portfolio' da referência) */}
+        {/* CARD 4: Featured Panel Adaptável (Dark & Light) */}
         <div
           className="card"
           style={{
             padding: "18px 20px",
-            background: "linear-gradient(180deg, #090A1A 0%, #100C2A 48%, #3A238A 100%)",
-            border: "1px solid rgba(189, 180, 239, 0.28)",
+            background: "var(--live-banner-bg, linear-gradient(180deg, #101124 0%, #1A1340 50%, #362480 100%))",
+            border: "1px solid var(--accent-border)",
             borderRadius: "16px",
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
             position: "relative",
             overflow: "hidden",
-            boxShadow: "0 10px 30px rgba(74, 48, 164, 0.22)",
-            minHeight: "185px",
+            minHeight: "180px",
           }}
         >
-          {/* Topo: Marca OD METRICS + Badge 'Novo' */}
+          {/* Topo */}
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <Sparkles style={{ width: "13px", height: "13px", color: "#BDB4EF" }} />
-                <span style={{ fontSize: "12px", fontWeight: 700, color: "#F5F4FA", letterSpacing: "0.02em" }}>
+                <Sparkles style={{ width: "13px", height: "13px", color: "var(--accent-primary)" }} />
+                <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-primary)", letterSpacing: "0.02em" }}>
                   OD METRICS
                 </span>
-                <span style={{ fontSize: "9px", color: "#BDB4EF" }}>®</span>
+                <span style={{ fontSize: "9px", color: "var(--accent-primary)" }}>®</span>
               </div>
               <span
                 style={{
                   fontSize: "9.5px",
                   fontWeight: 600,
-                  color: "#F5F4FA",
-                  background: "rgba(255, 255, 255, 0.15)",
-                  border: "1px solid rgba(255, 255, 255, 0.25)",
+                  color: "var(--text-primary)",
+                  background: "var(--accent-soft-bg)",
+                  border: "1px solid var(--accent-border)",
                   borderRadius: "999px",
                   padding: "2px 7px",
                 }}
@@ -581,9 +567,9 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
 
             <h3
               style={{
-                fontSize: "14.5px",
+                fontSize: "14px",
                 fontWeight: 600,
-                color: "#F5F4FA",
+                color: "var(--text-primary)",
                 margin: "0 0 4px",
                 letterSpacing: "-0.01em",
               }}
@@ -593,17 +579,16 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
             <p
               style={{
                 fontSize: "11px",
-                color: "#BDB4EF",
+                color: "var(--text-secondary)",
                 margin: 0,
                 lineHeight: 1.35,
-                opacity: 0.85,
               }}
             >
-              {stats.newSubscriptions.toLocaleString("pt-BR")} consulentes iniciaram a jornada · {stats.newOrders} converteram em doações.
+              {stats.newSubscriptions.toLocaleString("pt-BR")} consulentes no quiz · {stats.newOrders} converteram em doações.
             </p>
           </div>
 
-          {/* Botões de Ação da Pílula (Idênticos aos botões 'Connect' e 'Enter' da referência) */}
+          {/* Botões de Ação */}
           <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "12px" }}>
             <button
               className="btn btn-primary"
@@ -629,8 +614,8 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
                 justifyContent: "center",
                 gap: "5px",
                 fontSize: "10.5px",
-                color: "rgba(255, 255, 255, 0.75)",
-                padding: "3px 0",
+                color: "var(--text-muted)",
+                padding: "2px 0",
               }}
             >
               <Lock style={{ width: "10px", height: "10px" }} />

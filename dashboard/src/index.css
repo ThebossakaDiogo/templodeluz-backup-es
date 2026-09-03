@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
 *, *::before, *::after {
@@ -12,42 +12,42 @@ html, body {
 }
 
 /* ══════════════════════════════════════════════════════════════════════
-   OD METRICS: DARK APPLE DASHBOARD VISUAL SYSTEM (SOURCE OF TRUTH)
-   Inspiração: Apple macOS/iOS, superfícies em camadas quase pretas,
-   acento lavender/purple (#BDB4EF), bordas hairline de 1px (#232532).
+   OD METRICS 3.0: DESIGN SYSTEM FLUIDO (LIGHT / DARK HARMONIZADOS)
+   Tipografia fina e avançada, dock flutuante de navegação e contraste impecável
    ══════════════════════════════════════════════════════════════════════ */
 
 :root, [data-theme="dark"] {
-  /* Cores de Superfície em Camadas */
-  --app-bg:           #05060F;
-  --sidebar-bg:       #060710;
-  --topbar-bg:        #0D0F15;
-  --surface-1:        #0D0E17;
-  --surface-2:        #11121A;
-  --surface-3:        #161722;
-  --surface-hover:    #1A1B27;
-  --surface-selected: #20212D;
+  /* Fundo e Superfícies Escuras em Camadas Espaciais */
+  --app-bg:           #07080F;
+  --bg-root:          #07080F;
+  --topbar-bg:        rgba(10, 11, 19, 0.85);
+  --surface-1:        #0C0D17;
+  --surface-2:        #11121E;
+  --surface-3:        #161826;
+  --surface-card:     #10111D;
+  --surface-hover:    #181A2A;
+  --surface-selected: #1E2034;
 
-  /* Bordas Hairline e Divisores Sutis */
-  --border-subtle:    #232532;
-  --border-strong:    #303241;
-  --divider:          rgba(255, 255, 255, 0.075);
+  /* Bordas Hairline de Alta Definição */
+  --border-subtle:    #1E2030;
+  --border-strong:    #2C2F45;
+  --divider:          rgba(255, 255, 255, 0.07);
 
-  /* Tipografia SF Pro / Inter */
-  --text-primary:     #F5F4FA;
-  --text-secondary:   #A2A3AE;
-  --text-muted:       #707281;
-  --text-disabled:    #4E5060;
+  /* Tipografia Fina e Avançada */
+  --text-primary:     #F5F5FA;
+  --text-secondary:   #9DA0B5;
+  --text-muted:       #6C6F86;
+  --text-disabled:    #4A4C60;
 
-  /* Acentos de Interação Apple Lavender */
+  /* Acentos Lavanda e Roxo Cósmico */
   --accent-primary:       #BDB4EF;
-  --accent-primary-hover: #CBC3FF;
+  --accent-primary-hover: #CDC6F8;
   --accent-strong:        #7C5CFF;
   --accent-deep:          #5E46D8;
   --accent-soft-bg:       rgba(189, 180, 239, 0.12);
   --accent-border:        rgba(189, 180, 239, 0.28);
 
-  /* Status Semafóricos Apple */
+  /* Status e Semáforos */
   --success:          #2EDB6F;
   --success-soft:     rgba(46, 219, 111, 0.12);
   --danger:           #F05D66;
@@ -56,59 +56,84 @@ html, body {
   --warning-soft:     rgba(244, 184, 63, 0.12);
   --info:             #8A7CFF;
 
-  /* Gráficos Minimalistas */
-  --chart-grid:           rgba(255, 255, 255, 0.06);
+  /* Gráficos */
+  --chart-grid:           rgba(255, 255, 255, 0.05);
   --chart-line-primary:   #8A79FF;
   --chart-line-secondary: #C4BAFF;
-  --chart-negative:       #F05D66;
 
-  /* Aliases do App & Compatibilidade */
-  --bg-root:        var(--app-bg);
-  --bg-surface:     var(--surface-2);
+  /* Floating Dock & Sombras */
+  --dock-bg:          rgba(14, 15, 24, 0.82);
+  --dock-border:      rgba(255, 255, 255, 0.10);
+  --shadow-card:      0 8px 26px rgba(0, 0, 0, 0.35);
+  --shadow-hover:     0 12px 34px rgba(0, 0, 0, 0.45);
+  --shadow-dock:      0 16px 44px -4px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.08);
+
+  /* Aliases */
+  --bg-surface:     var(--surface-card);
   --bg-surface-alt: var(--surface-1);
-  --bg-sidebar:     var(--sidebar-bg);
   --border:         var(--border-subtle);
-
   --primary-blue:   var(--accent-strong);
   --primary-green:  var(--accent-primary);
-  --accent-cyan:    var(--accent-primary-hover);
-  --accent-mint:    var(--accent-primary);
-
-  --live-banner-bg:     linear-gradient(180deg, #080817 0%, #0D0B22 48%, #36286B 100%);
-  --live-banner-border: rgba(189, 180, 239, 0.26);
-  --live-banner-text:   #F5F4FA;
-  --live-banner-sub:    #A2A3AE;
-
-  --glow-emerald:   0 0 24px rgba(124, 92, 255, 0.15);
-  --glow-navy:      0 0 20px rgba(94, 70, 216, 0.15);
-  --shadow-card:    0 8px 30px rgba(0, 0, 0, 0.18);
-  --shadow-hover:   0 12px 36px rgba(0, 0, 0, 0.28);
 }
 
 [data-theme="light"] {
-  /* Modo Claro Apple (Zinc / Platina Suave) */
-  --bg-root:        #F6F7FB;
-  --bg-surface:     #FFFFFF;
-  --bg-surface-alt: #EDEFF5;
-  --bg-sidebar:     #0D0F17;
-  --border:         rgba(0, 0, 0, 0.08);
-  --border-subtle:  rgba(0, 0, 0, 0.06);
-  --border-strong:  rgba(0, 0, 0, 0.14);
-  --divider:        rgba(0, 0, 0, 0.06);
+  /* Fundo e Superfícies Claras Apple / Stripe */
+  --app-bg:           #F8F9FD;
+  --bg-root:          #F8F9FD;
+  --topbar-bg:        rgba(255, 255, 255, 0.88);
+  --surface-1:        #FFFFFF;
+  --surface-2:        #FFFFFF;
+  --surface-3:        #F1F3F9;
+  --surface-card:     #FFFFFF;
+  --surface-hover:    #F4F6FC;
+  --surface-selected: #EBF0FA;
 
-  --text-primary:   #12131C;
-  --text-secondary: #4B4D5E;
-  --text-muted:     #7B7D8F;
+  /* Bordas Hairline Suaves e Discretas */
+  --border-subtle:    #E4E7F0;
+  --border-strong:    #D1D6E4;
+  --divider:          rgba(0, 0, 0, 0.06);
 
+  /* Tipografia Fina e Legível */
+  --text-primary:     #10121D;
+  --text-secondary:   #4A4F65;
+  --text-muted:       #7D839B;
+  --text-disabled:    #9DA3B8;
+
+  /* Acentos Elegantes no Claro */
   --accent-primary:       #6E50E0;
   --accent-primary-hover: #5A3BC7;
+  --accent-strong:        #6E50E0;
+  --accent-deep:          #5339B8;
   --accent-soft-bg:       rgba(110, 80, 224, 0.08);
+  --accent-border:        rgba(110, 80, 224, 0.22);
 
-  --primary-green:  #6E50E0;
-  --primary-blue:   #2563EB;
+  /* Status */
+  --success:          #16A34A;
+  --success-soft:     rgba(22, 163, 74, 0.10);
+  --danger:           #E11D48;
+  --danger-soft:      rgba(225, 29, 72, 0.10);
+  --warning:          #D97706;
+  --warning-soft:     rgba(217, 119, 6, 0.10);
+  --info:             #4F46E5;
 
-  --shadow-card:    0 4px 20px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
-  --shadow-hover:   0 8px 28px rgba(0, 0, 0, 0.08);
+  /* Gráficos no Claro */
+  --chart-grid:           rgba(0, 0, 0, 0.04);
+  --chart-line-primary:   #6E50E0;
+  --chart-line-secondary: #9B82FF;
+
+  /* Floating Dock & Sombras no Claro */
+  --dock-bg:          rgba(255, 255, 255, 0.90);
+  --dock-border:      rgba(0, 0, 0, 0.08);
+  --shadow-card:      0 2px 14px -2px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03);
+  --shadow-hover:     0 8px 24px -4px rgba(0, 0, 0, 0.10);
+  --shadow-dock:      0 16px 40px -8px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.06);
+
+  /* Aliases */
+  --bg-surface:     var(--surface-card);
+  --bg-surface-alt: var(--surface-3);
+  --border:         var(--border-subtle);
+  --primary-blue:   var(--accent-strong);
+  --primary-green:  var(--accent-primary);
 }
 
 /* ── Reset e Estrutura ─────────────────────────────────────────────── */
@@ -123,11 +148,12 @@ html, body, #root {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', Inter, ui-sans-serif, system-ui, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Plus Jakarta Sans", "SF Pro Display", Inter, ui-sans-serif, system-ui, sans-serif;
   background: var(--bg-root);
   color: var(--text-primary);
   transition: background 0.2s ease, color 0.15s ease;
-  letter-spacing: -0.010em;
+  letter-spacing: -0.012em;
+  font-weight: 400;
 }
 
 /* Tipografia Numérica Precisa */
@@ -137,59 +163,257 @@ body {
   letter-spacing: -0.025em;
 }
 
-/* ── Card Apple: Camadas Escuras, Borda 1px Hairline, Raio 16px ────── */
+/* ── Card: Camadas, Borda Hairline, Raio 16px ────── */
 .card {
-  background: var(--surface-2);
+  background: var(--surface-card);
   border: 1px solid var(--border-subtle);
   border-radius: 16px;
   box-shadow: var(--shadow-card);
   position: relative;
-  transition: border-color 0.18s ease, background 0.18s ease;
+  transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+  color: var(--text-primary);
 }
 
 .card:hover {
   border-color: var(--border-strong);
 }
 
-/* ── Botões Apple Precision ─────────────────────────────────────────── */
+/* ── Botões Precision ─────────────────────────────────────────── */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 7px;
   font-family: inherit;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 500;
   border-radius: 9px;
-  height: 36px;
-  padding: 0 14px;
-  border: 1px solid #2B2D39;
-  background: #12131C;
-  color: #F2F1F6;
+  height: 34px;
+  padding: 0 13px;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-1);
+  color: var(--text-primary);
   cursor: pointer;
   transition: all 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
   white-space: nowrap;
   user-select: none;
 }
 .btn:hover {
-  background: #181924;
-  border-color: #383A4A;
+  background: var(--surface-hover);
+  border-color: var(--border-strong);
+  color: var(--text-primary);
 }
 .btn:active {
   transform: translateY(1px);
 }
 
-/* Botão Primário Lavender Apple */
+/* Botão Primário */
 .btn-emerald, .btn-primary {
-  background: #BDB4EF !important;
-  color: #090A10 !important;
-  font-weight: 600 !important;
-  border: 1px solid rgba(255, 255, 255, 0.16) !important;
-  box-shadow: 0 2px 8px rgba(189, 180, 239, 0.2) !important;
+  background: var(--accent-strong) !important;
+  color: #FFFFFF !important;
+  font-weight: 550 !important;
+  border: 1px solid transparent !important;
+  box-shadow: 0 2px 10px rgba(124, 92, 255, 0.25) !important;
 }
 .btn-emerald:hover, .btn-primary:hover {
-  background: #CBC3FF !important;
-  box-shadow: 0 4px 14px rgba(189, 180, 239, 0.3) !important;
+  filter: brightness(1.08);
+  box-shadow: 0 4px 16px rgba(124, 92, 255, 0.35) !important;
+}
+
+/* Inputs, Selects e Textareas Adaptáveis */
+input, select, textarea {
+  background: var(--surface-1);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  font-family: inherit;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   FLOATING DOCK NAVIGATION (MENU DE RODAPÉ FLUTUANTE ULTRA-PREMIUM)
+   ══════════════════════════════════════════════════════════════════════ */
+.floating-dock-container {
+  position: fixed;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
+  pointer-events: none;
+  width: auto;
+  max-width: calc(100vw - 32px);
+}
+
+.floating-dock-bar {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+  background: var(--dock-bg);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--dock-border);
+  border-radius: 999px;
+  box-shadow: var(--shadow-dock);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dock-nav-group {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.dock-item-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.dock-item-btn:hover {
+  color: var(--text-primary);
+  background: var(--surface-hover);
+}
+
+.dock-item-btn.active {
+  color: var(--text-primary);
+  background: var(--surface-selected);
+  border-color: var(--border-strong);
+  font-weight: 550;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.dock-icon {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  transition: transform 0.18s ease;
+}
+
+.dock-item-btn:hover .dock-icon {
+  transform: translateY(-1px);
+}
+
+.dock-item-label {
+  display: inline-block;
+  letter-spacing: -0.01em;
+}
+
+.dock-badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: var(--accent-strong);
+  color: #FFFFFF;
+  margin-left: 2px;
+}
+
+.dock-tooltip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface-1);
+  color: var(--text-primary);
+  border: 1px solid var(--border-strong);
+  padding: 4px 9px;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+  animation: tooltipFade 0.15s ease-out;
+}
+
+@keyframes tooltipFade {
+  from { opacity: 0; transform: translate(-50%, 4px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.dock-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border-subtle);
+  margin: 0 4px;
+}
+
+.dock-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.dock-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.dock-action-btn:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.dock-action-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.dock-signout:hover {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+@media (max-width: 768px) {
+  .floating-dock-container {
+    bottom: 12px;
+    width: calc(100vw - 16px);
+    max-width: calc(100vw - 16px);
+  }
+  .floating-dock-bar {
+    width: 100%;
+    justify-content: space-around;
+    padding: 5px 6px;
+    gap: 2px;
+  }
+  .dock-item-btn {
+    padding: 8px 9px;
+    gap: 0;
+  }
+  .dock-item-label {
+    display: none;
+  }
+  .dock-divider {
+    display: none;
+  }
+}
+
+/* Animação para Popover de Notificações */
+@keyframes dropdownFadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ── Badges Minimalistas ────────────────────────────────────────────── */
