@@ -62,21 +62,21 @@ export function PaymentMethodsPieChart({ orders, loading }: PaymentMethodsPieCha
               width: "30px",
               height: "30px",
               borderRadius: "8px",
-              background: "#161722",
-              border: "1px solid #282A36",
+              background: "var(--surface-1)",
+              border: "1px solid var(--border-subtle)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "#BDB4EF",
+              color: "var(--accent-strong)",
             }}
           >
             <PieIcon style={{ width: "15px", height: "15px" }} strokeWidth={1.8} />
           </div>
           <div>
-            <h3 style={{ fontSize: "13.5px", fontWeight: 600, color: "#F5F4FA", margin: 0, letterSpacing: "-0.01em" }}>
+            <h3 style={{ fontSize: "13.5px", fontWeight: 600, color: "var(--text-primary)", margin: 0, letterSpacing: "-0.01em" }}>
               Método de Pagamento (PIX vs Cartão)
             </h3>
-            <p style={{ fontSize: "11px", color: "#707281", margin: "2px 0 0", fontWeight: 400 }}>
+            <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: "2px 0 0", fontWeight: 400 }}>
               Onde cada consulente realizou a doação
             </p>
           </div>
@@ -86,9 +86,9 @@ export function PaymentMethodsPieChart({ orders, loading }: PaymentMethodsPieCha
           style={{
             fontSize: "11px",
             fontWeight: 500,
-            color: "#A2A3AE",
-            background: "#161722",
-            border: "1px solid #282A36",
+            color: "var(--text-secondary)",
+            background: "var(--surface-1)",
+            border: "1px solid var(--border-subtle)",
             borderRadius: "999px",
             padding: "2px 8px",
           }}

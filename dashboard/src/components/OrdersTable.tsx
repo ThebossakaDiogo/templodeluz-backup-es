@@ -244,9 +244,9 @@ export function OrdersTable({ orders, loading, compact = false }: OrdersTablePro
                 fontSize: "12px",
                 padding: "6px 12px 6px 30px",
                 borderRadius: "8px",
-                border: "1px solid #282A36",
-                background: "#0B0C14",
-                color: "#F5F4FA",
+                border: "1px solid var(--border-subtle)",
+                background: "var(--surface-1)",
+                color: "var(--text-primary)",
                 width: "200px",
                 outline: "none",
                 fontFamily: "inherit",
@@ -282,11 +282,11 @@ export function OrdersTable({ orders, loading, compact = false }: OrdersTablePro
                     textAlign: "left",
                     fontSize: "10px",
                     fontWeight: 500,
-                    color: "#707281",
+                    color: "var(--text-muted)",
                     textTransform: "uppercase",
                     letterSpacing: "0.05em",
-                    background: "#0D0E16",
-                    borderBottom: "1px solid #232532",
+                    background: "var(--surface-1)",
+                    borderBottom: "1px solid var(--border-subtle)",
                     whiteSpace: "nowrap",
                   }}
                 >
@@ -330,24 +330,24 @@ export function OrdersTable({ orders, loading, compact = false }: OrdersTablePro
                   <tr
                     key={order.id}
                     style={{
-                      background: idx % 2 === 0 ? "transparent" : "rgba(255,255,255,0.012)",
+                      background: idx % 2 === 0 ? "transparent" : "var(--surface-hover)",
                       transition: "background 0.12s ease",
                     }}
                     onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLTableRowElement).style.background = "rgba(189, 180, 239, 0.04)";
+                      (e.currentTarget as HTMLTableRowElement).style.background = "var(--surface-selected)";
                     }}
                     onMouseLeave={(e) => {
                       (e.currentTarget as HTMLTableRowElement).style.background =
-                        idx % 2 === 0 ? "transparent" : "rgba(255,255,255,0.012)";
+                        idx % 2 === 0 ? "transparent" : "var(--surface-hover)";
                     }}
                   >
                     {/* Nome */}
                     <td
                       style={{
                         padding: "12px 18px",
-                        borderBottom: "1px solid #1D1F2B",
+                        borderBottom: "1px solid var(--border-subtle)",
                         fontWeight: 500,
-                        color: "#F5F4FA",
+                        color: "var(--text-primary)",
                         whiteSpace: "nowrap",
                       }}
                     >
@@ -359,8 +359,8 @@ export function OrdersTable({ orders, loading, compact = false }: OrdersTablePro
                       <td
                         style={{
                           padding: "12px 18px",
-                          borderBottom: "1px solid #1D1F2B",
-                          color: "#A2A3AE",
+                          borderBottom: "1px solid var(--border-subtle)",
+                          color: "var(--text-secondary)",
                           maxWidth: "180px",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
@@ -375,8 +375,8 @@ export function OrdersTable({ orders, loading, compact = false }: OrdersTablePro
                     <td
                       style={{
                         padding: "12px 18px",
-                        borderBottom: "1px solid #1D1F2B",
-                        color: "#A2A3AE",
+                        borderBottom: "1px solid var(--border-subtle)",
+                        color: "var(--text-secondary)",
                         maxWidth: "220px",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
@@ -392,9 +392,9 @@ export function OrdersTable({ orders, loading, compact = false }: OrdersTablePro
                       className="font-numeric"
                       style={{
                         padding: "12px 18px",
-                        borderBottom: "1px solid #1D1F2B",
+                        borderBottom: "1px solid var(--border-subtle)",
                         fontWeight: 600,
-                        color: order.status === "paid" ? "#2EDB6F" : "#F5F4FA",
+                        color: order.status === "paid" ? "var(--success)" : "var(--text-primary)",
                         whiteSpace: "nowrap",
                       }}
                     >
@@ -402,7 +402,7 @@ export function OrdersTable({ orders, loading, compact = false }: OrdersTablePro
                     </td>
 
                     {/* Método / Gateway (DESTAQUE PIX vs CARTÃO STRIPE) */}
-                    <td style={{ padding: "12px 18px", borderBottom: "1px solid #1D1F2B", whiteSpace: "nowrap" }}>
+                    <td style={{ padding: "12px 18px", borderBottom: "1px solid var(--border-subtle)", whiteSpace: "nowrap" }}>
                       {isCard ? (
                         <span
                           style={{
@@ -413,9 +413,9 @@ export function OrdersTable({ orders, loading, compact = false }: OrdersTablePro
                             fontWeight: 500,
                             padding: "2px 8px",
                             borderRadius: "999px",
-                            background: "rgba(189, 180, 239, 0.12)",
-                            color: "#BDB4EF",
-                            border: "1px solid rgba(189, 180, 239, 0.25)",
+                            background: "var(--accent-soft-bg)",
+                            color: "var(--accent-strong)",
+                            border: "1px solid var(--accent-border)",
                           }}
                         >
                           <CreditCard style={{ width: "12px", height: "12px" }} strokeWidth={1.8} />
@@ -431,9 +431,9 @@ export function OrdersTable({ orders, loading, compact = false }: OrdersTablePro
                             fontWeight: 500,
                             padding: "2px 8px",
                             borderRadius: "999px",
-                            background: "#161722",
-                            color: "#2EDB6F",
-                            border: "1px solid #282A36",
+                            background: "var(--success-soft)",
+                            color: "var(--success)",
+                            border: "1px solid rgba(46, 219, 111, 0.25)",
                           }}
                         >
                           <QrCode style={{ width: "12px", height: "12px" }} strokeWidth={1.8} />
@@ -443,7 +443,7 @@ export function OrdersTable({ orders, loading, compact = false }: OrdersTablePro
                     </td>
 
                     {/* Status */}
-                    <td style={{ padding: "12px 18px", borderBottom: "1px solid #1D1F2B", whiteSpace: "nowrap" }}>
+                    <td style={{ padding: "12px 18px", borderBottom: "1px solid var(--border-subtle)", whiteSpace: "nowrap" }}>
                       <span className={STATUS_CLASS[order.status] ?? "badge badge-expired"}>
                         {STATUS_LABELS[order.status] ?? order.status}
                       </span>

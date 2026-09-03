@@ -30,19 +30,19 @@ function CustomTooltip({ active, payload }: any) {
   return (
     <div
       style={{
-        background: "#0c1527",
-        border: "1px solid var(--border)",
+        background: "var(--surface-card)",
+        border: "1px solid var(--border-strong)",
         borderRadius: "10px",
         padding: "10px 14px",
-        boxShadow: "0 10px 30px rgba(0, 0, 0, 0.8)",
+        boxShadow: "var(--shadow-card)",
         fontSize: "12px",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
         <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: p.color }} />
-        <span style={{ fontWeight: 700, color: "#ffffff" }}>{name}</span>
+        <span style={{ fontWeight: 600, color: "var(--text-primary)" }}>{name}</span>
       </div>
-      <div style={{ color: "#94a3b8", fontWeight: 600 }}>
+      <div style={{ color: "var(--text-secondary)", fontWeight: 500 }}>
         {value} pedido{value !== 1 ? "s" : ""} · {p.pct}%
       </div>
     </div>
@@ -52,7 +52,7 @@ function CustomTooltip({ active, payload }: any) {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function CustomLegend({ payload }: any) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "7px", padding: "0 4px" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "7px", padding: "0 4px", borderTop: "1px solid var(--border-subtle)", paddingTop: "12px" }}>
       {payload?.map((entry: { color: string; value: string; payload: { count: number; pct: number } }) => (
         <div key={entry.value} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -66,12 +66,12 @@ function CustomLegend({ payload }: any) {
                 flexShrink: 0,
               }}
             />
-            <span style={{ fontSize: "11.5px", fontWeight: 600, color: "#cbd5e1" }}>
+            <span style={{ fontSize: "11.5px", fontWeight: 500, color: "var(--text-secondary)" }}>
               {entry.value}
             </span>
           </div>
-          <span style={{ fontSize: "11.5px", fontWeight: 800, color: "#f8fafc" }}>
-            {entry.payload.count} <span style={{ color: "#64748b", fontWeight: 500 }}>({entry.payload.pct}%)</span>
+          <span style={{ fontSize: "11.5px", fontWeight: 600, color: "var(--text-primary)" }}>
+            {entry.payload.count} <span style={{ color: "var(--text-muted)", fontWeight: 400 }}>({entry.payload.pct}%)</span>
           </span>
         </div>
       ))}

@@ -129,8 +129,8 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
         style={{
           display: "flex",
           alignItems: "center",
-          background: "#0D0E16",
-          border: "1px solid #252733",
+          background: "var(--surface-1)",
+          border: "1px solid var(--border-subtle)",
           borderRadius: "11px",
           padding: "3px",
           gap: "2px",
@@ -153,11 +153,11 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
                 fontWeight: active ? 600 : 400,
                 padding: "4px 10px",
                 borderRadius: "8px",
-                border: "none",
+                border: active ? "1px solid var(--border-strong)" : "1px solid transparent",
                 cursor: "pointer",
-                background: active ? "#292A35" : "transparent",
-                color: active ? "#F5F4FA" : "#707281",
-                boxShadow: active ? "inset 0 1px 0 rgba(255,255,255,0.06)" : "none",
+                background: active ? "var(--surface-selected)" : "transparent",
+                color: active ? "var(--text-primary)" : "var(--text-muted)",
+                boxShadow: active ? "0 1px 3px rgba(0,0,0,0.06)" : "none",
                 transition: "all 0.14s ease",
               }}
             >
@@ -167,7 +167,7 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
         })}
 
         {/* Divisor */}
-        <div style={{ width: "1px", height: "14px", background: "#252733", margin: "0 2px" }} />
+        <div style={{ width: "1px", height: "14px", background: "var(--border-subtle)", margin: "0 2px" }} />
 
         {/* Botão de Calendário / Personalizado */}
         <button
@@ -180,11 +180,11 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
             fontWeight: isCustomActive ? 600 : 400,
             padding: "4px 9px",
             borderRadius: "8px",
-            border: "none",
+            border: isCustomActive ? "1px solid var(--accent-border)" : "1px solid transparent",
             cursor: "pointer",
-            background: isCustomActive ? "#292A35" : "transparent",
-            color: isCustomActive ? "#BDB4EF" : "#707281",
-            boxShadow: isCustomActive ? "inset 0 1px 0 rgba(255,255,255,0.06)" : "none",
+            background: isCustomActive ? "var(--accent-soft-bg)" : "transparent",
+            color: isCustomActive ? "var(--accent-strong)" : "var(--text-muted)",
+            boxShadow: isCustomActive ? "0 1px 3px rgba(0,0,0,0.06)" : "none",
             transition: "all 0.14s ease",
           }}
           title="Selecionar período personalizado"
@@ -195,7 +195,7 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
             style={{
               width: "11px",
               height: "11px",
-              transform: isOpen ? "rotate(180deg)" : "none",
+              transform: isOpen ? "rotate(180deg)" : "rotate(0)",
               transition: "transform 0.15s ease",
             }}
           />

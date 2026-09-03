@@ -529,8 +529,8 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
           className="card"
           style={{
             padding: "18px 20px",
-            background: "var(--live-banner-bg, linear-gradient(180deg, #101124 0%, #1A1340 50%, #362480 100%))",
-            border: "1px solid var(--accent-border)",
+            background: "var(--live-banner-bg)",
+            border: "1px solid var(--live-banner-border)",
             borderRadius: "16px",
             display: "flex",
             flexDirection: "column",
@@ -538,6 +538,7 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
             position: "relative",
             overflow: "hidden",
             minHeight: "180px",
+            boxShadow: "var(--shadow-card)",
           }}
         >
           {/* Topo */}

@@ -72,9 +72,9 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
                 gap: "4px",
                 fontSize: "11px",
                 fontWeight: 500,
-                color: "#BDB4EF",
-                background: "#161722",
-                border: "1px solid #282A36",
+                color: "var(--accent-strong)",
+                background: "var(--accent-soft-bg)",
+                border: "1px solid var(--accent-border)",
                 padding: "2px 8px",
                 borderRadius: "999px",
               }}
@@ -86,7 +86,7 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
           <p
             style={{
               fontSize: "11.5px",
-              color: "#707281",
+              color: "var(--text-muted)",
               margin: "2px 0 0",
               fontWeight: 400,
             }}
@@ -100,18 +100,18 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
           {/* Legenda PIX */}
           <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11.5px" }}>
             <span style={{ width: "8px", height: "8px", borderRadius: "2px", background: "#8A79FF" }} />
-            <span style={{ color: "#A2A3AE", fontWeight: 400 }}>PIX:</span>
-            <strong style={{ color: "#F5F4FA", fontWeight: 600 }}>{formatBRL(totalPix)}</strong>
+            <span style={{ color: "var(--text-secondary)", fontWeight: 400 }}>PIX:</span>
+            <strong style={{ color: "var(--text-primary)", fontWeight: 600 }}>{formatBRL(totalPix)}</strong>
           </div>
 
           {/* Legenda Cartão Stripe */}
           <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11.5px" }}>
             <span style={{ width: "8px", height: "8px", borderRadius: "2px", background: "#C4BAFF" }} />
-            <span style={{ color: "#A2A3AE", fontWeight: 400 }}>Cartão:</span>
-            <strong style={{ color: "#F5F4FA", fontWeight: 600 }}>{formatBRL(totalCard)}</strong>
+            <span style={{ color: "var(--text-secondary)", fontWeight: 400 }}>Cartão:</span>
+            <strong style={{ color: "var(--text-primary)", fontWeight: 600 }}>{formatBRL(totalCard)}</strong>
           </div>
 
-          <div style={{ width: "1px", height: "20px", background: "rgba(255,255,255,0.08)" }} />
+          <div style={{ width: "1px", height: "20px", background: "var(--border-subtle)" }} />
 
           <div style={{ textAlign: "right" }}>
             <span
@@ -119,7 +119,7 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
               style={{
                 fontSize: "17px",
                 fontWeight: 600,
-                color: "#F5F4FA",
+                color: "var(--text-primary)",
                 display: "block",
                 lineHeight: 1.1,
               }}
@@ -129,7 +129,7 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
             <span
               style={{
                 fontSize: "11px",
-                color: "#707281",
+                color: "var(--text-muted)",
                 fontWeight: 400,
               }}
             >
@@ -139,44 +139,38 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
         </div>
       </div>
 
-      {/* Gráfico */}
-      <div style={{ height: "230px", width: "100%", minWidth: 0, overflow: "hidden" }}>
+      {/* Gráfico Recharts */}
+      <div style={{ height: "260px", width: "100%", minWidth: 0, overflow: "hidden" }}>
         {loading ? (
-          <div
-            className="skeleton"
-            style={{ height: "100%", width: "100%", borderRadius: "10px" }}
-          />
+          <div className="skeleton" style={{ height: "100%", width: "100%", borderRadius: "12px" }} />
         ) : (
-          <ResponsiveContainer width="99%" height="100%">
+          <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <defs>
-                {/* Gradiente PIX Lavender Principal */}
-                <linearGradient id="pixGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#8A79FF" stopOpacity={0.25} />
+                <linearGradient id="colorPix" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#8A79FF" stopOpacity={0.35} />
                   <stop offset="95%" stopColor="#8A79FF" stopOpacity={0.0} />
                 </linearGradient>
-
-                {/* Gradiente Cartão Stripe Secundário */}
-                <linearGradient id="cardGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#C4BAFF" stopOpacity={0.18} />
+                <linearGradient id="colorCartao" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#C4BAFF" stopOpacity={0.25} />
                   <stop offset="95%" stopColor="#C4BAFF" stopOpacity={0.0} />
                 </linearGradient>
               </defs>
 
               <CartesianGrid
                 strokeDasharray="3 3"
-                stroke="rgba(255, 255, 255, 0.06)"
+                stroke="var(--chart-grid)"
                 vertical={false}
               />
               <XAxis
                 dataKey="dia"
-                stroke="#707281"
+                stroke="var(--text-muted)"
                 fontSize={11}
                 tickLine={false}
                 axisLine={false}
               />
               <YAxis
-                stroke="#707281"
+                stroke="var(--text-muted)"
                 fontSize={11}
                 tickLine={false}
                 axisLine={false}
@@ -189,20 +183,20 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
                     return (
                       <div
                         style={{
-                          background: "#191A24",
-                          border: "1px solid #303241",
+                          background: "var(--surface-card)",
+                          border: "1px solid var(--border-strong)",
                           borderRadius: "8px",
                           padding: "10px 14px",
-                          boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+                          boxShadow: "var(--shadow-card)",
                         }}
                       >
                         <p
                           style={{
                             fontSize: "11px",
                             fontWeight: 600,
-                            color: "#F5F4FA",
+                            color: "var(--text-primary)",
                             margin: "0 0 6px",
-                            borderBottom: "1px solid rgba(255,255,255,0.06)",
+                            borderBottom: "1px solid var(--border-subtle)",
                             paddingBottom: "4px",
                           }}
                         >
@@ -214,7 +208,7 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
                             <span style={{ color: "#8A79FF", fontWeight: 500, display: "flex", alignItems: "center", gap: "4px" }}>
                               <QrCode style={{ width: "12px", height: "12px" }} /> PIX:
                             </span>
-                            <strong style={{ color: "#F5F4FA" }}>
+                            <strong style={{ color: "var(--text-primary)" }}>
                               {formatBRL(row.receitaPix ?? 0)} ({row.vendasPix ?? 0} vendas)
                             </strong>
                           </div>
@@ -223,14 +217,14 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
                             <span style={{ color: "#C4BAFF", fontWeight: 500, display: "flex", alignItems: "center", gap: "4px" }}>
                               <CreditCard style={{ width: "12px", height: "12px" }} /> Cartão Stripe:
                             </span>
-                            <strong style={{ color: "#F5F4FA" }}>
+                            <strong style={{ color: "var(--text-primary)" }}>
                               {formatBRL(row.receitaCartao ?? 0)} ({row.vendasCartao ?? 0} vendas)
                             </strong>
                           </div>
 
-                          <div style={{ display: "flex", justifyContent: "space-between", gap: "16px", marginTop: "4px", paddingTop: "4px", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-                            <span style={{ color: "#707281", fontWeight: 500 }}>Total do Período:</span>
-                            <strong style={{ color: "var(--primary-green)", fontSize: "12.5px" }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", gap: "16px", marginTop: "4px", paddingTop: "4px", borderTop: "1px solid var(--border-subtle)" }}>
+                            <span style={{ color: "var(--text-muted)", fontWeight: 500 }}>Total do Período:</span>
+                            <strong style={{ color: "var(--success)", fontSize: "12.5px" }}>
                               {formatBRL(row.receita ?? 0)}
                             </strong>
                           </div>
