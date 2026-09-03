@@ -586,7 +586,7 @@ export function App() {
   }
 
   return (
-    <div style={{ display: "flex", height: "100vh", width: "100vw", overflow: "hidden", background: "var(--bg-root)", position: "relative" }}>
+    <div className="dashboard-root">
       <Sidebar
         section={section}
         onSelect={handleNavigate}
@@ -597,7 +597,7 @@ export function App() {
         onCloseMobile={() => setIsMobileMenuOpen(false)}
       />
 
-      <div style={{ flex: 1, height: "100vh", display: "flex", flexDirection: "column", overflow: "hidden", minWidth: 0 }}>
+      <div className="dashboard-content-area">
         <Topbar
           theme={theme}
           onToggleTheme={toggleTheme}

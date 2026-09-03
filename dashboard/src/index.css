@@ -233,7 +233,27 @@ body {
    SISTEMA DE DESIGN RESPONSIVO MOBILE-FIRST (SMARTPHONES & IPHONES)
    ══════════════════════════════════════════════════════════════════════ */
 
-/* Grades Responsivas */
+/* Grades Responsivas Universais */
+.dashboard-root {
+  display: flex;
+  height: 100vh;
+  height: 100dvh;
+  width: 100vw;
+  overflow: hidden;
+  background: var(--bg-root);
+  position: relative;
+}
+
+.dashboard-content-area {
+  flex: 1;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
 .metric-cards-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -252,7 +272,27 @@ body {
   gap: 20px;
 }
 
-/* No Desktop */
+.funnel-3d-grid {
+  display: grid;
+  grid-template-columns: 460px 1fr;
+  gap: 36px;
+  align-items: center;
+}
+
+.funnel-header-cards {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topbar-main-row {
+  display: flex;
+  align-items: center;
+  justifyContent: space-between;
+  width: 100%;
+}
+
+/* No Desktop (>= 769px) */
 @media (min-width: 769px) {
   .mobile-bottom-nav {
     display: none !important;
@@ -262,6 +302,18 @@ body {
   }
   .mobile-close-btn {
     display: none !important;
+  }
+  .mobile-logo-badge {
+    display: none !important;
+  }
+  .mobile-date-subbar {
+    display: none !important;
+  }
+  .desktop-only-control {
+    display: flex !important;
+  }
+  .desktop-date-selector {
+    display: block !important;
   }
 }
 
@@ -279,6 +331,10 @@ body {
     grid-template-columns: 1fr;
     gap: 16px;
   }
+  .funnel-3d-grid {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
 }
 
 /* No Mobile Smartphone & iPhone (<= 768px) */
@@ -291,8 +347,9 @@ body {
     bottom: 0 !important;
     width: 280px !important;
     min-width: 280px !important;
-    height: 100vh !important;
-    z-index: 1001 !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    z-index: 10001 !important;
     transform: translateX(-100%);
     transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
     box-shadow: 20px 0 50px rgba(0, 0, 0, 0.8) !important;
@@ -304,17 +361,75 @@ body {
 
   /* Main com respiro na base para a barra inferior */
   .dashboard-main {
-    padding: 16px 14px calc(env(safe-area-inset-bottom) + 80px) !important;
-    gap: 16px !important;
-    height: calc(100vh - 58px) !important;
+    padding: 14px 12px calc(env(safe-area-inset-bottom, 20px) + 84px) !important;
+    gap: 14px !important;
+    height: auto !important;
+    min-height: calc(100dvh - 56px) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
   }
 
-  /* Topbar adaptada */
+  /* Topbar adaptada com 2 linhas */
   .dashboard-topbar {
-    padding: 0 14px !important;
-    height: 58px !important;
+    padding: 10px 12px !important;
+    height: auto !important;
+    min-height: 52px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
   }
 
+  .desktop-only-control {
+    display: none !important;
+  }
+
+  .desktop-date-selector {
+    display: none !important;
+  }
+
+  /* Sub-barra de datas no mobile com scroll horizontal touch suave */
+  .mobile-date-subbar {
+    display: flex !important;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 2px 0 4px;
+  }
+  .mobile-date-subbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Funil 3D no Mobile */
+  .funnel-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  .funnel-header-cards {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .funnel-stat-card {
+    padding: 8px 6px !important;
+  }
+
+  .funnel-3d-grid {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+
+  .funnel-cone-container {
+    max-width: 340px !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+  }
+
+  /* Grades de métricas */
   .metric-cards-grid {
     grid-template-columns: 1fr 1fr;
     gap: 10px;
@@ -326,7 +441,7 @@ body {
   }
 
   .card {
-    padding: 16px !important;
+    padding: 14px !important;
     border-radius: 14px !important;
   }
 }

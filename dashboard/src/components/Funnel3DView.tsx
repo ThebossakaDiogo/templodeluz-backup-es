@@ -162,14 +162,15 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
     >
       {/* Cabeçalho do Card Espaçoso */}
       <div
+        className="funnel-header"
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           flexWrap: "wrap",
-          gap: "18px",
+          gap: "14px",
           borderBottom: "1px solid var(--border-subtle)",
-          paddingBottom: "20px",
+          paddingBottom: "16px",
         }}
       >
         <div>
@@ -185,6 +186,7 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
                 alignItems: "center",
                 justifyContent: "center",
                 color: "var(--primary-green)",
+                flexShrink: 0,
               }}
             >
               <Filter style={{ width: "17px", height: "17px" }} />
@@ -192,7 +194,7 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
             <div>
               <h2
                 style={{
-                  fontSize: "16px",
+                  fontSize: "15px",
                   fontWeight: 900,
                   color: "var(--text-primary)",
                   margin: 0,
@@ -203,108 +205,120 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
               </h2>
               <p
                 style={{
-                  fontSize: "12px",
+                  fontSize: "11.5px",
                   color: "var(--text-muted)",
-                  margin: "2px 0 0",
+                  margin: "1px 0 0",
                   fontWeight: 500,
                 }}
               >
-                Progressão passo a passo dos consulentes desde o primeiro clique até o checkout
+                Progressão passo a passo dos consulentes
               </p>
             </div>
           </div>
         </div>
 
         {/* Badges de Resumo Executivo */}
-        <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+        <div className="funnel-header-cards">
           <div
+            className="funnel-stat-card"
             style={{
               background: "var(--bg-surface-alt)",
               border: "1px solid var(--border)",
-              borderRadius: "12px",
-              padding: "10px 18px",
-              textAlign: "right",
+              borderRadius: "10px",
+              padding: "8px 12px",
+              textAlign: "center",
             }}
           >
             <span
               style={{
-                fontSize: "10.5px",
+                fontSize: "9.5px",
                 fontWeight: 700,
                 color: "var(--text-muted)",
                 display: "block",
                 textTransform: "uppercase",
-                letterSpacing: "0.05em",
+                letterSpacing: "0.03em",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
               }}
             >
-              Entradas no Topo
+              Entradas
             </span>
             <span
               style={{
-                fontSize: "18px",
+                fontSize: "15px",
                 fontWeight: 900,
                 color: "var(--text-primary)",
               }}
             >
-              {totalStarted} leads
+              {totalStarted} <span style={{ fontSize: "10px", fontWeight: 700, color: "var(--text-muted)" }}>leads</span>
             </span>
           </div>
 
           <div
+            className="funnel-stat-card"
             style={{
               background: "rgba(16, 185, 129, 0.12)",
               border: "1px solid rgba(16, 185, 129, 0.35)",
-              borderRadius: "12px",
-              padding: "10px 18px",
-              textAlign: "right",
+              borderRadius: "10px",
+              padding: "8px 12px",
+              textAlign: "center",
             }}
           >
             <span
               style={{
-                fontSize: "10.5px",
+                fontSize: "9.5px",
                 fontWeight: 700,
                 color: "var(--primary-green)",
                 display: "block",
                 textTransform: "uppercase",
-                letterSpacing: "0.05em",
+                letterSpacing: "0.03em",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
               }}
             >
-              Doações Convertidas
+              Doações
             </span>
             <span
               style={{
-                fontSize: "18px",
+                fontSize: "15px",
                 fontWeight: 900,
                 color: "var(--primary-green)",
               }}
             >
-              {totalConverted} pagos
+              {totalConverted} <span style={{ fontSize: "10px", fontWeight: 700 }}>pagos</span>
             </span>
           </div>
 
           <div
+            className="funnel-stat-card"
             style={{
               background: "rgba(37, 99, 235, 0.12)",
               border: "1px solid rgba(37, 99, 235, 0.35)",
-              borderRadius: "12px",
-              padding: "10px 18px",
-              textAlign: "right",
+              borderRadius: "10px",
+              padding: "8px 12px",
+              textAlign: "center",
             }}
           >
             <span
               style={{
-                fontSize: "10.5px",
+                fontSize: "9.5px",
                 fontWeight: 700,
                 color: "var(--primary-blue)",
                 display: "block",
                 textTransform: "uppercase",
-                letterSpacing: "0.05em",
+                letterSpacing: "0.03em",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
               }}
             >
               Taxa Global
             </span>
             <span
               style={{
-                fontSize: "18px",
+                fontSize: "15px",
                 fontWeight: 900,
                 color: "var(--primary-blue)",
               }}
@@ -315,23 +329,17 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
         </div>
       </div>
 
-      {/* Grid com Amplo Respiro: Cone 3D à Esquerda e Lista Elegante à Direita */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "480px 1fr",
-          gap: "40px",
-          alignItems: "center",
-        }}
-      >
+      {/* Grid: Cone 3D à Esquerda e Lista de Etapas à Direita */}
+      <div className="funnel-3d-grid">
         {/* COLUNA 1: FUNIL CÔNICO 3D ESCULPIDO COM ALVO CONCÊNTRICO */}
         <div
+          className="funnel-cone-container"
           style={{
             position: "relative",
             background: "var(--bg-surface-alt)",
             border: "1px solid var(--border)",
-            borderRadius: "20px",
-            padding: "24px 16px 16px",
+            borderRadius: "18px",
+            padding: "18px 12px 12px",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
