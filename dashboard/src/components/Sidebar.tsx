@@ -5,6 +5,7 @@ import {
   CreditCard,
   FileBarChart2,
   LogOut,
+  MessageCircle,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -54,6 +55,14 @@ const ITEMS: {
     sub: "Canais & Exportação",
     Icon: FileBarChart2,
     accent: "#34d399", // Mint
+  },
+  {
+    id: "whatsapp",
+    slug: "/whatsapp",
+    label: "WhatsApp Tracker",
+    sub: "Mensagens & Métodos",
+    Icon: MessageCircle,
+    accent: "#22c55e", // WhatsApp Green
   },
 ];
 
@@ -419,7 +428,7 @@ export function Sidebar({ section, onSelect, onlineCount, currentUserEmail, onSi
         }}
       >
         <span style={{ fontSize: "10px", color: "#64748b", fontWeight: 600 }}>
-          OD METRICS · Supabase Realtime v2.49
+          OD METRICS · Sistema Operacional v2.49
         </span>
       </div>
     </aside>

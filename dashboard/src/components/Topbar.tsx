@@ -20,6 +20,8 @@ const SECTION_LABELS: Record<Section, string> = {
   "rastreamento": "Rastreamento do Quiz ao Vivo",
   "pedidos":      "Auditoria de Pedidos (PIX & Cartão)",
   "relatorios":   "Relatórios de Canais & UTMs",
+  "whatsapp":     "WhatsApp Tracker & Conversas",
+  "login":        "Acesso Administrativo",
 };
 
 const SECTION_DESCRIPTIONS: Record<Section, string> = {
@@ -27,6 +29,8 @@ const SECTION_DESCRIPTIONS: Record<Section, string> = {
   "rastreamento": "Etapa exata de cada consulente no funil e pessoas navegando agora",
   "pedidos":      "Auditoria em tempo real de doações pagas, pendentes e gateways",
   "relatorios":   "Desempenho por fonte de tráfego, campanha e exportação consolidada",
+  "whatsapp":     "Metrificação de clientes que enviaram mensagens e forma de pagamento",
+  "login":        "Terminal seguro de autenticação",
 };
 
 function formatTime(d: Date): string {

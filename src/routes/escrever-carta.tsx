@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { recordInput } from "@/lib/auto-capture";
+import { trackWhatsAppEvent } from "@/lib/whatsapp-telemetry";
 
 export const Route = createFileRoute("/escrever-carta")({
   head: () => ({
@@ -184,6 +185,25 @@ function EscreverCartaPage() {
   const textoPergaminho = buildTextoPergaminho();
 
   const handleSendWhatsApp = () => {
+    // Identifica status e forma de pagamento utilizada pelo consulente
+    const isPixPaid = typeof window !== "undefined" && sessionStorage.getItem("templodeluz:pix-paid") === "true";
+    const urlParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+    const isCardPaid = urlParams?.get("payment") === "stripe_success" || urlParams?.get("method") === "card" || !!urlParams?.get("session_id");
+
+    const paymentMethod: "pix" | "credit_card" | "pending" = isCardPaid ? "credit_card" : isPixPaid ? "pix" : "pending";
+    const paymentStatus: "paid" | "pending" = isCardPaid || isPixPaid ? "paid" : "pending";
+
+    void trackWhatsAppEvent({
+      customerName: nome || "Consulente",
+      enteQuerido: ente || "Ente Querido",
+      grauParentesco: relacao || "Familiar",
+      paymentMethod,
+      paymentStatus,
+      amountCents: 1900,
+      sourcePage: "escrever_carta",
+      messagePreview: textoPergaminho.slice(0, 500),
+    });
+
     const modalidadeTexto = mode === "guiada" ? "Intenções Guiadas" : "Mensagem Livre";
     const textToSend =
       `🕊️ *TEMPLO DE LUZ — CARTA PSICOGRAFADA*\n` +

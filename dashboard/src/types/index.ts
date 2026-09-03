@@ -75,3 +75,19 @@ export interface ChartDataPoint {
   vendasCartao?: number;
   leads?: number;
 }
+
+export interface WhatsAppMessage {
+  id: string;
+  customer_name: string;
+  customer_phone?: string;
+  customer_email?: string;
+  ente_querido?: string;
+  grau_parentesco?: string;
+  payment_method: "pix" | "credit_card" | "pending" | "none";
+  payment_status: "paid" | "pending" | "none";
+  amount_cents: number;
+  source_page?: string;
+  message_preview?: string;
+  utm_source?: string;
+  created_at: string;
+}

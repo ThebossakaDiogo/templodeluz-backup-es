@@ -11,11 +11,12 @@ import { StatusPieChart } from "./components/StatusPieChart";
 import { TrafficPieChart } from "./components/TrafficPieChart";
 import { PaymentMethodsPieChart } from "./components/PaymentMethodsPieChart";
 import { ConversionOverview } from "./components/ConversionOverview";
+import { WhatsAppTracker } from "./components/WhatsAppTracker";
 import { LoginPage } from "./components/LoginPage";
 import { supabase } from "./lib/supabase";
 import type { Session } from "@supabase/supabase-js";
 import type { DateRangeValue } from "./components/DateRangeSelector";
-import type { DashboardStats, Lead, PaymentOrder, ChartDataPoint } from "./types";
+import type { DashboardStats, Lead, PaymentOrder, ChartDataPoint, WhatsAppMessage } from "./types";
 
 // ─── Helpers de Data ─────────────────────────────────────────────────────────
 function calcDiff(current: number, previous: number): number {
@@ -192,7 +193,7 @@ function buildLeadsChartRange(
 }
 
 // ─── Secções & Slugs do painel ───────────────────────────────────────────────
-export type Section = "visao-geral" | "rastreamento" | "pedidos" | "relatorios";
+export type Section = "visao-geral" | "rastreamento" | "pedidos" | "relatorios" | "whatsapp" | "login";
 
 const SLUG_TO_SECTION: Record<string, Section> = {
   "/": "visao-geral",
@@ -200,6 +201,8 @@ const SLUG_TO_SECTION: Record<string, Section> = {
   "/rastreamento": "rastreamento",
   "/pedidos": "pedidos",
   "/relatorios": "relatorios",
+  "/whatsapp": "whatsapp",
+  "/login": "login",
 };
 
 const SECTION_TO_SLUG: Record<Section, string> = {
@@ -207,6 +210,8 @@ const SECTION_TO_SLUG: Record<Section, string> = {
   "rastreamento": "/rastreamento",
   "pedidos": "/pedidos",
   "relatorios": "/relatorios",
+  "whatsapp": "/whatsapp",
+  "login": "/login",
 };
 
 function getSectionFromPath(): Section {
@@ -266,6 +271,10 @@ export function App() {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     setSession(null);
+    if (typeof window !== "undefined") {
+      window.history.replaceState(null, "", "/login");
+    }
+    setSection("login");
   };
 
   const [dateRange, setDateRange] = useState<DateRangeValue>(() => {
@@ -286,6 +295,7 @@ export function App() {
 
   const [allOrders, setAllOrders] = useState<PaymentOrder[]>([]);
   const [allLeads, setAllLeads] = useState<Lead[]>([]);
+  const [allWhatsApp, setAllWhatsApp] = useState<WhatsAppMessage[]>([]);
 
   useEffect(() => {
     const handlePopState = () => {
@@ -314,7 +324,7 @@ export function App() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [{ data: ordersData }, { data: leadsData }] = await Promise.all([
+      const [{ data: ordersData }, { data: leadsData }, { data: waData }] = await Promise.all([
         supabase
           .from("pix_orders")
           .select("*")
@@ -325,6 +335,11 @@ export function App() {
           .select("*")
           .order("created_at", { ascending: false })
           .limit(2000),
+        supabase
+          .from("whatsapp_conversations")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(1000),
       ]);
 
       const parsedOrders: PaymentOrder[] = (ordersData ?? []).map((o) => ({
@@ -343,6 +358,9 @@ export function App() {
 
       const parsedLeads: Lead[] = (leadsData ?? []) as Lead[];
       setAllLeads(parsedLeads);
+
+      const parsedWhatsApp: WhatsAppMessage[] = (waData ?? []) as WhatsAppMessage[];
+      setAllWhatsApp(parsedWhatsApp);
 
       // Pessoas ao vivo (últimos 15 minutos)
       const fifteenMinAgo = Date.now() - 15 * 60 * 1000;
@@ -382,9 +400,19 @@ export function App() {
       )
       .subscribe();
 
+    const ch3 = supabase
+      .channel("rt-whatsapp")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "whatsapp_conversations" },
+        () => void fetchData()
+      )
+      .subscribe();
+
     return () => {
       void supabase.removeChannel(ch1);
       void supabase.removeChannel(ch2);
+      void supabase.removeChannel(ch3);
     };
   }, [fetchData]);
 
@@ -534,9 +562,22 @@ export function App() {
     );
   }
 
-  // 2. Se não estiver autenticado ou não for admin da whitelist -> Exibe LoginPage
+  // 2. Se não estiver autenticado ou não for admin da whitelist -> Exibe LoginPage na rota /login
   if (!session || !session.user.email || !ALLOWED_ADMIN_EMAILS.has(session.user.email.toLowerCase())) {
-    return <LoginPage onLoginSuccess={fetchData} />;
+    if (typeof window !== "undefined" && window.location.pathname !== "/login") {
+      window.history.replaceState(null, "", "/login");
+    }
+    return (
+      <LoginPage
+        onLoginSuccess={() => {
+          if (typeof window !== "undefined") {
+            window.history.replaceState(null, "", "/visao-geral");
+          }
+          setSection("visao-geral");
+          void fetchData();
+        }}
+      />
+    );
   }
 
   return (
@@ -638,6 +679,15 @@ export function App() {
               stats={stats}
               onExport={exportCsv}
               periodLabel={dateRange.label}
+            />
+          )}
+
+          {/* SLUG: /whatsapp */}
+          {section === "whatsapp" && (
+            <WhatsAppTracker
+              messages={allWhatsApp}
+              loading={loading}
+              onRefresh={fetchData}
             />
           )}
         </main>
