@@ -140,10 +140,10 @@ export function OrdersTable({ orders, loading, compact = false }: OrdersTablePro
             style={{
               display: "flex",
               alignItems: "center",
-              background: "var(--bg-surface-alt)",
-              border: "1px solid var(--border)",
-              borderRadius: "8px",
-              padding: "2px",
+              background: "#0D0E16",
+              border: "1px solid #252733",
+              borderRadius: "10px",
+              padding: "3px",
               gap: "2px",
             }}
           >
@@ -162,18 +162,15 @@ export function OrdersTable({ orders, loading, compact = false }: OrdersTablePro
                     alignItems: "center",
                     gap: "4px",
                     fontSize: "11px",
-                    fontWeight: active ? 800 : 600,
-                    padding: "4px 9px",
-                    borderRadius: "6px",
+                    fontWeight: active ? 600 : 400,
+                    padding: "4px 8px",
+                    borderRadius: "7px",
                     border: "none",
                     cursor: "pointer",
-                    background: active
-                      ? f.id === "credit_card"
-                        ? "#6366f1"
-                        : "var(--primary-green)"
-                      : "transparent",
-                    color: active ? "#ffffff" : "var(--text-secondary)",
-                    transition: "all 0.15s ease",
+                    background: active ? "#292A35" : "transparent",
+                    color: active ? "#F5F4FA" : "#707281",
+                    boxShadow: active ? "inset 0 1px 0 rgba(255,255,255,0.06)" : "none",
+                    transition: "all 0.14s ease",
                   }}
                 >
                   {f.icon && <f.icon style={{ width: "11px", height: "11px" }} />}
@@ -188,10 +185,10 @@ export function OrdersTable({ orders, loading, compact = false }: OrdersTablePro
             style={{
               display: "flex",
               alignItems: "center",
-              background: "var(--bg-surface-alt)",
-              border: "1px solid var(--border)",
-              borderRadius: "8px",
-              padding: "2px",
+              background: "#0D0E16",
+              border: "1px solid #252733",
+              borderRadius: "10px",
+              padding: "3px",
               gap: "2px",
             }}
           >
@@ -207,14 +204,15 @@ export function OrdersTable({ orders, loading, compact = false }: OrdersTablePro
                   onClick={() => setStatusFilter(f.id as any)}
                   style={{
                     fontSize: "11px",
-                    fontWeight: active ? 800 : 600,
-                    padding: "4px 10px",
-                    borderRadius: "6px",
+                    fontWeight: active ? 600 : 400,
+                    padding: "4px 9px",
+                    borderRadius: "7px",
                     border: "none",
                     cursor: "pointer",
-                    background: active ? "var(--primary-green)" : "transparent",
-                    color: active ? "#ffffff" : "var(--text-secondary)",
-                    transition: "all 0.15s ease",
+                    background: active ? "#292A35" : "transparent",
+                    color: active ? (f.id === "paid" ? "#2EDB6F" : "#F5F4FA") : "#707281",
+                    boxShadow: active ? "inset 0 1px 0 rgba(255,255,255,0.06)" : "none",
+                    transition: "all 0.14s ease",
                   }}
                 >
                   {f.label}
@@ -228,35 +226,44 @@ export function OrdersTable({ orders, loading, compact = false }: OrdersTablePro
             <Search
               style={{
                 position: "absolute",
-                left: "9px",
+                left: "10px",
                 top: "50%",
                 transform: "translateY(-50%)",
-                width: "12px",
-                height: "12px",
-                color: "var(--text-muted)",
+                width: "13px",
+                height: "13px",
+                color: "#707281",
+                pointerEvents: "none",
               }}
             />
             <input
               type="text"
-              placeholder="Filtrar pedidos..."
+              placeholder="Buscar por nome, e-mail..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               style={{
-                fontSize: "11.5px",
-                padding: "5px 10px 5px 28px",
-                border: "1px solid var(--border)",
+                fontSize: "12px",
+                padding: "6px 12px 6px 30px",
                 borderRadius: "8px",
-                background: "var(--bg-surface-alt)",
-                color: "var(--text-primary)",
+                border: "1px solid #282A36",
+                background: "#0B0C14",
+                color: "#F5F4FA",
+                width: "200px",
                 outline: "none",
-                width: "160px",
+                fontFamily: "inherit",
               }}
             />
           </div>
 
+          {/* Botão Exportar CSV */}
           {!compact && (
-            <button onClick={exportFiltered} className="btn" style={{ padding: "5px 10px" }} title="Exportar tabela">
+            <button
+              onClick={exportFiltered}
+              className="btn"
+              style={{ fontSize: "11.5px", padding: "6px 12px", gap: "6px" }}
+              title="Exportar pedidos visíveis em CSV"
+            >
               <Download style={{ width: "12px", height: "12px" }} />
+              Exportar CSV
             </button>
           )}
         </div>
@@ -271,15 +278,15 @@ export function OrdersTable({ orders, loading, compact = false }: OrdersTablePro
                 <th
                   key={col}
                   style={{
-                    padding: "11px 20px",
+                    padding: "10px 18px",
                     textAlign: "left",
-                    fontSize: "10.5px",
-                    fontWeight: 800,
-                    color: "var(--text-muted)",
+                    fontSize: "10px",
+                    fontWeight: 500,
+                    color: "#707281",
                     textTransform: "uppercase",
-                    letterSpacing: "0.06em",
-                    background: "var(--bg-surface-alt)",
-                    borderBottom: "1px solid var(--border)",
+                    letterSpacing: "0.05em",
+                    background: "#0D0E16",
+                    borderBottom: "1px solid #232532",
                     whiteSpace: "nowrap",
                   }}
                 >
@@ -293,7 +300,7 @@ export function OrdersTable({ orders, loading, compact = false }: OrdersTablePro
               Array.from({ length: compact ? 4 : 8 }).map((_, i) => (
                 <tr key={i}>
                   {COLS.map((col) => (
-                    <td key={col} style={{ padding: "14px 20px", borderBottom: "1px solid var(--border-subtle)" }}>
+                    <td key={col} style={{ padding: "12px 18px", borderBottom: "1px solid #1D1F2B" }}>
                       <div className="skeleton" style={{ height: "14px", width: "80%" }} />
                     </td>
                   ))}
@@ -307,7 +314,7 @@ export function OrdersTable({ orders, loading, compact = false }: OrdersTablePro
                   style={{
                     padding: "44px 20px",
                     textAlign: "center",
-                    color: "var(--text-muted)",
+                    color: "#707281",
                     fontSize: "12px",
                   }}
                 >
@@ -323,24 +330,24 @@ export function OrdersTable({ orders, loading, compact = false }: OrdersTablePro
                   <tr
                     key={order.id}
                     style={{
-                      background: idx % 2 === 0 ? "var(--bg-surface)" : "var(--bg-surface-alt)",
-                      transition: "background 0.15s ease",
+                      background: idx % 2 === 0 ? "transparent" : "rgba(255,255,255,0.012)",
+                      transition: "background 0.12s ease",
                     }}
                     onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLTableRowElement).style.background = "rgba(16, 185, 129, 0.05)";
+                      (e.currentTarget as HTMLTableRowElement).style.background = "rgba(189, 180, 239, 0.04)";
                     }}
                     onMouseLeave={(e) => {
                       (e.currentTarget as HTMLTableRowElement).style.background =
-                        idx % 2 === 0 ? "var(--bg-surface)" : "var(--bg-surface-alt)";
+                        idx % 2 === 0 ? "transparent" : "rgba(255,255,255,0.012)";
                     }}
                   >
                     {/* Nome */}
                     <td
                       style={{
-                        padding: "13px 20px",
-                        borderBottom: "1px solid var(--border-subtle)",
-                        fontWeight: 800,
-                        color: "var(--text-primary)",
+                        padding: "12px 18px",
+                        borderBottom: "1px solid #1D1F2B",
+                        fontWeight: 500,
+                        color: "#F5F4FA",
                         whiteSpace: "nowrap",
                       }}
                     >
@@ -351,9 +358,9 @@ export function OrdersTable({ orders, loading, compact = false }: OrdersTablePro
                     {!compact && (
                       <td
                         style={{
-                          padding: "13px 20px",
-                          borderBottom: "1px solid var(--border-subtle)",
-                          color: "var(--text-secondary)",
+                          padding: "12px 18px",
+                          borderBottom: "1px solid #1D1F2B",
+                          color: "#A2A3AE",
                           maxWidth: "180px",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
@@ -367,14 +374,14 @@ export function OrdersTable({ orders, loading, compact = false }: OrdersTablePro
                     {/* Produto */}
                     <td
                       style={{
-                        padding: "13px 20px",
-                        borderBottom: "1px solid var(--border-subtle)",
-                        color: "var(--text-secondary)",
+                        padding: "12px 18px",
+                        borderBottom: "1px solid #1D1F2B",
+                        color: "#A2A3AE",
                         maxWidth: "220px",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
-                        fontWeight: 500,
+                        fontWeight: 400,
                       }}
                     >
                       {order.product_name}
@@ -382,11 +389,12 @@ export function OrdersTable({ orders, loading, compact = false }: OrdersTablePro
 
                     {/* Valor */}
                     <td
+                      className="font-numeric"
                       style={{
-                        padding: "13px 20px",
-                        borderBottom: "1px solid var(--border-subtle)",
-                        fontWeight: 800,
-                        color: order.status === "paid" ? "var(--primary-green)" : "var(--text-primary)",
+                        padding: "12px 18px",
+                        borderBottom: "1px solid #1D1F2B",
+                        fontWeight: 600,
+                        color: order.status === "paid" ? "#2EDB6F" : "#F5F4FA",
                         whiteSpace: "nowrap",
                       }}
                     >
@@ -394,7 +402,7 @@ export function OrdersTable({ orders, loading, compact = false }: OrdersTablePro
                     </td>
 
                     {/* Método / Gateway (DESTAQUE PIX vs CARTÃO STRIPE) */}
-                    <td style={{ padding: "13px 20px", borderBottom: "1px solid var(--border-subtle)", whiteSpace: "nowrap" }}>
+                    <td style={{ padding: "12px 18px", borderBottom: "1px solid #1D1F2B", whiteSpace: "nowrap" }}>
                       {isCard ? (
                         <span
                           style={{
@@ -402,15 +410,15 @@ export function OrdersTable({ orders, loading, compact = false }: OrdersTablePro
                             alignItems: "center",
                             gap: "5px",
                             fontSize: "11px",
-                            fontWeight: 800,
-                            padding: "3px 8px",
-                            borderRadius: "6px",
-                            background: "rgba(99, 102, 241, 0.15)",
-                            color: "#818cf8",
-                            border: "1px solid rgba(99, 102, 241, 0.35)",
+                            fontWeight: 500,
+                            padding: "2px 8px",
+                            borderRadius: "999px",
+                            background: "rgba(189, 180, 239, 0.12)",
+                            color: "#BDB4EF",
+                            border: "1px solid rgba(189, 180, 239, 0.25)",
                           }}
                         >
-                          <CreditCard style={{ width: "12px", height: "12px" }} />
+                          <CreditCard style={{ width: "12px", height: "12px" }} strokeWidth={1.8} />
                           Cartão (Stripe)
                         </span>
                       ) : (
@@ -420,22 +428,22 @@ export function OrdersTable({ orders, loading, compact = false }: OrdersTablePro
                             alignItems: "center",
                             gap: "5px",
                             fontSize: "11px",
-                            fontWeight: 800,
-                            padding: "3px 8px",
-                            borderRadius: "6px",
-                            background: "rgba(16, 185, 129, 0.14)",
-                            color: "var(--primary-green)",
-                            border: "1px solid rgba(16, 185, 129, 0.35)",
+                            fontWeight: 500,
+                            padding: "2px 8px",
+                            borderRadius: "999px",
+                            background: "#161722",
+                            color: "#2EDB6F",
+                            border: "1px solid #282A36",
                           }}
                         >
-                          <QrCode style={{ width: "12px", height: "12px" }} />
+                          <QrCode style={{ width: "12px", height: "12px" }} strokeWidth={1.8} />
                           PIX Oficial
                         </span>
                       )}
                     </td>
 
                     {/* Status */}
-                    <td style={{ padding: "13px 20px", borderBottom: "1px solid var(--border-subtle)", whiteSpace: "nowrap" }}>
+                    <td style={{ padding: "12px 18px", borderBottom: "1px solid #1D1F2B", whiteSpace: "nowrap" }}>
                       <span className={STATUS_CLASS[order.status] ?? "badge badge-expired"}>
                         {STATUS_LABELS[order.status] ?? order.status}
                       </span>

@@ -1,0 +1,475 @@
+{
+  "meta": {
+    "name": "OD Metrics / CRM - Dark Apple Dashboard Visual System",
+    "version": "1.0.0",
+    "purpose": "Reestilizar um CRM/dashboard existente usando apenas a linguagem visual da referência, sem copiar marca, textos, métricas, conteúdo ou identidade do produto original.",
+    "reference": {
+      "type": "uploaded_visual_reference",
+      "resolution": "1600x1200",
+      "visual_intent": [
+        "dark premium SaaS dashboard",
+        "macOS/iOS inspired precision",
+        "near-black layered surfaces",
+        "lavender/purple accent",
+        "rounded cards with thin borders",
+        "high information density without visual noise"
+      ]
+    }
+  },
+  "non_negotiable_rules": {
+    "preserve_existing_product": [
+      "business logic",
+      "data models",
+      "API integrations",
+      "routes",
+      "permissions",
+      "user data",
+      "metric definitions",
+      "CRM workflows",
+      "existing functional behavior"
+    ],
+    "replace_only": [
+      "visual hierarchy",
+      "spacing",
+      "colors",
+      "typography",
+      "component styling",
+      "layout composition",
+      "responsive behavior",
+      "micro-interactions"
+    ],
+    "do_not_copy_from_reference": [
+      "brand name",
+      "logo",
+      "crypto/staking content",
+      "exact labels",
+      "exact metrics",
+      "product-specific illustrations",
+      "proprietary textual content"
+    ]
+  },
+  "design_principles": {
+    "style_keywords": [
+      "Apple-like",
+      "premium",
+      "minimal",
+      "dark",
+      "precise",
+      "quiet",
+      "compact",
+      "high-end SaaS",
+      "subtle futuristic"
+    ],
+    "visual_rules": [
+      "Prefer layered near-black surfaces instead of pure flat black everywhere.",
+      "Use 1px low-contrast borders to define hierarchy before using shadows.",
+      "Use lavender as the primary interaction accent, never as a dominant page fill.",
+      "Keep corner radii consistent and moderately rounded.",
+      "Avoid oversized gradients, neon glows, excessive glassmorphism and thick shadows.",
+      "Maintain generous internal card padding while keeping overall dashboard density high.",
+      "Icons should be small, geometric, monochrome and visually quiet."
+    ]
+  },
+  "color_tokens": {
+    "page_outer_mockup": "#2B2E3A",
+    "app_background": "#05060F",
+    "sidebar_background": "#060710",
+    "topbar_background": "#0D0F15",
+    "surface_1": "#0D0E17",
+    "surface_2": "#11121A",
+    "surface_3": "#161722",
+    "surface_hover": "#1A1B27",
+    "surface_selected": "#20212D",
+    "border_subtle": "#232532",
+    "border_strong": "#303241",
+    "divider": "rgba(255,255,255,0.075)",
+    "text_primary": "#F5F4FA",
+    "text_secondary": "#A2A3AE",
+    "text_muted": "#707281",
+    "text_disabled": "#4E5060",
+    "accent_primary": "#BDB4EF",
+    "accent_primary_hover": "#CBC3FF",
+    "accent_strong": "#7C5CFF",
+    "accent_deep": "#5E46D8",
+    "accent_soft_bg": "rgba(189,180,239,0.12)",
+    "accent_border": "rgba(189,180,239,0.28)",
+    "success": "#2EDB6F",
+    "success_soft": "rgba(46,219,111,0.12)",
+    "danger": "#F05D66",
+    "danger_soft": "rgba(240,93,102,0.12)",
+    "warning": "#F4B83F",
+    "info": "#8A7CFF",
+    "chart_grid": "rgba(255,255,255,0.07)",
+    "chart_line_primary": "#8A79FF",
+    "chart_line_secondary": "#C4BAFF",
+    "chart_negative": "#F05D66"
+  },
+  "gradients": {
+    "hero_promo": "linear-gradient(180deg, #080817 0%, #0D0B22 48%, #6E4FD8 100%)",
+    "accent_button_optional": "linear-gradient(180deg, #C8BEFF 0%, #B4A9F0 100%)",
+    "chart_glow": "linear-gradient(180deg, rgba(124,92,255,0.20) 0%, rgba(124,92,255,0.00) 100%)"
+  },
+  "typography": {
+    "font_stack": "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', Inter, ui-sans-serif, system-ui, sans-serif",
+    "font_rendering": "antialiased",
+    "weights": {
+      "regular": 400,
+      "medium": 500,
+      "semibold": 600
+    },
+    "scale": {
+      "caption": {
+        "size_px": 11,
+        "line_height_px": 15,
+        "weight": 400
+      },
+      "label": {
+        "size_px": 12,
+        "line_height_px": 16,
+        "weight": 500
+      },
+      "body": {
+        "size_px": 14,
+        "line_height_px": 20,
+        "weight": 400
+      },
+      "body_medium": {
+        "size_px": 14,
+        "line_height_px": 20,
+        "weight": 500
+      },
+      "card_title": {
+        "size_px": 16,
+        "line_height_px": 22,
+        "weight": 500
+      },
+      "section_title": {
+        "size_px": 24,
+        "line_height_px": 30,
+        "weight": 500
+      },
+      "metric_large": {
+        "size_px": 44,
+        "line_height_px": 48,
+        "weight": 400
+      }
+    },
+    "letter_spacing": {
+      "headings": "-0.025em",
+      "body": "-0.010em",
+      "labels": "0em"
+    }
+  },
+  "spacing": {
+    "base_unit_px": 4,
+    "scale_px": [
+      4,
+      8,
+      12,
+      16,
+      20,
+      24,
+      28,
+      32,
+      40,
+      48
+    ]
+  },
+  "radii": {
+    "xs_px": 6,
+    "sm_px": 8,
+    "md_px": 12,
+    "lg_px": 16,
+    "xl_px": 20,
+    "pill_px": 999
+  },
+  "borders_and_shadows": {
+    "default_border": "1px solid #232532",
+    "subtle_border": "1px solid rgba(255,255,255,0.07)",
+    "focus_ring": "0 0 0 3px rgba(189,180,239,0.18)",
+    "card_shadow": "0 8px 30px rgba(0,0,0,0.18)",
+    "floating_shadow": "0 16px 50px rgba(0,0,0,0.30)",
+    "accent_glow": "0 0 24px rgba(124,92,255,0.15)"
+  },
+  "desktop_layout": {
+    "app_shell": {
+      "min_width_px": 1180,
+      "max_width_px": 1600,
+      "background": "{color_tokens.app_background}"
+    },
+    "browser_chrome_optional": {
+      "enabled_for_marketing_mockups_only": true,
+      "height_px": 42,
+      "background": "#111318",
+      "traffic_lights": true,
+      "note": "Não inserir chrome de navegador dentro do produto real. Use apenas em mockups/apresentações."
+    },
+    "topbar": {
+      "height_px": 64,
+      "position": "sticky",
+      "top": 0,
+      "z_index": 40,
+      "padding_x_px": 24,
+      "border_bottom": "{borders_and_shadows.subtle_border}",
+      "layout": "left identity/actions + right utility controls"
+    },
+    "sidebar": {
+      "width_px": 224,
+      "collapsed_width_px": 72,
+      "position": "fixed_or_sticky",
+      "top_offset_px": 64,
+      "padding_px": 20,
+      "border_right": "{borders_and_shadows.subtle_border}",
+      "item_height_px": 38,
+      "item_radius_px": 8,
+      "section_gap_px": 22,
+      "active_item": {
+        "background": "#191A23",
+        "text": "#F5F4FA",
+        "icon": "#F5F4FA"
+      },
+      "inactive_item": {
+        "background": "transparent",
+        "text": "#8E909C",
+        "icon": "#777986"
+      }
+    },
+    "main": {
+      "padding_top_px": 24,
+      "padding_right_px": 24,
+      "padding_bottom_px": 32,
+      "padding_left_px": 28,
+      "section_gap_px": 24
+    },
+    "content_grid": {
+      "columns": 12,
+      "gutter_px": 16,
+      "top_summary_pattern": "3 compact metric cards + 1 highlighted action/promo card",
+      "lower_pattern": "1 large full-width operational card with nested compact panels"
+    }
+  },
+  "responsive_layout": {
+    "breakpoints_px": {
+      "mobile": 0,
+      "tablet": 768,
+      "desktop": 1180,
+      "wide": 1440
+    },
+    "tablet": [
+      "Collapse sidebar into icon rail or drawer.",
+      "Reduce main horizontal padding to 20px.",
+      "Convert 4-column summary region into 2x2."
+    ],
+    "mobile_iphone": [
+      "Use a single-column content flow.",
+      "Replace fixed sidebar with bottom navigation or slide-over drawer.",
+      "Topbar height 56px.",
+      "Page padding 16px.",
+      "Cards use 14-16px radius and 16px internal padding.",
+      "Primary actions become full-width when appropriate.",
+      "Tables become stacked rows/cards or horizontally scrollable only when data density requires it.",
+      "Charts keep a minimum 220px height.",
+      "Do not shrink desktop UI mechanically; recompose it."
+    ]
+  },
+  "component_recipes": {
+    "button_primary": {
+      "height_px": 38,
+      "padding_x_px": 16,
+      "radius_px": 9,
+      "background": "#BDB4EF",
+      "text": "#090A10",
+      "font_size_px": 13,
+      "font_weight": 600,
+      "border": "1px solid rgba(255,255,255,0.16)",
+      "hover_background": "#CBC3FF",
+      "active_transform": "translateY(1px)"
+    },
+    "button_secondary": {
+      "height_px": 38,
+      "padding_x_px": 14,
+      "radius_px": 9,
+      "background": "#12131C",
+      "text": "#F2F1F6",
+      "border": "1px solid #2B2D39",
+      "hover_background": "#181924"
+    },
+    "icon_button": {
+      "size_px": 34,
+      "radius_px": 10,
+      "background": "transparent",
+      "border": "1px solid #282A36",
+      "icon_size_px": 16,
+      "hover_background": "#151620"
+    },
+    "segmented_control": {
+      "height_px": 38,
+      "padding_px": 4,
+      "background": "#0D0E16",
+      "border": "1px solid #252733",
+      "radius_px": 11,
+      "active_segment_background": "#292A35",
+      "active_segment_shadow": "inset 0 1px 0 rgba(255,255,255,0.04)"
+    },
+    "input": {
+      "height_px": 38,
+      "radius_px": 10,
+      "background": "#0B0C14",
+      "border": "1px solid #282A36",
+      "text": "#F5F4FA",
+      "placeholder": "#6E707D",
+      "focus_border": "#7162C9",
+      "focus_ring": "{borders_and_shadows.focus_ring}"
+    },
+    "card_default": {
+      "background": "#11121A",
+      "border": "1px solid #232532",
+      "radius_px": 16,
+      "padding_px": 18,
+      "shadow": "none",
+      "hover_border": "#303241"
+    },
+    "card_compact_metric": {
+      "min_height_px": 210,
+      "background": "#11121A",
+      "border": "1px solid #232532",
+      "radius_px": 16,
+      "padding_px": 18,
+      "header_layout": "icon tile + title + small action button",
+      "metric_position": "upper-middle",
+      "chart_position": "bottom",
+      "chart_style": "thin line, subtle glow, faint grid, no heavy axes"
+    },
+    "card_featured": {
+      "background": "{gradients.hero_promo}",
+      "border": "1px solid rgba(137,112,255,0.26)",
+      "radius_px": 18,
+      "padding_px": 22,
+      "min_height_px": 250,
+      "use": "only one focal card per viewport section",
+      "glow": "subtle purple glow near bottom"
+    },
+    "large_operational_panel": {
+      "background": "#0D0E16",
+      "border": "1px solid #232532",
+      "radius_px": 18,
+      "padding_px": 22,
+      "header_border_bottom": "optional 1px divider",
+      "nested_cards_background": "#11121A"
+    },
+    "navigation_item": {
+      "height_px": 38,
+      "radius_px": 8,
+      "gap_px": 10,
+      "icon_size_px": 16,
+      "font_size_px": 13
+    },
+    "badge": {
+      "height_px": 22,
+      "padding_x_px": 8,
+      "radius": "pill",
+      "font_size_px": 11,
+      "background": "#292A36",
+      "text": "#DAD8E5"
+    },
+    "status_positive": {
+      "text": "#2EDB6F",
+      "background": "rgba(46,219,111,0.10)"
+    },
+    "status_negative": {
+      "text": "#F05D66",
+      "background": "rgba(240,93,102,0.10)"
+    },
+    "modal": {
+      "background": "#11121A",
+      "border": "1px solid #2A2C38",
+      "radius_px": 18,
+      "shadow": "{borders_and_shadows.floating_shadow}",
+      "backdrop": "rgba(0,0,0,0.62)",
+      "backdrop_blur_px": 8
+    },
+    "table": {
+      "header_text": "#777986",
+      "row_text": "#E9E8EF",
+      "row_height_px": 48,
+      "divider": "1px solid rgba(255,255,255,0.055)",
+      "hover_background": "#14151F",
+      "container_radius_px": 14
+    },
+    "chart": {
+      "background": "transparent",
+      "grid": "rgba(255,255,255,0.06)",
+      "axis_text": "#6F7180",
+      "line_width_px": 1.5,
+      "primary_line": "#8A79FF",
+      "secondary_line": "#C4BAFF",
+      "negative_line": "#F05D66",
+      "point_radius_px": 3,
+      "tooltip_background": "#191A24",
+      "tooltip_border": "#303241",
+      "tooltip_radius_px": 8
+    }
+  },
+  "iconography": {
+    "style": "outline / geometric / monochrome",
+    "recommended_libraries": [
+      "Lucide",
+      "Phosphor"
+    ],
+    "stroke_width": 1.6,
+    "default_size_px": 16,
+    "rules": [
+      "Avoid colorful mixed icon sets.",
+      "Use accent color only for selected/high-value states.",
+      "Keep icons visually secondary to labels and data."
+    ]
+  },
+  "motion": {
+    "default_duration_ms": 160,
+    "fast_duration_ms": 120,
+    "slow_duration_ms": 220,
+    "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+    "hover": "subtle background/border change; no exaggerated scale",
+    "press": "1px translateY or 0.98 scale on compact controls",
+    "page_transitions": "opacity + 4px vertical shift maximum",
+    "reduced_motion": "respect prefers-reduced-motion"
+  },
+  "accessibility": {
+    "minimum_body_contrast": "WCAG AA where practical",
+    "keyboard_focus": "always visible",
+    "touch_target_mobile_px": 44,
+    "do_not_use_color_alone_for_status": true
+  },
+  "implementation_strategy": {
+    "phase_1": [
+      "Inventory current pages and reusable UI components.",
+      "Create global design tokens as CSS variables or theme tokens.",
+      "Build primitives: Button, Input, Select, Card, Badge, IconButton, Tabs, Modal, Table."
+    ],
+    "phase_2": [
+      "Rebuild AppShell, sidebar and topbar.",
+      "Apply new spacing/typography hierarchy.",
+      "Migrate existing dashboard cards and charts without changing their data."
+    ],
+    "phase_3": [
+      "Restyle CRM tables, forms, filters, drawers, modals and detail pages.",
+      "Add tablet/iPhone responsive compositions.",
+      "Standardize loading, empty, error and success states."
+    ],
+    "phase_4": [
+      "Visual QA against reference.",
+      "Accessibility QA.",
+      "Regression test all workflows and data actions."
+    ]
+  },
+  "acceptance_criteria": [
+    "The result immediately reads as the same visual family as the reference while remaining the user's own product.",
+    "No reference brand, staking terminology, crypto metrics or copied text remains.",
+    "Existing CRM/dashboard information and functionality remain intact.",
+    "All screens share the same tokens, spacing, radii, borders and interaction behavior.",
+    "Desktop feels like a premium macOS-class web app.",
+    "Mobile feels intentionally recomposed for iPhone rather than a compressed desktop.",
+    "Purple is used as a controlled accent, not as an omnipresent neon effect.",
+    "Borders and surface hierarchy remain visible on ordinary laptop displays."
+  ]
+}

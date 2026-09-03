@@ -30,14 +30,14 @@ export function PaymentMethodsPieChart({ orders, loading }: PaymentMethodsPieCha
       name: "PIX (Banco Central)",
       value: pixAmountCents / 100,
       count: pixOrders.length,
-      color: "#10b981",
+      color: "#8A79FF",
       icon: QrCode,
     },
     {
       name: "Cartão de Crédito (Stripe)",
       value: cardAmountCents / 100,
       count: cardOrders.length,
-      color: "#6366f1",
+      color: "#C4BAFF",
       icon: CreditCard,
     },
   ];
@@ -48,7 +48,7 @@ export function PaymentMethodsPieChart({ orders, loading }: PaymentMethodsPieCha
     <div
       className="card"
       style={{
-        padding: "24px 26px",
+        padding: "20px 22px",
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
@@ -59,24 +59,24 @@ export function PaymentMethodsPieChart({ orders, loading }: PaymentMethodsPieCha
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <div
             style={{
-              width: "32px",
-              height: "32px",
+              width: "30px",
+              height: "30px",
               borderRadius: "8px",
-              background: "rgba(99, 102, 241, 0.15)",
-              border: "1px solid rgba(99, 102, 241, 0.35)",
+              background: "#161722",
+              border: "1px solid #282A36",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "#818cf8",
+              color: "#BDB4EF",
             }}
           >
-            <PieIcon style={{ width: "16px", height: "16px" }} />
+            <PieIcon style={{ width: "15px", height: "15px" }} strokeWidth={1.8} />
           </div>
           <div>
-            <h3 style={{ fontSize: "14px", fontWeight: 800, color: "var(--text-primary)", margin: 0 }}>
+            <h3 style={{ fontSize: "13.5px", fontWeight: 600, color: "#F5F4FA", margin: 0, letterSpacing: "-0.01em" }}>
               Método de Pagamento (PIX vs Cartão)
             </h3>
-            <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: "2px 0 0", fontWeight: 500 }}>
+            <p style={{ fontSize: "11px", color: "#707281", margin: "2px 0 0", fontWeight: 400 }}>
               Onde cada consulente realizou a doação
             </p>
           </div>
@@ -85,12 +85,12 @@ export function PaymentMethodsPieChart({ orders, loading }: PaymentMethodsPieCha
         <span
           style={{
             fontSize: "11px",
-            fontWeight: 800,
-            color: "var(--text-primary)",
-            background: "var(--bg-surface-alt)",
-            border: "1px solid var(--border)",
-            borderRadius: "6px",
-            padding: "3px 8px",
+            fontWeight: 500,
+            color: "#A2A3AE",
+            background: "#161722",
+            border: "1px solid #282A36",
+            borderRadius: "999px",
+            padding: "2px 8px",
           }}
         >
           {paidOrders.length} {paidOrders.length === 1 ? "venda paga" : "vendas pagas"}

@@ -1,0 +1,267 @@
+{
+  "meta": {
+    "name": "OD Metrics - Layout Remodulation Spec",
+    "version": "2.0.0",
+    "goal": "Remodular o dashboard OD Metrics atual para ficar visualmente o mais próximo possível da referência dark premium estilo macOS/iPhone, preservando o conteúdo, módulos, nomes e estrutura funcional do produto.",
+    "references_used": {
+      "reference_style_image": "Dashboard dark premium com estética SaaS Apple-like",
+      "current_product_image": "OD Metrics atual com seus módulos, nomes e cards que devem ser preservados"
+    }
+  },
+  "hard_rules": {
+    "must_preserve": [
+      "nome da marca: OD Metrics",
+      "módulos e rotas existentes",
+      "nomes dos cards e das colunas",
+      "dados e métricas reais do sistema",
+      "ordem lógica dos elementos quando fizer sentido",
+      "lógica de negócio",
+      "tabelas, funis, gráficos e widgets existentes",
+      "workflow do produto"
+    ],
+    "must_change": [
+      "AppShell",
+      "hierarquia visual",
+      "estilo da sidebar",
+      "estilo da topbar",
+      "composição dos cards",
+      "espaçamento",
+      "tipografia",
+      "bordas",
+      "shadows",
+      "componentes UI",
+      "acabamento visual",
+      "responsividade"
+    ],
+    "must_not_copy": [
+      "nome, logo ou textos da dashboard de referência",
+      "métricas da referência",
+      "conteúdo de staking/crypto",
+      "qualquer informação funcional da referência que não exista no OD Metrics"
+    ]
+  },
+  "visual_target": {
+    "summary": "Transformar o OD Metrics em uma versão premium, elegante, limpa, coesa e muito próxima da dashboard de referência, com fundo escuro sofisticado, cards refinados, canto arredondado, accent lavanda, bordas hairline e aparência Apple/macOS.",
+    "keywords": [
+      "premium",
+      "macOS-like",
+      "Apple-inspired",
+      "dark refined",
+      "elegant",
+      "minimal",
+      "high-end SaaS",
+      "dense but clean"
+    ]
+  },
+  "layout_mapping": {
+    "global_structure": {
+      "reference_pattern": "sidebar à esquerda + topbar superior + área principal com cards superiores + faixa de insights/atalhos + painel principal amplo",
+      "apply_to_od_metrics": "recompor o OD Metrics usando exatamente essa lógica estrutural"
+    },
+    "sidebar": {
+      "keep_items": [
+        "Visão Geral",
+        "Rastreamento",
+        "Pedidos",
+        "Relatórios",
+        "WhatsApp Tracker",
+        "Meu Perfil"
+      ],
+      "keep_brand_block": [
+        "OD Metrics",
+        "Inteligência & Tracking"
+      ],
+      "restyle_as": "sidebar escura refinada, compacta, discreta, com estados ativos no estilo da referência",
+      "target_width_px": 224,
+      "section_dividers": true,
+      "icon_style": "small monochrome geometric"
+    },
+    "topbar": {
+      "keep_current_controls": [
+        "status ao vivo",
+        "filtros de período",
+        "personalizar",
+        "sync",
+        "exportar",
+        "ações utilitárias"
+      ],
+      "restyle_as": "topbar premium com pills e botões compactos no estilo da referência",
+      "height_px": 64
+    },
+    "top_metric_cards": {
+      "keep_cards": [
+        "Faturamento Total",
+        "Conversões no PIX",
+        "Cartão de Crédito",
+        "Total de Leads & Funil"
+      ],
+      "layout": "4 cards no topo em grid semelhante à referência",
+      "card_style": "cards escuros arredondados com ícone pequeno, título, métrica principal forte e linha/divisor inferior sutil"
+    },
+    "secondary_strip": {
+      "keep_content_type": "faixa de indicadores ou atalhos já existentes",
+      "restyle_as": "bar horizontal escura com chips/mini indicadores discretos, inspirada na faixa de navegação/insights da referência"
+    },
+    "main_panel": {
+      "keep_modules": [
+        "funil / telemetria",
+        "progressão passo a passo",
+        "entradas",
+        "doações",
+        "taxa global"
+      ],
+      "restyle_as": "grande painel unificado com nested cards, visual premium, melhor alinhamento, respiro e consistência com a referência"
+    },
+    "funnel_area": {
+      "keep_current_logic": "etapas do quiz e indicadores",
+      "restyle_as": "funil e lista de etapas integrados num grande painel escuro e elegante, com cartões internos claros apenas onde necessário",
+      "note": "melhorar drasticamente o contraste, alinhamento e qualidade visual da área que hoje parece quebrada"
+    }
+  },
+  "color_system": {
+    "page_background": "#05060F",
+    "sidebar_background": "#060710",
+    "topbar_background": "#0D0F15",
+    "surface_1": "#0D0E17",
+    "surface_2": "#11121A",
+    "surface_3": "#171925",
+    "surface_hover": "#1B1D28",
+    "surface_selected": "#232634",
+    "border_subtle": "#232532",
+    "border_medium": "#2D3040",
+    "text_primary": "#F5F4FA",
+    "text_secondary": "#A7A9B5",
+    "text_muted": "#747786",
+    "accent_primary": "#BDB4EF",
+    "accent_hover": "#CBC3FF",
+    "accent_strong": "#7C5CFF",
+    "success": "#2EDB6F",
+    "danger": "#F05D66",
+    "warning": "#F4B83F",
+    "chip_dark": "#12131D",
+    "white_card_optional": "#F5F5F7",
+    "white_card_text": "#111216"
+  },
+  "gradients": {
+    "featured_panel": "linear-gradient(180deg, #080817 0%, #0D0B22 48%, #6E4FD8 100%)",
+    "subtle_purple_glow": "radial-gradient(circle at center, rgba(124,92,255,0.16) 0%, rgba(124,92,255,0.00) 70%)"
+  },
+  "typography": {
+    "font_stack": "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', Inter, ui-sans-serif, system-ui, sans-serif",
+    "rules": [
+      "usar aparência próxima ao ecossistema Apple",
+      "evitar bold excessivo",
+      "títulos limpos com weight 500/600",
+      "números principais grandes e bem respirados",
+      "labels secundárias em cinza frio"
+    ],
+    "sizes": {
+      "caption": 11,
+      "label": 12,
+      "body": 14,
+      "card_title": 16,
+      "section_title": 24,
+      "metric_large": 44
+    }
+  },
+  "component_rules": {
+    "cards": {
+      "radius_px": [
+        16,
+        18
+      ],
+      "padding_px": [
+        18,
+        22
+      ],
+      "border": "1px solid #232532",
+      "shadow": "minimal",
+      "rule": "todos os cards devem parecer parte da mesma família visual"
+    },
+    "buttons": {
+      "primary": {
+        "background": "#BDB4EF",
+        "text": "#090A10",
+        "radius_px": 9,
+        "height_px": 38
+      },
+      "secondary": {
+        "background": "#12131C",
+        "text": "#F2F1F6",
+        "border": "1px solid #2B2D39",
+        "radius_px": 9,
+        "height_px": 38
+      }
+    },
+    "inputs": {
+      "background": "#0B0C14",
+      "border": "1px solid #282A36",
+      "radius_px": 10,
+      "height_px": 38,
+      "focus": "lavender ring"
+    },
+    "chips_and_tabs": {
+      "style": "pill dark controls with selected lighter state",
+      "radius_px": 11
+    },
+    "tables": {
+      "header_text": "#777986",
+      "row_text": "#E9E8EF",
+      "row_height_px": 48,
+      "hover": "#14151F"
+    },
+    "charts": {
+      "background": "transparent",
+      "grid": "rgba(255,255,255,0.06)",
+      "primary_series": "#8A79FF",
+      "positive": "#2EDB6F",
+      "negative": "#F05D66"
+    }
+  },
+  "repair_objectives_for_current_od_metrics": [
+    "corrigir sensação de layout quebrado",
+    "padronizar alturas e alinhamentos dos cards",
+    "melhorar respiro interno e grid",
+    "refinar contraste entre fundo, superfícies e bordas",
+    "substituir aparência de admin template por aparência premium",
+    "organizar melhor a área do funil principal",
+    "integrar os blocos laterais do funil ao painel principal",
+    "remover ruído visual",
+    "harmonizar botões, filtros e pills superiores",
+    "deixar a interface visualmente coerente de ponta a ponta"
+  ],
+  "responsive_rules": {
+    "desktop": [
+      "manter sidebar fixa à esquerda",
+      "grid principal 12 colunas",
+      "cards superiores em 4 colunas"
+    ],
+    "tablet": [
+      "cards superiores em 2x2",
+      "sidebar colapsável",
+      "painel principal empilhado"
+    ],
+    "iphone": [
+      "layout recomposto em coluna única",
+      "sidebar vira drawer ou bottom nav",
+      "padding lateral 16px",
+      "topbar 56px",
+      "cards empilhados",
+      "área do funil simplificada sem perder função"
+    ]
+  },
+  "delivery_expectation": {
+    "expected_result": [
+      "OD Metrics com o mesmo DNA visual da referência",
+      "conteúdo e nomes do OD Metrics preservados",
+      "layout bem mais elegante, coeso e premium",
+      "aparência final semelhante a um produto grande e polido"
+    ],
+    "quality_check": [
+      "confirmar que os módulos e nomes do OD Metrics foram preservados",
+      "confirmar que o layout ficou visualmente próximo da referência",
+      "confirmar consistência de spacing, radius, cores e bordas",
+      "confirmar funcionamento em desktop, tablet e iPhone"
+    ]
+  }
+}

@@ -235,7 +235,7 @@ export function App() {
   const [authLoading, setAuthLoading] = useState(true);
 
   const [theme, setTheme] = useState<"light" | "dark">(() => {
-    return (localStorage.getItem("tl-theme") as "light" | "dark") || "light";
+    return (localStorage.getItem("tl-theme") as "light" | "dark") || "dark";
   });
 
   const [section, setSection] = useState<Section>(getSectionFromPath);
@@ -538,30 +538,31 @@ export function App() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          background: "#030712",
-          color: "#ffffff",
+          background: "#05060F",
+          color: "#F5F4FA",
           gap: "16px",
         }}
       >
         <div
           style={{
-            width: "48px",
-            height: "48px",
-            borderRadius: "14px",
-            background: "linear-gradient(135deg, #10b981 0%, #06b6d4 100%)",
+            width: "44px",
+            height: "44px",
+            borderRadius: "12px",
+            background: "linear-gradient(180deg, #1D1E2C 0%, #12131F 100%)",
+            border: "1px solid rgba(189, 180, 239, 0.35)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontFamily: "'Space Grotesk', sans-serif",
-            fontWeight: 900,
-            fontSize: "20px",
-            color: "#030712",
-            boxShadow: "0 0 25px rgba(16, 185, 129, 0.4)",
+            fontFamily: "inherit",
+            fontWeight: 700,
+            fontSize: "18px",
+            color: "#BDB4EF",
+            boxShadow: "0 4px 20px rgba(124, 92, 255, 0.25)",
           }}
         >
           OD
         </div>
-        <span style={{ fontSize: "13px", fontWeight: 700, color: "#94a3b8" }}>
+        <span style={{ fontSize: "13px", fontWeight: 500, color: "#A2A3AE" }}>
           Validando credenciais administrativas...
         </span>
       </div>
@@ -640,11 +641,11 @@ export function App() {
                 loading={loading}
               />
 
+              {/* FUNIL DE CONVERSÃO 3D EM LARGURA TOTAL (PAINEL PRINCIPAL ESTILO STAKENT) */}
+              <FunnelViz leads={filteredLeads.length > 0 ? filteredLeads : allLeads} loading={loading} />
+
               {/* Gráfico de Receita Full Width com Curvas PIX vs Cartão */}
               <RevenueChart data={revenueChart} loading={loading} />
-
-              {/* FUNIL DE CONVERSÃO 3D EM LARGURA TOTAL */}
-              <FunnelViz leads={filteredLeads.length > 0 ? filteredLeads : allLeads} loading={loading} />
 
               {/* TRIO DE GRÁFICOS ANALÍTICOS: Métodos (PIX vs Cartão), Status e Origem UTM */}
               <div className="analytics-trio-grid">

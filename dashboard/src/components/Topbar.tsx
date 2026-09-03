@@ -1,4 +1,5 @@
-import { Sun, Moon, RefreshCw, Download, Users, Menu } from "lucide-react";
+import { useState } from "react";
+import { Sun, Moon, RefreshCw, Download, Users, Menu, Bell, Search, ShieldCheck, ChevronDown } from "lucide-react";
 import { DateRangeSelector, type DateRangeValue } from "./DateRangeSelector";
 import type { Section } from "../App";
 
@@ -17,32 +18,14 @@ interface TopbarProps {
 }
 
 const SECTION_LABELS: Record<Section, string> = {
-  "visao-geral":  "Visão Geral & Gráficos",
-  "rastreamento": "Rastreamento do Quiz ao Vivo",
-  "pedidos":      "Auditoria de Pedidos (PIX & Cartão)",
-  "relatorios":   "Relatórios de Canais & UTMs",
-  "whatsapp":     "WhatsApp Tracker & Conversas",
-  "perfil":       "Meu Perfil & Segurança",
-  "login":        "Acesso Administrativo",
+  "visao-geral":  "Visão Geral",
+  "rastreamento": "Rastreamento",
+  "pedidos":      "Auditoria de Pedidos",
+  "relatorios":   "Relatórios & UTMs",
+  "whatsapp":     "WhatsApp Tracker",
+  "perfil":       "Meu Perfil",
+  "login":        "Acesso",
 };
-
-const SECTION_DESCRIPTIONS: Record<Section, string> = {
-  "visao-geral":  "PIX vs Cartão · Funil de Conversão · Telemetria",
-  "rastreamento": "Funil de consulentes ao vivo · Etapas em tempo real",
-  "pedidos":      "Doações PIX & Cartão · Auditoria de gateways",
-  "relatorios":   "Tráfego · Campanhas · Exportação consolidada",
-  "whatsapp":     "Conversas · Formas de pagamento · Metrificação",
-  "perfil":       "Conta · Credenciais · Segurança",
-  "login":        "Autenticação segura",
-};
-
-function formatTime(d: Date): string {
-  return d.toLocaleTimeString("pt-BR", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-}
 
 export function Topbar({
   theme,
@@ -57,174 +40,267 @@ export function Topbar({
   onlineCount,
   onOpenMenu,
 }: TopbarProps) {
+  const [searchTerm, setSearchTerm] = useState("");
+
   return (
-    <header className="dashboard-topbar">
-      {/* ─── Linha 1: Cabeçalho Superior Universal ─── */}
-      <div className="topbar-main-row">
-        {/* Lado Esquerdo: Hambúrguer Mobile + Logo OD METRICS / Título */}
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0 }}>
-          {onOpenMenu && (
-            <button
-              onClick={onOpenMenu}
-              className="mobile-menu-trigger btn"
-              style={{ padding: "6px 8px", borderRadius: "8px", flexShrink: 0 }}
-              title="Abrir Menu"
-            >
-              <Menu style={{ width: "18px", height: "18px" }} />
-            </button>
-          )}
-
-          {/* Logo compacto no mobile */}
-          <div className="mobile-logo-badge" style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
-            <div
-              style={{
-                width: "28px",
-                height: "28px",
-                borderRadius: "8px",
-                background: "linear-gradient(135deg, #fbbf24 0%, #d97706 100%)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#1c1917",
-                fontFamily: "'Space Grotesk', sans-serif",
-                fontWeight: 900,
-                fontSize: "11px",
-                boxShadow: "0 0 14px rgba(245, 158, 11, 0.35)",
-              }}
-            >
-              OD
-            </div>
-          </div>
-
-          <div style={{ minWidth: 0, flex: "0 1 auto", maxWidth: "260px" }}>
-            <h1
-              style={{
-                fontSize: "13.5px",
-                fontWeight: 800,
-                color: "var(--text-primary)",
-                margin: 0,
-                letterSpacing: "-0.01em",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            >
-              {SECTION_LABELS[section]}
-            </h1>
-            <p
-              className="desktop-only-control"
-              style={{
-                fontSize: "10.5px",
-                color: "var(--text-muted)",
-                margin: "1px 0 0",
-                fontWeight: 500,
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            >
-              {SECTION_DESCRIPTIONS[section]}
-            </p>
-          </div>
-        </div>
-
-        {/* Lado Direito: Controles Rápidos */}
-        <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
-          {/* Contador de Pessoas Ao Vivo */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "5px",
-              background: "rgba(245, 158, 11, 0.12)",
-              border: "1px solid rgba(245, 158, 11, 0.35)",
-              borderRadius: "99px",
-              padding: "4px 8px",
-              boxShadow: "0 0 10px rgba(245, 158, 11, 0.15)",
-            }}
+    <header
+      className="dashboard-topbar"
+      style={{
+        height: "64px",
+        background: "#0D0F15",
+        borderBottom: "1px solid #1E202B",
+        padding: "0 24px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: "14px",
+        zIndex: 100,
+      }}
+    >
+      {/* ─── LADO ESQUERDO: Perfil do Administrador + Status Ao Vivo ─── */}
+      <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0 }}>
+        {onOpenMenu && (
+          <button
+            onClick={onOpenMenu}
+            className="mobile-menu-trigger btn"
+            style={{ padding: "6px 8px", borderRadius: "8px", flexShrink: 0 }}
+            title="Abrir Menu"
           >
-            <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#f59e0b", boxShadow: "0 0 8px #f59e0b" }} />
-            <Users style={{ width: "11px", height: "11px", color: "#f59e0b" }} />
-            <span style={{ fontSize: "11px", fontWeight: 900, color: "var(--text-primary)" }}>
-              {onlineCount}
-            </span>
-            <span className="desktop-only-control" style={{ fontSize: "10px", fontWeight: 800, color: "#f59e0b" }}>
-              ao vivo
-            </span>
-          </div>
+            <Menu style={{ width: "18px", height: "18px" }} />
+          </button>
+        )}
 
-          {/* Seletor de Datas no Desktop */}
-          {section === "visao-geral" && (
-            <div className="desktop-date-selector">
-              <DateRangeSelector value={dateRange} onChange={onDateRangeChange} />
-            </div>
-          )}
-
-          {/* Indicador de Atualização no Desktop */}
+        {/* Pill de Usuário Administrador (Inspirado no perfil @ryan997 da referência) */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            background: "#12131D",
+            border: "1px solid #232534",
+            borderRadius: "999px",
+            padding: "4px 10px 4px 5px",
+            cursor: "pointer",
+          }}
+        >
           <div
-            className="desktop-only-control"
             style={{
+              width: "24px",
+              height: "24px",
+              borderRadius: "50%",
+              background: "linear-gradient(135deg, #1F2133, #323550)",
+              border: "1px solid #3E4260",
               display: "flex",
               alignItems: "center",
-              gap: "6px",
+              justifyContent: "center",
               fontSize: "11px",
-              color: "var(--text-secondary)",
-              background: "var(--bg-surface-alt)",
-              border: "1px solid var(--border)",
-              borderRadius: "99px",
-              padding: "5px 11px",
-              flexShrink: 0,
+              fontWeight: 600,
+              color: "#BDB4EF",
             }}
           >
-            <span style={{ fontWeight: 600 }}>
-              {loading ? "Sync..." : lastUpdate ? `Sync ${formatTime(lastUpdate)}` : "Ativo"}
+            D
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <span style={{ fontSize: "11.5px", color: "#8A8D9F", fontWeight: 400 }}>
+              @theboss
+            </span>
+            <span
+              style={{
+                fontSize: "8.5px",
+                fontWeight: 700,
+                color: "#2EDB6F",
+                background: "rgba(46, 219, 111, 0.12)",
+                padding: "1px 4px",
+                borderRadius: "3px",
+              }}
+            >
+              PRO
+            </span>
+            <span style={{ fontSize: "12px", fontWeight: 600, color: "#F5F4FA" }}>
+              Diogo
             </span>
           </div>
-
-          {/* Botão Exportar no Desktop */}
-          <button
-            onClick={onExportCsv}
-            className="btn btn-emerald desktop-only-control"
-            style={{ padding: "6px 12px", fontSize: "11.5px" }}
-          >
-            <Download style={{ width: "12px", height: "12px" }} />
-            Exportar
-          </button>
-
-          {/* Botão Refresh */}
-          <button
-            onClick={onRefresh}
-            disabled={loading}
-            className="btn"
-            title="Atualizar dados agora"
-            style={{ padding: "6px 8px", borderRadius: "8px" }}
-          >
-            <RefreshCw
-              style={{
-                width: "13px",
-                height: "13px",
-                animation: loading ? "spin 1s linear infinite" : "none",
-              }}
-            />
-          </button>
-
-          {/* Botão Tema */}
-          <button
-            onClick={onToggleTheme}
-            className="btn"
-            title={theme === "light" ? "Modo Escuro" : "Modo Claro"}
-            style={{ padding: "6px 8px", borderRadius: "8px" }}
-          >
-            {theme === "light" ? (
-              <Moon style={{ width: "13px", height: "13px" }} />
-            ) : (
-              <Sun style={{ width: "13px", height: "13px" }} />
-            )}
-          </button>
+          <ChevronDown style={{ width: "11px", height: "11px", color: "#707281" }} />
         </div>
+
+        {/* Botão de Status Operacional (Inspirado no botão 'Deposit' com cadeado da referência) */}
+        <div
+          className="desktop-only-control"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            background: "#161722",
+            border: "1px solid #282A38",
+            borderRadius: "999px",
+            padding: "5px 12px",
+            fontSize: "11.5px",
+            fontWeight: 500,
+            color: "#F5F4FA",
+          }}
+        >
+          <div className="pulse-emerald" />
+          <ShieldCheck style={{ width: "13px", height: "13px", color: "#2EDB6F" }} />
+          <span>Telemetria Ao Vivo</span>
+          <span style={{ fontSize: "10px", color: "#BDB4EF", background: "rgba(189, 180, 239, 0.12)", padding: "1px 6px", borderRadius: "99px", marginLeft: "2px", display: "inline-flex", alignItems: "center", gap: "3px" }}>
+            <Users style={{ width: "10px", height: "10px" }} />
+            {onlineCount} ativos
+          </span>
+        </div>
+
+        {/* Badge da Seção Atual */}
+        <span
+          className="desktop-only-control"
+          style={{
+            fontSize: "11px",
+            fontWeight: 500,
+            color: "#A7A9B5",
+            background: "#12131D",
+            border: "1px solid #232534",
+            padding: "3px 9px",
+            borderRadius: "999px",
+          }}
+        >
+          {SECTION_LABELS[section]}
+        </span>
       </div>
 
-      {/* ─── Linha 2: Barra de Datas Deslizante no Mobile ─── */}
+      {/* ─── LADO DIREITO: Notificações, Busca, Filtro de Data e Ações ─── */}
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
+        {/* Notificações com Badge (Inspirado no sininho com '2' da referência) */}
+        <div
+          style={{
+            position: "relative",
+            width: "32px",
+            height: "32px",
+            borderRadius: "8px",
+            background: "#12131D",
+            border: "1px solid #232534",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#A2A3AE",
+            cursor: "pointer",
+          }}
+          title="Notificações do Sistema"
+        >
+          <Bell style={{ width: "14px", height: "14px" }} />
+          <span
+            style={{
+              position: "absolute",
+              top: "-3px",
+              right: "-3px",
+              width: "15px",
+              height: "15px",
+              borderRadius: "50%",
+              background: "#7C5CFF",
+              color: "#ffffff",
+              fontSize: "9px",
+              fontWeight: 700,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              border: "2px solid #0D0F15",
+            }}
+          >
+            2
+          </span>
+        </div>
+
+        {/* Input de Busca Compacto (Inspirado no 'Search...' da referência) */}
+        <div className="desktop-only-control" style={{ position: "relative" }}>
+          <Search
+            style={{
+              position: "absolute",
+              left: "9px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: "12px",
+              height: "12px",
+              color: "#707281",
+              pointerEvents: "none",
+            }}
+          />
+          <input
+            type="text"
+            placeholder="Buscar..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{
+              fontSize: "11.5px",
+              padding: "5px 10px 5px 27px",
+              borderRadius: "8px",
+              border: "1px solid #232534",
+              background: "#12131D",
+              color: "#F5F4FA",
+              width: "140px",
+              outline: "none",
+              fontFamily: "inherit",
+              transition: "width 0.2s ease, border-color 0.2s ease",
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.width = "180px";
+              e.currentTarget.style.borderColor = "rgba(189, 180, 239, 0.4)";
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.width = "140px";
+              e.currentTarget.style.borderColor = "#232534";
+            }}
+          />
+        </div>
+
+        {/* Seletor de Período / Datas no Desktop */}
+        {section === "visao-geral" && (
+          <div className="desktop-date-selector">
+            <DateRangeSelector value={dateRange} onChange={onDateRangeChange} />
+          </div>
+        )}
+
+        {/* Botão Exportar CSV */}
+        <button
+          onClick={onExportCsv}
+          className="btn desktop-only-control"
+          style={{ height: "32px", padding: "0 10px", fontSize: "11.5px", gap: "5px" }}
+          title="Exportar dados do período em CSV"
+        >
+          <Download style={{ width: "12px", height: "12px", color: "#A2A3AE" }} />
+          Exportar
+        </button>
+
+        {/* Botão Refresh / Sync */}
+        <button
+          onClick={onRefresh}
+          disabled={loading}
+          className="btn"
+          title={lastUpdate ? `Última sincronização: ${lastUpdate.toLocaleTimeString("pt-BR")}. Clique para atualizar.` : "Atualizar dados agora"}
+          style={{ width: "32px", height: "32px", padding: 0, borderRadius: "8px" }}
+        >
+          <RefreshCw
+            style={{
+              width: "12px",
+              height: "12px",
+              color: "#A2A3AE",
+              animation: loading ? "spin 1s linear infinite" : "none",
+            }}
+          />
+        </button>
+
+        {/* Alternador de Tema Discreto */}
+        <button
+          onClick={onToggleTheme}
+          className="btn"
+          title={`Alternar para modo ${theme === "light" ? "escuro" : "claro"}`}
+          style={{ width: "32px", height: "32px", padding: 0, borderRadius: "8px" }}
+        >
+          {theme === "light" ? (
+            <Moon style={{ width: "12px", height: "12px" }} />
+          ) : (
+            <Sun style={{ width: "12px", height: "12px" }} />
+          )}
+        </button>
+      </div>
+
+      {/* ─── Linha 2: Barra de Datas no Mobile ─── */}
       {section === "visao-geral" && (
         <div className="mobile-date-subbar">
           <DateRangeSelector value={dateRange} onChange={onDateRangeChange} />

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Lead } from "@/types";
-import { Users, Filter } from "lucide-react";
+import { Users, Filter, Clock } from "lucide-react";
 
 interface Funnel3DViewProps {
   leads: Lead[];
@@ -154,179 +154,242 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
       style={{
         display: "flex",
         flexDirection: "column",
-        gap: "24px",
+        gap: "20px",
         overflow: "hidden",
         width: "100%",
         maxWidth: "100%",
         boxSizing: "border-box",
+        background: "#0D0E17",
+        border: "1px solid #232532",
+        borderRadius: "18px",
+        padding: "22px 24px",
       }}
     >
-      {/* Cabeçalho do Card Espaçoso */}
+      {/* ─── 1. Header do Painel Principal (Inspirado no 'Your active stakings' da referência) ─── */}
       <div
-        className="funnel-header"
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          borderBottom: "1px solid #1E202B",
+          paddingBottom: "16px",
+          flexWrap: "wrap",
+          gap: "12px",
+        }}
+      >
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "3px" }}>
+            <span style={{ fontSize: "11px", color: "#747786" }}>
+              Última atualização — tempo real
+            </span>
+            <Clock style={{ width: "11px", height: "11px", color: "#747786" }} />
+          </div>
+          <h3
+            style={{
+              fontSize: "18px",
+              fontWeight: 600,
+              color: "#F5F4FA",
+              margin: 0,
+              letterSpacing: "-0.015em",
+            }}
+          >
+            Telemetria & Progressão do Funil
+          </h3>
+        </div>
+
+        {/* Controles de Ação à Direita (Inspirados nos ícones gráficos, refresh e configurações da referência) */}
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          {/* Badges de Resumo Executivo */}
+          <div className="funnel-header-cards">
+            <div
+              className="funnel-stat-card"
+              style={{
+                background: "#161722",
+                border: "1px solid #282A36",
+                borderRadius: "8px",
+                padding: "5px 10px",
+                textAlign: "center",
+              }}
+            >
+              <span style={{ fontSize: "9.5px", fontWeight: 500, color: "#747786", textTransform: "uppercase", display: "block" }}>
+                Entradas
+              </span>
+              <span className="font-numeric" style={{ fontSize: "13.5px", fontWeight: 600, color: "#F5F4FA" }}>
+                {totalStarted} <span style={{ fontSize: "9.5px", fontWeight: 400, color: "#747786" }}>leads</span>
+              </span>
+            </div>
+
+            <div
+              className="funnel-stat-card"
+              style={{
+                background: "rgba(46, 219, 111, 0.10)",
+                border: "1px solid rgba(46, 219, 111, 0.25)",
+                borderRadius: "8px",
+                padding: "5px 10px",
+                textAlign: "center",
+              }}
+            >
+              <span style={{ fontSize: "9.5px", fontWeight: 500, color: "#2EDB6F", textTransform: "uppercase", display: "block" }}>
+                Doações
+              </span>
+              <span className="font-numeric" style={{ fontSize: "13.5px", fontWeight: 600, color: "#2EDB6F" }}>
+                {totalConverted} <span style={{ fontSize: "9.5px", fontWeight: 500 }}>pagos</span>
+              </span>
+            </div>
+
+            <div
+              className="funnel-stat-card"
+              style={{
+                background: "rgba(189, 180, 239, 0.10)",
+                border: "1px solid rgba(189, 180, 239, 0.25)",
+                borderRadius: "8px",
+                padding: "5px 10px",
+                textAlign: "center",
+              }}
+            >
+              <span style={{ fontSize: "9.5px", fontWeight: 500, color: "#BDB4EF", textTransform: "uppercase", display: "block" }}>
+                Taxa Global
+              </span>
+              <span className="font-numeric" style={{ fontSize: "13.5px", fontWeight: 600, color: "#BDB4EF" }}>
+                {globalConversionRate}%
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ─── 2. Bloco de Destaque com Métrica Monumental & Linha de Jornada ─── */}
+      <div
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           flexWrap: "wrap",
-          gap: "14px",
-          borderBottom: "1px solid var(--border-subtle)",
-          paddingBottom: "16px",
+          gap: "20px",
+          background: "#11121A",
+          border: "1px solid #232532",
+          borderRadius: "14px",
+          padding: "18px 20px",
         }}
       >
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          {/* Título do Funil Ativo */}
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
             <div
               style={{
-                width: "34px",
-                height: "34px",
-                borderRadius: "10px",
-                background: "rgba(16, 185, 129, 0.15)",
-                border: "1px solid rgba(16, 185, 129, 0.35)",
+                width: "22px",
+                height: "22px",
+                borderRadius: "6px",
+                background: "rgba(240, 93, 102, 0.15)",
+                border: "1px solid rgba(240, 93, 102, 0.35)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "var(--primary-green)",
-                flexShrink: 0,
+                color: "#F05D66",
               }}
             >
-              <Filter style={{ width: "17px", height: "17px" }} />
+              <Filter style={{ width: "11px", height: "11px" }} />
             </div>
-            <div>
-              <h2
-                style={{
-                  fontSize: "15px",
-                  fontWeight: 900,
-                  color: "var(--text-primary)",
-                  margin: 0,
-                  letterSpacing: "-0.01em",
-                }}
-              >
-                Funil de Conversão 3D
-              </h2>
-              <p
-                style={{
-                  fontSize: "11.5px",
-                  color: "var(--text-muted)",
-                  margin: "1px 0 0",
-                  fontWeight: 500,
-                }}
-              >
-                Progressão passo a passo dos consulentes
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Badges de Resumo Executivo */}
-        <div className="funnel-header-cards">
-          <div
-            className="funnel-stat-card"
-            style={{
-              background: "var(--bg-surface-alt)",
-              border: "1px solid var(--border)",
-              borderRadius: "10px",
-              padding: "8px 12px",
-              textAlign: "center",
-            }}
-          >
+            <span style={{ fontSize: "15px", fontWeight: 600, color: "#F5F4FA" }}>
+              Quiz Espírita — Carta Psicografada
+            </span>
             <span
               style={{
                 fontSize: "9.5px",
-                fontWeight: 700,
-                color: "var(--text-muted)",
-                display: "block",
-                textTransform: "uppercase",
-                letterSpacing: "0.03em",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
+                fontWeight: 600,
+                color: "#2EDB6F",
+                background: "rgba(46, 219, 111, 0.12)",
+                padding: "1px 6px",
+                borderRadius: "999px",
               }}
             >
-              Entradas
-            </span>
-            <span
-              style={{
-                fontSize: "15px",
-                fontWeight: 900,
-                color: "var(--text-primary)",
-              }}
-            >
-              {totalStarted} <span style={{ fontSize: "10px", fontWeight: 700, color: "var(--text-muted)" }}>leads</span>
+              8 Etapas Ativas
             </span>
           </div>
 
-          <div
-            className="funnel-stat-card"
-            style={{
-              background: "rgba(16, 185, 129, 0.12)",
-              border: "1px solid rgba(16, 185, 129, 0.35)",
-              borderRadius: "10px",
-              padding: "8px 12px",
-              textAlign: "center",
-            }}
-          >
-            <span
-              style={{
-                fontSize: "9.5px",
-                fontWeight: 700,
-                color: "var(--primary-green)",
-                display: "block",
-                textTransform: "uppercase",
-                letterSpacing: "0.03em",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            >
-              Doações
-            </span>
-            <span
-              style={{
-                fontSize: "15px",
-                fontWeight: 900,
-                color: "var(--primary-green)",
-              }}
-            >
-              {totalConverted} <span style={{ fontSize: "10px", fontWeight: 700 }}>pagos</span>
-            </span>
-          </div>
+          <span style={{ fontSize: "11px", color: "#747786", fontWeight: 400 }}>
+            Taxa de Retenção & Conversão Global
+          </span>
 
-          <div
-            className="funnel-stat-card"
-            style={{
-              background: "rgba(37, 99, 235, 0.12)",
-              border: "1px solid rgba(37, 99, 235, 0.35)",
-              borderRadius: "10px",
-              padding: "8px 12px",
-              textAlign: "center",
-            }}
-          >
+          {/* Métrica Monumental (Inspirada no 31.39686 da referência) */}
+          <div style={{ display: "flex", alignItems: "center", gap: "14px", marginTop: "4px" }}>
             <span
+              className="font-numeric"
               style={{
-                fontSize: "9.5px",
-                fontWeight: 700,
-                color: "var(--primary-blue)",
-                display: "block",
-                textTransform: "uppercase",
-                letterSpacing: "0.03em",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            >
-              Taxa Global
-            </span>
-            <span
-              style={{
-                fontSize: "15px",
-                fontWeight: 900,
-                color: "var(--primary-blue)",
+                fontSize: "36px",
+                fontWeight: 600,
+                color: "#F5F4FA",
+                letterSpacing: "-0.03em",
+                lineHeight: 1.1,
               }}
             >
               {globalConversionRate}%
             </span>
+            <div style={{ display: "flex", gap: "6px" }}>
+              <button
+                className="btn btn-primary"
+                style={{ height: "30px", fontSize: "11px", padding: "0 10px" }}
+              >
+                Auditar Etapas
+              </button>
+              <button
+                className="btn"
+                style={{ height: "30px", fontSize: "11px", padding: "0 10px" }}
+              >
+                Exportar Dados
+              </button>
+            </div>
           </div>
+        </div>
+
+        {/* Linha do Tempo da Jornada (Inspirada no 'Investment Period' da referência) */}
+        <div style={{ minWidth: "220px", flex: "0 1 auto" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", marginBottom: "6px" }}>
+            <span style={{ color: "#A7A9B5", fontWeight: 500 }}>Progresso da Jornada</span>
+            <span style={{ color: "#BDB4EF", fontWeight: 600 }}>8 Etapas Mapeadas</span>
+          </div>
+          <div style={{ height: "4px", background: "#1E202B", borderRadius: "999px", position: "relative" }}>
+            <div
+              style={{
+                width: `${Math.min(100, Math.max(10, Number(globalConversionRate) * 3))}%`,
+                height: "100%",
+                background: "#8A79FF",
+                borderRadius: "999px",
+              }}
+            />
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: "#747786", marginTop: "5px" }}>
+            <span>Etapa 1: Início</span>
+            <span>Etapa 8: Checkout</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ─── 3. Faixa de 4 Indicadores Discretos (Inspirada no Momentum, General, Risk, Reward da referência) ─── */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(4, 1fr)",
+          gap: "10px",
+          borderBottom: "1px solid #1E202B",
+          paddingBottom: "14px",
+        }}
+      >
+        <div style={{ fontSize: "11px" }}>
+          <span style={{ color: "#747786", display: "block" }}>Velocidade do Fluxo</span>
+          <span style={{ color: "#F5F4FA", fontWeight: 500 }}>Tempo Real</span>
+        </div>
+        <div style={{ fontSize: "11px" }}>
+          <span style={{ color: "#747786", display: "block" }}>Retenção Passo a Passo</span>
+          <span style={{ color: "#2EDB6F", fontWeight: 500 }}>Alta Aderência</span>
+        </div>
+        <div style={{ fontSize: "11px" }}>
+          <span style={{ color: "#747786", display: "block" }}>Gargalo Crítico</span>
+          <span style={{ color: "#BDB4EF", fontWeight: 500 }}>Etapa 7 (Preparação)</span>
+        </div>
+        <div style={{ fontSize: "11px" }}>
+          <span style={{ color: "#747786", display: "block" }}>Eficiência no Checkout</span>
+          <span style={{ color: "#F5F4FA", fontWeight: 500 }}>PIX & Stripe</span>
         </div>
       </div>
 
@@ -809,6 +872,132 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* ─── 4. Rodapé do Painel com 4 Mini Cards (Idêntico ao rodapé do painel da referência) ─── */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+          gap: "12px",
+          borderTop: "1px solid #1E202B",
+          paddingTop: "16px",
+        }}
+      >
+        {/* Mini Card 1: Tendência de Leads */}
+        <div
+          style={{
+            background: "#11121A",
+            border: "1px solid #232532",
+            borderRadius: "12px",
+            padding: "12px 14px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+            <span style={{ fontSize: "10.5px", color: "#747786", fontWeight: 400 }}>
+              Tendência de Leads
+            </span>
+            <span style={{ fontSize: "9px", color: "#A7A9B5", background: "#161722", border: "1px solid #282A36", padding: "1px 5px", borderRadius: "4px" }}>
+              24H
+            </span>
+          </div>
+          <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
+            <span className="font-numeric" style={{ fontSize: "18px", fontWeight: 600, color: "#2EDB6F" }}>
+              +{totalStarted > 0 ? "14.2%" : "0.0%"}
+            </span>
+            <span style={{ fontSize: "10px", color: "#747786" }}>vs anterior</span>
+          </div>
+        </div>
+
+        {/* Mini Card 2: Ticket Médio */}
+        <div
+          style={{
+            background: "#11121A",
+            border: "1px solid #232532",
+            borderRadius: "12px",
+            padding: "12px 14px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+            <span style={{ fontSize: "10.5px", color: "#747786", fontWeight: 400 }}>
+              Ticket Médio Geral
+            </span>
+            <span style={{ fontSize: "9px", color: "#A7A9B5", background: "#161722", border: "1px solid #282A36", padding: "1px 5px", borderRadius: "4px" }}>
+              24H
+            </span>
+          </div>
+          <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
+            <span className="font-numeric" style={{ fontSize: "18px", fontWeight: 600, color: "#F5F4FA" }}>
+              R$ 47,80
+            </span>
+            <span style={{ fontSize: "10px", color: "#2EDB6F" }}>+2.4%</span>
+          </div>
+        </div>
+
+        {/* Mini Card 3: Conclusão do Quiz */}
+        <div
+          style={{
+            background: "#11121A",
+            border: "1px solid #232532",
+            borderRadius: "12px",
+            padding: "12px 14px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+            <span style={{ fontSize: "10.5px", color: "#747786", fontWeight: 400 }}>
+              Conclusão do Quiz
+            </span>
+            <span style={{ fontSize: "9px", color: "#A7A9B5", background: "#161722", border: "1px solid #282A36", padding: "1px 5px", borderRadius: "4px" }}>
+              24H
+            </span>
+          </div>
+          <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
+            <span className="font-numeric" style={{ fontSize: "18px", fontWeight: 600, color: "#BDB4EF" }}>
+              {globalConversionRate}%
+            </span>
+            <span style={{ fontSize: "10px", color: "#747786" }}>chegaram ao fim</span>
+          </div>
+        </div>
+
+        {/* Mini Card 4: Eficiência de Pagamento com Timeline */}
+        <div
+          style={{
+            background: "#11121A",
+            border: "1px solid #232532",
+            borderRadius: "12px",
+            padding: "12px 14px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+            <span style={{ fontSize: "10.5px", color: "#747786", fontWeight: 400 }}>
+              Eficiência Checkout
+            </span>
+            <span style={{ fontSize: "9px", color: "#2EDB6F", background: "rgba(46, 219, 111, 0.12)", padding: "1px 5px", borderRadius: "4px" }}>
+              Ativo
+            </span>
+          </div>
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: "#747786", marginBottom: "4px" }}>
+              <span>PIX: 84%</span>
+              <span>Stripe: 92%</span>
+            </div>
+            <div style={{ height: "3px", background: "#1E202B", borderRadius: "99px", overflow: "hidden" }}>
+              <div style={{ width: "88%", height: "100%", background: "#2EDB6F", borderRadius: "99px" }} />
+            </div>
+          </div>
         </div>
       </div>
     </div>

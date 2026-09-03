@@ -34,62 +34,50 @@ export function ConversionOverview({ leads, orders, loading }: ConversionOvervie
     <div
       className="card conversion-overview-grid"
       style={{
-        padding: "20px 24px",
-        position: "relative",
-        overflow: "hidden",
+        padding: "16px 20px",
+        background: "var(--surface-2)",
+        border: "1px solid var(--border-subtle)",
+        borderRadius: "16px",
       }}
     >
-      {/* Glow de fundo */}
-      <div
-        style={{
-          position: "absolute",
-          left: "20%",
-          top: "-30px",
-          width: "250px",
-          height: "100px",
-          background: "radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%)",
-          pointerEvents: "none",
-        }}
-      />
-
       {/* Item 1: Conclusão do Quiz */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <div
             style={{
               width: "28px",
               height: "28px",
-              borderRadius: "8px",
-              background: "rgba(37, 99, 235, 0.15)",
-              border: "1px solid rgba(37, 99, 235, 0.3)",
+              borderRadius: "7px",
+              background: "#161722",
+              border: "1px solid #282A36",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "var(--primary-blue)",
+              color: "#BDB4EF",
             }}
           >
-            <Target style={{ width: "15px", height: "15px" }} />
+            <Target style={{ width: "14px", height: "14px" }} strokeWidth={1.8} />
           </div>
-          <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-secondary)" }}>
+          <span style={{ fontSize: "11.5px", fontWeight: 500, color: "#A2A3AE" }}>
             Conclusão do Quiz
           </span>
         </div>
 
         <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
-          <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--text-primary)" }}>
+          <span className="font-numeric" style={{ fontSize: "19px", fontWeight: 600, color: "#F5F4FA" }}>
             {loading ? "—" : `${quizCompletionRate}%`}
           </span>
-          <span style={{ fontSize: "10.5px", color: "var(--text-muted)", fontWeight: 500 }}>
+          <span style={{ fontSize: "11px", color: "#707281", fontWeight: 400 }}>
             chegaram ao fim
           </span>
         </div>
 
-        <div style={{ height: "4px", background: "var(--border)", borderRadius: "99px", overflow: "hidden" }}>
+        <div style={{ height: "3px", background: "#1D1F2B", borderRadius: "99px", overflow: "hidden" }}>
           <div
             style={{
               width: `${quizCompletionRate}%`,
               height: "100%",
-              background: "linear-gradient(90deg, #2563eb, #38bdf8)",
+              background: "#8A79FF",
               borderRadius: "99px",
               transition: "width 0.6s ease",
             }}
@@ -98,43 +86,43 @@ export function ConversionOverview({ leads, orders, loading }: ConversionOvervie
       </div>
 
       {/* Item 2: Eficiência PIX */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <div
             style={{
               width: "28px",
               height: "28px",
-              borderRadius: "8px",
-              background: "rgba(16, 185, 129, 0.15)",
-              border: "1px solid rgba(16, 185, 129, 0.3)",
+              borderRadius: "7px",
+              background: "#161722",
+              border: "1px solid #282A36",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "#10b981",
+              color: "#2EDB6F",
             }}
           >
-            <QrCode style={{ width: "15px", height: "15px" }} />
+            <QrCode style={{ width: "14px", height: "14px" }} strokeWidth={1.8} />
           </div>
-          <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-secondary)" }}>
+          <span style={{ fontSize: "11.5px", fontWeight: 500, color: "#A2A3AE" }}>
             Eficiência do PIX
           </span>
         </div>
 
         <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
-          <span style={{ fontSize: "20px", fontWeight: 900, color: "#10b981" }}>
+          <span className="font-numeric" style={{ fontSize: "19px", fontWeight: 600, color: "#2EDB6F" }}>
             {loading ? "—" : `${pixSuccessRate}%`}
           </span>
-          <span style={{ fontSize: "10.5px", color: "var(--text-muted)", fontWeight: 500 }}>
+          <span style={{ fontSize: "11px", color: "#707281", fontWeight: 400 }}>
             {pixPaid}/{pixOrders.length} pagos
           </span>
         </div>
 
-        <div style={{ height: "4px", background: "var(--border)", borderRadius: "99px", overflow: "hidden" }}>
+        <div style={{ height: "3px", background: "#1D1F2B", borderRadius: "99px", overflow: "hidden" }}>
           <div
             style={{
               width: `${pixSuccessRate}%`,
               height: "100%",
-              background: "linear-gradient(90deg, #059669, #10b981)",
+              background: "#2EDB6F",
               borderRadius: "99px",
               transition: "width 0.6s ease",
             }}
@@ -143,43 +131,43 @@ export function ConversionOverview({ leads, orders, loading }: ConversionOvervie
       </div>
 
       {/* Item 3: Eficiência Cartão (Stripe) */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <div
             style={{
               width: "28px",
               height: "28px",
-              borderRadius: "8px",
-              background: "rgba(99, 102, 241, 0.15)",
-              border: "1px solid rgba(99, 102, 241, 0.3)",
+              borderRadius: "7px",
+              background: "#161722",
+              border: "1px solid #282A36",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "#818cf8",
+              color: "#C4BAFF",
             }}
           >
-            <CreditCard style={{ width: "15px", height: "15px" }} />
+            <CreditCard style={{ width: "14px", height: "14px" }} strokeWidth={1.8} />
           </div>
-          <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-secondary)" }}>
+          <span style={{ fontSize: "11.5px", fontWeight: 500, color: "#A2A3AE" }}>
             Eficiência Cartão
           </span>
         </div>
 
         <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
-          <span style={{ fontSize: "20px", fontWeight: 900, color: "#818cf8" }}>
+          <span className="font-numeric" style={{ fontSize: "19px", fontWeight: 600, color: "#C4BAFF" }}>
             {loading ? "—" : `${cardSuccessRate}%`}
           </span>
-          <span style={{ fontSize: "10.5px", color: "var(--text-muted)", fontWeight: 500 }}>
+          <span style={{ fontSize: "11px", color: "#707281", fontWeight: 400 }}>
             {cardPaid}/{cardOrders.length} aprovados
           </span>
         </div>
 
-        <div style={{ height: "4px", background: "var(--border)", borderRadius: "99px", overflow: "hidden" }}>
+        <div style={{ height: "3px", background: "#1D1F2B", borderRadius: "99px", overflow: "hidden" }}>
           <div
             style={{
               width: `${cardSuccessRate}%`,
               height: "100%",
-              background: "linear-gradient(90deg, #6366f1, #a855f7)",
+              background: "#7C5CFF",
               borderRadius: "99px",
               transition: "width 0.6s ease",
             }}
@@ -188,43 +176,43 @@ export function ConversionOverview({ leads, orders, loading }: ConversionOvervie
       </div>
 
       {/* Item 4: Conversão Global (Lead -> Venda) */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <div
             style={{
               width: "28px",
               height: "28px",
-              borderRadius: "8px",
-              background: "rgba(6, 182, 212, 0.15)",
-              border: "1px solid rgba(6, 182, 212, 0.3)",
+              borderRadius: "7px",
+              background: "#161722",
+              border: "1px solid #282A36",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "var(--accent-cyan)",
+              color: "#BDB4EF",
             }}
           >
-            <TrendingUp style={{ width: "15px", height: "15px" }} />
+            <TrendingUp style={{ width: "14px", height: "14px" }} strokeWidth={1.8} />
           </div>
-          <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-secondary)" }}>
+          <span style={{ fontSize: "11.5px", fontWeight: 500, color: "#A2A3AE" }}>
             Conversão Global
           </span>
         </div>
 
         <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
-          <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--accent-cyan)" }}>
+          <span className="font-numeric" style={{ fontSize: "19px", fontWeight: 600, color: "#BDB4EF" }}>
             {loading ? "—" : `${globalLeadToSaleRate}%`}
           </span>
-          <span style={{ fontSize: "10.5px", color: "var(--text-muted)", fontWeight: 500 }}>
+          <span style={{ fontSize: "11px", color: "#707281", fontWeight: 400 }}>
             lead para doador
           </span>
         </div>
 
-        <div style={{ height: "4px", background: "var(--border)", borderRadius: "99px", overflow: "hidden" }}>
+        <div style={{ height: "3px", background: "#1D1F2B", borderRadius: "99px", overflow: "hidden" }}>
           <div
             style={{
               width: `${Math.min(100, Number(globalLeadToSaleRate) * 5)}%`,
               height: "100%",
-              background: "linear-gradient(90deg, #0284c7, #06b6d4)",
+              background: "#BDB4EF",
               borderRadius: "99px",
               transition: "width 0.6s ease",
             }}
@@ -233,34 +221,34 @@ export function ConversionOverview({ leads, orders, loading }: ConversionOvervie
       </div>
 
       {/* Item 5: Status Gateways & Pixel */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <div
             style={{
               width: "28px",
               height: "28px",
-              borderRadius: "8px",
-              background: "rgba(16, 185, 129, 0.15)",
-              border: "1px solid rgba(16, 185, 129, 0.3)",
+              borderRadius: "7px",
+              background: "#161722",
+              border: "1px solid #282A36",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "var(--primary-green)",
+              color: "#2EDB6F",
             }}
           >
-            <ShieldCheck style={{ width: "15px", height: "15px" }} />
+            <ShieldCheck style={{ width: "14px", height: "14px" }} strokeWidth={1.8} />
           </div>
-          <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-secondary)" }}>
+          <span style={{ fontSize: "11.5px", fontWeight: 500, color: "#A2A3AE" }}>
             Gateways Conectados
           </span>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginTop: "2px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11.5px", fontWeight: 800, color: "var(--primary-green)" }}>
-            <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: "#10b981" }} />
+        <div style={{ display: "flex", flexDirection: "column", gap: "3px", marginTop: "2px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", fontWeight: 500, color: "#2EDB6F" }}>
+            <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#2EDB6F" }} />
             PIX Oficial & Stripe Ativos
           </div>
-          <span style={{ fontSize: "10.5px", color: "var(--text-muted)", fontWeight: 500 }}>
+          <span style={{ fontSize: "11px", color: "#707281", fontWeight: 400 }}>
             Meta Pixel + UTMify integrados
           </span>
         </div>

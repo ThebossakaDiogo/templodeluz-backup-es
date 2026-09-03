@@ -8,6 +8,7 @@ import {
   MessageCircle,
   X,
   User,
+  Shield,
 } from "lucide-react";
 import { PwaInstallPrompt } from "./PwaInstallPrompt";
 
@@ -105,18 +106,17 @@ export function Sidebar({
           className="mobile-sidebar-backdrop"
         />
       )}
-
       <aside
         className={`dashboard-sidebar ${isOpenMobile ? "mobile-open" : ""}`}
         style={{
-          width: "245px",
-          minWidth: "245px",
+          width: "224px",
+          minWidth: "224px",
           height: "100vh",
           maxHeight: "100vh",
-          background: "#050a14",
+          background: "#060710",
           display: "flex",
           flexDirection: "column",
-          borderRight: "1px solid #16233b",
+          borderRight: "1px solid #1E202B",
           position: "sticky",
           top: 0,
           left: 0,
@@ -127,77 +127,64 @@ export function Sidebar({
           transition: "transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
         }}
       >
-        {/* Glow de fundo */}
+        {/* Cabeçalho do App: Logo OD & Marca */}
         <div
           style={{
-            position: "absolute",
-            top: "-50px",
-            left: "-50px",
-            width: "180px",
-            height: "180px",
-            background: "radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 70%)",
-            pointerEvents: "none",
-          }}
-        />
-
-        {/* Logo OD METRICS */}
-        <div
-          style={{
-            padding: "22px 20px 18px",
-            borderBottom: "1px solid #142036",
+            padding: "18px 16px 14px",
             display: "flex",
             alignItems: "center",
-            gap: "11px",
+            justifyContent: "space-between",
           }}
         >
-          <div
-            style={{
-              width: "36px",
-              height: "36px",
-              borderRadius: "10px",
-              background: "linear-gradient(135deg, #fbbf24 0%, #d97706 100%)",
-              border: "1px solid rgba(254, 240, 138, 0.35)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: "0 0 16px rgba(245, 158, 11, 0.4)",
-              flexShrink: 0,
-              fontFamily: "'Space Grotesk', sans-serif",
-              fontWeight: 900,
-              fontSize: "14px",
-              color: "#1c1917",
-              letterSpacing: "-0.05em",
-            }}
-          >
-            OD
-          </div>
-          <div>
-            <span
+          <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
+            <div
               style={{
-                display: "block",
-                fontFamily: "'Space Grotesk', 'Plus Jakarta Sans', sans-serif",
-                fontSize: "15px",
-                fontWeight: 900,
-                color: "#ffffff",
-                letterSpacing: "-0.02em",
-                lineHeight: 1.1,
-              }}
-            >
-              OD <span style={{ color: "#f59e0b" }}>METRICS</span>
-            </span>
-            <span
-              style={{
-                fontSize: "9.5px",
-                color: "#94a3b8",
+                width: "30px",
+                height: "30px",
+                borderRadius: "8px",
+                background: "linear-gradient(180deg, #1D1E2C 0%, #12131F 100%)",
+                border: "1px solid rgba(189, 180, 239, 0.35)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                fontFamily: "inherit",
                 fontWeight: 700,
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                display: "block",
-                marginTop: "2px",
+                fontSize: "12.5px",
+                color: "#BDB4EF",
+                boxShadow: "0 2px 8px rgba(124, 92, 255, 0.2)",
               }}
             >
-              Inteligência & Tracking
-            </span>
+              OD
+            </div>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                <span
+                  style={{
+                    fontFamily: "inherit",
+                    fontSize: "13.5px",
+                    fontWeight: 600,
+                    color: "#F5F4FA",
+                    letterSpacing: "-0.01em",
+                    lineHeight: 1.1,
+                  }}
+                >
+                  OD Metrics
+                </span>
+                <span style={{ fontSize: "9px", color: "#707281" }}>®</span>
+              </div>
+              <span
+                style={{
+                  fontSize: "10px",
+                  color: "#707281",
+                  fontWeight: 400,
+                  display: "block",
+                  marginTop: "2px",
+                }}
+              >
+                Inteligência & Tracking
+              </span>
+            </div>
           </div>
 
           {onCloseMobile && (
@@ -205,325 +192,350 @@ export function Sidebar({
               onClick={onCloseMobile}
               className="mobile-close-btn"
               style={{
-                marginLeft: "auto",
-                background: "rgba(255, 255, 255, 0.08)",
-                border: "none",
-                borderRadius: "8px",
-                width: "30px",
-                height: "30px",
-                color: "#94a3b8",
+                background: "rgba(255, 255, 255, 0.06)",
+                border: "1px solid rgba(255, 255, 255, 0.08)",
+                borderRadius: "7px",
+                width: "26px",
+                height: "26px",
+                color: "#A2A3AE",
                 cursor: "pointer",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <X style={{ width: "16px", height: "16px" }} />
+              <X style={{ width: "13px", height: "13px" }} />
             </button>
           )}
         </div>
 
-      {/* Navegação por Slugs */}
-      <nav style={{ flex: 1, padding: "16px 12px" }}>
-        <p
+        {/* Dual Pill Switcher (Inspirado no Staking / Stablecoin da referência) */}
+        <div style={{ padding: "0 12px 14px" }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "2px",
+              background: "#0D0E16",
+              border: "1px solid #232532",
+              borderRadius: "9px",
+              padding: "2px",
+            }}
+          >
+            <button
+              style={{
+                fontSize: "11px",
+                fontWeight: 600,
+                color: "#F5F4FA",
+                background: "#232534",
+                border: "none",
+                borderRadius: "7px",
+                padding: "4px 0",
+                cursor: "pointer",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
+              }}
+            >
+              Produção
+            </button>
+            <button
+              style={{
+                fontSize: "11px",
+                fontWeight: 400,
+                color: "#707281",
+                background: "transparent",
+                border: "none",
+                borderRadius: "7px",
+                padding: "4px 0",
+                cursor: "pointer",
+              }}
+            >
+              Sandbox
+            </button>
+          </div>
+        </div>
+
+        {/* Navegação por Slugs */}
+        <nav style={{ flex: 1, padding: "0 10px" }}>
+          {ITEMS.map(({ id, slug, label, Icon }) => {
+            const active = section === id;
+            return (
+              <button
+                key={id}
+                onClick={() => {
+                  onSelect(id);
+                  onCloseMobile?.();
+                }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "9px",
+                  width: "100%",
+                  padding: "7px 10px",
+                  borderRadius: "8px",
+                  border: active ? "1px solid #282A38" : "1px solid transparent",
+                  cursor: "pointer",
+                  background: active ? "#171925" : "transparent",
+                  textAlign: "left",
+                  transition: "all 0.12s ease",
+                  marginBottom: "2px",
+                  outline: "none",
+                }}
+                onMouseEnter={(e) => {
+                  if (!active) {
+                    (e.currentTarget as HTMLButtonElement).style.background = "#11121C";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!active) {
+                    (e.currentTarget as HTMLButtonElement).style.background = "transparent";
+                  }
+                }}
+              >
+                {/* Ícone */}
+                <Icon
+                  style={{
+                    width: "14px",
+                    height: "14px",
+                    color: active ? "#BDB4EF" : "#747786",
+                    flexShrink: 0,
+                  }}
+                  strokeWidth={active ? 2.0 : 1.7}
+                />
+
+                <span
+                  style={{
+                    fontSize: "12.5px",
+                    fontWeight: active ? 600 : 400,
+                    color: active ? "#F5F4FA" : "#8A8D9B",
+                    letterSpacing: "-0.01em",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    flex: 1,
+                  }}
+                >
+                  {label}
+                </span>
+
+                {/* Slug ou Badge da rota */}
+                <span
+                  style={{
+                    fontSize: "9px",
+                    fontWeight: 500,
+                    color: active ? "#BDB4EF" : "#4A4C5A",
+                    fontFamily: "monospace",
+                  }}
+                >
+                  {slug}
+                </span>
+              </button>
+            );
+          })}
+
+          {/* Divisor */}
+          <div style={{ height: "1px", background: "#1C1D29", margin: "14px 4px 12px" }} />
+
+          {/* Bloco "Telemetria Ativa" (Inspirado no Active Staking 6 da referência) */}
+          <div style={{ padding: "0 4px 6px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <span style={{ fontSize: "11px", fontWeight: 500, color: "#8E909F" }}>
+              Telemetria Ativa
+            </span>
+            <span
+              style={{
+                fontSize: "10px",
+                fontWeight: 600,
+                color: "#BDB4EF",
+                background: "rgba(189, 180, 239, 0.12)",
+                padding: "1px 6px",
+                borderRadius: "999px",
+              }}
+            >
+              {onlineCount}
+            </span>
+          </div>
+
+          {/* Mini ativos em monitoramento */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "2px", marginBottom: "14px" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "5px 8px",
+                borderRadius: "6px",
+              }}
+            >
+              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#2EDB6F" }} />
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <span style={{ fontSize: "11px", color: "#F5F4FA", display: "block", fontWeight: 500, lineHeight: 1.1 }}>
+                  Quiz Templo de Luz
+                </span>
+                <span style={{ fontSize: "9.5px", color: "#707281" }}>Funil 8 Etapas</span>
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "5px 8px",
+                borderRadius: "6px",
+              }}
+            >
+              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#8A79FF" }} />
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <span style={{ fontSize: "11px", color: "#F5F4FA", display: "block", fontWeight: 500, lineHeight: 1.1 }}>
+                  Gateways de Pagamento
+                </span>
+                <span style={{ fontSize: "9.5px", color: "#707281" }}>PIX Oficial & Stripe</span>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        {/* Card de Rodapé da Sidebar (Inspirado no "Activate Super" da referência) */}
+        <div
           style={{
-            fontSize: "9.5px",
-            fontWeight: 700,
-            color: "#64748b",
-            letterSpacing: "0.09em",
-            textTransform: "uppercase",
-            padding: "0 10px",
-            marginBottom: "8px",
+            margin: "0 10px 10px",
+            padding: "10px 12px",
+            background: "linear-gradient(180deg, #11121C 0%, #0C0D15 100%)",
+            border: "1px solid #232532",
+            borderRadius: "10px",
+            display: "flex",
+            alignItems: "center",
+            gap: "9px",
           }}
         >
-          Páginas (Rotas Únicas)
-        </p>
+          <div
+            style={{
+              width: "26px",
+              height: "26px",
+              borderRadius: "6px",
+              background: "rgba(189, 180, 239, 0.12)",
+              border: "1px solid rgba(189, 180, 239, 0.25)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#BDB4EF",
+              flexShrink: 0,
+            }}
+          >
+            <Shield style={{ width: "13px", height: "13px" }} strokeWidth={1.8} />
+          </div>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <span style={{ fontSize: "11.5px", fontWeight: 500, color: "#F5F4FA", display: "block", lineHeight: 1.1 }}>
+              OD Shield Ativo
+            </span>
+            <span style={{ fontSize: "10px", color: "#707281", display: "block", marginTop: "1px" }}>
+              Telemetria Segura
+            </span>
+          </div>
+        </div>
 
-        {ITEMS.map(({ id, slug, label, sub, Icon, accent }) => {
-          const active = section === id;
-          return (
-            <button
-              key={id}
+        {/* Botão de Instalação PWA */}
+        <div style={{ margin: "0 10px 10px" }}>
+          <PwaInstallPrompt />
+        </div>
+
+        {/* Perfil do Administrador Logado & Sair */}
+        {currentUserEmail && (
+          <div
+            style={{
+              margin: "0 10px 12px",
+              padding: "7px 10px",
+              background: "#0D0E17",
+              border: "1px solid #232532",
+              borderRadius: "9px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "8px",
+            }}
+          >
+            <div
               onClick={() => {
-                onSelect(id);
+                onSelect("perfil");
                 onCloseMobile?.();
               }}
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "11px",
-                width: "100%",
-                padding: "10px 10px",
-                borderRadius: "10px",
-                border: "none",
+                gap: "8px",
+                minWidth: 0,
                 cursor: "pointer",
-                background: active
-                  ? "linear-gradient(90deg, rgba(16, 185, 129, 0.12) 0%, rgba(6, 182, 212, 0.04) 100%)"
-                  : "transparent",
-                textAlign: "left",
-                transition: "all 0.15s ease",
-                marginBottom: "4px",
-                position: "relative",
-                outline: "none",
-              }}
-              onMouseEnter={(e) => {
-                if (!active) {
-                  (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.03)";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!active) {
-                  (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-                }
+                padding: "2px 4px",
+                borderRadius: "6px",
               }}
             >
-              {/* Barra lateral ativa */}
-              {active && (
-                <div
-                  style={{
-                    position: "absolute",
-                    left: 0,
-                    top: "7px",
-                    bottom: "7px",
-                    width: "3px",
-                    borderRadius: "99px",
-                    background: accent,
-                    boxShadow: `0 0 10px ${accent}`,
-                  }}
-                />
-              )}
-
-              {/* Ícone */}
               <div
                 style={{
-                  width: "34px",
-                  height: "34px",
-                  borderRadius: "9px",
+                  width: "24px",
+                  height: "24px",
+                  borderRadius: "50%",
+                  background: "linear-gradient(135deg, #1E1F2D, #2B2C3E)",
+                  border: "1px solid #383A4E",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  background: active ? "rgba(16, 185, 129, 0.18)" : "rgba(255,255,255,0.03)",
-                  border: `1px solid ${active ? "rgba(16, 185, 129, 0.35)" : "#16233b"}`,
-                  boxShadow: active ? "0 0 12px rgba(16, 185, 129, 0.25)" : "none",
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  color: "#BDB4EF",
                   flexShrink: 0,
-                  transition: "all 0.15s ease",
                 }}
               >
-                <Icon
-                  style={{
-                    width: "16px",
-                    height: "16px",
-                    color: active ? accent : "#94a3b8",
-                    filter: active ? `drop-shadow(0 0 4px ${accent})` : "none",
-                  }}
-                />
+                {currentUserEmail[0]?.toUpperCase() ?? "A"}
               </div>
-
-              <div style={{ flex: 1 }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <span
-                    style={{
-                      fontSize: "12.5px",
-                      fontWeight: active ? 800 : 500,
-                      color: active ? "#ffffff" : "#cbd5e1",
-                    }}
-                  >
-                    {label}
-                  </span>
-                  {/* Slug da rota */}
-                  <span
-                    style={{
-                      fontSize: "9px",
-                      fontWeight: 700,
-                      color: active ? accent : "#475569",
-                      background: "rgba(255,255,255,0.04)",
-                      padding: "1px 5px",
-                      borderRadius: "4px",
-                      fontFamily: "monospace",
-                    }}
-                  >
-                    {slug}
-                  </span>
-                </div>
+              <div style={{ minWidth: 0 }}>
                 <span
                   style={{
+                    fontSize: "11px",
+                    fontWeight: 500,
+                    color: "#F5F4FA",
                     display: "block",
-                    fontSize: "10px",
-                    color: active ? "#6ee7b7" : "#64748b",
-                    marginTop: "1px",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
                   }}
                 >
-                  {sub}
+                  {currentUserEmail.split("@")[0]}
                 </span>
               </div>
-            </button>
-          );
-        })}
-      </nav>
+            </div>
 
-      {/* Card de Pessoas ao Vivo na base da Sidebar */}
-      <div
-        style={{
-          margin: "12px",
-          padding: "12px 14px",
-          background: "rgba(16, 185, 129, 0.08)",
-          border: "1px solid rgba(16, 185, 129, 0.25)",
-          borderRadius: "10px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "4px",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-          <div className="pulse-emerald" />
-          <span style={{ fontSize: "11px", fontWeight: 700, color: "#34d399" }}>
-            Monitoramento Ao Vivo
-          </span>
-        </div>
-        <div style={{ fontSize: "13px", fontWeight: 900, color: "#ffffff", marginTop: "2px" }}>
-          {onlineCount} {onlineCount === 1 ? "usuário ativo" : "usuários ativos"}
-        </div>
-        <span style={{ fontSize: "10px", color: "#94a3b8" }}>
-          Navegando no quiz neste instante
-        </span>
-      </div>
-
-      {/* Botão de Instalação PWA (iPhone / Android / Desktop) */}
-      <div style={{ margin: "0 12px 10px" }}>
-        <PwaInstallPrompt />
-      </div>
-
-      {/* Perfil do Administrador Logado & Sair */}
-      {currentUserEmail && (
-        <div
-          style={{
-            margin: "0 12px 10px",
-            padding: "10px 12px",
-            background: "rgba(15, 23, 42, 0.7)",
-            border: "1px solid rgba(255, 255, 255, 0.08)",
-            borderRadius: "10px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "8px",
-          }}
-        >
-          <div
-            onClick={() => {
-              onSelect("perfil");
-              onCloseMobile?.();
-            }}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              minWidth: 0,
-              cursor: "pointer",
-              padding: "2px 4px",
-              borderRadius: "6px",
-              transition: "background 0.15s ease",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLDivElement).style.background = "rgba(16, 185, 129, 0.1)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLDivElement).style.background = "transparent";
-            }}
-            title="Gerenciar meu perfil e alterar senha"
-          >
-            <div
+            <button
+              onClick={onSignOut}
+              title="Encerrar Sessão"
               style={{
-                width: "28px",
-                height: "28px",
-                borderRadius: "8px",
-                background: "linear-gradient(135deg, #10b981, #06b6d4)",
+                background: "transparent",
+                border: "none",
+                color: "#707281",
+                cursor: "pointer",
+                padding: "4px",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
-                color: "#030712",
-                fontWeight: 900,
-                fontSize: "12px",
-                flexShrink: 0,
+                borderRadius: "5px",
               }}
             >
-              {currentUserEmail.slice(0, 2).toUpperCase()}
-            </div>
-            <div style={{ minWidth: 0 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                <span
-                  style={{
-                    fontSize: "8.5px",
-                    fontWeight: 800,
-                    background: "rgba(16, 185, 129, 0.2)",
-                    color: "#34d399",
-                    border: "1px solid rgba(16, 185, 129, 0.4)",
-                    borderRadius: "4px",
-                    padding: "1px 4px",
-                  }}
-                >
-                  ADMIN
-                </span>
-              </div>
-              <span
-                style={{
-                  display: "block",
-                  fontSize: "10px",
-                  color: "#cbd5e1",
-                  fontWeight: 600,
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  maxWidth: "115px",
-                }}
-                title={currentUserEmail}
-              >
-                {currentUserEmail}
-              </span>
-            </div>
+              <LogOut style={{ width: "13px", height: "13px" }} />
+            </button>
           </div>
+        )}
 
-          <button
-            onClick={onSignOut}
-            title="Sair / Desconectar"
-            style={{
-              background: "none",
-              border: "none",
-              color: "#94a3b8",
-              cursor: "pointer",
-              padding: "4px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              borderRadius: "6px",
-              transition: "all 0.15s ease",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.color = "#ef4444";
-              (e.currentTarget as HTMLButtonElement).style.background = "rgba(239, 68, 68, 0.15)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.color = "#94a3b8";
-              (e.currentTarget as HTMLButtonElement).style.background = "none";
-            }}
-          >
-            <LogOut style={{ width: "14px", height: "14px" }} />
-          </button>
+        {/* Rodapé Version */}
+        <div
+          style={{
+            padding: "8px 14px",
+            borderTop: "1px solid rgba(255,255,255,0.06)",
+            background: "transparent",
+            textAlign: "center",
+          }}
+        >
+          <span style={{ fontSize: "9.5px", color: "#4E5060", fontWeight: 400 }}>
+            OD METRICS · v2.0
+          </span>
         </div>
-      )}
-
-      {/* Rodapé */}
-      <div
-        style={{
-          padding: "12px 18px",
-          borderTop: "1px solid #142036",
-          background: "rgba(0,0,0,0.2)",
-        }}
-      >
-        <span style={{ fontSize: "10px", color: "#64748b", fontWeight: 600 }}>
-          OD METRICS · Sistema Operacional v2.49
-        </span>
-      </div>
-    </aside>
-  </>
+      </aside>
+    </>
   );
 }

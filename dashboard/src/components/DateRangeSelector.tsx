@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Calendar, ChevronDown, Check, X } from "lucide-react";
+import { Calendar, ChevronDown, X } from "lucide-react";
 
 export type DateRangePreset = "today" | "yesterday" | "7d" | "14d" | "30d" | "this_month" | "custom";
 
@@ -124,17 +124,15 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
 
   return (
     <div ref={containerRef} style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
-      {/* Barra de Filtro Rápido com Segmented Control Estilo iOS */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
-          background: "var(--bg-surface-alt)",
-          border: "1px solid var(--border)",
+          background: "#0D0E16",
+          border: "1px solid #252733",
           borderRadius: "11px",
           padding: "3px",
           gap: "2px",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.03)",
         }}
       >
         {/* Presets Rápidos */}
@@ -150,16 +148,16 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
               key={item.key}
               onClick={() => selectPreset(item.key as DateRangePreset)}
               style={{
-                fontSize: "11px",
-                fontWeight: active ? 800 : 600,
-                padding: "5px 11px",
+                fontSize: "11.5px",
+                fontWeight: active ? 600 : 400,
+                padding: "4px 10px",
                 borderRadius: "8px",
-                border: active ? "1px solid rgba(0,0,0,0.04)" : "none",
+                border: "none",
                 cursor: "pointer",
-                background: active ? "var(--bg-surface)" : "transparent",
-                color: active ? "var(--text-primary)" : "var(--text-muted)",
-                boxShadow: active ? "0 2px 8px rgba(0, 0, 0, 0.08)" : "none",
-                transition: "all 0.18s ease",
+                background: active ? "#292A35" : "transparent",
+                color: active ? "#F5F4FA" : "#707281",
+                boxShadow: active ? "inset 0 1px 0 rgba(255,255,255,0.06)" : "none",
+                transition: "all 0.14s ease",
               }}
             >
               {item.label}
@@ -168,7 +166,7 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
         })}
 
         {/* Divisor */}
-        <div style={{ width: "1px", height: "14px", background: "var(--border)", margin: "0 3px" }} />
+        <div style={{ width: "1px", height: "14px", background: "#252733", margin: "0 2px" }} />
 
         {/* Botão de Calendário / Personalizado */}
         <button
@@ -177,20 +175,20 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
             display: "flex",
             alignItems: "center",
             gap: "5px",
-            fontSize: "11px",
-            fontWeight: isCustomActive ? 800 : 600,
-            padding: "5px 10px",
+            fontSize: "11.5px",
+            fontWeight: isCustomActive ? 600 : 400,
+            padding: "4px 9px",
             borderRadius: "8px",
-            border: isCustomActive ? "1px solid rgba(0,0,0,0.04)" : "none",
+            border: "none",
             cursor: "pointer",
-            background: isCustomActive ? "var(--bg-surface)" : "transparent",
-            color: isCustomActive ? "var(--primary-green)" : "var(--text-muted)",
-            boxShadow: isCustomActive ? "0 2px 8px rgba(0, 0, 0, 0.08)" : "none",
-            transition: "all 0.18s ease",
+            background: isCustomActive ? "#292A35" : "transparent",
+            color: isCustomActive ? "#BDB4EF" : "#707281",
+            boxShadow: isCustomActive ? "inset 0 1px 0 rgba(255,255,255,0.06)" : "none",
+            transition: "all 0.14s ease",
           }}
           title="Selecionar período personalizado"
         >
-          <Calendar style={{ width: "12px", height: "12px" }} strokeWidth={2.2} />
+          <Calendar style={{ width: "12px", height: "12px" }} strokeWidth={1.8} />
           <span>{isCustomActive ? value.label : "Personalizar"}</span>
           <ChevronDown
             style={{
@@ -214,9 +212,9 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
             alignItems: "center",
             justifyContent: "center",
             padding: "16px",
-            background: "rgba(0, 0, 0, 0.65)",
-            backdropFilter: "blur(6px)",
-            WebkitBackdropFilter: "blur(6px)",
+            background: "rgba(0, 0, 0, 0.62)",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
           }}
           onClick={(e) => {
             if (e.target === e.currentTarget) setIsOpen(false);
@@ -227,11 +225,11 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
             style={{
               width: "100%",
               maxWidth: "360px",
-              background: "var(--bg-surface)",
-              border: "1px solid var(--border)",
+              background: "#11121A",
+              border: "1px solid #2A2C38",
               borderRadius: "18px",
               padding: "20px",
-              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--border)",
+              boxShadow: "0 16px 50px rgba(0, 0, 0, 0.45)",
             }}
           >
           {/* Cabeçalho do Popover */}
@@ -242,12 +240,12 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
               alignItems: "center",
               marginBottom: "14px",
               paddingBottom: "10px",
-              borderBottom: "1px solid var(--border-subtle)",
+              borderBottom: "1px solid rgba(255,255,255,0.075)",
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <Calendar style={{ width: "14px", height: "14px", color: "var(--primary-green)" }} />
-              <span style={{ fontSize: "12.5px", fontWeight: 800, color: "var(--text-primary)" }}>
+              <Calendar style={{ width: "14px", height: "14px", color: "#BDB4EF" }} />
+              <span style={{ fontSize: "13px", fontWeight: 600, color: "#F5F4FA" }}>
                 Filtrar por Período
               </span>
             </div>
@@ -257,7 +255,7 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
                 background: "transparent",
                 border: "none",
                 cursor: "pointer",
-                color: "var(--text-muted)",
+                color: "#707281",
                 padding: "2px",
                 display: "flex",
               }}
@@ -268,7 +266,7 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
 
           {/* Atalhos Rápidos */}
           <div style={{ marginBottom: "14px" }}>
-            <span style={{ fontSize: "10.5px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: "6px" }}>
+            <span style={{ fontSize: "10.5px", fontWeight: 500, color: "#707281", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: "6px" }}>
               Atalhos Rápidos
             </span>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
@@ -285,34 +283,34 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
                   onClick={() => selectPreset(p.key as DateRangePreset)}
                   style={{
                     fontSize: "11px",
-                    fontWeight: value.preset === p.key ? 800 : 500,
-                    padding: "6px 8px",
-                    borderRadius: "6px",
-                    border: "1px solid var(--border)",
-                    background: value.preset === p.key ? "rgba(16, 185, 129, 0.15)" : "var(--bg-surface-alt)",
-                    color: value.preset === p.key ? "var(--primary-green)" : "var(--text-primary)",
+                    fontWeight: value.preset === p.key ? 600 : 400,
+                    padding: "7px 10px",
+                    borderRadius: "8px",
+                    border: value.preset === p.key ? "1px solid rgba(189, 180, 239, 0.35)" : "1px solid #232532",
+                    background: value.preset === p.key ? "rgba(189, 180, 239, 0.12)" : "#0B0C14",
+                    color: value.preset === p.key ? "#BDB4EF" : "#A2A3AE",
                     cursor: "pointer",
                     textAlign: "left",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
+                    transition: "all 0.14s ease",
                   }}
                 >
                   <span>{p.label}</span>
-                  {value.preset === p.key && <Check style={{ width: "11px", height: "11px" }} />}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Seleção de Datas Personalizadas (De / Até) */}
+          {/* Intervalo Customizado */}
           <div style={{ marginBottom: "16px" }}>
-            <span style={{ fontSize: "10.5px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: "6px" }}>
+            <span style={{ fontSize: "10.5px", fontWeight: 500, color: "#707281", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: "6px" }}>
               Intervalo Específico
             </span>
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
               <div>
-                <label style={{ fontSize: "10.5px", color: "var(--text-muted)", display: "block", marginBottom: "3px" }}>
+                <label style={{ fontSize: "11px", color: "#A2A3AE", display: "block", marginBottom: "3px" }}>
                   Data Inicial:
                 </label>
                 <input
@@ -322,11 +320,11 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
                   style={{
                     width: "100%",
                     fontSize: "12px",
-                    padding: "6px 10px",
-                    borderRadius: "7px",
-                    border: "1px solid var(--border)",
-                    background: "var(--bg-surface-alt)",
-                    color: "var(--text-primary)",
+                    padding: "7px 10px",
+                    borderRadius: "8px",
+                    border: "1px solid #282A36",
+                    background: "#0B0C14",
+                    color: "#F5F4FA",
                     outline: "none",
                     fontFamily: "inherit",
                   }}
@@ -334,7 +332,7 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
               </div>
 
               <div>
-                <label style={{ fontSize: "10.5px", color: "var(--text-muted)", display: "block", marginBottom: "3px" }}>
+                <label style={{ fontSize: "11px", color: "#A2A3AE", display: "block", marginBottom: "3px" }}>
                   Data Final:
                 </label>
                 <input
@@ -344,11 +342,11 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
                   style={{
                     width: "100%",
                     fontSize: "12px",
-                    padding: "6px 10px",
-                    borderRadius: "7px",
-                    border: "1px solid var(--border)",
-                    background: "var(--bg-surface-alt)",
-                    color: "var(--text-primary)",
+                    padding: "7px 10px",
+                    borderRadius: "8px",
+                    border: "1px solid #282A36",
+                    background: "#0B0C14",
+                    color: "#F5F4FA",
                     outline: "none",
                     fontFamily: "inherit",
                   }}
@@ -362,14 +360,14 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
             <button
               onClick={() => setIsOpen(false)}
               className="btn"
-              style={{ fontSize: "11px", padding: "6px 12px" }}
+              style={{ fontSize: "12px", height: "34px", padding: "0 12px" }}
             >
               Cancelar
             </button>
             <button
               onClick={applyCustom}
-              className="btn btn-emerald"
-              style={{ fontSize: "11px", padding: "6px 14px" }}
+              className="btn btn-primary"
+              style={{ fontSize: "12px", height: "34px", padding: "0 14px" }}
             >
               Aplicar Filtro
             </button>

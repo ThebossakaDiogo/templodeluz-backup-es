@@ -50,11 +50,11 @@ export function MobileBottomNav({
         minHeight: "56px",
         paddingTop: "4px",
         paddingBottom: "max(10px, env(safe-area-inset-bottom, 14px))",
-        background: "var(--bg-surface)",
+        background: "rgba(13, 15, 21, 0.92)",
         backdropFilter: "blur(20px)",
         WebkitBackdropFilter: "blur(20px)",
-        borderTop: "1px solid var(--border)",
-        boxShadow: "0 -2px 10px rgba(0, 0, 0, 0.06)",
+        borderTop: "1px solid rgba(255, 255, 255, 0.075)",
+        boxShadow: "0 -4px 20px rgba(0, 0, 0, 0.35)",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-around",
@@ -84,8 +84,8 @@ export function MobileBottomNav({
               padding: "6px 2px",
               minHeight: "48px",
               position: "relative",
-              color: active ? "var(--primary-green)" : "var(--text-muted)",
-              transition: "all 0.18s ease",
+              color: active ? "#BDB4EF" : "#707281",
+              transition: "all 0.16s ease",
             }}
           >
             {/* Ícone com Pill Suave no Ativo */}
@@ -97,24 +97,24 @@ export function MobileBottomNav({
                 justifyContent: "center",
                 padding: "3px 12px",
                 borderRadius: "10px",
-                background: active ? "rgba(245, 158, 11, 0.15)" : "transparent",
-                transition: "all 0.18s ease",
+                background: active ? "rgba(189, 180, 239, 0.12)" : "transparent",
+                transition: "all 0.16s ease",
               }}
             >
-              <Icon style={{ width: "19px", height: "19px" }} strokeWidth={active ? 2.4 : 1.9} />
+              <Icon style={{ width: "19px", height: "19px" }} strokeWidth={active ? 2.2 : 1.7} />
               {item.badge !== undefined && (
                 <span
                   style={{
                     position: "absolute",
                     top: "-2px",
                     right: "2px",
-                    background: "#f59e0b",
-                    color: "#1c1917",
+                    background: "#7C5CFF",
+                    color: "#F5F4FA",
                     fontSize: "9px",
-                    fontWeight: 900,
+                    fontWeight: 700,
                     borderRadius: "99px",
                     padding: "1px 5px",
-                    boxShadow: "0 2px 6px rgba(245, 158, 11, 0.4)",
+                    boxShadow: "0 2px 6px rgba(124, 92, 255, 0.4)",
                   }}
                 >
                   {item.badge}
@@ -125,7 +125,7 @@ export function MobileBottomNav({
             <span
               style={{
                 fontSize: "10px",
-                fontWeight: active ? 800 : 500,
+                fontWeight: active ? 600 : 400,
                 letterSpacing: "-0.01em",
                 marginTop: "1px",
               }}
