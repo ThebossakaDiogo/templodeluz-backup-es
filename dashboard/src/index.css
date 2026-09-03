@@ -3,11 +3,11 @@
 
 /* ══════════════════════════════════════════════════════════════════════
    SISTEMA DE DESIGN LUXURY: MIDNIGHT NAVY & EMERALD GREEN
-   (Azul Escuro, Verde Esmeralda, Ciano e Prata)
+   (Contraste Perfeito para Modo Claro e Modo Escuro)
    ══════════════════════════════════════════════════════════════════════ */
 
 :root {
-  /* Modo Claro Elegante (Off-white com azul marinho e verde) */
+  /* MODO CLARO (Branco puro, cinza neutro e textos em preto/grafite de altíssimo contraste) */
   --bg-root:        #f1f5f9;
   --bg-surface:     #ffffff;
   --bg-surface-alt: #f8fafc;
@@ -15,22 +15,30 @@
   --border:         #cbd5e1;
   --border-subtle:  #e2e8f0;
 
-  --text-primary:   #0f172a;
-  --text-secondary: #475569;
-  --text-muted:     #64748b;
+  /* Tipografia Modo Claro: Preto Sólido & Grafite Escuro */
+  --text-primary:   #090d16;
+  --text-secondary: #1e293b;
+  --text-muted:     #475569;
 
-  --primary-blue:   #1e40af;
+  --primary-blue:   #1d4ed8;
   --primary-green:  #059669;
   --accent-cyan:    #0284c7;
+  --accent-mint:    #047857;
 
-  --glow-emerald:   0 0 16px rgba(5, 150, 105, 0.25);
-  --glow-navy:      0 0 16px rgba(30, 64, 175, 0.2);
-  --shadow-card:    0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
-  --shadow-hover:   0 8px 24px rgba(15, 23, 42, 0.1);
+  /* Banner de Pessoas Ao Vivo no Modo Claro */
+  --live-banner-bg:   linear-gradient(135deg, #ecfdf5 0%, #f0fdfa 100%);
+  --live-banner-border: #a7f3d0;
+  --live-banner-text: #064e3b;
+  --live-banner-sub:  #065f46;
+
+  --glow-emerald:   0 0 14px rgba(5, 150, 105, 0.2);
+  --glow-navy:      0 0 14px rgba(29, 78, 216, 0.15);
+  --shadow-card:    0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-hover:   0 8px 24px rgba(15, 23, 42, 0.12);
 }
 
 [data-theme="dark"] {
-  /* Modo Escuro Sofisticado (Azul Marinho Meia-Noite + Verde Esmeralda + Ciano) */
+  /* MODO ESCURO (Azul Marinho Meia-Noite + Verde Esmeralda + Ciano) */
   --bg-root:        #060c18;
   --bg-surface:     #0d1629;
   --bg-surface-alt: #121e38;
@@ -38,16 +46,21 @@
   --border:         #1a2a47;
   --border-subtle:  #121f36;
 
-  /* Tipografia Cristalina */
+  /* Tipografia Modo Escuro: Branco Cristal & Prata */
   --text-primary:   #f8fafc;
   --text-secondary: #cbd5e1;
-  --text-muted:     #71829e;
+  --text-muted:     #94a3b8;
 
-  /* Paleta Nobre */
   --primary-blue:   #2563eb;
   --primary-green:  #10b981;
   --accent-cyan:    #06b6d4;
   --accent-mint:    #34d399;
+
+  /* Banner de Pessoas Ao Vivo no Modo Escuro */
+  --live-banner-bg:   linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(6, 182, 212, 0.08) 100%);
+  --live-banner-border: rgba(16, 185, 129, 0.35);
+  --live-banner-text: #ffffff;
+  --live-banner-sub:  #94a3b8;
 
   --glow-emerald:   0 0 20px rgba(16, 185, 129, 0.35);
   --glow-navy:      0 0 20px rgba(37, 99, 235, 0.3);
@@ -68,7 +81,7 @@ body {
   letter-spacing: -0.01em;
 }
 
-/* ── Card Luxury Navy ───────────────────────────────────────────────── */
+/* ── Card Luxury ────────────────────────────────────────────────────── */
 .card {
   background: var(--bg-surface);
   border: 1px solid var(--border);
@@ -77,7 +90,7 @@ body {
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .card:hover {
-  border-color: rgba(16, 185, 129, 0.32);
+  border-color: rgba(16, 185, 129, 0.4);
   box-shadow: var(--shadow-hover);
 }
 
@@ -91,9 +104,9 @@ body {
   height: 38px;
   flex-shrink: 0;
   background: rgba(16, 185, 129, 0.14);
-  color: #34d399;
+  color: var(--primary-green);
   border: 1px solid rgba(16, 185, 129, 0.3);
-  box-shadow: 0 0 14px rgba(16, 185, 129, 0.25);
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.2);
 }
 
 .icon-navy {
@@ -105,9 +118,9 @@ body {
   height: 38px;
   flex-shrink: 0;
   background: rgba(37, 99, 235, 0.15);
-  color: #38bdf8;
+  color: var(--primary-blue);
   border: 1px solid rgba(37, 99, 235, 0.3);
-  box-shadow: 0 0 14px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 0 14px rgba(37, 99, 235, 0.2);
 }
 
 .icon-cyan {
@@ -119,9 +132,9 @@ body {
   height: 38px;
   flex-shrink: 0;
   background: rgba(6, 182, 212, 0.15);
-  color: #06b6d4;
+  color: var(--accent-cyan);
   border: 1px solid rgba(6, 182, 212, 0.3);
-  box-shadow: 0 0 14px rgba(6, 182, 212, 0.25);
+  box-shadow: 0 0 14px rgba(6, 182, 212, 0.2);
 }
 
 .icon-amber {
@@ -133,28 +146,39 @@ body {
   height: 38px;
   flex-shrink: 0;
   background: rgba(245, 158, 11, 0.14);
-  color: #f59e0b;
+  color: #d97706;
   border: 1px solid rgba(245, 158, 11, 0.3);
-  box-shadow: 0 0 14px rgba(245, 158, 11, 0.25);
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.2);
 }
 
-/* ── Badges Sofisticados ────────────────────────────────────────────── */
+/* ── Badges Sofisticados de Alto Contraste ───────────────────────────── */
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 800;
   border-radius: 6px;
   padding: 3px 9px;
   letter-spacing: 0.01em;
 }
-.badge-emerald { background: rgba(16, 185, 129, 0.14); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
-.badge-navy    { background: rgba(37, 99, 235, 0.15);  color: #38bdf8; border: 1px solid rgba(37, 99, 235, 0.3); }
-.badge-cyan    { background: rgba(6, 182, 212, 0.15);  color: #22d3ee; border: 1px solid rgba(6, 182, 212, 0.3); }
-.badge-pending { background: rgba(245, 158, 11, 0.14); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
-.badge-failed  { background: rgba(239, 68, 68, 0.15);  color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
-.badge-expired { background: rgba(100, 116, 139, 0.15);color: #94a3b8; border: 1px solid rgba(100, 116, 139, 0.25); }
+.badge-emerald { background: rgba(16, 185, 129, 0.16); color: #047857; border: 1px solid rgba(16, 185, 129, 0.35); }
+[data-theme="dark"] .badge-emerald { color: #34d399; }
+
+.badge-navy    { background: rgba(37, 99, 235, 0.16);  color: #1d4ed8; border: 1px solid rgba(37, 99, 235, 0.35); }
+[data-theme="dark"] .badge-navy { color: #38bdf8; }
+
+.badge-cyan    { background: rgba(6, 182, 212, 0.16);  color: #0369a1; border: 1px solid rgba(6, 182, 212, 0.35); }
+[data-theme="dark"] .badge-cyan { color: #22d3ee; }
+
+.badge-pending { background: rgba(245, 158, 11, 0.16); color: #b45309; border: 1px solid rgba(245, 158, 11, 0.35); }
+[data-theme="dark"] .badge-pending { color: #fbbf24; }
+
+.badge-failed  { background: rgba(239, 68, 68, 0.16);  color: #b91c1c; border: 1px solid rgba(239, 68, 68, 0.35); }
+[data-theme="dark"] .badge-failed { color: #f87171; }
+
+.badge-expired { background: rgba(100, 116, 139, 0.16);color: #475569; border: 1px solid rgba(100, 116, 139, 0.3); }
+[data-theme="dark"] .badge-expired { color: #94a3b8; }
 
 /* ── Botões ─────────────────────────────────────────────────────────── */
 .btn {
@@ -163,10 +187,10 @@ body {
   gap: 6px;
   border-radius: 9px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   border: 1px solid var(--border);
   background: var(--bg-surface);
-  color: var(--text-secondary);
+  color: var(--text-primary);
   padding: 7px 14px;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -176,7 +200,7 @@ body {
 .btn:hover:not(:disabled) {
   background: var(--bg-surface-alt);
   color: var(--text-primary);
-  border-color: rgba(16, 185, 129, 0.4);
+  border-color: rgba(16, 185, 129, 0.5);
   box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
 }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -184,19 +208,20 @@ body {
 .btn-emerald {
   background: linear-gradient(135deg, #059669, #10b981);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #ffffff;
+  color: #ffffff !important;
   box-shadow: 0 2px 14px rgba(16, 185, 129, 0.45);
 }
 .btn-emerald:hover:not(:disabled) {
   background: linear-gradient(135deg, #10b981, #34d399);
   box-shadow: 0 4px 22px rgba(16, 185, 129, 0.65);
-  color: #064e3b;
+  color: #064e3b !important;
 }
 
 /* ── Scrollbar ──────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 99px; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
+[data-theme="dark"] ::-webkit-scrollbar-thumb { background: #1e293b; }
 ::-webkit-scrollbar-thumb:hover { background: #10b981; }
 
 /* ── Skeleton ───────────────────────────────────────────────────────── */

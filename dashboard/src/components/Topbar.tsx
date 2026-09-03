@@ -1,4 +1,5 @@
-import { Sun, Moon, RefreshCw, Download, Calendar, Users } from "lucide-react";
+import { Sun, Moon, RefreshCw, Download, Users } from "lucide-react";
+import { DateRangeSelector, type DateRangeValue } from "./DateRangeSelector";
 import type { Section } from "../App";
 
 interface TopbarProps {
@@ -9,8 +10,8 @@ interface TopbarProps {
   lastUpdate: Date | null;
   section: Section;
   onExportCsv: () => void;
-  periodFilter: number;
-  onPeriodChange: (days: number) => void;
+  dateRange: DateRangeValue;
+  onDateRangeChange: (val: DateRangeValue) => void;
   onlineCount: number;
 }
 
@@ -44,8 +45,8 @@ export function Topbar({
   lastUpdate,
   section,
   onExportCsv,
-  periodFilter,
-  onPeriodChange,
+  dateRange,
+  onDateRangeChange,
   onlineCount,
 }: TopbarProps) {
   return (
@@ -96,7 +97,7 @@ export function Topbar({
           display: "flex",
           alignItems: "center",
           gap: "8px",
-          background: "rgba(16, 185, 129, 0.12)",
+          background: "rgba(16, 185, 129, 0.15)",
           border: "1px solid rgba(16, 185, 129, 0.35)",
           borderRadius: "99px",
           padding: "5px 14px",
@@ -105,59 +106,19 @@ export function Topbar({
       >
         <div className="pulse-emerald" />
         <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-          <Users style={{ width: "13px", height: "13px", color: "#34d399" }} />
-          <span style={{ fontSize: "12px", fontWeight: 800, color: "#ffffff" }}>
+          <Users style={{ width: "13px", height: "13px", color: "var(--primary-green)" }} />
+          <span style={{ fontSize: "12px", fontWeight: 900, color: "var(--text-primary)" }}>
             {onlineCount}
           </span>
-          <span style={{ fontSize: "11px", fontWeight: 600, color: "#34d399" }}>
+          <span style={{ fontSize: "11px", fontWeight: 800, color: "var(--primary-green)" }}>
             {onlineCount === 1 ? "pessoa ao vivo no funil" : "pessoas ao vivo no funil"}
           </span>
         </div>
       </div>
 
-      {/* Filtro Rápido de Período (Visão Geral) */}
+      {/* SELETOR DE CALENDÁRIO COM HOJE E PERSONALIZADO */}
       {section === "visao-geral" && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            background: "var(--bg-surface-alt)",
-            border: "1px solid var(--border)",
-            borderRadius: "8px",
-            padding: "2px",
-            gap: "2px",
-          }}
-        >
-          <div style={{ padding: "0 6px", color: "var(--text-muted)", display: "flex", alignItems: "center" }}>
-            <Calendar style={{ width: "12px", height: "12px" }} />
-          </div>
-          {[
-            { label: "7D", days: 7 },
-            { label: "14D", days: 14 },
-            { label: "30D", days: 30 },
-          ].map((item) => {
-            const active = periodFilter === item.days;
-            return (
-              <button
-                key={item.days}
-                onClick={() => onPeriodChange(item.days)}
-                style={{
-                  fontSize: "11px",
-                  fontWeight: active ? 800 : 600,
-                  padding: "4px 10px",
-                  borderRadius: "6px",
-                  border: "none",
-                  cursor: "pointer",
-                  background: active ? "#10b981" : "transparent",
-                  color: active ? "#ffffff" : "var(--text-secondary)",
-                  transition: "all 0.15s ease",
-                }}
-              >
-                {item.label}
-              </button>
-            );
-          })}
-        </div>
+        <DateRangeSelector value={dateRange} onChange={onDateRangeChange} />
       )}
 
       {/* Indicador de Atualização */}

@@ -83,7 +83,7 @@ export function ConversionOverview({ leads, orders, loading }: ConversionOvervie
         </div>
 
         <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
-          <span style={{ fontSize: "22px", fontWeight: 900, color: "#f8fafc" }}>
+          <span style={{ fontSize: "22px", fontWeight: 900, color: "var(--text-primary)" }}>
             {loading ? "—" : `${quizCompletionRate}%`}
           </span>
           <span style={{ fontSize: "11px", color: "var(--text-muted)", fontWeight: 500 }}>

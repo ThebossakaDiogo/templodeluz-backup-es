@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { Sidebar } from "./components/Sidebar";
 import { Topbar } from "./components/Topbar";
 import { MetricCards } from "./components/MetricCards";
@@ -11,9 +11,10 @@ import { StatusPieChart } from "./components/StatusPieChart";
 import { TrafficPieChart } from "./components/TrafficPieChart";
 import { ConversionOverview } from "./components/ConversionOverview";
 import { supabase } from "./lib/supabase";
+import type { DateRangeValue } from "./components/DateRangeSelector";
 import type { DashboardStats, Lead, PaymentOrder, ChartDataPoint } from "./types";
 
-// ─── Helpers ────────────────────────────────────────────────────────────────
+// ─── Helpers de Data ─────────────────────────────────────────────────────────
 function calcDiff(current: number, previous: number): number {
   if (previous === 0) return current > 0 ? 100 : 0;
   return Math.round(((current - previous) / previous) * 1000) / 10;
@@ -24,26 +25,72 @@ function dateLabel(dateStr: string): string {
   return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
 
-function buildRevenueChart(orders: PaymentOrder[], days = 14): ChartDataPoint[] {
-  const now = new Date();
+function toDateString(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+// Construtor do Gráfico de Receita baseado no intervalo
+function buildRevenueChartRange(
+  orders: PaymentOrder[],
+  start: Date,
+  end: Date,
+  isSingleDay: boolean
+): ChartDataPoint[] {
+  if (isSingleDay) {
+    const hours = ["00h", "04h", "08h", "12h", "16h", "20h"];
+    const buckets: Record<string, { revenue: number; sales: number }> = {};
+    hours.forEach((h) => {
+      buckets[h] = { revenue: 0, sales: 0 };
+    });
+
+    for (const o of orders) {
+      if (o.status !== "paid") continue;
+      const d = new Date(o.created_at);
+      if (d < start || d > end) continue;
+      const hour = d.getHours();
+      let slot = "20h";
+      if (hour < 4) slot = "00h";
+      else if (hour < 8) slot = "04h";
+      else if (hour < 12) slot = "08h";
+      else if (hour < 16) slot = "12h";
+      else if (hour < 20) slot = "16h";
+      buckets[slot].revenue += o.amount_cents / 100;
+      buckets[slot].sales += 1;
+    }
+
+    return Object.entries(buckets).map(([dia, v]) => ({
+      dia,
+      receita: Math.round(v.revenue * 100) / 100,
+      vendas: v.sales,
+    }));
+  }
+
+  const diffDays = Math.min(
+    60,
+    Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 3600 * 24)))
+  );
   const buckets: Record<string, { revenue: number; sales: number }> = {};
-  for (let i = days - 1; i >= 0; i--) {
-    const d = new Date(now);
-    d.setDate(d.getDate() - i);
+  for (let i = 0; i <= diffDays; i++) {
+    const d = new Date(start);
+    d.setDate(d.getDate() + i);
+    if (d > end) break;
     buckets[dateLabel(d.toISOString())] = { revenue: 0, sales: 0 };
   }
-  const cutoff = new Date(now);
-  cutoff.setDate(cutoff.getDate() - days);
+
   for (const o of orders) {
     if (o.status !== "paid") continue;
     const d = new Date(o.created_at);
-    if (d < cutoff) continue;
+    if (d < start || d > end) continue;
     const key = dateLabel(o.created_at);
     if (buckets[key]) {
       buckets[key].revenue += o.amount_cents / 100;
       buckets[key].sales += 1;
     }
   }
+
   return Object.entries(buckets).map(([dia, v]) => ({
     dia,
     receita: Math.round(v.revenue * 100) / 100,
@@ -51,23 +98,56 @@ function buildRevenueChart(orders: PaymentOrder[], days = 14): ChartDataPoint[] 
   }));
 }
 
-function buildLeadsChart(leads: Lead[], days = 14): ChartDataPoint[] {
-  const now = new Date();
+// Construtor do Gráfico de Leads baseado no intervalo
+function buildLeadsChartRange(
+  leads: Lead[],
+  start: Date,
+  end: Date,
+  isSingleDay: boolean
+): ChartDataPoint[] {
+  if (isSingleDay) {
+    const hours = ["00h", "04h", "08h", "12h", "16h", "20h"];
+    const buckets: Record<string, number> = {};
+    hours.forEach((h) => {
+      buckets[h] = 0;
+    });
+
+    for (const l of leads) {
+      const d = new Date(l.created_at);
+      if (d < start || d > end) continue;
+      const hour = d.getHours();
+      let slot = "20h";
+      if (hour < 4) slot = "00h";
+      else if (hour < 8) slot = "04h";
+      else if (hour < 12) slot = "08h";
+      else if (hour < 16) slot = "12h";
+      else if (hour < 20) slot = "16h";
+      buckets[slot]++;
+    }
+
+    return Object.entries(buckets).map(([dia, leadsCount]) => ({ dia, leads: leadsCount }));
+  }
+
+  const diffDays = Math.min(
+    60,
+    Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 3600 * 24)))
+  );
   const buckets: Record<string, number> = {};
-  for (let i = days - 1; i >= 0; i--) {
-    const d = new Date(now);
-    d.setDate(d.getDate() - i);
+  for (let i = 0; i <= diffDays; i++) {
+    const d = new Date(start);
+    d.setDate(d.getDate() + i);
+    if (d > end) break;
     buckets[dateLabel(d.toISOString())] = 0;
   }
-  const cutoff = new Date(now);
-  cutoff.setDate(cutoff.getDate() - days);
+
   for (const l of leads) {
     const d = new Date(l.created_at);
-    if (d < cutoff) continue;
+    if (d < start || d > end) continue;
     const key = dateLabel(l.created_at);
     if (key in buckets) buckets[key]++;
   }
-  return Object.entries(buckets).map(([dia, leads]) => ({ dia, leads }));
+
+  return Object.entries(buckets).map(([dia, leadsCount]) => ({ dia, leads: leadsCount }));
 }
 
 // ─── Secções & Slugs do painel ───────────────────────────────────────────────
@@ -94,7 +174,7 @@ function getSectionFromPath(): Section {
   return SLUG_TO_SECTION[path] || "visao-geral";
 }
 
-// ─── Componente principal ────────────────────────────────────────────────────
+// ─── Componente Principal ────────────────────────────────────────────────────
 export function App() {
   const [theme, setTheme] = useState<"light" | "dark">(() => {
     return (localStorage.getItem("tl-theme") as "light" | "dark") || "dark";
@@ -102,30 +182,26 @@ export function App() {
 
   // Estado de Rota por Slug
   const [section, setSection] = useState<Section>(getSectionFromPath);
-  const [periodFilter, setPeriodFilter] = useState<number>(14);
-  const [loading, setLoading] = useState(true);
-  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
-  // Contagem de Pessoas Ao Vivo no Funil
-  const [onlineCount, setOnlineCount] = useState<number>(0);
-
-  const [stats, setStats] = useState<DashboardStats>({
-    newSubscriptions: 0,
-    newSubscriptionsDiff: 0,
-    newOrders: 0,
-    newOrdersDiff: 0,
-    avgOrderRevenue: 0,
-    avgOrderRevenueDiff: 0,
-    totalRevenue: 0,
-    totalRevenueDiff: 0,
-    pendingAmount: 0,
-    pendingCount: 0,
+  // Estado de Filtro de Calendário
+  const [dateRange, setDateRange] = useState<DateRangeValue>(() => {
+    const today = new Date();
+    const start = new Date();
+    start.setDate(today.getDate() - 13);
+    return {
+      preset: "14d",
+      label: "14 Dias",
+      startDate: toDateString(start),
+      endDate: toDateString(today),
+    };
   });
 
-  const [orders, setOrders] = useState<PaymentOrder[]>([]);
-  const [leads, setLeads] = useState<Lead[]>([]);
-  const [revenueChart, setRevenueChart] = useState<ChartDataPoint[]>([]);
-  const [leadsChart, setLeadsChart] = useState<ChartDataPoint[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [onlineCount, setOnlineCount] = useState<number>(0);
+
+  const [allOrders, setAllOrders] = useState<PaymentOrder[]>([]);
+  const [allLeads, setAllLeads] = useState<Lead[]>([]);
 
   // Sincroniza histórico de navegação por Slug (popstate)
   useEffect(() => {
@@ -136,7 +212,6 @@ export function App() {
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
-  // Navegação para uma nova Slug
   const handleNavigate = (newSection: Section) => {
     const targetSlug = SECTION_TO_SLUG[newSection];
     if (window.location.pathname !== targetSlug) {
@@ -145,16 +220,14 @@ export function App() {
     setSection(newSection);
   };
 
-  // Aplica tema no HTML
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("tl-theme", theme);
   }, [theme]);
 
-  const toggleTheme = () =>
-    setTheme((t) => (t === "light" ? "dark" : "light"));
+  const toggleTheme = () => setTheme((t) => (t === "light" ? "dark" : "light"));
 
-  // ─── Busca de dados ──────────────────────────────────────────────────────
+  // ─── Busca de dados no Supabase ──────────────────────────────────────────
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
@@ -163,20 +236,15 @@ export function App() {
           .from("pix_orders")
           .select("*")
           .order("created_at", { ascending: false })
-          .limit(500),
+          .limit(1000),
         supabase
           .from("quiz_funnel_leads")
           .select("*")
           .order("created_at", { ascending: false })
-          .limit(1000),
+          .limit(2000),
       ]);
 
-      const now = new Date();
-      const p30 = new Date(now); p30.setDate(p30.getDate() - 30);
-      const p60 = new Date(now); p60.setDate(p60.getDate() - 60);
-
-      // Pedidos
-      const allOrders: PaymentOrder[] = (ordersData ?? []).map((o) => ({
+      const parsedOrders: PaymentOrder[] = (ordersData ?? []).map((o) => ({
         id: o.id,
         customer_name: o.customer_name || "Consulente",
         customer_email: o.customer_email || "",
@@ -187,73 +255,32 @@ export function App() {
         payment_method: "pix" as const,
         created_at: o.created_at,
       }));
-      setOrders(allOrders);
+      setAllOrders(parsedOrders);
 
-      // Leads
-      const allLeads: Lead[] = (leadsData ?? []) as Lead[];
-      setLeads(allLeads);
+      const parsedLeads: Lead[] = (leadsData ?? []) as Lead[];
+      setAllLeads(parsedLeads);
 
-      // Calcula Pessoas Ao Vivo (leads com atividade nos últimos 15 minutos)
+      // Pessoas ao vivo (últimos 15 minutos)
       const fifteenMinAgo = Date.now() - 15 * 60 * 1000;
-      const activeRecent = allLeads.filter(
+      const activeRecent = parsedLeads.filter(
         (l) => new Date(l.updated_at || l.created_at).getTime() >= fifteenMinAgo
       );
-      // Se não houver atividade real nos últimos 15 min, exibe pelo menos os leads recentes
       setOnlineCount(activeRecent.length);
-
-      // Métricas com períodos reais
-      const paidCurr = allOrders.filter(
-        (o) => o.status === "paid" && new Date(o.created_at) >= p30
-      );
-      const paidPrev = allOrders.filter(
-        (o) =>
-          o.status === "paid" &&
-          new Date(o.created_at) >= p60 &&
-          new Date(o.created_at) < p30
-      );
-      const revCurr = paidCurr.reduce((s, o) => s + o.amount_cents / 100, 0);
-      const revPrev = paidPrev.reduce((s, o) => s + o.amount_cents / 100, 0);
-      const avgCurr = paidCurr.length > 0 ? revCurr / paidCurr.length : 0;
-      const avgPrev = paidPrev.length > 0 ? revPrev / paidPrev.length : 0;
-      const leadsCurr = allLeads.filter((l) => new Date(l.created_at) >= p30);
-      const leadsPrev = allLeads.filter(
-        (l) => new Date(l.created_at) >= p60 && new Date(l.created_at) < p30
-      );
-      const pending = allOrders.filter(
-        (o) => o.status === "pending" || o.status === "creating"
-      );
-
-      setStats({
-        newSubscriptions: allLeads.length,
-        newSubscriptionsDiff: calcDiff(leadsCurr.length, leadsPrev.length),
-        newOrders: allOrders.filter((o) => o.status === "paid").length,
-        newOrdersDiff: calcDiff(paidCurr.length, paidPrev.length),
-        avgOrderRevenue: avgCurr,
-        avgOrderRevenueDiff: calcDiff(avgCurr, avgPrev),
-        totalRevenue: revCurr,
-        totalRevenueDiff: calcDiff(revCurr, revPrev),
-        pendingAmount: pending.reduce((s, o) => s + o.amount_cents / 100, 0),
-        pendingCount: pending.length,
-      });
-
-      setRevenueChart(buildRevenueChart(allOrders, periodFilter));
-      setLeadsChart(buildLeadsChart(allLeads, periodFilter));
       setLastUpdate(new Date());
     } catch (err) {
       console.warn("Erro ao buscar dados:", err);
     } finally {
       setLoading(false);
     }
-  }, [periodFilter]);
+  }, []);
 
-  // Carregamento inicial + polling 20s
   useEffect(() => {
     void fetchData();
     const interval = setInterval(() => void fetchData(), 20_000);
     return () => clearInterval(interval);
   }, [fetchData]);
 
-  // Realtime Supabase + Presença
+  // Realtime Supabase
   useEffect(() => {
     const ch1 = supabase
       .channel("rt-orders")
@@ -277,11 +304,79 @@ export function App() {
     };
   }, [fetchData]);
 
-  // Exportar CSV
+  // ─── Cálculos reativos ao DateRange (Hoje, Personalizado, etc) ─────────────
+  const { filteredOrders, filteredLeads, stats, revenueChart, leadsChart } = useMemo(() => {
+    const startObj = new Date(dateRange.startDate + "T00:00:00");
+    const endObj = new Date(dateRange.endDate + "T23:59:59");
+    const isSingleDay = dateRange.startDate === dateRange.endDate;
+
+    // Período anterior correspondente para cálculo de crescimento % (Diff)
+    const durationMs = endObj.getTime() - startObj.getTime();
+    const prevStartObj = new Date(startObj.getTime() - durationMs);
+    const prevEndObj = new Date(startObj.getTime() - 1);
+
+    const fOrders = allOrders.filter((o) => {
+      const d = new Date(o.created_at);
+      return d >= startObj && d <= endObj;
+    });
+
+    const prevOrders = allOrders.filter((o) => {
+      const d = new Date(o.created_at);
+      return d >= prevStartObj && d <= prevEndObj;
+    });
+
+    const fLeads = allLeads.filter((l) => {
+      const d = new Date(l.created_at);
+      return d >= startObj && d <= endObj;
+    });
+
+    const prevLeads = allLeads.filter((l) => {
+      const d = new Date(l.created_at);
+      return d >= prevStartObj && d <= prevEndObj;
+    });
+
+    // Métricas financeiras
+    const paidCurr = fOrders.filter((o) => o.status === "paid");
+    const paidPrev = prevOrders.filter((o) => o.status === "paid");
+
+    const revCurr = paidCurr.reduce((s, o) => s + o.amount_cents / 100, 0);
+    const revPrev = paidPrev.reduce((s, o) => s + o.amount_cents / 100, 0);
+
+    const avgCurr = paidCurr.length > 0 ? revCurr / paidCurr.length : 0;
+    const avgPrev = paidPrev.length > 0 ? revPrev / paidPrev.length : 0;
+
+    const pending = fOrders.filter((o) => o.status === "pending" || o.status === "creating");
+
+    const calculatedStats: DashboardStats = {
+      newSubscriptions: fLeads.length,
+      newSubscriptionsDiff: calcDiff(fLeads.length, prevLeads.length),
+      newOrders: paidCurr.length,
+      newOrdersDiff: calcDiff(paidCurr.length, paidPrev.length),
+      avgOrderRevenue: avgCurr,
+      avgOrderRevenueDiff: calcDiff(avgCurr, avgPrev),
+      totalRevenue: revCurr,
+      totalRevenueDiff: calcDiff(revCurr, revPrev),
+      pendingAmount: pending.reduce((s, o) => s + o.amount_cents / 100, 0),
+      pendingCount: pending.length,
+    };
+
+    const revData = buildRevenueChartRange(allOrders, startObj, endObj, isSingleDay);
+    const leadsData = buildLeadsChartRange(allLeads, startObj, endObj, isSingleDay);
+
+    return {
+      filteredOrders: fOrders,
+      filteredLeads: fLeads,
+      stats: calculatedStats,
+      revenueChart: revData,
+      leadsChart: leadsData,
+    };
+  }, [allOrders, allLeads, dateRange]);
+
+  // Exportar CSV do período selecionado
   const exportCsv = () => {
     const rows = [
       "ID,Nome,E-mail,Produto,Valor (R$),Status,Metodo,Data",
-      ...orders.map(
+      ...filteredOrders.map(
         (o) =>
           `${o.id},"${o.customer_name}","${o.customer_email}","${o.product_name}",${(
             o.amount_cents / 100
@@ -292,7 +387,7 @@ export function App() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `templo-de-luz-relatorio-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `templo-de-luz-relatorio-${dateRange.startDate}-a-${dateRange.endDate}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -310,12 +405,8 @@ export function App() {
           lastUpdate={lastUpdate}
           section={section}
           onExportCsv={exportCsv}
-          periodFilter={periodFilter}
-          onPeriodChange={(days) => {
-            setPeriodFilter(days);
-            setRevenueChart(buildRevenueChart(orders, days));
-            setLeadsChart(buildLeadsChart(leads, days));
-          }}
+          dateRange={dateRange}
+          onDateRangeChange={setDateRange}
           onlineCount={onlineCount}
         />
 
@@ -323,50 +414,54 @@ export function App() {
           style={{
             flex: 1,
             overflowY: "auto",
-            padding: "24px 30px",
+            padding: "26px 32px",
             display: "flex",
             flexDirection: "column",
-            gap: "22px",
+            gap: "24px",
           }}
         >
           {/* SLUG: /visao-geral */}
           {section === "visao-geral" && (
             <>
-              {/* Cards de Métricas Principais */}
+              {/* Cards de Métricas Principais Dinâmicos com base no Período */}
               <MetricCards stats={stats} loading={loading} />
 
-              {/* Barra de Conversão & Saúde da Operação */}
-              <ConversionOverview leads={leads} orders={orders} loading={loading} />
+              {/* Barra de Conversão & Saúde da Operação no Período */}
+              <ConversionOverview
+                leads={filteredLeads}
+                orders={filteredOrders}
+                loading={loading}
+              />
 
-              {/* Gráfico de Receita Full Width */}
+              {/* Gráfico de Receita Full Width (Horas para Hoje, Dias para Multi-dias) */}
               <RevenueChart data={revenueChart} loading={loading} />
 
-              {/* DUPLO GRÁFICO PIZZA (Status & Origem de Tráfego) */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
-                <StatusPieChart orders={orders} loading={loading} />
-                <TrafficPieChart leads={leads} loading={loading} />
+              {/* FUNIL DE CONVERSÃO 3D EM LARGURA TOTAL (ESPAÇOSO E CONFORTÁVEL) */}
+              <FunnelViz leads={filteredLeads.length > 0 ? filteredLeads : allLeads} loading={loading} />
+
+              {/* DUPLO GRÁFICO PIZZA (Status & Origem de Tráfego do Período) */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "22px" }}>
+                <StatusPieChart orders={filteredOrders} loading={loading} />
+                <TrafficPieChart leads={filteredLeads} loading={loading} />
               </div>
 
-              {/* Funil Visual do Quiz + Gráfico de Barras de Leads */}
-              <div style={{ display: "grid", gridTemplateColumns: "1.2fr 0.8fr", gap: "20px" }}>
-                <FunnelViz leads={leads} loading={loading} />
-                <LeadsChart
-                  data={leadsChart}
-                  total={leads.length}
-                  diff={stats.newSubscriptionsDiff}
-                  loading={loading}
-                />
-              </div>
+              {/* Volume de Leads do Período */}
+              <LeadsChart
+                data={leadsChart}
+                total={filteredLeads.length}
+                diff={stats.newSubscriptionsDiff}
+                loading={loading}
+              />
 
-              {/* Tabela de Pedidos com Filtros Rápidos */}
-              <OrdersTable orders={orders.slice(0, 10)} loading={loading} compact />
+              {/* Tabela de Pedidos do Período */}
+              <OrdersTable orders={filteredOrders.slice(0, 10)} loading={loading} compact />
             </>
           )}
 
           {/* SLUG: /rastreamento */}
           {section === "rastreamento" && (
             <FunnelTracker
-              leads={leads}
+              leads={allLeads}
               loading={loading}
               onRefresh={fetchData}
               onlineCount={onlineCount}
@@ -375,16 +470,17 @@ export function App() {
 
           {/* SLUG: /pedidos */}
           {section === "pedidos" && (
-            <OrdersTable orders={orders} loading={loading} />
+            <OrdersTable orders={filteredOrders.length > 0 ? filteredOrders : allOrders} loading={loading} />
           )}
 
           {/* SLUG: /relatorios */}
           {section === "relatorios" && (
             <ReportsView
-              orders={orders}
-              leads={leads}
+              orders={filteredOrders}
+              leads={filteredLeads}
               stats={stats}
               onExport={exportCsv}
+              periodLabel={dateRange.label}
             />
           )}
         </main>
@@ -399,11 +495,13 @@ function ReportsView({
   leads,
   stats,
   onExport,
+  periodLabel,
 }: {
   orders: PaymentOrder[];
   leads: Lead[];
   stats: DashboardStats;
   onExport: () => void;
+  periodLabel: string;
 }) {
   const brl = (v: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
@@ -430,38 +528,38 @@ function ReportsView({
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
       {/* Resumo */}
-      <div className="card" style={{ padding: "24px" }}>
+      <div className="card" style={{ padding: "26px" }}>
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            marginBottom: "20px",
+            marginBottom: "22px",
           }}
         >
           <div>
             <h2
               style={{
-                fontSize: "15px",
-                fontWeight: 800,
+                fontSize: "16px",
+                fontWeight: 900,
                 color: "var(--text-primary)",
                 margin: 0,
               }}
             >
-              Resumo Operacional (30 Dias)
+              Resumo Operacional ({periodLabel})
             </h2>
             <p
               style={{
-                fontSize: "11px",
+                fontSize: "11.5px",
                 color: "var(--text-muted)",
-                margin: "4px 0 0",
+                margin: "3px 0 0",
               }}
             >
-              Auditoria de desempenho comercial e funil de conversão
+              Auditoria de desempenho comercial e funil de conversão no período selecionado
             </p>
           </div>
           <button onClick={onExport} className="btn btn-emerald">
-            Exportar CSV
+            Exportar CSV do Período
           </button>
         </div>
 
@@ -473,11 +571,11 @@ function ReportsView({
           }}
         >
           {[
-            { label: "Faturamento Líquido (30d)", value: brl(stats.totalRevenue), color: "#34d399" },
-            { label: "Vendas Confirmadas", value: stats.newOrders, color: "#10b981" },
-            { label: "Total de Leads Mapeados", value: stats.newSubscriptions, color: "#38bdf8" },
-            { label: "Ticket Médio", value: brl(stats.avgOrderRevenue), color: "#ffffff" },
-            { label: "Cobranças Pendentes", value: stats.pendingCount, color: "#fbbf24" },
+            { label: `Faturamento Líquido (${periodLabel})`, value: brl(stats.totalRevenue), color: "var(--primary-green)" },
+            { label: "Vendas Confirmadas", value: stats.newOrders, color: "var(--primary-green)" },
+            { label: "Leads Capturados", value: stats.newSubscriptions, color: "var(--primary-blue)" },
+            { label: "Ticket Médio", value: brl(stats.avgOrderRevenue), color: "var(--text-primary)" },
+            { label: "Cobranças Pendentes", value: stats.pendingCount, color: "#d97706" },
             { label: "Volume Pendente", value: brl(stats.pendingAmount), color: "#f59e0b" },
           ].map((item) => (
             <div
@@ -528,13 +626,13 @@ function ReportsView({
         <div className="card" style={{ padding: "24px" }}>
           <h3
             style={{
-              fontSize: "13px",
+              fontSize: "13.5px",
               fontWeight: 800,
               color: "var(--text-primary)",
               margin: "0 0 16px",
             }}
           >
-            Origem dos Leads (UTMs)
+            Origem dos Leads no Período (UTMs)
           </h3>
           {Object.entries(utmSources)
             .sort((a, b) => b[1] - a[1])
@@ -560,7 +658,7 @@ function ReportsView({
                   </div>
                   <div
                     style={{
-                      height: "5px",
+                      height: "6px",
                       background: "var(--border)",
                       borderRadius: "99px",
                       overflow: "hidden",
@@ -581,7 +679,7 @@ function ReportsView({
             })}
           {leads.length === 0 && (
             <p style={{ fontSize: "12px", color: "var(--text-muted)" }}>
-              Nenhum lead registrado ainda.
+              Nenhum lead registrado no período selecionado.
             </p>
           )}
         </div>
@@ -590,13 +688,13 @@ function ReportsView({
         <div className="card" style={{ padding: "24px" }}>
           <h3
             style={{
-              fontSize: "13px",
+              fontSize: "13.5px",
               fontWeight: 800,
               color: "var(--text-primary)",
               margin: "0 0 16px",
             }}
           >
-            Status dos Pedidos no Gateway
+            Status dos Pedidos no Período
           </h3>
           {Object.entries(statusDist)
             .sort((a, b) => b[1] - a[1])
@@ -629,7 +727,7 @@ function ReportsView({
                   </div>
                   <div
                     style={{
-                      height: "5px",
+                      height: "6px",
                       background: "var(--border)",
                       borderRadius: "99px",
                       overflow: "hidden",
@@ -650,7 +748,7 @@ function ReportsView({
             })}
           {orders.length === 0 && (
             <p style={{ fontSize: "12px", color: "var(--text-muted)" }}>
-              Nenhum pedido registrado ainda.
+              Nenhum pedido registrado no período selecionado.
             </p>
           )}
         </div>

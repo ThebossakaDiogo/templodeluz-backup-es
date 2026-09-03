@@ -168,7 +168,7 @@ export function OrdersTable({ orders, loading, compact }: OrdersTableProps) {
                   border: "1px solid var(--border)",
                   borderRadius: "8px",
                   background: "var(--bg-surface-alt)",
-                  color: "#ffffff",
+                  color: "var(--text-primary)",
                   outline: "none",
                   width: "180px",
                 }}
@@ -286,8 +286,8 @@ export function OrdersTable({ orders, loading, compact }: OrdersTableProps) {
                     style={{
                       padding: "13px 20px",
                       borderBottom: "1px solid var(--border-subtle)",
-                      fontWeight: 700,
-                      color: "#ffffff",
+                      fontWeight: 800,
+                      color: "var(--text-primary)",
                       whiteSpace: "nowrap",
                     }}
                   >
@@ -335,8 +335,8 @@ export function OrdersTable({ orders, loading, compact }: OrdersTableProps) {
                       fontWeight: 800,
                       color:
                         order.status === "paid"
-                          ? "#34d399"
-                          : "#ffffff",
+                          ? "var(--primary-green)"
+                          : "var(--text-primary)",
                       whiteSpace: "nowrap",
                     }}
                   >

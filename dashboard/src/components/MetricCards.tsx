@@ -33,7 +33,7 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
       diff: stats.newSubscriptionsDiff,
       icon: Users,
       iconClass: "icon-navy",
-      valueColor: "#ffffff",
+      valueColor: "var(--text-primary)",
       accentGlow: "rgba(37, 99, 235, 0.15)",
     },
     {
@@ -43,7 +43,7 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
       diff: stats.newOrdersDiff,
       icon: ShoppingBag,
       iconClass: "icon-emerald",
-      valueColor: "#34d399",
+      valueColor: "#059669",
       accentGlow: "rgba(16, 185, 129, 0.18)",
     },
     {
@@ -52,7 +52,7 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
       value: brl(stats.pendingAmount),
       icon: Clock,
       iconClass: "icon-amber",
-      valueColor: "#fbbf24",
+      valueColor: "#d97706",
       accentGlow: "rgba(245, 158, 11, 0.15)",
     },
     {
@@ -62,7 +62,7 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
       diff: stats.totalRevenueDiff,
       icon: DollarSign,
       iconClass: "icon-emerald",
-      valueColor: "#ffffff",
+      valueColor: "var(--text-primary)",
       accentGlow: "rgba(16, 185, 129, 0.25)",
     },
   ];
