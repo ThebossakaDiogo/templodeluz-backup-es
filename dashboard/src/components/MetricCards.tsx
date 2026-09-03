@@ -31,17 +31,17 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
       value: formatBRL(stats.totalRevenue),
       diff: stats.totalRevenueDiff,
       icon: DollarSign,
-      iconGrad: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-      iconShadow: "0 4px 14px rgba(16, 185, 129, 0.28)",
+      iconGrad: "linear-gradient(135deg, #fbbf24 0%, #d97706 100%)",
+      iconShadow: "0 4px 16px rgba(245, 158, 11, 0.35)",
       extraInfo: (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "8px", fontSize: "11.5px" }}>
-          <span style={{ color: "var(--primary-green)", fontWeight: 700, display: "flex", alignItems: "center", gap: "4px" }}>
-            <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--primary-green)", display: "inline-block" }} />
+          <span style={{ color: "#f59e0b", fontWeight: 700, display: "flex", alignItems: "center", gap: "4px" }}>
+            <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#f59e0b", display: "inline-block" }} />
             PIX: {formatBRL(stats.pixRevenue)}
           </span>
           <span style={{ color: "var(--text-muted)" }}>•</span>
-          <span style={{ color: "#3b82f6", fontWeight: 700, display: "flex", alignItems: "center", gap: "4px" }}>
-            <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#3b82f6", display: "inline-block" }} />
+          <span style={{ color: "#fbbf24", fontWeight: 700, display: "flex", alignItems: "center", gap: "4px" }}>
+            <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#fbbf24", display: "inline-block" }} />
             Cartão: {formatBRL(stats.cardRevenue)}
           </span>
         </div>
@@ -54,12 +54,12 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
       value: formatBRL(stats.pixRevenue),
       diff: null,
       icon: QrCode,
-      iconGrad: "linear-gradient(135deg, #06b6d4 0%, #0284c7 100%)",
-      iconShadow: "0 4px 14px rgba(6, 182, 212, 0.28)",
+      iconGrad: "linear-gradient(135deg, #f59e0b 0%, #b45309 100%)",
+      iconShadow: "0 4px 16px rgba(217, 119, 6, 0.35)",
       extraInfo: (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "8px", fontSize: "11.5px" }}>
           <span style={{ color: "var(--text-secondary)", fontWeight: 700, display: "flex", alignItems: "center", gap: "4px" }}>
-            <CheckCircle2 style={{ width: "13px", height: "13px", color: "#10b981" }} />
+            <CheckCircle2 style={{ width: "13px", height: "13px", color: "#f59e0b" }} />
             {stats.pixCount} {stats.pixCount === 1 ? "venda paga" : "vendas pagas"}
           </span>
           <span style={{ color: stats.pixPendingCount > 0 ? "#f59e0b" : "var(--text-muted)", fontWeight: 700, display: "flex", alignItems: "center", gap: "4px" }}>
@@ -76,12 +76,12 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
       value: formatBRL(stats.cardRevenue),
       diff: null,
       icon: CreditCard,
-      iconGrad: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
-      iconShadow: "0 4px 14px rgba(59, 130, 246, 0.28)",
+      iconGrad: "linear-gradient(135deg, #eab308 0%, #a16207 100%)",
+      iconShadow: "0 4px 16px rgba(234, 179, 8, 0.35)",
       extraInfo: (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "8px", fontSize: "11.5px" }}>
           <span style={{ color: "var(--text-secondary)", fontWeight: 700, display: "flex", alignItems: "center", gap: "4px" }}>
-            <CheckCircle2 style={{ width: "13px", height: "13px", color: "#3b82f6" }} />
+            <CheckCircle2 style={{ width: "13px", height: "13px", color: "#eab308" }} />
             {stats.cardCount} {stats.cardCount === 1 ? "venda aprovada" : "vendas aprovadas"}
           </span>
           <span style={{ color: "var(--text-muted)", fontWeight: 600 }}>
@@ -97,14 +97,14 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
       value: stats.newSubscriptions.toLocaleString("pt-BR"),
       diff: stats.newSubscriptionsDiff,
       icon: Users,
-      iconGrad: "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)",
-      iconShadow: "0 4px 14px rgba(139, 92, 246, 0.28)",
+      iconGrad: "linear-gradient(135deg, #fde047 0%, #ca8a04 100%)",
+      iconShadow: "0 4px 16px rgba(202, 138, 4, 0.35)",
       extraInfo: (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "8px", fontSize: "11.5px" }}>
           <span style={{ color: "var(--text-secondary)", fontWeight: 700 }}>
             Vendas: {stats.newOrders}
           </span>
-          <span style={{ color: "var(--primary-green)", fontWeight: 800 }}>
+          <span style={{ color: "#f59e0b", fontWeight: 800 }}>
             {stats.newSubscriptions > 0
               ? `${((stats.newOrders / stats.newSubscriptions) * 100).toFixed(1)}% conv.`
               : "0% conv."}

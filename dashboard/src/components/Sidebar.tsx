@@ -35,7 +35,7 @@ const ITEMS: {
     label: "Visão Geral",
     sub: "Métricas & Pizza Charts",
     Icon: LayoutGrid,
-    accent: "#10b981", // Emerald
+    accent: "#f59e0b", // Gold Imperial
   },
   {
     id: "rastreamento",
@@ -43,7 +43,7 @@ const ITEMS: {
     label: "Rastreamento",
     sub: "Funil & Pessoas Ao Vivo",
     Icon: Activity,
-    accent: "#06b6d4", // Cyan
+    accent: "#fbbf24", // Amber Solar
   },
   {
     id: "pedidos",
@@ -51,7 +51,7 @@ const ITEMS: {
     label: "Pedidos",
     sub: "Histórico & Gateway",
     Icon: CreditCard,
-    accent: "#38bdf8", // Sky Blue
+    accent: "#eab308", // Pure Gold
   },
   {
     id: "relatorios",
@@ -59,7 +59,7 @@ const ITEMS: {
     label: "Relatórios",
     sub: "Canais & Exportação",
     Icon: FileBarChart2,
-    accent: "#34d399", // Mint
+    accent: "#d97706", // Deep Amber
   },
   {
     id: "whatsapp",
@@ -155,17 +155,17 @@ export function Sidebar({
               width: "36px",
               height: "36px",
               borderRadius: "10px",
-              background: "linear-gradient(135deg, #059669 0%, #10b981 50%, #06b6d4 100%)",
-              border: "1px solid rgba(255, 255, 255, 0.25)",
+              background: "linear-gradient(135deg, #fbbf24 0%, #d97706 100%)",
+              border: "1px solid rgba(254, 240, 138, 0.35)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              boxShadow: "0 0 16px rgba(16, 185, 129, 0.4)",
+              boxShadow: "0 0 16px rgba(245, 158, 11, 0.4)",
               flexShrink: 0,
               fontFamily: "'Space Grotesk', sans-serif",
               fontWeight: 900,
               fontSize: "14px",
-              color: "#ffffff",
+              color: "#1c1917",
               letterSpacing: "-0.05em",
             }}
           >
@@ -183,7 +183,7 @@ export function Sidebar({
                 lineHeight: 1.1,
               }}
             >
-              OD <span style={{ color: "#10b981" }}>METRICS</span>
+              OD <span style={{ color: "#f59e0b" }}>METRICS</span>
             </span>
             <span
               style={{

@@ -16,61 +16,61 @@ html, body {
    ══════════════════════════════════════════════════════════════════════ */
 
 :root {
-  /* MODO CLARO LUXURY (Vidro Fosco, Platina, Sombras Profundas) */
-  --bg-root:        #f8fafc;
+  /* MODO CLARO LUXURY (Marfim Nobre, Platina & Ouro Imperial) */
+  --bg-root:        #faf8f5;
   --bg-surface:     #ffffff;
-  --bg-surface-alt: #f1f5f9;
-  --bg-sidebar:     #050a14;
-  --border:         rgba(15, 23, 42, 0.12);
-  --border-subtle:  rgba(15, 23, 42, 0.06);
+  --bg-surface-alt: #f5f2eb;
+  --bg-sidebar:     #0c0a07;
+  --border:         rgba(217, 119, 6, 0.16);
+  --border-subtle:  rgba(217, 119, 6, 0.08);
 
-  --text-primary:   #090d16;
-  --text-secondary: #1e293b;
-  --text-muted:     #64748b;
+  --text-primary:   #1c1917;
+  --text-secondary: #44403c;
+  --text-muted:     #78716c;
 
-  --primary-blue:   #1d4ed8;
-  --primary-green:  #059669;
-  --accent-cyan:    #0284c7;
-  --accent-mint:    #047857;
+  --primary-blue:   #2563eb;
+  --primary-green:  #d97706; /* Dourado Nobre */
+  --accent-cyan:    #f59e0b;
+  --accent-mint:    #b45309;
 
-  --live-banner-bg:   linear-gradient(135deg, #ecfdf5 0%, #f0fdfa 100%);
-  --live-banner-border: #a7f3d0;
-  --live-banner-text: #064e3b;
-  --live-banner-sub:  #065f46;
+  --live-banner-bg:   linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  --live-banner-border: #fde68a;
+  --live-banner-text: #78350f;
+  --live-banner-sub:  #92400e;
 
-  --glow-emerald:   0 0 16px rgba(5, 150, 105, 0.2);
-  --glow-navy:      0 0 16px rgba(29, 78, 216, 0.15);
-  --shadow-card:    0 4px 20px -4px rgba(15, 23, 42, 0.08), 0 0 1px rgba(15, 23, 42, 0.1);
-  --shadow-hover:   0 12px 32px -4px rgba(15, 23, 42, 0.14), 0 0 0 1px rgba(5, 150, 105, 0.3);
+  --glow-emerald:   0 0 16px rgba(217, 119, 6, 0.25);
+  --glow-navy:      0 0 16px rgba(180, 83, 9, 0.2);
+  --shadow-card:    0 4px 20px -4px rgba(28, 25, 23, 0.06), 0 0 1px rgba(217, 119, 6, 0.15);
+  --shadow-hover:   0 12px 32px -4px rgba(28, 25, 23, 0.12), 0 0 0 1px rgba(217, 119, 6, 0.4);
 }
 
 [data-theme="dark"] {
-  /* MODO ESCURO PROFISSIONAL (Preto Ónix, Midnight Navy, Verde Neon & Ciano) */
-  --bg-root:        #040711;
-  --bg-surface:     #09101f;
-  --bg-surface-alt: #0d172e;
-  --bg-sidebar:     #03060d;
-  --border:         rgba(255, 255, 255, 0.08);
-  --border-subtle:  rgba(255, 255, 255, 0.04);
+  /* MODO ESCURO SAGRADO (Preto Obsidian, Linhas de Ouro Nobre & Brilho Âmbar) */
+  --bg-root:        #040507;
+  --bg-surface:     #090c14;
+  --bg-surface-alt: #101522;
+  --bg-sidebar:     #030406;
+  --border:         rgba(245, 158, 11, 0.15);
+  --border-subtle:  rgba(245, 158, 11, 0.08);
 
-  --text-primary:   #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-muted:     #8292a8;
+  --text-primary:   #fefce8;
+  --text-secondary: #e2e8f0;
+  --text-muted:     #94a3b8;
 
-  --primary-blue:   #3b82f6;
-  --primary-green:  #10b981;
-  --accent-cyan:    #06b6d4;
-  --accent-mint:    #34d399;
+  --primary-blue:   #38bdf8;
+  --primary-green:  #f59e0b; /* Dourado Nobre Imperial */
+  --accent-cyan:    #fbbf24;
+  --accent-mint:    #eab308;
 
-  --live-banner-bg:   linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 182, 212, 0.08) 100%);
-  --live-banner-border: rgba(16, 185, 129, 0.35);
-  --live-banner-text: #ffffff;
-  --live-banner-sub:  #94a3b8;
+  --live-banner-bg:   linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.08) 100%);
+  --live-banner-border: rgba(245, 158, 11, 0.35);
+  --live-banner-text: #fefce8;
+  --live-banner-sub:  #fde68a;
 
-  --glow-emerald:   0 0 24px rgba(16, 185, 129, 0.35);
-  --glow-navy:      0 0 24px rgba(37, 99, 235, 0.3);
-  --shadow-card:    0 10px 30px -10px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  --shadow-hover:   0 16px 40px -10px rgba(0, 0, 0, 0.9), 0 0 20px rgba(16, 185, 129, 0.25), 0 0 0 1px rgba(16, 185, 129, 0.4);
+  --glow-emerald:   0 0 24px rgba(245, 158, 11, 0.35);
+  --glow-navy:      0 0 24px rgba(217, 119, 6, 0.3);
+  --shadow-card:    0 10px 30px -10px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(245, 158, 11, 0.14), inset 0 1px 0 rgba(254, 240, 138, 0.1);
+  --shadow-hover:   0 16px 40px -10px rgba(0, 0, 0, 0.95), 0 0 24px rgba(245, 158, 11, 0.3), 0 0 0 1px rgba(245, 158, 11, 0.5);
 }
 
 /* ── Reset e Estrutura ─────────────────────────────────────────────── */
@@ -111,14 +111,14 @@ body {
 }
 
 [data-theme="dark"] .card {
-  background: linear-gradient(180deg, rgba(13, 22, 42, 0.75) 0%, rgba(7, 12, 24, 0.9) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(180deg, rgba(16, 20, 32, 0.85) 0%, rgba(9, 12, 20, 0.95) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.14);
+  border-top: 1px solid rgba(254, 240, 138, 0.18);
 }
 
 .card:hover {
   transform: translateY(-2px);
-  border-color: rgba(16, 185, 129, 0.45);
+  border-color: rgba(245, 158, 11, 0.45);
   box-shadow: var(--shadow-hover);
 }
 
@@ -143,7 +143,7 @@ body {
 }
 .btn:hover {
   background: var(--bg-surface-alt);
-  border-color: rgba(16, 185, 129, 0.4);
+  border-color: rgba(245, 158, 11, 0.4);
   transform: translateY(-1px);
 }
 .btn:active {
@@ -151,14 +151,14 @@ body {
 }
 
 .btn-emerald {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
   color: #ffffff !important;
   border: none;
-  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+  box-shadow: 0 4px 14px rgba(217, 119, 6, 0.35);
 }
 .btn-emerald:hover {
-  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.45);
 }
 
 /* ── Badges com Glow ────────────────────────────────────────────────── */
@@ -173,10 +173,10 @@ body {
   letter-spacing: 0.01em;
 }
 .badge-emerald {
-  background: rgba(16, 185, 129, 0.16);
-  color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.35);
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.15);
+  background: rgba(245, 158, 11, 0.16);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.15);
 }
 .badge-navy {
   background: rgba(37, 99, 235, 0.16);

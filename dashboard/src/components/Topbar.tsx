@@ -78,17 +78,18 @@ export function Topbar({
           <div className="mobile-logo-badge" style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
             <div
               style={{
-                width: "26px",
-                height: "26px",
-                borderRadius: "7px",
-                background: "linear-gradient(135deg, #059669 0%, #10b981 100%)",
+                width: "28px",
+                height: "28px",
+                borderRadius: "8px",
+                background: "linear-gradient(135deg, #fbbf24 0%, #d97706 100%)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "#ffffff",
+                color: "#1c1917",
                 fontFamily: "'Space Grotesk', sans-serif",
                 fontWeight: 900,
                 fontSize: "11px",
+                boxShadow: "0 0 14px rgba(245, 158, 11, 0.35)",
               }}
             >
               OD
@@ -136,19 +137,19 @@ export function Topbar({
               display: "flex",
               alignItems: "center",
               gap: "5px",
-              background: "rgba(16, 185, 129, 0.12)",
-              border: "1px solid rgba(16, 185, 129, 0.35)",
+              background: "rgba(245, 158, 11, 0.12)",
+              border: "1px solid rgba(245, 158, 11, 0.35)",
               borderRadius: "99px",
               padding: "4px 8px",
-              boxShadow: "0 0 10px rgba(16, 185, 129, 0.1)",
+              boxShadow: "0 0 10px rgba(245, 158, 11, 0.15)",
             }}
           >
-            <div className="pulse-emerald" style={{ width: "6px", height: "6px" }} />
-            <Users style={{ width: "11px", height: "11px", color: "var(--primary-green)" }} />
+            <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#f59e0b", boxShadow: "0 0 8px #f59e0b" }} />
+            <Users style={{ width: "11px", height: "11px", color: "#f59e0b" }} />
             <span style={{ fontSize: "11px", fontWeight: 900, color: "var(--text-primary)" }}>
               {onlineCount}
             </span>
-            <span className="desktop-only-control" style={{ fontSize: "10px", fontWeight: 800, color: "var(--primary-green)" }}>
+            <span className="desktop-only-control" style={{ fontSize: "10px", fontWeight: 800, color: "#f59e0b" }}>
               ao vivo
             </span>
           </div>

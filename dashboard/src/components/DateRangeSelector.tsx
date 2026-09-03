@@ -203,23 +203,37 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
         </button>
       </div>
 
-      {/* POPOVER FLUTUANTE DE CALENDÁRIO PERSONALIZADO */}
+      {/* MODAL / BOTTOM SHEET DE CALENDÁRIO PERSONALIZADO (FIXED - NUNCA CORTADO POR OVERFLOW) */}
       {isOpen && (
         <div
-          className="fade-up"
           style={{
-            position: "absolute",
-            top: "calc(100% + 8px)",
-            right: 0,
-            zIndex: 9999,
-            width: "320px",
-            background: "var(--bg-surface)",
-            border: "1px solid var(--border)",
-            borderRadius: "14px",
-            padding: "18px",
-            boxShadow: "0 15px 35px rgba(0,0,0,0.4), 0 0 0 1px rgba(16, 185, 129, 0.2)",
+            position: "fixed",
+            inset: 0,
+            zIndex: 999999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "16px",
+            background: "rgba(0, 0, 0, 0.65)",
+            backdropFilter: "blur(6px)",
+            WebkitBackdropFilter: "blur(6px)",
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsOpen(false);
           }}
         >
+          <div
+            className="fade-up"
+            style={{
+              width: "100%",
+              maxWidth: "360px",
+              background: "var(--bg-surface)",
+              border: "1px solid var(--border)",
+              borderRadius: "18px",
+              padding: "20px",
+              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--border)",
+            }}
+          >
           {/* Cabeçalho do Popover */}
           <div
             style={{
@@ -361,7 +375,8 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
             </button>
           </div>
         </div>
-      )}
-    </div>
-  );
+      </div>
+    )}
+  </div>
+);
 }

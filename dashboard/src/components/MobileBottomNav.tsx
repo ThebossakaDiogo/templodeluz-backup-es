@@ -97,7 +97,7 @@ export function MobileBottomNav({
                 justifyContent: "center",
                 padding: "3px 12px",
                 borderRadius: "10px",
-                background: active ? "rgba(16, 185, 129, 0.12)" : "transparent",
+                background: active ? "rgba(245, 158, 11, 0.15)" : "transparent",
                 transition: "all 0.18s ease",
               }}
             >
@@ -108,13 +108,13 @@ export function MobileBottomNav({
                     position: "absolute",
                     top: "-2px",
                     right: "2px",
-                    background: "#10b981",
-                    color: "#ffffff",
+                    background: "#f59e0b",
+                    color: "#1c1917",
                     fontSize: "9px",
                     fontWeight: 900,
                     borderRadius: "99px",
                     padding: "1px 5px",
-                    boxShadow: "0 2px 6px rgba(16, 185, 129, 0.4)",
+                    boxShadow: "0 2px 6px rgba(245, 158, 11, 0.4)",
                   }}
                 >
                   {item.badge}
