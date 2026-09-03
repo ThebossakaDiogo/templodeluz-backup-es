@@ -1,28 +1,12 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
-import { Mail, Lock, Eye, EyeOff, ArrowRight, AlertTriangle, KeyRound } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Mail, Lock, Eye, EyeOff, ArrowRight, AlertTriangle, KeyRound, ShieldCheck } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 const ALLOWED_ADMIN_EMAILS = new Set([
   "thebossakadiogo@gmail.com",
   "otaviov.quinalia@gmail.com",
 ]);
-
-function Input({ className, type, ...props }: React.ComponentProps<"input">) {
-  return (
-    <input
-      type={type}
-      data-slot="input"
-      className={cn(
-        "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-        "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-        className
-      )}
-      {...props}
-    />
-  );
-}
 
 interface SignInCardProps {
   onLoginSuccess: () => void;
@@ -41,11 +25,11 @@ export function SignInCard({ onLoginSuccess }: SignInCardProps) {
   const [successMsg, setSuccessMsg] = useState("");
   const [unauthorized, setUnauthorized] = useState(false);
 
-  // Efeito 3D de rotação do Card com o mouse
+  // Efeito 3D de inclinação do cartão no mouse
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
-  const rotateX = useTransform(mouseY, [-300, 300], [10, -10]);
-  const rotateY = useTransform(mouseX, [-300, 300], [-10, 10]);
+  const rotateX = useTransform(mouseY, [-300, 300], [8, -8]);
+  const rotateY = useTransform(mouseX, [-300, 300], [-8, 8]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -87,11 +71,11 @@ export function SignInCard({ onLoginSuccess }: SignInCardProps) {
 
     if (isFirstAccess) {
       if (password.length < 6) {
-        setError("A senha deve ter no mínimo 6 caracteres.");
+        setError("A senha deve ter no mínimo 6 dígitos.");
         return;
       }
       if (password !== confirmPassword) {
-        setError("As senhas não coincidem.");
+        setError("As senhas informadas não coincidem.");
         return;
       }
 
@@ -124,11 +108,11 @@ export function SignInCard({ onLoginSuccess }: SignInCardProps) {
           setSuccessMsg("Senha configurada com sucesso! Entrando...");
           setTimeout(onLoginSuccess, 1000);
         } else {
-          setSuccessMsg("Senha salva! Faça seu login normalmente.");
+          setSuccessMsg("Senha salva! Faça o login normalmente.");
           setIsFirstAccess(false);
         }
       } catch (err: any) {
-        setError(err.message || "Erro ao salvar senha.");
+        setError(err.message || "Erro ao configurar senha.");
       } finally {
         setIsLoading(false);
       }
@@ -162,561 +146,663 @@ export function SignInCard({ onLoginSuccess }: SignInCardProps) {
   };
 
   return (
-    <div className="min-h-screen w-screen bg-black relative overflow-hidden flex items-center justify-center font-sans select-none">
-      {/* Background gradient effect */}
-      <div className="absolute inset-0 bg-gradient-to-b from-purple-600/30 via-purple-900/40 to-black pointer-events-none" />
-
-      {/* Subtle noise texture overlay */}
+    <div
+      style={{
+        minHeight: "100vh",
+        width: "100vw",
+        backgroundColor: "#03060d",
+        position: "relative",
+        overflow: "hidden",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily: "'Plus Jakarta Sans', sans-serif",
+      }}
+    >
+      {/* ── Background com a paleta oficial do OD METRICS (Navy & Emerald & Cyan) ── */}
       <div
-        className="absolute inset-0 opacity-[0.03] mix-blend-soft-light pointer-events-none"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-          backgroundSize: "200px 200px",
+          position: "absolute",
+          inset: 0,
+          background:
+            "radial-gradient(ellipse 70% 60% at 50% -10%, rgba(16, 185, 129, 0.18) 0%, rgba(6, 182, 212, 0.12) 40%, rgba(3, 6, 13, 0.98) 100%)",
+          pointerEvents: "none",
         }}
       />
 
-      {/* Top radial glow */}
-      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[120vh] h-[60vh] rounded-b-[50%] bg-purple-400/20 blur-[80px] pointer-events-none" />
-      <motion.div
-        className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[100vh] h-[60vh] rounded-b-full bg-purple-300/15 blur-[60px] pointer-events-none"
-        animate={{
-          opacity: [0.15, 0.3, 0.15],
-          scale: [0.98, 1.02, 0.98],
-        }}
-        transition={{
-          duration: 8,
-          repeat: Infinity,
-          repeatType: "mirror",
-        }}
-      />
-      <motion.div
-        className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-[90vh] h-[90vh] rounded-t-full bg-purple-500/15 blur-[60px] pointer-events-none"
-        animate={{
-          opacity: [0.2, 0.4, 0.2],
-          scale: [1, 1.08, 1],
-        }}
-        transition={{
-          duration: 6,
-          repeat: Infinity,
-          repeatType: "mirror",
-          delay: 1,
+      {/* Brilho esmeralda inferior */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: "-10%",
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "900px",
+          height: "400px",
+          background: "radial-gradient(ellipse at bottom, rgba(16, 185, 129, 0.12) 0%, transparent 70%)",
+          pointerEvents: "none",
         }}
       />
 
-      {/* Animated glow spots */}
-      <div className="absolute left-1/4 top-1/4 w-96 h-96 bg-white/5 rounded-full blur-[100px] animate-pulse opacity-40 pointer-events-none" />
-      <div className="absolute right-1/4 bottom-1/4 w-96 h-96 bg-white/5 rounded-full blur-[100px] animate-pulse delay-1000 opacity-40 pointer-events-none" />
-
+      {/* Luzes dinâmicas de fundo */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: [0.15, 0.35, 0.15], scale: [0.98, 1.03, 0.98] }}
+        transition={{ duration: 7, repeat: Infinity, repeatType: "mirror" }}
+        style={{
+          position: "absolute",
+          top: "10%",
+          left: "20%",
+          width: "350px",
+          height: "350px",
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%)",
+          filter: "blur(60px)",
+          pointerEvents: "none",
+        }}
+      />
+      <motion.div
+        animate={{ opacity: [0.15, 0.3, 0.15], scale: [1, 1.05, 1] }}
+        transition={{ duration: 8, repeat: Infinity, repeatType: "mirror", delay: 1 }}
+        style={{
+          position: "absolute",
+          bottom: "15%",
+          right: "20%",
+          width: "400px",
+          height: "400px",
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(6, 182, 212, 0.15) 0%, transparent 70%)",
+          filter: "blur(70px)",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* Grid sutil */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          opacity: 0.03,
+          backgroundImage:
+            "linear-gradient(rgba(255,255,255,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px)",
+          backgroundSize: "40px 40px",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* ── Container do Cartão 3D ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="w-full max-w-sm relative z-10 p-4"
-        style={{ perspective: 1500 }}
+        transition={{ duration: 0.7, ease: "easeOut" }}
+        style={{
+          width: "100%",
+          maxWidth: "430px",
+          padding: "20px",
+          position: "relative",
+          zIndex: 10,
+          perspective: 1500,
+        }}
       >
         <motion.div
-          className="relative"
           style={{ rotateX, rotateY }}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
-          whileHover={{ z: 10 }}
+          whileHover={{ z: 12 }}
         >
-          <div className="relative group">
-            {/* Card glow effect */}
-            <motion.div
-              className="absolute -inset-[1px] rounded-2xl opacity-0 group-hover:opacity-70 transition-opacity duration-700 pointer-events-none"
-              animate={{
-                boxShadow: [
-                  "0 0 10px 2px rgba(255,255,255,0.03)",
-                  "0 0 15px 5px rgba(255,255,255,0.05)",
-                  "0 0 10px 2px rgba(255,255,255,0.03)",
-                ],
-                opacity: [0.2, 0.4, 0.2],
+          <div style={{ position: "relative" }}>
+            {/* Feixes de luz viajantes pelas bordas */}
+            <div
+              style={{
+                position: "absolute",
+                inset: "-1px",
+                borderRadius: "20px",
+                overflow: "hidden",
+                pointerEvents: "none",
+                zIndex: 1,
               }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: "easeInOut",
-                repeatType: "mirror",
-              }}
-            />
-
-            {/* Traveling light beam effect */}
-            <div className="absolute -inset-[1px] rounded-2xl overflow-hidden pointer-events-none">
-              {/* Top light beam */}
+            >
+              {/* Feixe Topo (Verde Esmeralda) */}
               <motion.div
-                className="absolute top-0 left-0 h-[3px] w-[50%] bg-gradient-to-r from-transparent via-white to-transparent opacity-70"
-                initial={{ filter: "blur(2px)" }}
-                animate={{
-                  left: ["-50%", "100%"],
-                  opacity: [0.3, 0.7, 0.3],
-                  filter: ["blur(1px)", "blur(2.5px)", "blur(1px)"],
-                }}
-                transition={{
-                  left: {
-                    duration: 2.5,
-                    ease: "easeInOut",
-                    repeat: Infinity,
-                    repeatDelay: 1,
-                  },
-                  opacity: {
-                    duration: 1.2,
-                    repeat: Infinity,
-                    repeatType: "mirror",
-                  },
-                  filter: {
-                    duration: 1.5,
-                    repeat: Infinity,
-                    repeatType: "mirror",
-                  },
+                animate={{ left: ["-50%", "100%"] }}
+                transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut", repeatDelay: 0.8 }}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  height: "2px",
+                  width: "50%",
+                  background: "linear-gradient(90deg, transparent, #10b981, transparent)",
+                  boxShadow: "0 0 12px #10b981",
                 }}
               />
 
-              {/* Right light beam */}
+              {/* Feixe Direita (Ciano) */}
               <motion.div
-                className="absolute top-0 right-0 h-[50%] w-[3px] bg-gradient-to-b from-transparent via-white to-transparent opacity-70"
-                initial={{ filter: "blur(2px)" }}
-                animate={{
-                  top: ["-50%", "100%"],
-                  opacity: [0.3, 0.7, 0.3],
-                  filter: ["blur(1px)", "blur(2.5px)", "blur(1px)"],
-                }}
-                transition={{
-                  top: {
-                    duration: 2.5,
-                    ease: "easeInOut",
-                    repeat: Infinity,
-                    repeatDelay: 1,
-                    delay: 0.6,
-                  },
-                  opacity: {
-                    duration: 1.2,
-                    repeat: Infinity,
-                    repeatType: "mirror",
-                    delay: 0.6,
-                  },
-                  filter: {
-                    duration: 1.5,
-                    repeat: Infinity,
-                    repeatType: "mirror",
-                    delay: 0.6,
-                  },
+                animate={{ top: ["-50%", "100%"] }}
+                transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut", repeatDelay: 0.8, delay: 0.7 }}
+                style={{
+                  position: "absolute",
+                  right: 0,
+                  width: "2px",
+                  height: "50%",
+                  background: "linear-gradient(180deg, transparent, #06b6d4, transparent)",
+                  boxShadow: "0 0 12px #06b6d4",
                 }}
               />
 
-              {/* Bottom light beam */}
+              {/* Feixe Base */}
               <motion.div
-                className="absolute bottom-0 right-0 h-[3px] w-[50%] bg-gradient-to-r from-transparent via-white to-transparent opacity-70"
-                initial={{ filter: "blur(2px)" }}
-                animate={{
-                  right: ["-50%", "100%"],
-                  opacity: [0.3, 0.7, 0.3],
-                  filter: ["blur(1px)", "blur(2.5px)", "blur(1px)"],
-                }}
-                transition={{
-                  right: {
-                    duration: 2.5,
-                    ease: "easeInOut",
-                    repeat: Infinity,
-                    repeatDelay: 1,
-                    delay: 1.2,
-                  },
-                  opacity: {
-                    duration: 1.2,
-                    repeat: Infinity,
-                    repeatType: "mirror",
-                    delay: 1.2,
-                  },
-                  filter: {
-                    duration: 1.5,
-                    repeat: Infinity,
-                    repeatType: "mirror",
-                    delay: 1.2,
-                  },
+                animate={{ right: ["-50%", "100%"] }}
+                transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut", repeatDelay: 0.8, delay: 1.4 }}
+                style={{
+                  position: "absolute",
+                  bottom: 0,
+                  height: "2px",
+                  width: "50%",
+                  background: "linear-gradient(270deg, transparent, #10b981, transparent)",
+                  boxShadow: "0 0 12px #10b981",
                 }}
               />
 
-              {/* Left light beam */}
+              {/* Feixe Esquerda */}
               <motion.div
-                className="absolute bottom-0 left-0 h-[50%] w-[3px] bg-gradient-to-b from-transparent via-white to-transparent opacity-70"
-                initial={{ filter: "blur(2px)" }}
-                animate={{
-                  bottom: ["-50%", "100%"],
-                  opacity: [0.3, 0.7, 0.3],
-                  filter: ["blur(1px)", "blur(2.5px)", "blur(1px)"],
+                animate={{ bottom: ["-50%", "100%"] }}
+                transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut", repeatDelay: 0.8, delay: 2.1 }}
+                style={{
+                  position: "absolute",
+                  left: 0,
+                  width: "2px",
+                  height: "50%",
+                  background: "linear-gradient(0deg, transparent, #06b6d4, transparent)",
+                  boxShadow: "0 0 12px #06b6d4",
                 }}
-                transition={{
-                  bottom: {
-                    duration: 2.5,
-                    ease: "easeInOut",
-                    repeat: Infinity,
-                    repeatDelay: 1,
-                    delay: 1.8,
-                  },
-                  opacity: {
-                    duration: 1.2,
-                    repeat: Infinity,
-                    repeatType: "mirror",
-                    delay: 1.8,
-                  },
-                  filter: {
-                    duration: 1.5,
-                    repeat: Infinity,
-                    repeatType: "mirror",
-                    delay: 1.8,
-                  },
-                }}
-              />
-
-              {/* Subtle corner glow spots */}
-              <motion.div
-                className="absolute top-0 left-0 h-[5px] w-[5px] rounded-full bg-white/40 blur-[1px]"
-                animate={{ opacity: [0.2, 0.4, 0.2] }}
-                transition={{ duration: 2, repeat: Infinity, repeatType: "mirror" }}
-              />
-              <motion.div
-                className="absolute top-0 right-0 h-[8px] w-[8px] rounded-full bg-white/60 blur-[2px]"
-                animate={{ opacity: [0.2, 0.4, 0.2] }}
-                transition={{ duration: 2.4, repeat: Infinity, repeatType: "mirror", delay: 0.5 }}
-              />
-              <motion.div
-                className="absolute bottom-0 right-0 h-[8px] w-[8px] rounded-full bg-white/60 blur-[2px]"
-                animate={{ opacity: [0.2, 0.4, 0.2] }}
-                transition={{ duration: 2.2, repeat: Infinity, repeatType: "mirror", delay: 1 }}
-              />
-              <motion.div
-                className="absolute bottom-0 left-0 h-[5px] w-[5px] rounded-full bg-white/40 blur-[1px]"
-                animate={{ opacity: [0.2, 0.4, 0.2] }}
-                transition={{ duration: 2.3, repeat: Infinity, repeatType: "mirror", delay: 1.5 }}
               />
             </div>
 
-            {/* Card border glow */}
-            <div className="absolute -inset-[0.5px] rounded-2xl bg-gradient-to-r from-white/5 via-white/10 to-white/5 opacity-0 group-hover:opacity-70 transition-opacity duration-500 pointer-events-none" />
-
-            {/* Glass card background */}
-            <div className="relative bg-black/60 backdrop-blur-2xl rounded-2xl p-6 border border-white/[0.08] shadow-2xl overflow-hidden">
-              {/* Subtle card inner patterns */}
-              <div
-                className="absolute inset-0 opacity-[0.03] pointer-events-none"
-                style={{
-                  backgroundImage: `linear-gradient(135deg, white 0.5px, transparent 0.5px), linear-gradient(45deg, white 0.5px, transparent 0.5px)`,
-                  backgroundSize: "30px 30px",
-                }}
-              />
-
-              {/* Logo e cabeçalho OD METRICS */}
-              <div className="text-center space-y-1 mb-5">
-                <motion.div
-                  initial={{ scale: 0.5, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ type: "spring", duration: 0.8 }}
-                  className="mx-auto w-11 h-11 rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/20 to-teal-500/10 flex items-center justify-center relative overflow-hidden shadow-lg shadow-emerald-500/20"
+            {/* Borda de vidro e Corpo do Cartão */}
+            <div
+              style={{
+                background: "linear-gradient(165deg, rgba(13, 22, 42, 0.92) 0%, rgba(6, 12, 24, 0.96) 100%)",
+                backdropFilter: "blur(24px)",
+                WebkitBackdropFilter: "blur(24px)",
+                borderRadius: "20px",
+                border: "1px solid rgba(255, 255, 255, 0.08)",
+                borderTop: "1px solid rgba(16, 185, 129, 0.35)",
+                boxShadow: "0 24px 60px -12px rgba(0, 0, 0, 0.85), 0 0 30px rgba(16, 185, 129, 0.08)",
+                padding: "34px 30px 28px",
+                position: "relative",
+                zIndex: 2,
+              }}
+            >
+              {/* Cabeçalho Centralizado com Logo OD */}
+              <div style={{ textAlign: "center", marginBottom: "26px" }}>
+                <div
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "48px",
+                    height: "48px",
+                    borderRadius: "14px",
+                    background: "linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(6, 182, 212, 0.1) 100%)",
+                    border: "1px solid rgba(16, 185, 129, 0.45)",
+                    boxShadow: "0 0 20px rgba(16, 185, 129, 0.25)",
+                    marginBottom: "12px",
+                  }}
                 >
                   <span
-                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                    className="text-lg font-black bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-teal-200"
+                    style={{
+                      fontFamily: "'Space Grotesk', sans-serif",
+                      fontWeight: 900,
+                      fontSize: "19px",
+                      background: "linear-gradient(135deg, #10b981 0%, #38bdf8 100%)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                    }}
                   >
                     OD
                   </span>
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/15 to-transparent opacity-50" />
-                </motion.div>
+                </div>
 
-                <motion.h1
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                  className="text-xl font-extrabold text-white tracking-tight"
+                <h1
+                  style={{
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontSize: "22px",
+                    fontWeight: 900,
+                    letterSpacing: "-0.02em",
+                    color: "#ffffff",
+                    margin: 0,
+                  }}
                 >
-                  OD <span className="text-emerald-400">METRICS</span>
-                </motion.h1>
+                  OD <span style={{ color: "#10b981" }}>METRICS</span>
+                </h1>
 
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                  className="text-white/60 text-xs font-medium"
+                <p
+                  style={{
+                    fontSize: "12px",
+                    color: "#8292a8",
+                    margin: "5px 0 0",
+                    fontWeight: 500,
+                  }}
                 >
                   Terminal Seguro de Inteligência & Tracking
-                </motion.p>
+                </p>
               </div>
 
-              {/* Alerta de erro ou acesso negado */}
+              {/* Mensagem de Erro / Acesso Negado */}
               {error && (
                 <motion.div
-                  initial={{ opacity: 0, y: -6 }}
+                  initial={{ opacity: 0, y: -8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className={cn(
-                    "mb-4 flex items-center gap-2 rounded-xl p-3 text-xs font-bold border",
-                    unauthorized
-                      ? "bg-red-500/25 border-red-500/50 text-red-200"
-                      : "bg-red-500/15 border-red-500/30 text-red-300"
-                  )}
+                  style={{
+                    marginBottom: "18px",
+                    padding: "12px 14px",
+                    borderRadius: "10px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    background: unauthorized ? "rgba(239, 68, 68, 0.2)" : "rgba(239, 68, 68, 0.12)",
+                    border: unauthorized ? "1px solid rgba(239, 68, 68, 0.5)" : "1px solid rgba(239, 68, 68, 0.3)",
+                    color: "#fca5a5",
+                  }}
                 >
-                  <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
+                  <AlertTriangle style={{ width: "16px", height: "16px", flexShrink: 0, color: "#f87171" }} />
                   <span>{error}</span>
                 </motion.div>
               )}
 
-              {/* Alerta de sucesso */}
+              {/* Mensagem de Sucesso */}
               {successMsg && (
                 <motion.div
-                  initial={{ opacity: 0, y: -6 }}
+                  initial={{ opacity: 0, y: -8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="mb-4 rounded-xl p-3 text-xs font-bold bg-emerald-500/15 border border-emerald-500/30 text-emerald-300"
+                  style={{
+                    marginBottom: "18px",
+                    padding: "12px 14px",
+                    borderRadius: "10px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    background: "rgba(16, 185, 129, 0.15)",
+                    border: "1px solid rgba(16, 185, 129, 0.35)",
+                    color: "#6ee7b7",
+                  }}
                 >
-                  {successMsg}
+                  <ShieldCheck style={{ width: "16px", height: "16px", flexShrink: 0, color: "#10b981" }} />
+                  <span>{successMsg}</span>
                 </motion.div>
               )}
 
               {/* Formulário de Login */}
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-3">
-                  {/* Campo de E-mail */}
-                  <motion.div
-                    className={cn("relative", focusedInput === "email" && "z-10")}
-                    whileFocus={{ scale: 1.02 }}
-                    whileHover={{ scale: 1.01 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                  >
-                    <div className="absolute -inset-[0.5px] bg-gradient-to-r from-emerald-500/20 via-white/5 to-teal-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none" />
-
-                    <div className="relative flex items-center overflow-hidden rounded-lg">
-                      <Mail
-                        className={cn(
-                          "absolute left-3 w-4 h-4 transition-all duration-300",
-                          focusedInput === "email" ? "text-emerald-400" : "text-white/40"
-                        )}
-                      />
-
-                      <Input
-                        type="email"
-                        placeholder="E-mail de acesso"
-                        value={email}
-                        onChange={(e) => {
-                          setEmail(e.target.value);
-                          setError("");
-                        }}
-                        onFocus={() => setFocusedInput("email")}
-                        onBlur={() => setFocusedInput(null)}
-                        disabled={isLoading || unauthorized}
-                        className="w-full bg-white/5 border-transparent focus:border-emerald-500/40 text-white placeholder:text-white/30 h-10 transition-all duration-300 pl-10 pr-3 focus:bg-white/10"
-                      />
-
-                      {focusedInput === "email" && (
-                        <motion.div
-                          layoutId="input-highlight"
-                          className="absolute inset-0 bg-white/5 -z-10"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.2 }}
-                        />
-                      )}
-                    </div>
-                  </motion.div>
-
-                  {/* Campo de Senha */}
-                  <motion.div
-                    className={cn("relative", focusedInput === "password" && "z-10")}
-                    whileFocus={{ scale: 1.02 }}
-                    whileHover={{ scale: 1.01 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                  >
-                    <div className="absolute -inset-[0.5px] bg-gradient-to-r from-emerald-500/20 via-white/5 to-teal-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none" />
-
-                    <div className="relative flex items-center overflow-hidden rounded-lg">
-                      <Lock
-                        className={cn(
-                          "absolute left-3 w-4 h-4 transition-all duration-300",
-                          focusedInput === "password" ? "text-emerald-400" : "text-white/40"
-                        )}
-                      />
-
-                      <Input
-                        type={showPassword ? "text" : "password"}
-                        placeholder={isFirstAccess ? "Criar senha (mín. 6 dígitos)" : "Sua senha"}
-                        value={password}
-                        onChange={(e) => {
-                          setPassword(e.target.value);
-                          setError("");
-                        }}
-                        onFocus={() => setFocusedInput("password")}
-                        onBlur={() => setFocusedInput(null)}
-                        disabled={isLoading || unauthorized}
-                        className="w-full bg-white/5 border-transparent focus:border-emerald-500/40 text-white placeholder:text-white/30 h-10 transition-all duration-300 pl-10 pr-10 focus:bg-white/10"
-                      />
-
-                      <div
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 cursor-pointer select-none"
-                      >
-                        {showPassword ? (
-                          <EyeOff className="w-4 h-4 text-white/40 hover:text-white transition-colors duration-300" />
-                        ) : (
-                          <Eye className="w-4 h-4 text-white/40 hover:text-white transition-colors duration-300" />
-                        )}
-                      </div>
-
-                      {focusedInput === "password" && (
-                        <motion.div
-                          layoutId="input-highlight"
-                          className="absolute inset-0 bg-white/5 -z-10"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.2 }}
-                        />
-                      )}
-                    </div>
-                  </motion.div>
-
-                  {/* Confirmação de Senha no Primeiro Acesso */}
-                  {isFirstAccess && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className={cn("relative", focusedInput === "confirmPassword" && "z-10")}
-                    >
-                      <div className="relative flex items-center overflow-hidden rounded-lg">
-                        <KeyRound
-                          className={cn(
-                            "absolute left-3 w-4 h-4 transition-all duration-300",
-                            focusedInput === "confirmPassword"
-                              ? "text-emerald-400"
-                              : "text-white/40"
-                          )}
-                        />
-
-                        <Input
-                          type={showPassword ? "text" : "password"}
-                          placeholder="Confirme sua nova senha"
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          onFocus={() => setFocusedInput("confirmPassword")}
-                          onBlur={() => setFocusedInput(null)}
-                          disabled={isLoading || unauthorized}
-                          className="w-full bg-white/5 border-transparent focus:border-emerald-500/40 text-white placeholder:text-white/30 h-10 transition-all duration-300 pl-10 pr-10 focus:bg-white/10"
-                        />
-                      </div>
-                    </motion.div>
-                  )}
-                </div>
-
-                {/* Lembrar-me e Primeiro Acesso */}
-                <div className="flex items-center justify-between pt-1">
-                  <div className="flex items-center space-x-2">
-                    <div className="relative">
-                      <input
-                        id="remember-me"
-                        name="remember-me"
-                        type="checkbox"
-                        checked={rememberMe}
-                        onChange={() => setRememberMe(!rememberMe)}
-                        className="appearance-none h-4 w-4 rounded border border-white/20 bg-white/5 checked:bg-emerald-500 checked:border-emerald-500 focus:outline-none transition-all duration-200 cursor-pointer"
-                      />
-                      {rememberMe && (
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.5 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          className="absolute inset-0 flex items-center justify-center text-black pointer-events-none"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="10"
-                            height="10"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="3.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                          </svg>
-                        </motion.div>
-                      )}
-                    </div>
-                    <label
-                      htmlFor="remember-me"
-                      className="text-xs text-white/60 hover:text-white/80 transition-colors duration-200 cursor-pointer"
-                    >
-                      Lembrar acesso
-                    </label>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsFirstAccess(!isFirstAccess);
-                      setError("");
+              <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                {/* CAMPO DE E-MAIL */}
+                <div>
+                  <label
+                    htmlFor="admin-email"
+                    style={{
+                      display: "block",
+                      fontSize: "11px",
+                      fontWeight: 800,
+                      color: "#94a3b8",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.06em",
+                      marginBottom: "6px",
                     }}
-                    className="text-xs text-emerald-400/90 hover:text-emerald-300 transition-colors duration-200 font-semibold bg-transparent border-none cursor-pointer p-0"
                   >
-                    {isFirstAccess ? "Já possuo senha" : "Criar nova senha"}
-                  </button>
-                </div>
+                    E-mail Administrativo
+                  </label>
 
-                {/* Botão Entrar / Criar */}
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  type="submit"
-                  disabled={isLoading || unauthorized}
-                  className="w-full relative group/button mt-5 cursor-pointer"
-                >
-                  <div className="absolute inset-0 bg-white/10 rounded-lg blur-lg opacity-0 group-hover/button:opacity-70 transition-opacity duration-300" />
-
-                  <div className="relative overflow-hidden bg-white text-black font-bold h-10 rounded-lg transition-all duration-300 flex items-center justify-center">
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/40 to-white/0 -z-10"
-                      animate={{
-                        x: ["-100%", "100%"],
-                      }}
-                      transition={{
-                        duration: 1.5,
-                        ease: "easeInOut",
-                        repeat: Infinity,
-                        repeatDelay: 1,
-                      }}
+                  <div
+                    style={{
+                      position: "relative",
+                      borderRadius: "12px",
+                      background: "rgba(9, 16, 31, 0.8)",
+                      border:
+                        focusedInput === "email"
+                          ? "1px solid #10b981"
+                          : "1px solid rgba(255, 255, 255, 0.1)",
+                      boxShadow:
+                        focusedInput === "email"
+                          ? "0 0 16px rgba(16, 185, 129, 0.25)"
+                          : "none",
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    <Mail
                       style={{
-                        opacity: isLoading ? 1 : 0,
-                        transition: "opacity 0.3s ease",
+                        position: "absolute",
+                        left: "14px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        width: "16px",
+                        height: "16px",
+                        color: focusedInput === "email" ? "#10b981" : "#64748b",
+                        transition: "color 0.2s ease",
+                        pointerEvents: "none",
                       }}
                     />
 
-                    <AnimatePresence mode="wait">
-                      {isLoading ? (
-                        <motion.div
-                          key="loading"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="flex items-center justify-center"
-                        >
-                          <div className="w-4 h-4 border-2 border-black/80 border-t-transparent rounded-full animate-spin" />
-                        </motion.div>
-                      ) : (
-                        <motion.span
-                          key="button-text"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="flex items-center justify-center gap-1.5 text-xs font-extrabold uppercase tracking-wider"
-                        >
-                          <span>{isFirstAccess ? "Salvar Senha & Entrar" : "Entrar no OD METRICS"}</span>
-                          <ArrowRight className="w-3.5 h-3.5 group-hover/button:translate-x-1 transition-transform duration-300" />
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
+                    <input
+                      id="admin-email"
+                      type="email"
+                      placeholder="admin@exemplo.com"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        setError("");
+                      }}
+                      onFocus={() => setFocusedInput("email")}
+                      onBlur={() => setFocusedInput(null)}
+                      disabled={isLoading || unauthorized}
+                      style={{
+                        width: "100%",
+                        height: "44px",
+                        background: "transparent",
+                        border: "none",
+                        outline: "none",
+                        padding: "0 14px 0 44px", // PADDING SEGURO: ÍCONE NUNCA TOCA NO TEXTO
+                        color: "#ffffff",
+                        fontSize: "13.5px",
+                        fontWeight: 600,
+                        fontFamily: "'Plus Jakarta Sans', sans-serif",
+                      }}
+                    />
                   </div>
+                </div>
+
+                {/* CAMPO DE SENHA */}
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                    <label
+                      htmlFor="admin-password"
+                      style={{
+                        fontSize: "11px",
+                        fontWeight: 800,
+                        color: "#94a3b8",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.06em",
+                      }}
+                    >
+                      {isFirstAccess ? "Criar Senha" : "Sua Senha"}
+                    </label>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsFirstAccess(!isFirstAccess);
+                        setError("");
+                      }}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "#10b981",
+                        fontSize: "11px",
+                        fontWeight: 800,
+                        cursor: "pointer",
+                        padding: 0,
+                      }}
+                    >
+                      {isFirstAccess ? "Já tenho senha" : "Criar nova senha"}
+                    </button>
+                  </div>
+
+                  <div
+                    style={{
+                      position: "relative",
+                      borderRadius: "12px",
+                      background: "rgba(9, 16, 31, 0.8)",
+                      border:
+                        focusedInput === "password"
+                          ? "1px solid #10b981"
+                          : "1px solid rgba(255, 255, 255, 0.1)",
+                      boxShadow:
+                        focusedInput === "password"
+                          ? "0 0 16px rgba(16, 185, 129, 0.25)"
+                          : "none",
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    <Lock
+                      style={{
+                        position: "absolute",
+                        left: "14px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        width: "16px",
+                        height: "16px",
+                        color: focusedInput === "password" ? "#10b981" : "#64748b",
+                        transition: "color 0.2s ease",
+                        pointerEvents: "none",
+                      }}
+                    />
+
+                    <input
+                      id="admin-password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder={isFirstAccess ? "Mínimo de 6 dígitos" : "Digite sua senha"}
+                      value={password}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        setError("");
+                      }}
+                      onFocus={() => setFocusedInput("password")}
+                      onBlur={() => setFocusedInput(null)}
+                      disabled={isLoading || unauthorized}
+                      style={{
+                        width: "100%",
+                        height: "44px",
+                        background: "transparent",
+                        border: "none",
+                        outline: "none",
+                        padding: "0 44px 0 44px", // PADDING SEGURO NAS DUAS PONTAS
+                        color: "#ffffff",
+                        fontSize: "13.5px",
+                        fontWeight: 600,
+                        fontFamily: "'Plus Jakarta Sans', sans-serif",
+                      }}
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      style={{
+                        position: "absolute",
+                        right: "12px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        color: "#64748b",
+                        padding: "4px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {showPassword ? (
+                        <EyeOff style={{ width: "15px", height: "15px" }} />
+                      ) : (
+                        <Eye style={{ width: "15px", height: "15px" }} />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* CONFIRMAÇÃO DE SENHA NO PRIMEIRO ACESSO */}
+                {isFirstAccess && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                  >
+                    <label
+                      htmlFor="admin-confirm-password"
+                      style={{
+                        display: "block",
+                        fontSize: "11px",
+                        fontWeight: 800,
+                        color: "#94a3b8",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.06em",
+                        marginBottom: "6px",
+                      }}
+                    >
+                      Confirmar Nova Senha
+                    </label>
+
+                    <div
+                      style={{
+                        position: "relative",
+                        borderRadius: "12px",
+                        background: "rgba(9, 16, 31, 0.8)",
+                        border:
+                          focusedInput === "confirm"
+                            ? "1px solid #10b981"
+                            : "1px solid rgba(255, 255, 255, 0.1)",
+                        boxShadow:
+                          focusedInput === "confirm"
+                            ? "0 0 16px rgba(16, 185, 129, 0.25)"
+                            : "none",
+                        transition: "all 0.2s ease",
+                      }}
+                    >
+                      <KeyRound
+                        style={{
+                          position: "absolute",
+                          left: "14px",
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          width: "16px",
+                          height: "16px",
+                          color: focusedInput === "confirm" ? "#10b981" : "#64748b",
+                          pointerEvents: "none",
+                        }}
+                      />
+
+                      <input
+                        id="admin-confirm-password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Repita a senha criada"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        onFocus={() => setFocusedInput("confirm")}
+                        onBlur={() => setFocusedInput(null)}
+                        disabled={isLoading || unauthorized}
+                        style={{
+                          width: "100%",
+                          height: "44px",
+                          background: "transparent",
+                          border: "none",
+                          outline: "none",
+                          padding: "0 14px 0 44px",
+                          color: "#ffffff",
+                          fontSize: "13.5px",
+                          fontWeight: 600,
+                          fontFamily: "'Plus Jakarta Sans', sans-serif",
+                        }}
+                      />
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Lembrar Acesso */}
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", paddingTop: "2px" }}>
+                  <input
+                    id="remember-admin"
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    style={{
+                      width: "15px",
+                      height: "15px",
+                      accentColor: "#10b981",
+                      cursor: "pointer",
+                      borderRadius: "4px",
+                    }}
+                  />
+                  <label
+                    htmlFor="remember-admin"
+                    style={{ fontSize: "12px", color: "#94a3b8", cursor: "pointer", fontWeight: 600 }}
+                  >
+                    Manter sessão conectada
+                  </label>
+                </div>
+
+                {/* BOTÃO PRINCIPAL DE ENTRAR */}
+                <motion.button
+                  whileHover={{ scale: 1.015 }}
+                  whileTap={{ scale: 0.985 }}
+                  type="submit"
+                  disabled={isLoading || unauthorized}
+                  style={{
+                    width: "100%",
+                    height: "46px",
+                    marginTop: "8px",
+                    borderRadius: "12px",
+                    border: "none",
+                    background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                    color: "#ffffff",
+                    fontSize: "13px",
+                    fontWeight: 900,
+                    letterSpacing: "0.04em",
+                    cursor: isLoading || unauthorized ? "not-allowed" : "pointer",
+                    boxShadow: "0 4px 20px rgba(16, 185, 129, 0.4)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    transition: "box-shadow 0.2s ease, opacity 0.2s ease",
+                    opacity: isLoading ? 0.7 : 1,
+                  }}
+                >
+                  <AnimatePresence mode="wait">
+                    {isLoading ? (
+                      <motion.div
+                        key="spin"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        style={{
+                          width: "18px",
+                          height: "18px",
+                          border: "2px solid #ffffff",
+                          borderTopColor: "transparent",
+                          borderRadius: "50%",
+                          animation: "spin 0.8s linear infinite",
+                        }}
+                      />
+                    ) : (
+                      <motion.span
+                        key="txt"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        style={{ display: "flex", alignItems: "center", gap: "6px" }}
+                      >
+                        <span>{isFirstAccess ? "SALVAR SENHA & ENTRAR" : "ENTRAR NO OD METRICS"}</span>
+                        <ArrowRight style={{ width: "16px", height: "16px" }} />
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
                 </motion.button>
               </form>
 
-              {/* Rodapé discreto sem qualquer menção de banco */}
-              <div className="mt-5 pt-4 border-t border-white/[0.06] text-center text-[10.5px] text-white/40">
+              {/* Rodapé do Cartão */}
+              <div
+                style={{
+                  marginTop: "22px",
+                  paddingTop: "16px",
+                  borderTop: "1px solid rgba(255, 255, 255, 0.06)",
+                  textAlign: "center",
+                  fontSize: "11px",
+                  color: "#64748b",
+                  fontWeight: 600,
+                }}
+              >
                 <span>Terminal Seguro de Alta Performance</span>
               </div>
             </div>
