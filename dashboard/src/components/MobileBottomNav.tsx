@@ -2,10 +2,10 @@ import { LayoutGrid, MessageCircle, Activity, CreditCard, Menu } from "lucide-re
 import type { Section } from "@/App";
 
 interface MobileBottomNavProps {
-  currentSection: Section;
-  onSelect: (section: Section) => void;
-  onOpenMenu: () => void;
-  unreadWhatsAppCount?: number;
+  readonly currentSection: Section;
+  readonly onSelect: (section: Section) => void;
+  readonly onOpenMenu: () => void;
+  readonly unreadWhatsAppCount?: number;
 }
 
 export function MobileBottomNav({

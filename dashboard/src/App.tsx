@@ -1,24 +1,24 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { Sidebar } from "./components/Sidebar";
-import { Topbar } from "./components/Topbar";
-import { MetricCards } from "./components/MetricCards";
-import { RevenueChart } from "./components/RevenueChart";
-import { LeadsChart } from "./components/LeadsChart";
-import { OrdersTable } from "./components/OrdersTable";
-import { FunnelTracker } from "./components/FunnelTracker";
-import { FunnelViz } from "./components/FunnelViz";
-import { StatusPieChart } from "./components/StatusPieChart";
-import { TrafficPieChart } from "./components/TrafficPieChart";
-import { PaymentMethodsPieChart } from "./components/PaymentMethodsPieChart";
-import { ConversionOverview } from "./components/ConversionOverview";
-import { WhatsAppTracker } from "./components/WhatsAppTracker";
-import { ProfileView } from "./components/ProfileView";
-import { MobileBottomNav } from "./components/MobileBottomNav";
-import { LoginPage } from "./components/LoginPage";
-import { supabase } from "./lib/supabase";
+import { Sidebar } from "@/components/Sidebar";
+import { Topbar } from "@/components/Topbar";
+import { MetricCards } from "@/components/MetricCards";
+import { RevenueChart } from "@/components/RevenueChart";
+import { LeadsChart } from "@/components/LeadsChart";
+import { OrdersTable } from "@/components/OrdersTable";
+import { FunnelTracker } from "@/components/FunnelTracker";
+import { FunnelViz } from "@/components/FunnelViz";
+import { StatusPieChart } from "@/components/StatusPieChart";
+import { TrafficPieChart } from "@/components/TrafficPieChart";
+import { PaymentMethodsPieChart } from "@/components/PaymentMethodsPieChart";
+import { ConversionOverview } from "@/components/ConversionOverview";
+import { WhatsAppTracker } from "@/components/WhatsAppTracker";
+import { ProfileView } from "@/components/ProfileView";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { LoginPage } from "@/components/LoginPage";
+import { supabase } from "@/lib/supabase";
 import type { Session } from "@supabase/supabase-js";
-import type { DateRangeValue } from "./components/DateRangeSelector";
-import type { DashboardStats, Lead, PaymentOrder, ChartDataPoint, WhatsAppMessage } from "./types";
+import type { DateRangeValue } from "@/components/DateRangeSelector";
+import type { DashboardStats, Lead, PaymentOrder, ChartDataPoint, WhatsAppMessage } from "@/types";
 
 // ─── Helpers de Data ─────────────────────────────────────────────────────────
 function calcDiff(current: number, previous: number): number {
@@ -319,6 +319,7 @@ export function App() {
   };
 
   useEffect(() => {
+    document.documentElement.dataset.theme = theme;
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("tl-theme", theme);
   }, [theme]);
@@ -568,7 +569,7 @@ export function App() {
   }
 
   // 2. Se não estiver autenticado ou não for admin da whitelist -> Exibe LoginPage na rota /login
-  if (!session || !session.user.email || !ALLOWED_ADMIN_EMAILS.has(session.user.email.toLowerCase())) {
+  if (!session?.user?.email || !ALLOWED_ADMIN_EMAILS.has(session.user.email.toLowerCase())) {
     if (typeof window !== "undefined" && window.location.pathname !== "/login") {
       window.history.replaceState(null, "", "/login");
     }
@@ -722,19 +723,21 @@ export function App() {
 }
 
 // ─── View de Relatórios ──────────────────────────────────────────────────────
+interface ReportsViewProps {
+  readonly orders: PaymentOrder[];
+  readonly leads: Lead[];
+  readonly stats: DashboardStats;
+  readonly onExport: () => void;
+  readonly periodLabel: string;
+}
+
 function ReportsView({
   orders,
   leads,
   stats,
   onExport,
   periodLabel,
-}: {
-  orders: PaymentOrder[];
-  leads: Lead[];
-  stats: DashboardStats;
-  onExport: () => void;
-  periodLabel: string;
-}) {
+}: ReportsViewProps) {
   const brl = (v: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
 
