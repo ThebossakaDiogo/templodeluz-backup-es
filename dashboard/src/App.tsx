@@ -11,7 +11,9 @@ import { StatusPieChart } from "./components/StatusPieChart";
 import { TrafficPieChart } from "./components/TrafficPieChart";
 import { PaymentMethodsPieChart } from "./components/PaymentMethodsPieChart";
 import { ConversionOverview } from "./components/ConversionOverview";
+import { LoginPage } from "./components/LoginPage";
 import { supabase } from "./lib/supabase";
+import type { Session } from "@supabase/supabase-js";
 import type { DateRangeValue } from "./components/DateRangeSelector";
 import type { DashboardStats, Lead, PaymentOrder, ChartDataPoint } from "./types";
 
@@ -213,13 +215,58 @@ function getSectionFromPath(): Section {
   return SLUG_TO_SECTION[path] || "visao-geral";
 }
 
+const ALLOWED_ADMIN_EMAILS = new Set([
+  "thebossakadiogo@gmail.com",
+  "otaviov.quinalia@gmail.com",
+]);
+
 // ─── Componente Principal ────────────────────────────────────────────────────
 export function App() {
+  const [session, setSession] = useState<Session | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
   const [theme, setTheme] = useState<"light" | "dark">(() => {
     return (localStorage.getItem("tl-theme") as "light" | "dark") || "dark";
   });
 
   const [section, setSection] = useState<Section>(getSectionFromPath);
+
+  // Verificação e sincronização de sessão de Administrador
+  useEffect(() => {
+    let mounted = true;
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+      if (session?.user?.email && ALLOWED_ADMIN_EMAILS.has(session.user.email.toLowerCase())) {
+        setSession(session);
+      } else {
+        setSession(null);
+      }
+      setAuthLoading(false);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return;
+      if (session?.user?.email && ALLOWED_ADMIN_EMAILS.has(session.user.email.toLowerCase())) {
+        setSession(session);
+      } else {
+        setSession(null);
+      }
+      setAuthLoading(false);
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setSession(null);
+  };
 
   const [dateRange, setDateRange] = useState<DateRangeValue>(() => {
     const today = new Date();
@@ -446,9 +493,61 @@ export function App() {
     URL.revokeObjectURL(url);
   };
 
+  // 1. Tela de Carregamento de Auth
+  if (authLoading) {
+    return (
+      <div
+        style={{
+          height: "100vh",
+          width: "100vw",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "#030712",
+          color: "#ffffff",
+          gap: "16px",
+        }}
+      >
+        <div
+          style={{
+            width: "48px",
+            height: "48px",
+            borderRadius: "14px",
+            background: "linear-gradient(135deg, #10b981 0%, #06b6d4 100%)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontFamily: "'Space Grotesk', sans-serif",
+            fontWeight: 900,
+            fontSize: "20px",
+            color: "#030712",
+            boxShadow: "0 0 25px rgba(16, 185, 129, 0.4)",
+          }}
+        >
+          OD
+        </div>
+        <span style={{ fontSize: "13px", fontWeight: 700, color: "#94a3b8" }}>
+          Validando credenciais administrativas...
+        </span>
+      </div>
+    );
+  }
+
+  // 2. Se não estiver autenticado ou não for admin da whitelist -> Exibe LoginPage
+  if (!session || !session.user.email || !ALLOWED_ADMIN_EMAILS.has(session.user.email.toLowerCase())) {
+    return <LoginPage onLoginSuccess={fetchData} />;
+  }
+
   return (
     <div style={{ display: "flex", height: "100vh", width: "100vw", overflow: "hidden", background: "var(--bg-root)" }}>
-      <Sidebar section={section} onSelect={handleNavigate} onlineCount={onlineCount} />
+      <Sidebar
+        section={section}
+        onSelect={handleNavigate}
+        onlineCount={onlineCount}
+        currentUserEmail={session.user.email}
+        onSignOut={handleSignOut}
+      />
 
       <div style={{ flex: 1, height: "100vh", display: "flex", flexDirection: "column", overflow: "hidden", minWidth: 0 }}>
         <Topbar

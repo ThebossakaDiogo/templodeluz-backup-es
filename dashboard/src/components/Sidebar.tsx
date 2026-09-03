@@ -4,12 +4,15 @@ import {
   Activity,
   CreditCard,
   FileBarChart2,
+  LogOut,
 } from "lucide-react";
 
 interface SidebarProps {
   section: Section;
-  onSelect: (s: Section) => void;
+  onSelect: (section: Section) => void;
   onlineCount: number;
+  currentUserEmail?: string;
+  onSignOut?: () => void;
 }
 
 const ITEMS: {
@@ -54,7 +57,7 @@ const ITEMS: {
   },
 ];
 
-export function Sidebar({ section, onSelect, onlineCount }: SidebarProps) {
+export function Sidebar({ section, onSelect, onlineCount, currentUserEmail, onSignOut }: SidebarProps) {
   return (
     <aside
       style={{
@@ -310,6 +313,102 @@ export function Sidebar({ section, onSelect, onlineCount }: SidebarProps) {
           Navegando no quiz neste instante
         </span>
       </div>
+
+      {/* Perfil do Administrador Logado & Sair */}
+      {currentUserEmail && (
+        <div
+          style={{
+            margin: "0 12px 10px",
+            padding: "10px 12px",
+            background: "rgba(15, 23, 42, 0.7)",
+            border: "1px solid rgba(255, 255, 255, 0.08)",
+            borderRadius: "10px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "8px",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0 }}>
+            <div
+              style={{
+                width: "28px",
+                height: "28px",
+                borderRadius: "8px",
+                background: "linear-gradient(135deg, #10b981, #06b6d4)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#030712",
+                fontWeight: 900,
+                fontSize: "12px",
+                flexShrink: 0,
+              }}
+            >
+              {currentUserEmail.slice(0, 2).toUpperCase()}
+            </div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                <span
+                  style={{
+                    fontSize: "8.5px",
+                    fontWeight: 800,
+                    background: "rgba(16, 185, 129, 0.2)",
+                    color: "#34d399",
+                    border: "1px solid rgba(16, 185, 129, 0.4)",
+                    borderRadius: "4px",
+                    padding: "1px 4px",
+                  }}
+                >
+                  ADMIN
+                </span>
+              </div>
+              <span
+                style={{
+                  display: "block",
+                  fontSize: "10px",
+                  color: "#cbd5e1",
+                  fontWeight: 600,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  maxWidth: "115px",
+                }}
+                title={currentUserEmail}
+              >
+                {currentUserEmail}
+              </span>
+            </div>
+          </div>
+
+          <button
+            onClick={onSignOut}
+            title="Sair / Desconectar"
+            style={{
+              background: "none",
+              border: "none",
+              color: "#94a3b8",
+              cursor: "pointer",
+              padding: "4px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: "6px",
+              transition: "all 0.15s ease",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.color = "#ef4444";
+              (e.currentTarget as HTMLButtonElement).style.background = "rgba(239, 68, 68, 0.15)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.color = "#94a3b8";
+              (e.currentTarget as HTMLButtonElement).style.background = "none";
+            }}
+          >
+            <LogOut style={{ width: "14px", height: "14px" }} />
+          </button>
+        </div>
+      )}
 
       {/* Rodapé */}
       <div
