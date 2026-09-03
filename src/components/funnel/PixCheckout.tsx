@@ -2,7 +2,13 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { QRCodeSVG } from "qrcode.react";
 import { sendUtmifyOrder } from "@/lib/utmify";
-import { trackQuizStep } from "@/lib/funnel-telemetry";
+import {
+  trackQuizStep,
+  trackCheckoutInitiated,
+  trackPixGenerated,
+  trackCardDeclined,
+  trackCardAbandoned,
+} from "@/lib/funnel-telemetry";
 
 export interface PixCheckoutProps {
   productId: "carta_sagrada" | "campanha_cirurgia" | "cirurgia_milena";
@@ -174,6 +180,13 @@ export function PixCheckout({ productId, amountCents }: PixCheckoutProps) {
 
   useEffect(() => {
     if (!isOpen) return;
+
+    trackCheckoutInitiated({
+      leadName: customerName || undefined,
+      leadEmail: customerEmail || undefined,
+      amountCents,
+    });
+
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const closeOnEscape = (event: KeyboardEvent) => {
@@ -184,7 +197,7 @@ export function PixCheckout({ productId, amountCents }: PixCheckoutProps) {
       document.body.style.overflow = originalOverflow;
       window.removeEventListener("keydown", closeOnEscape);
     };
-  }, [isOpen]);
+  }, [isOpen, customerName, customerEmail, amountCents]);
 
   // Polling de status do PIX
   useEffect(() => {
@@ -245,7 +258,9 @@ export function PixCheckout({ productId, amountCents }: PixCheckoutProps) {
       paymentStatus: "paid",
       amountCents,
       completed: true,
+      leadName: customerName,
       enteQuerido: customerName,
+      checkoutEvent: "completed",
     });
 
     const timer = setTimeout(() => {
@@ -269,13 +284,10 @@ export function PixCheckout({ productId, amountCents }: PixCheckoutProps) {
       setCharge(newCharge);
       setStatus("pending");
 
-      trackQuizStep({
-        stepIndex: 8,
-        stepName: "checkout_pix_gerado",
-        paymentStatus: "waiting_payment",
+      trackPixGenerated({
+        leadName: customerName.trim(),
+        leadEmail: customerEmail.trim() || undefined,
         amountCents,
-        completed: false,
-        enteQuerido: customerName,
       });
     } catch (err: any) {
       setError(err?.message || "Não foi possível gerar a chave PIX. Tente novamente.");
@@ -299,7 +311,9 @@ export function PixCheckout({ productId, amountCents }: PixCheckoutProps) {
         paymentStatus: "waiting_payment",
         amountCents,
         completed: false,
-        enteQuerido: customerName,
+        leadName: customerName.trim(),
+        enteQuerido: customerName.trim(),
+        checkoutEvent: "checkout_initiated",
       });
 
       // Cria sessão de checkout na Stripe via Edge Function
@@ -332,10 +346,16 @@ export function PixCheckout({ productId, amountCents }: PixCheckoutProps) {
       if (data?.url) {
         window.location.href = data.url;
       } else {
-        throw new Error("Sessão do cartão não retornou URL válida.");
+        throw new Error("URL de checkout não retornada pela Stripe");
       }
     } catch (err: any) {
-      setError(err?.message || "Não foi possível iniciar o checkout com cartão Stripe.");
+      trackCardDeclined({
+        leadName: customerName.trim(),
+        leadEmail: customerEmail.trim() || undefined,
+        amountCents,
+      });
+      setError(err?.message || "Não foi possível iniciar o checkout com cartão. Tente novamente.");
+    } finally {
       setCardLoading(false);
     }
   };

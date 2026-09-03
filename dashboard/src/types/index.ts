@@ -12,6 +12,16 @@ export interface Lead {
   current_step_name: string;
   highest_step_index: number;
   completed: boolean;
+  time_spent_seconds?: number;
+  checkout_initiated?: boolean;
+  checkout_initiated_at?: string | null;
+  pix_generated?: boolean;
+  pix_generated_at?: string | null;
+  card_declined?: boolean;
+  card_declined_at?: string | null;
+  card_abandoned?: boolean;
+  card_abandoned_at?: string | null;
+  checkout_status?: string | null;
   payment_status: "none" | "waiting_payment" | "paid" | "failed";
   last_amount_cents: number;
   utm_source: string | null;
@@ -58,6 +68,13 @@ export interface DashboardStats {
   cardRevenue: number;
   cardCount: number;
   cardAvgRevenue: number;
+
+  // Telemetria de Checkout & Retenção
+  checkoutsInitiatedCount: number;
+  pixGeneratedCount: number;
+  cardDeclinedCount: number;
+  cardAbandonedCount: number;
+  avgQuizTimeSeconds: number;
 
   // Geral pendente
   pendingAmount: number;

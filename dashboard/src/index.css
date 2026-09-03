@@ -817,9 +817,79 @@ input, select, textarea {
   }
 }
 
+/* ─── Regras de Seletor de Data e Topbar Mobile ─── */
+.date-range-desktop-container {
+  display: flex;
+}
+
+.date-range-mobile-btn {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .desktop-only-control {
+    display: none !important;
+  }
+
+  .date-range-desktop-container {
+    display: none !important;
+  }
+
+  .date-range-mobile-btn {
+    display: flex !important;
+    align-items: center;
+    gap: 5px;
+    background: var(--surface-1);
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    padding: 5px 10px;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    white-space: nowrap;
+    transition: all 0.15s ease;
+  }
+
+  .dashboard-topbar {
+    height: 56px !important;
+    min-height: 56px !important;
+    padding: 0 14px !important;
+    gap: 8px !important;
+  }
+
+  .dashboard-main {
+    padding: 16px 14px 110px !important;
+    gap: 18px !important;
+  }
+
+  .floating-dock-container {
+    bottom: 14px !important;
+    max-width: calc(100vw - 16px) !important;
+  }
+
+  .floating-dock-bar {
+    padding: 5px 8px !important;
+    gap: 3px !important;
+  }
+
+  .dock-item-btn {
+    padding: 6px 9px !important;
+    gap: 5px !important;
+  }
+
+  .dock-item-label {
+    display: none !important;
+  }
+
+  .dock-item-btn.active .dock-item-label {
+    display: inline-block !important;
+    font-size: 11px !important;
+  }
+}
+
 @media (max-width: 480px) {
   .metric-cards-grid {
     grid-template-columns: 1fr !important;
     gap: 12px !important;
   }
 }
+

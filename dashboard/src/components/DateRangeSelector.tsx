@@ -125,9 +125,10 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
 
   return (
     <div ref={containerRef} style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
+      {/* Presets Rápidos no Desktop */}
       <div
+        className="date-range-desktop-container"
         style={{
-          display: "flex",
           alignItems: "center",
           background: "var(--surface-1)",
           border: "1px solid var(--border-subtle)",
@@ -201,6 +202,28 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
           />
         </button>
       </div>
+
+      {/* Gatilho Mobile: Pílula Única Compacta de Alta Resolução */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="date-range-mobile-btn"
+        title="Filtrar por período"
+        aria-label="Filtrar data"
+      >
+        <Calendar style={{ width: "12px", height: "12px", color: "var(--accent-strong)" }} strokeWidth={1.8} />
+        <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-primary)" }}>
+          {value.label}
+        </span>
+        <ChevronDown
+          style={{
+            width: "10px",
+            height: "10px",
+            color: "var(--text-muted)",
+            transform: isOpen ? "rotate(180deg)" : "rotate(0)",
+            transition: "transform 0.15s ease",
+          }}
+        />
+      </button>
 
       {/* MODAL / BOTTOM SHEET DE CALENDÁRIO PERSONALIZADO (PORTALIZADO NO BODY - NUNCA CORTADO POR OVERFLOW OU HEAD) */}
       {isOpen && typeof document !== "undefined" && createPortal(

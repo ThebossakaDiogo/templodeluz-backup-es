@@ -1,6 +1,6 @@
 /**
  * Telemetria em Tempo Real do Funil de Psicografia
- * Envia o progresso de cada etapa e dados do lead diretamente ao Supabase
+ * Envia o progresso de cada etapa, tempo de permanência e eventos de checkout diretamente ao Supabase
  */
 
 const DEFAULT_SUPABASE_URL = "https://opftmzegcvfyoinjfmcj.supabase.co";
@@ -11,6 +11,14 @@ const supabaseUrl =
   (import.meta.env["VITE_SUPABASE_URL"] as string | undefined) || DEFAULT_SUPABASE_URL;
 const supabaseAnonKey =
   (import.meta.env["VITE_SUPABASE_ANON_KEY"] as string | undefined) || DEFAULT_SUPABASE_ANON_KEY;
+
+export type CheckoutEvent =
+  | "step_view"
+  | "checkout_initiated"
+  | "pix_generated"
+  | "card_declined"
+  | "card_abandoned"
+  | "completed";
 
 export interface FunnelProgressPayload {
   stepIndex: number;
@@ -25,10 +33,15 @@ export interface FunnelProgressPayload {
   completed?: boolean | undefined;
   paymentStatus?: ("none" | "waiting_payment" | "paid" | "failed") | undefined;
   amountCents?: number | undefined;
+  checkoutEvent?: CheckoutEvent | undefined;
 }
 
 const SESSION_STORAGE_KEY = "templodeluz_telemetry_session_id";
+const QUIZ_START_TIME_KEY = "templodeluz_quiz_start_timestamp";
 
+/**
+ * Retorna ou gera o ID único da sessão do visitante
+ */
 export function getTelemetrySessionId(): string {
   if (typeof window === "undefined") return "server_session";
   let sessionId = localStorage.getItem(SESSION_STORAGE_KEY);
@@ -39,11 +52,30 @@ export function getTelemetrySessionId(): string {
   return sessionId;
 }
 
+/**
+ * Retorna o tempo decorrido no quiz em segundos (desde a primeira interação)
+ */
+export function getQuizTimeSpentSeconds(): number {
+  if (typeof window === "undefined") return 0;
+  let start = localStorage.getItem(QUIZ_START_TIME_KEY);
+  if (!start) {
+    start = String(Date.now());
+    localStorage.setItem(QUIZ_START_TIME_KEY, start);
+  }
+  const diffMs = Date.now() - Number(start);
+  return Math.max(1, Math.round(diffMs / 1000));
+}
+
+/**
+ * Envia o progresso de cada etapa ao Supabase
+ */
 export function trackQuizStep(payload: FunnelProgressPayload): void {
   if (typeof window === "undefined") return;
 
   try {
     const sessionId = getTelemetrySessionId();
+    const timeSpentSeconds = getQuizTimeSpentSeconds();
+
     const utmsRaw = localStorage.getItem("templodeluz_utm_parameters");
     let utms: Record<string, string | null> = {};
     if (utmsRaw) {
@@ -66,6 +98,8 @@ export function trackQuizStep(payload: FunnelProgressPayload): void {
       p_mensagem_preview: payload.mensagemPreview || null,
       p_temas: payload.temas && payload.temas.length > 0 ? payload.temas : null,
       p_completed: payload.completed || false,
+      p_time_spent_seconds: timeSpentSeconds,
+      p_checkout_event: payload.checkoutEvent || (payload.stepIndex >= 8 ? "checkout_initiated" : null),
       p_payment_status: payload.paymentStatus || null,
       p_amount_cents: payload.amountCents || null,
       p_utm_source: utms["utm_source"] || null,
@@ -76,7 +110,6 @@ export function trackQuizStep(payload: FunnelProgressPayload): void {
       p_src: utms["src"] || null,
     };
 
-    // Disparo assíncrono não bloqueante via fetch
     fetch(`${supabaseUrl}/rest/v1/rpc/track_quiz_progress`, {
       method: "POST",
       headers: {
@@ -89,6 +122,79 @@ export function trackQuizStep(payload: FunnelProgressPayload): void {
       console.warn("[TELEMETRY] Aviso ao sincronizar progresso:", err);
     });
   } catch {
-    // Não interrompe o fluxo do usuário em caso de falha de telemetria
+    // Silencia erros para não interferir na navegação do consulente
   }
+}
+
+/**
+ * Disparado no momento exato em que a pessoa inicia o Checkout
+ */
+export function trackCheckoutInitiated(params: {
+  leadName?: string;
+  leadEmail?: string;
+  amountCents?: number;
+}): void {
+  trackQuizStep({
+    stepIndex: 8,
+    stepName: "checkout",
+    leadName: params.leadName,
+    leadEmail: params.leadEmail,
+    amountCents: params.amountCents,
+    checkoutEvent: "checkout_initiated",
+    paymentStatus: "waiting_payment",
+  });
+}
+
+/**
+ * Disparado no momento em que um código PIX é gerado na tela
+ */
+export function trackPixGenerated(params: {
+  leadName?: string;
+  leadEmail?: string;
+  amountCents?: number;
+}): void {
+  trackQuizStep({
+    stepIndex: 8,
+    stepName: "checkout_pix",
+    leadName: params.leadName,
+    leadEmail: params.leadEmail,
+    amountCents: params.amountCents,
+    checkoutEvent: "pix_generated",
+    paymentStatus: "waiting_payment",
+  });
+}
+
+/**
+ * Disparado quando uma transação com cartão é recusada ou falha
+ */
+export function trackCardDeclined(params: {
+  leadName?: string;
+  leadEmail?: string;
+  amountCents?: number;
+}): void {
+  trackQuizStep({
+    stepIndex: 8,
+    stepName: "checkout_card_failed",
+    leadName: params.leadName,
+    leadEmail: params.leadEmail,
+    amountCents: params.amountCents,
+    checkoutEvent: "card_declined",
+    paymentStatus: "failed",
+  });
+}
+
+/**
+ * Disparado quando a pessoa chega no checkout e abandona/fecha
+ */
+export function trackCardAbandoned(params: {
+  leadName?: string;
+  leadEmail?: string;
+}): void {
+  trackQuizStep({
+    stepIndex: 8,
+    stepName: "checkout_abandoned",
+    leadName: params.leadName,
+    leadEmail: params.leadEmail,
+    checkoutEvent: "card_abandoned",
+  });
 }

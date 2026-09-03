@@ -11,6 +11,7 @@ import { StatusPieChart } from "@/components/StatusPieChart";
 import { TrafficPieChart } from "@/components/TrafficPieChart";
 import { PaymentMethodsPieChart } from "@/components/PaymentMethodsPieChart";
 import { ConversionOverview } from "@/components/ConversionOverview";
+import { ConsulentesTelemetryTable } from "@/components/ConsulentesTelemetryTable";
 import { WhatsAppTracker } from "@/components/WhatsAppTracker";
 import { ProfileView } from "@/components/ProfileView";
 import { LoginPage } from "@/components/LoginPage";
@@ -471,6 +472,25 @@ export function App() {
     const pending = fOrders.filter((o) => o.status === "pending" || o.status === "creating");
     const pixPending = pending.filter((o) => o.payment_method === "pix" || !o.payment_method);
 
+    // Métricas de Checkout e Retenção
+    const checkoutsInit = fLeads.filter(
+      (l) => l.checkout_initiated || l.highest_step_index >= 8 || l.checkout_status === "checkout_initiated"
+    );
+    const pixGenerated = fLeads.filter(
+      (l) => l.pix_generated || l.checkout_status === "pix_generated"
+    );
+    const cardDeclined = fLeads.filter(
+      (l) => l.card_declined || l.checkout_status === "card_declined" || l.payment_status === "failed"
+    );
+    const cardAbandoned = fLeads.filter(
+      (l) => l.card_abandoned || (l.highest_step_index >= 8 && l.payment_status !== "paid")
+    );
+
+    const leadsWithTime = fLeads.filter((l) => (l.time_spent_seconds || 0) > 0);
+    const avgQuizTime = leadsWithTime.length > 0
+      ? Math.round(leadsWithTime.reduce((sum, l) => sum + (l.time_spent_seconds || 0), 0) / leadsWithTime.length)
+      : 0;
+
     const calculatedStats: DashboardStats = {
       newSubscriptions: fLeads.length,
       newSubscriptionsDiff: calcDiff(fLeads.length, prevLeads.length),
@@ -489,6 +509,13 @@ export function App() {
       cardRevenue: cardRev,
       cardCount: cardPaidOrders.length,
       cardAvgRevenue: cardPaidOrders.length > 0 ? cardRev / cardPaidOrders.length : 0,
+
+      // Telemetria de Checkout & Retenção
+      checkoutsInitiatedCount: checkoutsInit.length,
+      pixGeneratedCount: pixGenerated.length,
+      cardDeclinedCount: cardDeclined.length,
+      cardAbandonedCount: cardAbandoned.length,
+      avgQuizTimeSeconds: avgQuizTime,
 
       pendingAmount: pending.reduce((s, o) => s + o.amount_cents / 100, 0),
       pendingCount: pending.length,
@@ -631,6 +658,9 @@ export function App() {
                 loading={loading}
               />
 
+              {/* Tabela Nominal de Telemetria de Consulentes, Tempos e Checkouts */}
+              <ConsulentesTelemetryTable leads={filteredLeads.length > 0 ? filteredLeads : allLeads} />
+
               {/* FUNIL DE CONVERSÃO 3D EM LARGURA TOTAL (PAINEL PRINCIPAL ESTILO STAKENT) */}
               <FunnelViz leads={filteredLeads.length > 0 ? filteredLeads : allLeads} loading={loading} />
 
@@ -659,12 +689,15 @@ export function App() {
 
           {/* SLUG: /rastreamento */}
           {section === "rastreamento" && (
-            <FunnelTracker
-              leads={allLeads}
-              loading={loading}
-              onRefresh={fetchData}
-              onlineCount={onlineCount}
-            />
+            <div style={{ display: "flex", flexDirection: "column", gap: "26px" }}>
+              <FunnelTracker
+                leads={allLeads}
+                loading={loading}
+                onRefresh={fetchData}
+                onlineCount={onlineCount}
+              />
+              <ConsulentesTelemetryTable leads={allLeads} />
+            </div>
           )}
 
           {/* SLUG: /pedidos */}
