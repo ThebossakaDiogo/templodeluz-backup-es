@@ -4,7 +4,6 @@ import {
   Activity,
   CreditCard,
   FileBarChart2,
-  Sparkles,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -82,7 +81,7 @@ export function Sidebar({ section, onSelect, onlineCount }: SidebarProps) {
         }}
       />
 
-      {/* Logo */}
+      {/* Logo OD METRICS */}
       <div
         style={{
           padding: "22px 20px 18px",
@@ -94,42 +93,51 @@ export function Sidebar({ section, onSelect, onlineCount }: SidebarProps) {
       >
         <div
           style={{
-            width: "35px",
-            height: "35px",
+            width: "36px",
+            height: "36px",
             borderRadius: "10px",
-            background: "linear-gradient(135deg, #059669, #10b981)",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
+            background: "linear-gradient(135deg, #059669 0%, #10b981 50%, #06b6d4 100%)",
+            border: "1px solid rgba(255, 255, 255, 0.25)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             boxShadow: "0 0 16px rgba(16, 185, 129, 0.4)",
             flexShrink: 0,
+            fontFamily: "'Space Grotesk', sans-serif",
+            fontWeight: 900,
+            fontSize: "14px",
+            color: "#ffffff",
+            letterSpacing: "-0.05em",
           }}
         >
-          <Sparkles style={{ width: "18px", height: "18px", color: "#ffffff" }} />
+          OD
         </div>
         <div>
           <span
             style={{
               display: "block",
-              fontSize: "14px",
-              fontWeight: 800,
+              fontFamily: "'Space Grotesk', 'Plus Jakarta Sans', sans-serif",
+              fontSize: "15px",
+              fontWeight: 900,
               color: "#ffffff",
-              letterSpacing: "-0.01em",
+              letterSpacing: "-0.02em",
+              lineHeight: 1.1,
             }}
           >
-            Templo de Luz
+            OD <span style={{ color: "#10b981" }}>METRICS</span>
           </span>
           <span
             style={{
-              fontSize: "10px",
-              color: "#34d399",
+              fontSize: "9.5px",
+              color: "#94a3b8",
               fontWeight: 700,
-              letterSpacing: "0.06em",
+              letterSpacing: "0.08em",
               textTransform: "uppercase",
+              display: "block",
+              marginTop: "2px",
             }}
           >
-            Painel Executivo
+            Inteligência & Tracking
           </span>
         </div>
       </div>
@@ -305,7 +313,7 @@ export function Sidebar({ section, onSelect, onlineCount }: SidebarProps) {
         }}
       >
         <span style={{ fontSize: "10px", color: "#64748b", fontWeight: 600 }}>
-          Supabase Realtime v2.49
+          OD METRICS · Supabase Realtime v2.49
         </span>
       </div>
     </aside>
