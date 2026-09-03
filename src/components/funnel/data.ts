@@ -6,6 +6,8 @@ import heroTemplo from "@/assets/templodeluz-hero.webp";
 import seloCheckout from "@/assets/checkout-selo.png";
 import seloPomba from "@/assets/pomba-seguro.png";
 import heroBgImage from "@/assets/hero-image.jpeg";
+import milenaOratorioImg from "@/assets/milena-oratorio.jpeg";
+import mediumMilenaPssImg from "@/assets/medium-milena-pss.jpeg";
 
 export const IMAGES = {
   hero: heroTemplo,
@@ -16,6 +18,8 @@ export const IMAGES = {
   seloCheckout: seloCheckout,
   seloPomba: seloPomba,
   heroBg: heroBgImage,
+  milenaOratorio: milenaOratorioImg,
+  milenaPss: mediumMilenaPssImg,
 };
 
 export const CHECKOUT_URL = "https://pay.cakto.com.br/amnpmje_1071513";
@@ -23,23 +27,23 @@ export const CHECKOUT_URL = "https://pay.cakto.com.br/amnpmje_1071513";
 export const FAQ: { q: string; a: string }[] = [
   {
     q: "Como a carta é psicografada?",
-    a: "A médium Milena Medeiros entra em recolhimento espiritual e oração profunda com o nome que você informou. Em transe mediúnico, a mensagem é escrita inteiramente à mão no papel — manifestando os traços da caligrafia, expressões afetivas e a assinatura original do seu ente querido. Nada é digital ou gerado por computador.",
+    a: "A médium Milena Medeiros entra em recolhimento espiritual e oração profunda com o nome que você informou no altar. Em transe mediúnico de sintonia, a mensagem é vertida inteiramente à mão no papel de algodão — manifestando os traços originais da caligrafia, expressões de afeto, memórias íntimas e a assinatura do seu ente querido. Nada é digital ou gerado por computador.",
   },
   {
     q: "Em quanto tempo a mensagem chega no meu WhatsApp?",
-    a: "A sessão de psicografia ocorre no horário reservado para você. Assim que a carta é concluída e abençoada, você recebe as fotos em alta resolução da carta original manuscrita diretamente no seu WhatsApp em até 24 horas — na maioria dos casos, no mesmo dia.",
+    a: "A sessão de psicografia ocorre exatamente no horário reservado para você no oratório. Assim que a carta é concluída à mão e abençoada diante da vela sagrada, você recebe as fotografias em alta resolução da carta original manuscrita diretamente no seu WhatsApp em até 24 horas — na maioria dos casos, no mesmo dia.",
   },
   {
-    q: "Por que é pedida uma doação simbólica de R$ 27,90 se a carta é caridade?",
-    a: "A mediunidade e a mensagem são um ato de amor e caridade espiritual. A pequena contribuição simbólica de R$ 27,90 é destinada exclusivamente à manutenção do Templo de Luz, aquisição dos materiais sagrados (velas, papéis especiais, incensos) e ao auxílio alimentar das famílias acolhidas pela nossa casa.",
+    q: "Por que é solicitada uma contribuição fraterna se a psicografia é gratuita?",
+    a: "O dom mediúnico e a mensagem espiritual são 100% gratuitos por caridade e amor ao próximo. A contribuição fraterna livre (você escolhe o valor que o seu coração puder a partir de R$ 10) é destinada exclusivamente para cobrir os materiais físicos consumidos no oratório (a vela de cera pura de 7 dias com o nome do seu ente querido, as folhas especiais de algodão e incensos de sintonização), além de apoiar as ações assistenciais do Centro Espírita Casa Nova.",
   },
   {
     q: "E se a carta não tocar o meu coração ou não fizer sentido?",
-    a: "Você conta com a nossa Garantia Sagrada de 7 dias. Se por qualquer motivo a mensagem não trouxer a paz e a confirmação que a sua alma procura, basta nos avisar e devolveremos 100% da sua doação imediatamente, sem burocracias e com o mesmo respeito.",
+    a: "Você conta com a nossa Garantia Sagrada de 7 dias. Se por qualquer motivo a mensagem não trouxer a paz, a certeza e a confirmação que a sua alma procura, basta nos avisar pelo WhatsApp ou e-mail e devolveremos 100% da sua contribuição imediatamente, sem questionamentos e com a mesma fraternidade.",
   },
   {
-    q: "As informações e memórias que compartilhei ficam em sigilo?",
-    a: "Sigilo absoluto. O nome de quem partiu e o desabafo do seu coração são mantidos em segredo sagrado no oratório da médium, utilizados unicamente como ponte de sintonia energética para a psicografia.",
+    q: "As informações e o nome de quem partiu ficam em sigilo?",
+    a: "Sigilo absoluto e sagrado. O nome de quem partiu e o desabafo do seu coração são mantidos em segredo no oratório da médium, utilizados unicamente como ponte de sintonia energética para a sessão de psicografia.",
   },
 ];
 

@@ -3,13 +3,14 @@ import { createPortal } from "react-dom";
 import { createStripeCheckoutSession } from "@/lib/stripe";
 import { CHECKOUT_URL } from "./data";
 import { trackInitiateDonation } from "@/lib/metaPixel";
+import { CreditCard } from "@/components/ui/credit-card";
 
 interface StripeCardModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  productId: "carta_sagrada" | "cirurgia_milena";
-  amountCents: number;
-  primeiroEnte?: string;
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+  readonly productId: "carta_sagrada" | "cirurgia_milena";
+  readonly amountCents: number;
+  readonly primeiroEnte?: string;
 }
 
 export function StripeCardModal({
@@ -115,23 +116,23 @@ export function StripeCardModal({
 
   return createPortal(
     <div
-      role="dialog"
       aria-modal="true"
-      aria-label="Confirmar valor para Cartão de Crédito"
       className="fixed inset-0 z-[200] flex items-end justify-center bg-black/70 backdrop-blur-sm sm:items-center sm:p-4 animate-fade-in"
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
     >
-      <div className="max-h-[92dvh] w-full overflow-y-auto rounded-t-3xl border border-[#e5daf0] bg-white p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] text-left shadow-2xl sm:max-w-[440px] sm:rounded-3xl sm:p-6 animate-scale-up">
+      <div
+        className="fixed inset-0"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      <div className="relative z-10 max-h-[92dvh] w-full overflow-y-auto rounded-t-3xl border border-[#e5daf0] bg-white p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] text-left shadow-2xl sm:max-w-[440px] sm:rounded-3xl sm:p-6 animate-scale-up">
         {/* Header */}
-        <div className="mb-4 flex items-start justify-between gap-3">
+        <div className="mb-3 flex items-start justify-between gap-3">
           <div>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 border border-blue-200 px-3 py-1 text-[10.5px] font-extrabold uppercase tracking-wider text-blue-900">
-              💳 Pagamento com Cartão
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-purple-50 border border-purple-200 px-3 py-1 text-[10.5px] font-extrabold uppercase tracking-wider text-purple-950">
+              💳 Pagamento Seguro com Cartão
             </span>
-            <h3 className="mt-2 text-xl font-extrabold text-[#181126] leading-tight">
-              Confirmar Doação no Cartão
+            <h3 className="mt-1.5 text-xl font-extrabold text-[#181126] leading-tight">
+              Confirmar Doação Fraterna
             </h3>
           </div>
           <button
@@ -144,25 +145,37 @@ export function StripeCardModal({
           </button>
         </div>
 
-        {/* Card de Valor */}
-        <div className="rounded-2xl border-2 border-amber-300 bg-gradient-to-br from-[#fffdfa] via-[#fffbeb] to-[#fef8ea] p-4 text-center shadow-xs">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-[#92400e] block">
-            Valor selecionado para a doação:
-          </span>
-          <span className="font-display mt-1 block text-3xl font-black text-[#2d144d]">
-            R$ {formattedAmount}
-          </span>
-          <span className="mt-1 block text-[11.5px] text-[#786445]">
+        {/* Cartão de Crédito Animado */}
+        <div className="my-3 flex justify-center">
+          <CreditCard
+            cardNumber="•••• •••• •••• ••••"
+            cardHolder={customerName.trim() || "NOME DO TITULAR"}
+            expiryDate="••/••"
+            variant="dark"
+          />
+        </div>
+
+        {/* Card de Resumo do Valor */}
+        <div className="rounded-2xl border border-amber-300/80 bg-gradient-to-br from-[#fffdfa] via-[#fffbeb] to-[#fef8ea] p-3.5 text-center shadow-2xs">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#92400e]">
+              Valor da Contribuição:
+            </span>
+            <span className="font-display text-2xl font-black text-[#2d144d]">
+              R$ {formattedAmount}
+            </span>
+          </div>
+          <p className="mt-1 text-left text-[11px] text-[#786445] leading-tight">
             {productId === "carta_sagrada"
-              ? `Materiais do oratório e vela sagrada para ${primeiroEnte}`
-              : "Aporte para a cirurgia de catarata da Médium Milena"}
-          </span>
+              ? `Vela de 7 dias e materiais do oratório para ${primeiroEnte}`
+              : "Aporte solidário para a cirurgia de catarata da Médium Milena"}
+          </p>
         </div>
 
         {/* Campo do Nome */}
-        <div className="mt-4">
+        <div className="mt-3.5">
           <label htmlFor="stripe-card-name" className="mb-1.5 block text-xs font-bold text-[#2d144d]">
-            Nome completo do titular
+            Nome completo impresso no cartão:
           </label>
           <input
             id="stripe-card-name"
@@ -171,9 +184,9 @@ export function StripeCardModal({
             onKeyDown={(e) => {
               if (e.key === "Enter") void handleProceedStripe();
             }}
-            placeholder="Digite o nome como no cartão"
+            placeholder="Digite como está no cartão"
             autoComplete="name"
-            className="w-full rounded-2xl border-2 border-[#d8caea] bg-white px-4 py-3 text-[15px] font-medium text-[#181126] outline-none transition-colors placeholder:text-[#9583a6] focus:border-[#2d144d]"
+            className="w-full rounded-2xl border-2 border-[#d8caea] bg-white px-4 py-3 text-[15px] font-medium text-[#181126] outline-hidden transition-colors placeholder:text-[#9583a6] focus:border-purple-600 shadow-2xs"
           />
         </div>
 
@@ -189,7 +202,7 @@ export function StripeCardModal({
           {loading ? (
             <span className="inline-flex items-center justify-center gap-2">
               <span className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
-              Abrindo Checkout Stripe...
+              <span>Abrindo Checkout Stripe...</span>
             </span>
           ) : (
             `Pagar R$ ${formattedAmount} com Cartão ›`
@@ -200,9 +213,9 @@ export function StripeCardModal({
         <div className="mt-4 pt-3 border-t border-[#ece4f4] space-y-2 text-center">
           <div className="flex flex-wrap items-center justify-center gap-2 text-[11px] font-bold text-[#5e4b73]">
             <span>🔒 Criptografia SSL 256-bit</span>
-            <span>•</span>
+            <span aria-hidden="true">•</span>
             <span>⚡ Processamento Seguro Stripe</span>
-            <span>•</span>
+            <span aria-hidden="true">•</span>
             <span>🛡️ 7 Dias de Garantia</span>
           </div>
           <p className="text-[10.5px] text-[#8e7a60]">

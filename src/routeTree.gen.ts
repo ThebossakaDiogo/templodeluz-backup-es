@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AjudaMilenaRouteImport } from './routes/ajuda-milena'
 import { Route as ApoioMilenaRouteImport } from './routes/apoio-milena'
+import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
 import { Route as EscreverCartaRouteImport } from './routes/escrever-carta'
 import { Route as ObrigadoRouteImport } from './routes/obrigado'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
@@ -30,6 +31,11 @@ const AjudaMilenaRoute = AjudaMilenaRouteImport.update({
 const ApoioMilenaRoute = ApoioMilenaRouteImport.update({
   id: '/apoio-milena',
   path: '/apoio-milena',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComoFuncionaRoute = ComoFuncionaRouteImport.update({
+  id: '/como-funciona',
+  path: '/como-funciona',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EscreverCartaRoute = EscreverCartaRouteImport.update({
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/ajuda-milena': typeof AjudaMilenaRoute
   '/apoio-milena': typeof ApoioMilenaRoute
+  '/como-funciona': typeof ComoFuncionaRoute
   '/escrever-carta': typeof EscreverCartaRoute
   '/obrigado': typeof ObrigadoRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/ajuda-milena': typeof AjudaMilenaRoute
   '/apoio-milena': typeof ApoioMilenaRoute
+  '/como-funciona': typeof ComoFuncionaRoute
   '/escrever-carta': typeof EscreverCartaRoute
   '/obrigado': typeof ObrigadoRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -76,6 +84,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/ajuda-milena': typeof AjudaMilenaRoute
   '/apoio-milena': typeof ApoioMilenaRoute
+  '/como-funciona': typeof ComoFuncionaRoute
   '/escrever-carta': typeof EscreverCartaRoute
   '/obrigado': typeof ObrigadoRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -87,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/ajuda-milena'
     | '/apoio-milena'
+    | '/como-funciona'
     | '/escrever-carta'
     | '/obrigado'
     | '/privacidade'
@@ -96,6 +106,7 @@ export interface FileRouteTypes {
     | '/'
     | '/ajuda-milena'
     | '/apoio-milena'
+    | '/como-funciona'
     | '/escrever-carta'
     | '/obrigado'
     | '/privacidade'
@@ -105,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/ajuda-milena'
     | '/apoio-milena'
+    | '/como-funciona'
     | '/escrever-carta'
     | '/obrigado'
     | '/privacidade'
@@ -115,6 +127,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AjudaMilenaRoute: typeof AjudaMilenaRoute
   ApoioMilenaRoute: typeof ApoioMilenaRoute
+  ComoFuncionaRoute: typeof ComoFuncionaRoute
   EscreverCartaRoute: typeof EscreverCartaRoute
   ObrigadoRoute: typeof ObrigadoRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
@@ -142,6 +155,13 @@ declare module '@tanstack/react-router' {
       path: '/apoio-milena'
       fullPath: '/apoio-milena'
       preLoaderRoute: typeof ApoioMilenaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/como-funciona': {
+      id: '/como-funciona'
+      path: '/como-funciona'
+      fullPath: '/como-funciona'
+      preLoaderRoute: typeof ComoFuncionaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/escrever-carta': {
@@ -179,6 +199,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AjudaMilenaRoute: AjudaMilenaRoute,
   ApoioMilenaRoute: ApoioMilenaRoute,
+  ComoFuncionaRoute: ComoFuncionaRoute,
   EscreverCartaRoute: EscreverCartaRoute,
   ObrigadoRoute: ObrigadoRoute,
   PrivacidadeRoute: PrivacidadeRoute,

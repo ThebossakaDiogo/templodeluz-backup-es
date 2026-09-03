@@ -35,21 +35,25 @@ function Cta({
   onClick,
   tone = "gold",
 }: {
-  children: React.ReactNode;
-  onClick: () => void;
-  tone?: "gold" | "green" | "royal";
+  readonly children: React.ReactNode;
+  readonly onClick: () => void;
+  readonly tone?: "gold" | "green" | "royal";
 }) {
+  let toneClasses =
+    "bg-gradient-to-r from-[#f59e0b] via-[#d97706] to-[#b45309] text-white shadow-amber-500/25 border border-amber-400/50 hover:brightness-105";
+  if (tone === "green") {
+    toneClasses =
+      "bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 text-white shadow-emerald-500/25 border border-emerald-400/40 hover:brightness-105";
+  } else if (tone === "royal") {
+    toneClasses =
+      "bg-gradient-to-r from-[#2d144d] via-[#3b1c63] to-[#1f0c36] text-white shadow-[#2d144d]/30 border border-[#4b267d]/40 hover:brightness-110";
+  }
+
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`animate-pulse-cta w-full cursor-pointer rounded-2xl px-6 py-[18px] text-[15.5px] font-extrabold tracking-[0.02em] uppercase transition-all duration-300 hover:scale-[1.015] active:scale-[0.985] shadow-lg ${
-        tone === "green"
-          ? "bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 text-white shadow-emerald-500/25 border border-emerald-400/40 hover:brightness-105"
-          : tone === "royal"
-            ? "bg-gradient-to-r from-[#2d144d] via-[#3b1c63] to-[#1f0c36] text-white shadow-[#2d144d]/30 border border-[#4b267d]/40 hover:brightness-110"
-            : "bg-gradient-to-r from-[#f59e0b] via-[#d97706] to-[#b45309] text-white shadow-amber-500/25 border border-amber-400/50 hover:brightness-105"
-      }`}
+      className={`animate-pulse-cta w-full cursor-pointer rounded-2xl px-6 py-[18px] text-[15.5px] font-extrabold tracking-[0.02em] uppercase transition-all duration-300 hover:scale-[1.015] active:scale-[0.985] shadow-lg ${toneClasses}`}
     >
       <span className="flex items-center justify-center gap-2 drop-shadow-xs font-bold">
         {children}
@@ -69,15 +73,15 @@ function Field({
   onEnter,
   hideLabel,
 }: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  placeholder: string;
-  error?: string | undefined;
-  textarea?: boolean;
-  autoFocus?: boolean;
-  onEnter?: () => void;
-  hideLabel?: boolean;
+  readonly label: string;
+  readonly value: string;
+  readonly onChange: (v: string) => void;
+  readonly placeholder: string;
+  readonly error?: string | undefined;
+  readonly textarea?: boolean;
+  readonly autoFocus?: boolean;
+  readonly onEnter?: () => void;
+  readonly hideLabel?: boolean;
 }) {
   const shared =
     "w-full rounded-2xl border bg-white px-4 py-4 text-[15.5px] font-medium leading-relaxed text-[#181126] shadow-2xs outline-none transition-all duration-200 placeholder:text-[#9583a6] focus:border-[#f59e0b] focus:ring-2 focus:ring-[#f59e0b]/20";
@@ -120,10 +124,10 @@ function Progress({
   caption,
   onBack,
 }: {
-  step: number;
-  total: number;
-  caption: string;
-  onBack?: () => void;
+  readonly step: number;
+  readonly total: number;
+  readonly caption: string;
+  readonly onBack?: () => void;
 }) {
   const pct = (step / total) * 100;
   return (
@@ -164,9 +168,9 @@ function QuestionHead({
   title,
   subtitle,
 }: {
-  eyebrow: string;
-  title: string;
-  subtitle?: string;
+  readonly eyebrow: string;
+  readonly title: string;
+  readonly subtitle?: string;
 }) {
   return (
     <div className="px-4 pt-7 pb-3 sm:px-6">
@@ -190,11 +194,11 @@ function Option({
   selected,
   onClick,
 }: {
-  emoji: string;
-  label: string;
-  hint?: string;
-  selected: boolean;
-  onClick: () => void;
+  readonly emoji: string;
+  readonly label: string;
+  readonly hint?: string;
+  readonly selected: boolean;
+  readonly onClick: () => void;
 }) {
   return (
     <button
@@ -230,7 +234,15 @@ function Option({
   );
 }
 
-function ObjectionBuster({ icon, title, text }: { icon: string; title: string; text: string }) {
+function ObjectionBuster({
+  icon,
+  title,
+  text,
+}: {
+  readonly icon: string;
+  readonly title: string;
+  readonly text: string;
+}) {
   return (
     <div className="mx-4 mt-6 flex items-start gap-3.5 rounded-2xl border border-[#fde68a] bg-[#fefaf3] p-4 text-left shadow-2xs sm:mx-6">
       <span className="text-2xl shrink-0 p-1.5 bg-white rounded-xl border border-[#fde68a]">
@@ -248,68 +260,74 @@ function ObjectionBuster({ icon, title, text }: { icon: string; title: string; t
 
 function DonationGoal() {
   return (
-    <div className="relative overflow-hidden rounded-3xl border-2 border-[#f59e0b]/40 bg-gradient-to-b from-[#fffef9] via-[#fefbf2] to-[#fbf6ea] p-5 text-left shadow-lg sm:p-6">
-      {/* Detalhe de fundo suave */}
-      <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-amber-200/30 blur-2xl" />
+    <div className="relative overflow-hidden rounded-3xl border border-amber-200/70 bg-gradient-to-b from-[#fffefc] via-[#fffdf9] to-[#faf6ed] p-5 text-left shadow-md sm:p-6">
+      {/* Luz ambiente suave de fundo */}
+      <div className="pointer-events-none absolute -right-6 -top-6 h-28 w-28 rounded-full bg-amber-200/40 blur-2xl" />
 
       {/* Header com Badge e Indicador Vivo */}
       <div className="flex flex-wrap items-center justify-between gap-2.5">
-        <div className="flex items-center gap-2">
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-100/80 border border-amber-300 text-sm shadow-2xs">
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-8 w-8 items-center justify-center rounded-2xl bg-amber-100/90 border border-amber-200 text-base shadow-2xs">
             🕯️
           </span>
           <div>
-            <span className="block text-[12.5px] font-extrabold text-[#2d144d] leading-tight">
+            <span className="block text-[13px] font-extrabold text-[#1f1035] leading-tight">
               Materiais & Insumos do Oratório
             </span>
-            <span className="block text-[11px] font-semibold text-[#8a7251]">
-              Meta semanal para velas sagradas de 7 dias
+            <span className="block text-[11px] font-medium text-[#7a6442]">
+              Meta semanal para consagração das velas de 7 dias
             </span>
           </div>
         </div>
 
         <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 px-3 py-1 text-[11px] font-extrabold text-emerald-800 shadow-2xs">
           <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-          53% alcançada
+          {" "}61,6% alcançada esta semana
         </span>
       </div>
 
       {/* Barra de Progresso com Gradiente Dourado-Esmeralda */}
       <div className="mt-4">
-        <div className="h-3.5 w-full overflow-hidden rounded-full bg-[#f3e9d8] p-0.5 border border-[#e5d4be] shadow-inner">
+        <div className="h-3 w-full overflow-hidden rounded-full bg-[#f1e5d4] p-0.5 border border-[#e2d0b8]">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-amber-400 via-amber-500 to-emerald-500 transition-all duration-1000 shadow-xs"
-            style={{ width: "53%" }}
+            className="h-full rounded-full bg-gradient-to-r from-amber-400 via-amber-500 to-emerald-500 transition-all duration-1000"
+            style={{ width: "61.6%" }}
           />
         </div>
       </div>
 
-      {/* Estatísticas em Cards Claros */}
+      {/* Estatísticas em Cards Claros com Valores Quebrados Realistas */}
       <div className="mt-3.5 grid grid-cols-2 gap-2.5 text-[12px]">
-        <div className="rounded-2xl border border-amber-200/60 bg-white/90 p-3 shadow-2xs">
+        <div className="rounded-2xl border border-amber-200/60 bg-white/95 p-3 shadow-2xs">
           <span className="block text-[10.5px] font-bold uppercase tracking-wider text-[#92400e]">
-            Arrecadado esta semana
+            Insumos Arrecadados
           </span>
           <span className="font-display mt-0.5 block text-lg font-black text-emerald-700">
-            R$ 187,00
+            R$ 237,40
+          </span>
+          <span className="block text-[9.5px] text-emerald-600 font-semibold mt-0.5">
+            Última doação: há 3 min
           </span>
         </div>
 
-        <div className="rounded-2xl border border-amber-200/60 bg-white/90 p-3 text-right shadow-2xs">
+        <div className="rounded-2xl border border-amber-200/60 bg-white/95 p-3 text-right shadow-2xs">
           <span className="block text-[10.5px] font-bold uppercase tracking-wider text-[#786445]">
-            Objetivo semanal
+            Custo Semanal do Oratório
           </span>
           <span className="font-display mt-0.5 block text-lg font-black text-[#2d144d]">
-            R$ 350,00
+            R$ 385,00
+          </span>
+          <span className="block text-[9.5px] text-[#786445] font-semibold mt-0.5">
+            Faltam R$ 147,60
           </span>
         </div>
       </div>
 
       {/* Nota de Transparência */}
-      <div className="mt-3 flex items-start gap-2 pt-2 border-t border-amber-200/50 text-[11px] text-[#786445] leading-relaxed">
+      <div className="mt-3 flex items-start gap-2 pt-2.5 border-t border-amber-200/40 text-[11px] text-[#786445] leading-relaxed">
         <span className="shrink-0 text-xs">🤍</span>
         <p>
-          O Templo de Luz opera por caridade. As doações cobrem as velas de cera virgem, folhas de pergaminho puro e óleos de sintonização mediúnica.
+          O Centro Espírita Casa Nova (Templo de Luz) é uma obra de caridade sem fins lucrativos. Sua doação voluntária cobre unicamente a vela de cera virgem de 7 dias com o nome do seu ente querido, o pergaminho consagrado e o acolhimento fraterno.
         </p>
       </div>
     </div>
@@ -327,12 +345,12 @@ function getDonationPsychologicalImpact(
     return {
       tier: "invalid",
       icon: "⚠️",
-      badge: "Insumos Sagrados Mínimos",
-      title: "Mínimo Fraterno de R$ 10,00",
+      badge: "Insumos Físicos Mínimos",
+      title: "Mínimo Fraterno de R$ 10",
       description:
-        "O Templo de Luz não visa lucro. Este valor de R$ 10,00 custeia a vela de cera virgem de 7 dias, a folha de pergaminho de algodão puro e os óleos de sintonização.",
+        `O acolhimento espiritual é 100% gratuito. O valor mínimo de R$ 10 é necessário unicamente para custear a vela de cera virgem de 7 dias e o pergaminho consagrado para ${primeiroEnte}.`,
       badgeColor: "bg-red-50 text-red-800 border-red-200",
-      cardBorder: "border-red-300 bg-red-50/40",
+      cardBorder: "border-red-200 bg-red-50/30",
       isValid: false,
     };
   }
@@ -340,47 +358,59 @@ function getDonationPsychologicalImpact(
     return {
       tier: "basic",
       icon: "🕯️",
-      badge: "Vela & Pergaminho",
-      title: `Materiais e Consagração para ${primeiroEnte}`,
-      description: `Custeia a vela de 7 dias e a folha de pergaminho sagrado para a sessão de psicografia de ${primeiroEnte}.`,
-      badgeColor: "bg-zinc-100 text-zinc-800 border-zinc-300",
-      cardBorder: "border-zinc-200 bg-zinc-50/50",
+      badge: "Vela no Altar",
+      title: `Vela de 7 Dias Consagrada para ${primeiroEnte}`,
+      description: `Custeia a vela de cera pura de 7 dias que permanecerá acesa diante do oratório da médium Milena durante todo o recolhimento espiritual.`,
+      badgeColor: "bg-amber-50 text-amber-900 border-amber-200",
+      cardBorder: "border-amber-200 bg-amber-50/30",
       isValid: true,
     };
   }
-  if (amount < 25) {
+  if (amount < 20) {
     return {
-      tier: "heart",
-      icon: "✨",
-      badge: "⭐ Mais Escolhido pelo Coração",
-      title: "Consagração Completa & Oração Dedicada",
-      description: `Cobre todos os insumos sagrados no oratório e garante a vigília de preces dedicada à paz e acolhimento espiritual de ${primeiroEnte}.`,
-      badgeColor: "bg-amber-100 text-[#92400e] border-[#f59e0b]/50",
-      cardBorder: "border-[#f59e0b] bg-[#fefaf3]",
+      tier: "paper",
+      icon: "📜",
+      badge: "Vela & Papel de Algodão",
+      title: `Materiais de Escrita Manuscrita para ${primeiroEnte}`,
+      description: `Cobre a vela de 7 dias e a folha especial de algodão puro onde as palavras e memórias de ${primeiroEnte} serão vertidas à mão pela médium.`,
+      badgeColor: "bg-amber-50 text-amber-900 border-amber-200",
+      cardBorder: "border-amber-200 bg-amber-50/30",
       isValid: true,
     };
   }
   if (amount < 35) {
     return {
-      tier: "light",
-      icon: "🌟",
-      badge: "Luz Ampliada no Oratório",
-      title: "Velas de Vigília & Preces Fraternas",
-      description: `Além de garantir todos os insumos para ${primeiroEnte}, sua doação acende velas e irradiações de luz para os familiares.`,
-      badgeColor: "bg-purple-100 text-purple-900 border-purple-300",
-      cardBorder: "border-purple-300 bg-purple-50/40",
+      tier: "heart",
+      icon: "✨",
+      badge: "⭐ Mais Escolhido pelo Coração",
+      title: `Consagração Completa & Vigília para ${primeiroEnte}`,
+      description: `A escolha mais comum das famílias. Cobre a vela sagrada de 7 dias, o pergaminho físico e inclui o nome de ${primeiroEnte} na vigília de preces do templo.`,
+      badgeColor: "bg-amber-100 text-amber-950 border-amber-300",
+      cardBorder: "border-amber-300 bg-amber-50/50",
       isValid: true,
     };
   }
   if (amount < 50) {
     return {
+      tier: "light",
+      icon: "🌟",
+      badge: "Consagração & Obras Fraternas",
+      title: `Luz Ampliada & Apoio Assistencial`,
+      description: `Além de garantir todos os materiais de ${primeiroEnte}, sua contribuição ajuda a manter os trabalhos de acolhimento e a sopa fraterna aos necessitados.`,
+      badgeColor: "bg-purple-50 text-purple-900 border-purple-200",
+      cardBorder: "border-purple-200 bg-purple-50/30",
+      isValid: true,
+    };
+  }
+  if (amount < 100) {
+    return {
       tier: "guardian",
       icon: "🕊️",
-      badge: "Protetor(a) da Obra de Acolhimento",
-      title: "Sustentação do Oratório e Marmitas Solidárias",
-      description: `Garante a consagração especial de ${primeiroEnte} e apoia a manutenção do templo e auxílio alimentar a famílias necessitadas.`,
-      badgeColor: "bg-emerald-100 text-emerald-900 border-emerald-300",
-      cardBorder: "border-emerald-400 bg-emerald-50/50",
+      badge: "Protetor(a) da Obra de Luz",
+      title: `Irradiação de Paz Familiar & Preces Contínuas`,
+      description: `Garante a consagração especial de ${primeiroEnte} e estende irradiações de preces e conforto espiritual a você (${primeiroNome || "familiar"}) e a todos os entes do lar.`,
+      badgeColor: "bg-emerald-50 text-emerald-900 border-emerald-200",
+      cardBorder: "border-emerald-200 bg-emerald-50/40",
       isValid: true,
     };
   }
@@ -388,14 +418,43 @@ function getDonationPsychologicalImpact(
   return {
     tier: "eternal",
     icon: "👑",
-    badge: "Bênção Suprema de Gratidão",
-    title: "Inscrição no Livro Sagrado de Orações",
-    description: `Um gesto sublime de caridade. Os nomes de ${primeiroNome || "você"} e de ${primeiroEnte} serão inscritos no Livro Sagrado do Altar para preces de luz.`,
-    badgeColor:
-      "bg-gradient-to-r from-amber-200 to-amber-300 text-amber-950 border-amber-400 shadow-xs",
-    cardBorder: "border-amber-400 bg-gradient-to-br from-[#fffbeb] via-[#fffdfa] to-[#fef3c7]",
+    badge: "Bênção de Gratidão Eterna",
+    title: "Inscrição no Livro Sagrado do Altar",
+    description: `Um gesto sublime de caridade cristã. Os nomes de ${primeiroNome || "você"} e de ${primeiroEnte} serão inscritos no Livro Sagrado do Altar para preces permanentes de luz e gratidão.`,
+    badgeColor: "bg-amber-100 text-amber-950 border-amber-300",
+    cardBorder: "border-amber-300 bg-gradient-to-br from-[#fffbeb] via-[#fffdfa] to-[#fef3c7]",
     isValid: true,
   };
+}
+
+function PixIcon({
+  className = "w-4 h-4",
+  fill = "currentColor",
+}: {
+  readonly className?: string;
+  readonly fill?: string;
+}) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 48 48"
+      className={className}
+      aria-hidden="true"
+    >
+      <path
+        fill={fill}
+        d="M11.9,12h-0.68l8.04-8.04c2.62-2.61,6.86-2.61,9.48,0L36.78,12H36.1c-1.6,0-3.11,0.62-4.24,1.76l-6.8,6.77c-0.59,0.59-1.53,0.59-2.12,0l-6.8-6.77C15.01,12.62,13.5,12,11.9,12z"
+      />
+      <path
+        fill={fill}
+        d="M36.1,36h0.68l-8.04,8.04c-2.62,2.61-6.86,2.61-9.48,0L11.22,36h0.68c1.6,0,3.11-0.62,4.24-1.76l6.8-6.77c0.59-0.59,1.53-0.59,2.12,0l6.8,6.77C32.99,35.38,34.5,36,36.1,36z"
+      />
+      <path
+        fill={fill}
+        d="M44.04,28.74L38.78,34H36.1c-1.07,0-2.07-0.42-2.83-1.17l-6.8-6.78c-1.36-1.36-3.58-1.36-4.94,0l-6.8,6.78C13.97,33.58,12.97,34,11.9,34H9.22l-5.26-5.26c-2.61-2.62-2.61-6.86,0-9.48L9.22,14h2.68c1.07,0,2.07,0.42,2.83,1.17l6.8,6.78c0.68,0.68,1.58,1.02,2.47,1.02s1.79-0.34,2.47-1.02l6.8-6.78C34.03,14.42,35.03,14,36.1,14h2.68l5.26,5.26C46.65,21.88,46.65,26.12,44.04,28.74z"
+      />
+    </svg>
+  );
 }
 
 function PixInstantBox({
@@ -405,12 +464,12 @@ function PixInstantBox({
   readonly primeiroNome?: string;
   readonly primeiroEnte?: string;
 }) {
-  const [selectedAmount, setSelectedAmount] = useState<number>(19);
+  const [selectedAmount, setSelectedAmount] = useState<number>(20);
   const [customInput, setCustomInput] = useState<string>("");
   const [isCustom, setIsCustom] = useState<boolean>(false);
   const [stripeModalOpen, setStripeModalOpen] = useState<boolean>(false);
 
-  const activeAmount = isCustom ? Number(customInput) || 0 : selectedAmount;
+  const activeAmount = isCustom ? Number(customInput.replace(/\D/g, "")) || 0 : selectedAmount;
   const impact = getDonationPsychologicalImpact(activeAmount, primeiroEnte, primeiroNome);
 
   const handleSelectPreset = (val: number) => {
@@ -420,109 +479,120 @@ function PixInstantBox({
   };
 
   const handleCustomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value.replace(/[^0-9]/g, "");
+    const raw = e.target.value.replace(/\D/g, "");
     setIsCustom(true);
     setCustomInput(raw);
   };
 
+  const presets = [
+    { val: 10, label: "R$ 10", tag: "Vela no Altar" },
+    { val: 15, label: "R$ 15", tag: "Vela & Papel" },
+    { val: 20, label: "R$ 20", tag: "⭐ Mais Escolhido", highlight: true },
+    { val: 35, label: "R$ 35", tag: "Consagração" },
+    { val: 50, label: "R$ 50", tag: "Luz & Obras" },
+    { val: 100, label: "R$ 100", tag: "Protetor do Templo" },
+  ];
+
   return (
-    <div className="mt-6 rounded-3xl border-2 border-[#f59e0b]/50 bg-white p-4 sm:p-6 shadow-xl text-center">
-      {/* Badge Topo */}
-      <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-amber-50 border border-[#fde68a] text-[#92400e] text-[11px] font-extrabold tracking-wider uppercase mb-3">
-        <span className="h-2 w-2 rounded-full bg-amber-500 animate-ping" />
-        🤍 Escolha o Valor do Seu Coração
+    <div className="mt-6 rounded-3xl border border-slate-200/80 bg-white p-5 sm:p-7 shadow-xl text-center">
+      {/* Header Limpo e Confiável */}
+      <div className="flex items-center justify-center gap-2 mb-2">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-extrabold tracking-wider uppercase">
+          <PixIcon className="w-3.5 h-3.5 text-emerald-600" />
+          <span>PIX Oficial Banco Central</span>
+        </span>
       </div>
 
-      <h3 className="font-display text-[20px] font-extrabold text-[#181126] leading-tight">
-        Sua Doação Fraterna para os Materiais de {primeiroEnte}
+      <h3 className="font-display text-[21px] font-extrabold text-[#1c1033] leading-tight">
+        Sua Contribuição Fraterna para a Sessão de {primeiroEnte}
       </h3>
-      <p className="text-[13px] text-[#5e4b73] mt-1 leading-snug">
-        A mensagem é gratuita. O valor cobre os custos de velas consagradas de 7 dias, pergaminho e
-        caridade.
+      <p className="text-[13px] text-[#5e4b73] mt-1.5 leading-relaxed max-w-md mx-auto">
+        A psicografia é 100% gratuita por amor e caridade. O valor cobre unicamente os insumos físicos do oratório (vela de 7 dias, pergaminho e acolhimento).
       </p>
 
-      {/* Seletor de Valores em Botões Rápidos */}
-      <div className="mt-5 text-left">
-        <span className="block text-[11px] font-bold tracking-wider text-[#786445] uppercase mb-2">
-          Sugestões de contribuição fraterna:
-        </span>
-        <div className="grid grid-cols-3 gap-2">
-          {[
-            { val: 10, tag: "Simbólico" },
-            { val: 15, tag: "Vela & Papel" },
-            { val: 19, tag: "⭐ Mais Escolhido", highlight: true },
-            { val: 27, tag: "Consagração" },
-            { val: 37, tag: "Luz Especial" },
-          ].map((item) => {
+      {/* Seletor de Valores em Grade Limpa e Moderna */}
+      <div className="mt-6 text-left">
+        <div className="flex items-center justify-between mb-2.5">
+          <span className="text-[11.5px] font-extrabold tracking-wider text-[#786445] uppercase">
+            Escolha o valor da contribuição:
+          </span>
+          <span className="text-[11px] text-emerald-700 font-bold flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Instantâneo 24h</span>
+          </span>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2.5">
+          {presets.map((item) => {
             const isSelected = !isCustom && selectedAmount === item.val;
             return (
               <button
                 key={item.val}
                 type="button"
                 onClick={() => handleSelectPreset(item.val)}
-                className={`relative py-2.5 px-2 rounded-2xl text-center transition-all duration-200 border-2 cursor-pointer ${
+                className={`group relative py-3 px-2 rounded-2xl text-center transition-all duration-200 cursor-pointer ${
                   isSelected
-                    ? "border-[#f59e0b] bg-[#fef3c7] text-[#92400e] shadow-md scale-[1.02]"
-                    : "border-[#ece4f4] bg-white text-[#2d144d] hover:border-[#f59e0b]/50"
+                    ? "border-2 border-emerald-600 bg-emerald-50/60 text-emerald-950 shadow-md ring-2 ring-emerald-600/20 scale-[1.02]"
+                    : "border border-slate-200 bg-slate-50/50 text-[#1f1035] hover:border-slate-300 hover:bg-white"
                 }`}
               >
                 {item.highlight && (
-                  <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-[#b45309] px-2 py-0.5 text-[8.5px] font-black text-white uppercase tracking-wider whitespace-nowrap shadow-xs">
-                    Popular
+                  <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-amber-500 px-2.5 py-0.5 text-[8.5px] font-black text-white uppercase tracking-wider whitespace-nowrap shadow-xs">
+                    Mais Escolhido
                   </span>
                 )}
-                <span className="block text-[15px] font-black leading-tight">R$ {item.val}</span>
-                <span className="block text-[9.5px] font-semibold text-[#786445] truncate mt-0.5">
+                <span className="block text-[16px] font-black leading-tight tracking-tight">
+                  {item.label}
+                </span>
+                <span className={`block text-[10px] font-medium truncate mt-0.5 ${isSelected ? "text-emerald-800" : "text-[#786445]"}`}>
                   {item.tag}
                 </span>
               </button>
             );
           })}
 
-          {/* Botão para Ativar Valor Personalizado */}
+          {/* Botão de Outro Valor */}
           <button
             type="button"
             onClick={() => {
               setIsCustom(true);
               if (!customInput) setCustomInput("25");
             }}
-            className={`py-2.5 px-2 rounded-2xl text-center transition-all duration-200 border-2 cursor-pointer ${
+            className={`col-span-3 py-2.5 px-3 rounded-2xl text-center transition-all duration-200 border cursor-pointer flex items-center justify-center gap-2 ${
               isCustom
-                ? "border-[#f59e0b] bg-[#fef3c7] text-[#92400e] shadow-md scale-[1.02]"
-                : "border-[#ece4f4] bg-white text-[#2d144d] hover:border-[#f59e0b]/50"
+                ? "border-2 border-emerald-600 bg-emerald-50/60 text-emerald-950 shadow-sm ring-2 ring-emerald-600/20"
+                : "border-dashed border-slate-300 bg-slate-50/40 text-[#4a3b60] hover:border-slate-400 hover:bg-white"
             }`}
           >
-            <span className="block text-[14px] font-black leading-tight">✍️ Outro</span>
-            <span className="block text-[9.5px] font-semibold text-[#786445] mt-0.5">
-              Digitar Valor
-            </span>
+            <span className="text-[13px] font-bold">✍️ Digitar Outro Valor Personalizado</span>
           </button>
         </div>
       </div>
 
-      {/* Input de Valor Personalizado caso ativado */}
+      {/* Input de Valor Personalizado */}
       {isCustom && (
-        <div className="mt-3.5 p-3 rounded-2xl bg-[#fbf9f5] border border-[#fde68a] text-left animate-rise-in">
-          <label className="block text-[11.5px] font-bold text-[#2d144d] mb-1">
-            Digite o valor que deseja doar (mínimo de R$ 10,00):
+        <div className="mt-4 p-4 rounded-2xl bg-slate-50 border border-slate-200 text-left animate-rise-in">
+          <label htmlFor="custom-donation-input" className="block text-[11.5px] font-bold text-[#1f1035] mb-1.5">
+            Digite o valor que deseja doar (mínimo de R$ 10):
           </label>
           <div className="relative flex items-center">
-            <span className="absolute left-3.5 text-base font-black text-[#2d144d]">R$</span>
+            <span className="absolute left-4 text-base font-black text-[#1f1035]">R$</span>
             <input
+              id="custom-donation-input"
               type="text"
               inputMode="numeric"
               value={customInput}
               onChange={handleCustomChange}
               placeholder="Ex: 25"
-              className="w-full pl-11 pr-4 py-2.5 rounded-xl border-2 border-[#e5daf0] focus:border-[#f59e0b] bg-white text-[16px] font-black text-[#181126] outline-hidden shadow-2xs"
+              className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-slate-200 focus:border-emerald-600 bg-white text-[17px] font-black text-[#1f1035] outline-hidden shadow-2xs"
             />
           </div>
         </div>
       )}
 
-      {/* CARD PSICOLÓGICO DINÂMICO CONFORME O VALOR ESCOLHIDO */}
+      {/* Card de Impacto Espiritual Refinado */}
       <div
-        className={`mt-4 rounded-2xl border-2 p-4 text-left shadow-xs transition-all duration-300 ${impact.cardBorder}`}
+        className={`mt-4 rounded-2xl border p-4 text-left shadow-2xs transition-all duration-300 ${impact.cardBorder}`}
       >
         <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
           <span
@@ -531,11 +601,8 @@ function PixInstantBox({
             <span>{impact.icon}</span>
             {impact.badge}
           </span>
-          <span className="text-[13px] font-black text-[#2d144d]">
-            R${" "}
-            {activeAmount > 0
-              ? activeAmount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })
-              : "0,00"}
+          <span className="text-[13px] font-black text-[#1f1035]">
+            R$ {activeAmount > 0 ? activeAmount.toFixed(2).replace(".", ",") : "0,00"}
           </span>
         </div>
 
@@ -543,9 +610,8 @@ function PixInstantBox({
         <p className="text-[12px] text-[#5e4b73] mt-1 leading-relaxed">{impact.description}</p>
 
         {activeAmount < 10 && (
-          <div className="mt-2.5 p-2 rounded-xl bg-red-100/70 border border-red-200 text-red-900 text-[11.5px] font-bold leading-tight">
-            ⚠️ O valor mínimo de R$ 10,00 é necessário apenas para cobrir a vela de 7 dias e o
-            pergaminho especial de algodão puro.
+          <div className="mt-2.5 p-2.5 rounded-xl bg-red-100/80 border border-red-200 text-red-900 text-[11.5px] font-bold leading-tight">
+            ⚠️ O valor mínimo de R$ 10 é necessário unicamente para cobrir a vela de 7 dias e o pergaminho físico de algodão puro.
           </div>
         )}
       </div>
@@ -554,19 +620,47 @@ function PixInstantBox({
         <PixCheckout productId="carta_sagrada" amountCents={Math.round(activeAmount * 100)} />
       ) : (
         <div className="mt-5 p-4 rounded-2xl bg-zinc-100 border border-zinc-200 text-zinc-600 text-xs font-semibold">
-          Por favor, selecione ou digite um valor a partir de R$ 10,00 para gerar o código PIX.
+          Por favor, selecione ou digite um valor a partir de R$ 10 para gerar o código PIX.
         </div>
       )}
 
-      {/* Opção Cartão de Crédito com Modal de Confirmação Stripe */}
-      <div className="mt-4 pt-3 border-t border-[#ece4f4]">
+      {/* Opção Cartão de Crédito - Design Premium */}
+      <div className="mt-4 pt-4 border-t border-[#ede4f5]">
         <button
           type="button"
           onClick={() => setStripeModalOpen(true)}
-          className="utmify-initiate-checkout inline-flex w-full items-center justify-center gap-2 py-3.5 px-4 rounded-2xl border-2 border-[#d5c3ea] bg-[#f9f5fd] hover:bg-[#f2eafb] text-[#2d144d] font-bold text-[13px] transition-all cursor-pointer shadow-2xs"
+          className="utmify-initiate-checkout group relative w-full overflow-hidden rounded-2xl border-2 border-[#dccbe8] bg-gradient-to-r from-[#faf7fd] via-[#f5eefb] to-[#f0e4f7] p-3.5 text-left transition-all duration-200 hover:border-[#6b21a8] hover:shadow-lg hover:shadow-purple-900/10 active:scale-[0.99] cursor-pointer"
         >
-          <span>💳</span>
-          <span>Prefere doar no Cartão de Crédito? Clique aqui ›</span>
+          {/* Efeito de brilho ao passar o mouse */}
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
+
+          <div className="flex items-center justify-between gap-3 relative z-10">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#2d144d] via-[#43196f] to-[#1a0730] text-white shadow-md shadow-purple-950/25 group-hover:scale-105 transition-transform">
+                <svg className="w-6 h-6 text-purple-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+              </div>
+
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="text-[13.5px] font-black text-[#1f0c36] group-hover:text-[#43196f] transition-colors">
+                    Doar com Cartão de Crédito
+                  </span>
+                  <span className="rounded-full bg-purple-100/90 border border-purple-200/80 px-2 py-0.5 text-[9.5px] font-extrabold uppercase text-[#43196f]">
+                    Até 12x
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 mt-0.5 text-[11px] text-[#6b5883] font-medium truncate">
+                  <span>Visa • Master • Elo • Amex • Hipercard</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex shrink-0 items-center justify-center h-8 w-8 rounded-full bg-white border border-[#dccbe8] text-[#43196f] font-black text-sm group-hover:bg-[#43196f] group-hover:text-white group-hover:border-[#43196f] shadow-2xs transition-all">
+              ›
+            </div>
+          </div>
         </button>
       </div>
 
@@ -574,14 +668,14 @@ function PixInstantBox({
         isOpen={stripeModalOpen}
         onClose={() => setStripeModalOpen(false)}
         productId="carta_sagrada"
-        amountCents={Math.round((activeAmount >= 10 ? activeAmount : 19) * 100)}
+        amountCents={Math.round((activeAmount >= 10 ? activeAmount : 20) * 100)}
         primeiroEnte={primeiroEnte}
       />
 
       {/* Info pós-PIX */}
-      <div className="mt-5 pt-4 border-t border-[#ece4f4]">
-        <p className="text-[12px] text-[#786445] text-center leading-relaxed">
-          ✨ Após confirmar o pagamento PIX ou Cartão, você será redirecionado(a) automaticamente.
+      <div className="mt-4 pt-3 border-t border-slate-100">
+        <p className="text-[11.5px] text-[#786445] text-center leading-relaxed">
+          ✨ Após confirmar a doação via PIX ou Cartão, você será redirecionado(a) automaticamente.
         </p>
       </div>
     </div>
@@ -656,10 +750,10 @@ function Intro({
   error,
   next,
 }: {
-  nome: string;
-  setNome: (v: string) => void;
-  error?: string | undefined;
-  next: () => void;
+  readonly nome: string;
+  readonly setNome: (v: string) => void;
+  readonly error?: string | undefined;
+  readonly next: () => void;
 }) {
   const [letterModalOpen, setLetterModalOpen] = useState(false);
 
@@ -678,7 +772,7 @@ function Intro({
           <div className="absolute top-4 inset-x-0 flex justify-center z-10 px-4">
             <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/80 bg-black/65 backdrop-blur-md px-4 py-1.5 text-[11px] font-bold tracking-[0.2em] text-amber-300 uppercase shadow-2xl">
               <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping shadow-xs shadow-amber-400" />
-              🕊️ Templo de Luz · Desde 1977
+              {" "}🕊️ Templo de Luz · Desde 1977
             </span>
           </div>
           {/* Transição suave na base da foto */}
@@ -740,9 +834,11 @@ function Intro({
 
         {/* Exemplo de Carta com Borda Sagrada & Zoom em Tela Cheia */}
         <Reveal className="w-full">
-          <div
+          <button
+            type="button"
             onClick={() => setLetterModalOpen(true)}
-            className="group relative mx-auto max-w-[325px] rounded-2xl p-1 bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 shadow-xl cursor-zoom-in transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl"
+            aria-label="Toque para ampliar exemplo de carta psicografada"
+            className="group relative block w-full mx-auto max-w-[325px] rounded-2xl p-1 bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 shadow-xl cursor-zoom-in transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl text-left"
           >
             <div className="relative overflow-hidden rounded-xl">
               <img
@@ -757,7 +853,7 @@ function Intro({
                 </span>
               </div>
             </div>
-          </div>
+          </button>
           <p className="font-display mx-auto mt-4 max-w-[310px] text-center text-[14px] italic text-[#4a365f] leading-relaxed font-medium">
             🥹 “Quando abri o envelope e li a primeira linha, reconheci a letra exata da minha
             mãe... Chorei de pura paz.”
@@ -854,18 +950,26 @@ function Intro({
 function Loading({
   nome,
   ente,
+  relacao: _relacao,
   dorPrincipal,
   onDone,
 }: {
-  nome: string;
-  ente: string;
-  relacao?: string;
-  dorPrincipal?: string | undefined;
-  onDone: () => void;
+  readonly nome: string;
+  readonly ente: string;
+  readonly relacao?: string;
+  readonly dorPrincipal?: string | undefined;
+  readonly onDone: () => void;
 }) {
   const [pct, setPct] = useState(0);
   const primeiroNome = nome.split(" ")[0] || "você";
   const primeiroEnte = ente.split(" ")[0] || "seu ente";
+
+  let intentionDetail = "Preparando sua intenção com cuidado e privacidade.";
+  if (dorPrincipal) {
+    const isLong = dorPrincipal.length > 48;
+    const truncatedText = dorPrincipal.slice(0, 48);
+    intentionDetail = `Preparando sua intenção: “${truncatedText}${isLong ? "..." : ""}”`;
+  }
 
   const stages = useMemo(
     () => [
@@ -875,9 +979,7 @@ function Loading({
       },
       {
         title: "Organizando as informações",
-        detail: dorPrincipal
-          ? `Preparando sua intenção: “${dorPrincipal.slice(0, 48)}${dorPrincipal.length > 48 ? "..." : ""}”`
-          : "Preparando sua intenção com cuidado e privacidade.",
+        detail: intentionDetail,
       },
       {
         title: "Preparando o oratório",
@@ -888,7 +990,7 @@ function Loading({
         detail: "Seu pedido está pronto para ser apresentado à médium Milena.",
       },
     ],
-    [primeiroNome, primeiroEnte, dorPrincipal],
+    [primeiroNome, primeiroEnte, intentionDetail],
   );
   const activeStage = Math.min(Math.floor(pct / 25), stages.length - 1);
 
@@ -922,12 +1024,14 @@ function Loading({
         </p>
 
         <div className="mt-5">
-          <div
-            role="progressbar"
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={pct}
+          <progress
+            value={pct}
+            max={100}
             aria-label="Preparação do pedido"
+            className="sr-only"
+          />
+          <div
+            aria-hidden="true"
             className="h-2.5 overflow-hidden rounded-full border border-white/10 bg-black/35 p-0.5"
           >
             <div
@@ -945,25 +1049,24 @@ function Loading({
           {stages.map((stage, index) => {
             const isComplete = index < activeStage || pct === 100;
             const isActive = index === activeStage && pct < 100;
+
+            let cardClasses = "border-white/10 bg-black/10";
+            let badgeClasses = "bg-white/10 text-white/45";
+            if (isComplete) {
+              cardClasses = "border-emerald-300/20 bg-emerald-300/[0.07]";
+              badgeClasses = "bg-emerald-400 text-emerald-950";
+            } else if (isActive) {
+              cardClasses = "border-amber-300/40 bg-amber-200/10";
+              badgeClasses = "bg-amber-300 text-amber-950 ring-4 ring-amber-300/15";
+            }
+
             return (
               <div
                 key={stage.title}
-                className={`flex items-start gap-3 rounded-2xl border px-3.5 py-3 transition-colors duration-300 ${
-                  isActive
-                    ? "border-amber-300/40 bg-amber-200/10"
-                    : isComplete
-                      ? "border-emerald-300/20 bg-emerald-300/[0.07]"
-                      : "border-white/10 bg-black/10"
-                }`}
+                className={`flex items-start gap-3 rounded-2xl border px-3.5 py-3 transition-colors duration-300 ${cardClasses}`}
               >
                 <span
-                  className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-black ${
-                    isComplete
-                      ? "bg-emerald-400 text-emerald-950"
-                      : isActive
-                        ? "bg-amber-300 text-amber-950 ring-4 ring-amber-300/15"
-                        : "bg-white/10 text-white/45"
-                  }`}
+                  className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-black ${badgeClasses}`}
                 >
                   {isComplete ? "✓" : index + 1}
                 </span>
@@ -1020,7 +1123,7 @@ function Faq() {
   );
 }
 
-function Countdown({ minutes }: { minutes: number }) {
+function Countdown({ minutes }: { readonly minutes: number }) {
   const [left, setLeft] = useState(minutes * 60);
   useEffect(() => {
     const iv = setInterval(() => setLeft((s) => (s > 0 ? s - 1 : 0)), 1000);
@@ -1067,7 +1170,7 @@ function Result({
           />
           <div className="absolute top-4 inset-x-0 flex justify-center z-10 px-4">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/80 bg-black/65 px-4 py-1 text-[11px] font-bold tracking-[0.16em] text-amber-300 uppercase shadow-2xl backdrop-blur-md">
-              📅 Agendamento Espiritual Confirmado
+              📅 Sintonia Espiritual Reservada
             </span>
           </div>
           <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#180829] to-transparent pointer-events-none" />
@@ -1087,17 +1190,17 @@ function Result({
               foi agendada para <span className="text-shimmer">{horarioExibicao}</span>
             </h1>
             <p className="mx-auto mt-3 text-[13.5px] leading-relaxed text-zinc-200 font-normal">
-              Guarde este momento no coração: é quando a médium Milena Medeiros entra em recolhimento
-              sagrado para psicografar a mensagem de {primeiroEnte} ({relacao || "ente querido"}) para
+              Guarde este momento em prece no coração: é quando a médium Milena Medeiros entra em recolhimento
+              sagrado no oratório para sintonizar a presença e psicografar a mensagem de {primeiroEnte} ({relacao || "ente querido"}) para
               você.
             </p>
           </div>
         </div>
       </header>
 
-      {/* Banner de Urgência */}
+      {/* Banner de Urgência Espiritual */}
       <div className="bg-[#f6f0fc] border-b border-[#ece4f4] px-5 py-3.5 text-center text-xs text-[#2d144d] flex items-center justify-center gap-2 font-medium">
-        <span>⏳ Vaga reservada no oratório por</span>
+        <span>⏳ Vela sagrada e horário reservados no oratório por</span>
         <Countdown minutes={15} />
       </div>
 
@@ -1106,7 +1209,7 @@ function Result({
         {dorPrincipal && (
           <Reveal className="p-4 rounded-2xl bg-white border border-[#fde68a] mb-6 text-center shadow-sm">
             <span className="text-[11px] font-bold text-[#b45309] block uppercase tracking-wider">
-              🕊️ Intenção Registrada para a Médium
+              🕊️ Intenção Registrada para a Sessão
             </span>
             <p className="text-[13.5px] text-[#2d144d] mt-1 font-semibold italic">
               "{dorPrincipal}"
@@ -1141,19 +1244,18 @@ function Result({
 
           <div className="mt-2.5 max-w-[360px] px-2 z-10">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 backdrop-blur-xs border border-amber-300/80 text-[11px] font-extrabold text-[#92400e] uppercase shadow-xs">
-              <span>✦</span> MÉDIUM TITULAR DESDE 1993
+              <span>✦</span> MÉDIUM TITULAR DA CASA NOVA (DESDE 1993)
             </span>
             <p className="mt-2 text-[13px] text-[#5e4b73] leading-relaxed font-medium">
-              Milena já verteu mais de 12 mil cartas manuscritas, trazendo alívio, confirmação e
-              consolo a famílias de todo o Brasil.
+              Há 33 anos dedicando sua vida à missão de consolar corações. Milena jamais cobra por psicografia — cada mensagem é vertida à mão como ato de amor e caridade pura.
             </p>
           </div>
         </Reveal>
 
         <Reveal delay={120} className="mt-4 grid grid-cols-3 gap-2.5">
           {[
-            { n: "33", l: "anos de missão" },
-            { n: "+12k", l: "cartas entregues" },
+            { n: "33", l: "anos de caridade" },
+            { n: "+12k", l: "cartas manuscritas" },
             { n: "4,9★", l: "de consolo real" },
           ].map((s) => (
             <div
@@ -1168,32 +1270,116 @@ function Result({
           ))}
         </Reveal>
 
-        {/* ── META DE MATERIAIS DO ORATÓRIO (APÓS A APRESENTAÇÃO DE MILENA) ── */}
-        <Reveal delay={140} className="mt-7">
+        {/* ── SEÇÃO DE COPY PERSUASIVA & QUEBRA DE OBJEÇÃO ANTES DA DOAÇÃO ── */}
+        <Reveal delay={130} className="mt-8">
+          <div className="rounded-3xl border border-amber-300/70 bg-gradient-to-b from-[#fffef9] via-[#fffcf4] to-[#fbf7eb] p-5 sm:p-7 shadow-lg text-left">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100/80 border border-amber-300 text-amber-950 text-[10.5px] font-extrabold uppercase tracking-wider mb-3 shadow-2xs">
+              <span>🕊️</span>
+              <span>Compromisso Sagrado de Caridade</span>
+            </div>
+
+            <h2 className="font-display text-[21px] sm:text-[23px] font-extrabold text-[#1f1035] leading-snug">
+              Por que a psicografia de {primeiroEnte} é 100% gratuita, mas a vela no altar precisa ser mantida com a sua ajuda?
+            </h2>
+
+            <div className="mt-3.5 space-y-3 text-[13px] sm:text-[13.5px] text-[#4a3b60] leading-relaxed font-normal">
+              <p>
+                A mediunidade de Milena Medeiros é um dom divino guiado pela caridade pura de Allan Kardec e Chico Xavier — por isso, <strong className="text-[#1f1035] font-extrabold">você jamais pagará por uma linha sequer da psicografia</strong>. A mensagem de quem você ama é um presente sagrado dos céus.
+              </p>
+              <p>
+                No entanto, para que a médium consiga realizar o recolhimento espiritual e sintonizar a presença de {primeiroEnte} aqui na Terra, o oratório necessita de <strong className="text-[#1f1035] font-extrabold">insumos físicos consagrados</strong> que não são gratuitos na matéria:
+              </p>
+            </div>
+
+            {/* Foto da Médium Milena no Oratório com Vela e Pergaminho */}
+            <div className="my-4 overflow-hidden rounded-2xl border border-amber-300/80 bg-white shadow-md">
+              <img
+                src={IMAGES.milenaOratorio}
+                alt="Médium Milena Medeiros em recolhimento e oração no Templo de Luz"
+                className="w-full h-auto max-h-[380px] object-cover object-center"
+              />
+              <div className="p-2.5 bg-gradient-to-r from-amber-50 via-white to-amber-50 text-center border-t border-amber-200/60">
+                <span className="text-[11px] font-bold text-[#78350f] italic">
+                  🕊️ Médium Milena Medeiros durante o recolhimento sagrado no Templo de Luz
+                </span>
+              </div>
+            </div>
+
+            {/* 3 Pilares Visuais da Doação */}
+            <div className="mt-4 space-y-2.5">
+              <div className="flex items-start gap-3 p-3 rounded-2xl bg-white/90 border border-amber-200/60 shadow-2xs">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50 border border-amber-200 text-lg">
+                  🕯️
+                </span>
+                <div>
+                  <h4 className="text-[13px] font-extrabold text-[#1f1035]">
+                    1. Vela de 7 Dias em Nome de {primeiroEnte}
+                  </h4>
+                  <p className="text-[11.5px] text-[#6c5a82] mt-0.5 leading-relaxed">
+                    A cera pura de 7 dias é consagrada e permanece acesa diante do altar durante todo o recolhimento, funcionando como ponto de ancoragem e farol de luz para a sintonia.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 p-3 rounded-2xl bg-white/90 border border-amber-200/60 shadow-2xs">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50 border border-amber-200 text-lg">
+                  📜
+                </span>
+                <div>
+                  <h4 className="text-[13px] font-extrabold text-[#1f1035]">
+                    2. Papel Especial de Algodão Puro
+                  </h4>
+                  <p className="text-[11.5px] text-[#6c5a82] mt-0.5 leading-relaxed">
+                    Folhas de pergaminho físico de alta gramatura onde a letra manuscrita, os traços originais e as assinaturas de {primeiroEnte} são vertidos fisicamente.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 p-3 rounded-2xl bg-white/90 border border-amber-200/60 shadow-2xs">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50 border border-amber-200 text-lg">
+                  🍲
+                </span>
+                <div>
+                  <h4 className="text-[13px] font-extrabold text-[#1f1035]">
+                    3. Sopa Fraterna & Manutenção da Casa
+                  </h4>
+                  <p className="text-[11.5px] text-[#6c5a82] mt-0.5 leading-relaxed">
+                    O Centro Espírita Casa Nova é mantido unicamente pelas doações das famílias acolhidas, alimentando semanalmente dezenas de irmãos necessitados.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Chamada de Fechamento Confortadora */}
+            <div className="mt-4 p-3.5 rounded-2xl bg-amber-500/10 border border-amber-400/40 text-[12px] text-[#78350f] font-medium leading-relaxed">
+              ✨ <strong>Milena doa seu tempo, sua prece e sua mediunidade sem pedir nada em troca.</strong> Seu gesto voluntário de manter os insumos hoje é o que permite a este altar continuar aceso para você e para quem mais busca alívio na dor.
+            </div>
+          </div>
+        </Reveal>
+
+        {/* ── META DE MATERIAIS DO ORATÓRIO (APÓS A EXPLICAÇÃO) ── */}
+        <Reveal delay={140} className="mt-6">
           <DonationGoal />
         </Reveal>
 
         {/* ── CARD DE DOAÇÃO SOLIDÁRIA COM PIX NA PÁGINA ── */}
-        <Reveal className="relative mt-8 overflow-hidden rounded-3xl p-4 text-center shadow-xl border-2 border-[#f59e0b] bg-white sm:p-6">
+        <Reveal className="relative mt-8 overflow-hidden rounded-3xl p-4 text-center shadow-xl border border-slate-200/90 bg-white sm:p-6">
           <div id="pix-section" className="absolute -top-16" />
           <div className="flex flex-wrap items-center justify-center gap-2">
-            <span className="inline-flex items-center gap-1 rounded-full border border-[#fde68a] bg-[#fef3c7] px-3 py-1 text-[10.5px] font-extrabold uppercase tracking-wider text-[#92400e]">
-              ★ Ação solidária
+            <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[10.5px] font-extrabold uppercase tracking-wider text-[#92400e]">
+              ★ Caridade Fraterna
             </span>
             <span className="inline-flex rounded-full border border-[#e5daf0] bg-[#f6f0fc] px-3 py-1 text-[10.5px] font-bold uppercase tracking-[0.12em] text-[#2d144d]">
-              Contribuição de manutenção
+              Sustentação do Oratório
             </span>
           </div>
 
           <h2 className="font-display mt-4 text-[20px] leading-[1.35] font-extrabold text-[#181126] sm:text-[22px]">
-            A mensagem de {primeiroEnte} é sagrada e gratuita — você escolhe com o coração o valor
-            da sua contribuição fraterna
+            Consagre a vela e os materiais da sessão de {primeiroEnte}
           </h2>
 
-          <p className="mx-auto mt-3 text-[13.5px] leading-relaxed text-[#5e4b73] font-normal">
-            O Templo de Luz mantém as portas abertas por caridade. Sua contribuição custeia a vela
-            de 7 dias acesa no oratório, a folha de algodão puro para psicografia e apoia as obras
-            assistenciais da casa.
+          <p className="mx-auto mt-2 text-[13px] leading-relaxed text-[#5e4b73] font-normal max-w-md">
+            Escolha abaixo com o coração o valor da sua contribuição para os insumos do oratório da médium Milena Medeiros:
           </p>
 
           {/* Integração do Seletor de Doação Livre & PIX Instantâneo */}
@@ -1229,7 +1415,7 @@ function Result({
           className="utmify-initiate-checkout cta-hot w-full cursor-pointer rounded-xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 px-5 py-3.5 text-[14.5px] font-extrabold tracking-wide text-white uppercase shadow-lg shadow-emerald-600/25 transition-transform hover:-translate-y-0.5"
         >
           <span className="relative z-10 flex items-center justify-center gap-2">
-            🕯️ Fazer Doação Fraterna de {primeiroEnte}
+            🕯️ Consagrar Vela de {primeiroEnte} no Oratório
           </span>
         </button>
       </div>

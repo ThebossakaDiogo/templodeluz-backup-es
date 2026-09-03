@@ -60,19 +60,19 @@ export function LiveActivityToast() {
   useEffect(() => {
     if (dismissed) return;
 
-    // Primeiro toast aparece após 3.5 segundos
+    // Primeiro toast aparece após 4 segundos
     const initialTimer = setTimeout(() => {
       setVisible(true);
-    }, 3500);
+    }, 4000);
 
-    // Intervalo de ciclo: 5s visível, 4s invisível antes do próximo
+    // Intervalo de ciclo: 4s visível, 6s invisível antes do próximo
     const interval = setInterval(() => {
       setVisible(false);
       setTimeout(() => {
         setCurrentIdx((prev) => (prev + 1) % LIVE_EVENTS.length);
         setVisible(true);
-      }, 4000);
-    }, 9500);
+      }, 6000);
+    }, 10000);
 
     return () => {
       clearTimeout(initialTimer);
@@ -80,40 +80,41 @@ export function LiveActivityToast() {
     };
   }, [dismissed]);
 
-  if (dismissed || !visible) return null;
-
   const ev = LIVE_EVENTS[currentIdx];
+  if (dismissed || !visible || !ev) return null;
 
   return (
     <aside
       aria-label="Atividade recente no Templo de Luz"
-      className="fixed bottom-24 left-4 right-4 z-40 max-w-[370px] animate-rise-in sm:bottom-4 sm:right-auto"
+      className="fixed bottom-3 left-3 right-auto z-40 max-w-[310px] sm:max-w-[340px] pointer-events-auto animate-fade-in"
     >
-      <div className="flex items-start gap-3 rounded-2xl border border-[#fde68a] bg-white/95 backdrop-blur-md p-3.5 shadow-2xl shadow-purple-950/15">
-        {/* Ícone com Aura */}
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#fefaf3] border border-[#fde68a] text-lg shadow-2xs">
+      <div className="flex items-center gap-2 rounded-full border border-amber-300/70 bg-white/95 backdrop-blur-md py-1.5 px-3 shadow-lg shadow-purple-950/10 text-left">
+        {/* Ponto de Pulso e Ícone */}
+        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-100 text-xs">
           {ev.icon}
-        </div>
+        </span>
 
-        {/* Conteúdo */}
-        <div className="flex-1 text-left min-w-0">
-          <div className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
-            <span className="text-[11.5px] font-black text-[#181126] truncate">
-              {ev.name} <span className="text-[#8e7a60] font-medium">({ev.city})</span>
+        {/* Texto em linha compacta */}
+        <div className="flex-1 min-w-0 pr-1">
+          <div className="flex items-center gap-1 leading-none truncate">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0" />
+            <span className="text-[10.5px] font-black text-[#181126] truncate">
+              {ev.name}
+            </span>
+            <span className="text-[9.5px] text-[#8e7a60] font-medium shrink-0">
+              ({ev.city})
             </span>
           </div>
-          <p className="mt-0.5 text-[11.5px] text-[#5e4b73] leading-snug">{ev.action}</p>
-          <span className="mt-1 block text-[10px] font-semibold text-[#b45309]">
-            {ev.time} · Templo de Luz
-          </span>
+          <p className="text-[10px] text-[#5e4b73] font-medium truncate mt-0.5 leading-none">
+            {ev.action} · <span className="text-[#b45309] font-bold">{ev.time}</span>
+          </p>
         </div>
 
-        {/* Botão Fechar */}
+        {/* Botão Fechar Discreto */}
         <button
           type="button"
           onClick={() => setDismissed(true)}
-          className="text-zinc-400 hover:text-zinc-700 text-xs p-1 -mr-1 -mt-1 cursor-pointer transition-colors"
+          className="text-zinc-400 hover:text-zinc-700 text-[10px] p-0.5 rounded-full hover:bg-zinc-100 cursor-pointer transition-colors shrink-0"
           aria-label="Fechar notificação"
         >
           ✕

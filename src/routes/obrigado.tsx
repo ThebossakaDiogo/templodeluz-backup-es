@@ -144,12 +144,21 @@ function ObrigadoPage() {
               enviar as palavras do seu coração diretamente para a médium Milena Medeiros.
             </p>
 
-            <Link
-              to="/escrever-carta"
-              className="cta-hot inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#3c1766] via-[#2a0e4a] to-[#1a0630] px-6 py-4 text-sm font-black tracking-wide text-white uppercase shadow-xl border border-[#d4af37]/40 transition-transform hover:scale-[1.02]"
-            >
-              <span className="relative z-10">✍️ Redigir Minha Carta em Pergaminho</span>
-            </Link>
+            <div className="space-y-2.5 pt-2">
+              <Link
+                to="/como-funciona"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 px-6 py-4 text-sm font-black tracking-wide text-white uppercase shadow-xl shadow-emerald-700/25 transition-transform hover:scale-[1.01] active:scale-[0.99]"
+              >
+                <span>📋 Ver Passo a Passo & Escrever Carta ›</span>
+              </Link>
+
+              <Link
+                to="/escrever-carta"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white border border-[#d8caea] px-4 py-2.5 text-xs font-bold text-[#2d144d] hover:bg-[#f6f0fc] transition-colors"
+              >
+                <span>✍️ Ir direto para a Carta Manuscrita</span>
+              </Link>
+            </div>
           </Reveal>
 
           {/* O que acontece agora */}

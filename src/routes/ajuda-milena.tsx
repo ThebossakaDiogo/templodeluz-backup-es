@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Halos, Reveal, Stars, Footer } from "@/components/funnel/Shell";
 import { PixCheckout } from "@/components/funnel/PixCheckout";
@@ -122,6 +122,16 @@ export function AjudaMilenaPage() {
   const [isCustom, setIsCustom] = useState<boolean>(false);
   const [donorIdx, setDonorIdx] = useState(0);
   const [stripeModalOpen, setStripeModalOpen] = useState(false);
+  const [isRetorno, setIsRetorno] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("retorno") === "true") {
+        setIsRetorno(true);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     let tick = 0;
@@ -155,11 +165,18 @@ export function AjudaMilenaPage() {
   return (
     <div className="min-h-screen bg-[#fbf9f5] text-[#181126] antialiased selection:bg-[#fde68a] selection:text-[#181126]">
       <div className="mx-auto flex min-h-screen w-full max-w-[480px] flex-col bg-[#fbf9f5] shadow-2xl border-x border-[#ece4f4] pb-24">
-        {/* Banner Superior de Sucesso da Compra */}
-        <div className="bg-emerald-600 px-4 py-2.5 text-center text-xs font-bold text-white flex items-center justify-center gap-1.5 shadow-sm">
-          <span>✅</span>
-          <span>Sua Carta Psicografada já está confirmada no oratório!</span>
-        </div>
+        {/* Banner Superior de Sucesso ou de Retorno */}
+        {isRetorno ? (
+          <div className="bg-gradient-to-r from-amber-600 via-amber-700 to-amber-800 px-4 py-3 text-center text-xs font-black text-white flex items-center justify-center gap-2 shadow-md">
+            <span className="text-base animate-bounce">🕊️</span>
+            <span>Está aqui novamente para nos ajudar? Que Deus abençoe seu coração!</span>
+          </div>
+        ) : (
+          <div className="bg-emerald-600 px-4 py-2.5 text-center text-xs font-bold text-white flex items-center justify-center gap-1.5 shadow-sm">
+            <span>✅</span>
+            <span>Sua Carta Psicografada já está confirmada no oratório!</span>
+          </div>
+        )}
 
         {/* Top Header Sagrado */}
         <header className="relative overflow-hidden bg-gradient-to-b from-[#2d144d] via-[#1f0c36] to-[#120422] px-6 pt-9 pb-9 text-center text-white">
@@ -168,19 +185,31 @@ export function AjudaMilenaPage() {
             <Stars />
             <span className="mt-2.5 inline-flex items-center gap-2 rounded-full border border-amber-400/50 bg-white/10 backdrop-blur-md px-4 py-1.5 text-[11px] font-bold tracking-[0.2em] text-amber-300 uppercase shadow-md">
               <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping shadow-xs shadow-amber-400" />
-              <span>🙏 Um Pedido do Coração</span>
+              <span>{isRetorno ? "✨ Chamado de Gratidão" : "🙏 Um Pedido do Coração"}</span>
             </span>
 
-            <h1 className="font-display mt-5 text-[25px] leading-[1.25] font-black text-white tracking-tight drop-shadow-md">
-              Antes de ir para o WhatsApp: Um apelo urgente pela visão da{" "}
-              <span className="text-[#fde68a] not-italic underline decoration-amber-400/60 decoration-2 underline-offset-4">
-                Médium Milena
-              </span>
+            <h1 className="font-display mt-5 text-[24px] sm:text-[25px] leading-[1.25] font-black text-white tracking-tight drop-shadow-md">
+              {isRetorno ? (
+                <>
+                  Está aqui novamente para nos ajudar? Sua caridade renova a visão da{" "}
+                  <span className="text-[#fde68a] not-italic underline decoration-amber-400/60 decoration-2 underline-offset-4">
+                    Médium Milena
+                  </span>
+                </>
+              ) : (
+                <>
+                  Antes de ir para o WhatsApp: Um apelo urgente pela visão da{" "}
+                  <span className="text-[#fde68a] not-italic underline decoration-amber-400/60 decoration-2 underline-offset-4">
+                    Médium Milena
+                  </span>
+                </>
+              )}
             </h1>
 
             <p className="mt-3 max-w-[340px] text-[14px] leading-relaxed text-zinc-200 font-normal">
-              Após 33 anos confortando mais de 12 mil famílias, Milena enfrenta um grave problema de
-              catarata que ameaça impedi-la de continuar escrevendo.
+              {isRetorno
+                ? "O plano espiritual ouviu seu coração. Mais um gesto de amor fraterno hoje nos ajuda a alcançar a cirurgia e salvar os olhos de Milena."
+                : "Após 33 anos confortando mais de 12 mil famílias, Milena enfrenta um grave problema de catarata que ameaça impedi-la de continuar escrevendo."}
             </p>
           </div>
         </header>
@@ -193,6 +222,38 @@ export function AjudaMilenaPage() {
         </div>
 
         <div className="px-6 pt-7">
+          {/* Card Especial de Retorno de Alta Conversão */}
+          {isRetorno && (
+            <Reveal className="mb-6 overflow-hidden rounded-3xl border-2 border-amber-400 bg-gradient-to-br from-[#fffdf5] via-[#fffbeb] to-[#fef3c7] p-5 shadow-lg text-left">
+              <div className="flex items-start gap-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 text-white text-xl shadow-sm">
+                  🕊️
+                </span>
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-wider text-[#92400e] block">
+                    Que bênção ver você aqui novamente
+                  </span>
+                  <h3 className="text-sm font-extrabold text-[#1a082c] mt-0.5">
+                    Sentimos que você voltou porque seu coração foi tocado
+                  </h3>
+                </div>
+              </div>
+
+              <p className="mt-3 text-xs sm:text-[13px] text-[#5e4b73] leading-relaxed">
+                Se você retornou a esta página, é porque sentiu no peito o desejo sagrado de amparar a Médium Milena Medeiros. Milena passou 33 anos confortando mais de 12 mil famílias em luto sem jamais cobrar por uma linha sequer.
+              </p>
+              
+              <p className="mt-2 text-xs sm:text-[13px] text-[#5e4b73] leading-relaxed">
+                Agora que a catarata ameaça apagar a luz dos seus olhos, uma nova contribuição — seja de <strong>R$ 10, R$ 19, R$ 35 ou o que puder doar</strong> — nos aproxima da cirurgia e garante que as cartas continuem trazendo consolo a tantas almas em dor.
+              </p>
+
+              <div className="mt-3.5 flex items-center gap-2 rounded-2xl bg-white/90 p-3 border border-amber-300/80 text-[11.5px] font-bold text-[#854d0e] shadow-2xs">
+                <span>🤍</span>
+                <span>Toda caridade sincera retorna multiplicada em saúde, paz e bênçãos para você e sua família.</span>
+              </div>
+            </Reveal>
+          )}
+
           {/* Foto Emocionante da Médium Milena com Efeito de Nuvem / Névoa Celestial */}
           <Reveal className="relative w-full my-4 flex flex-col items-center justify-center">
             {/* Aura de Luz e Nuvem no Fundo */}
@@ -423,14 +484,44 @@ export function AjudaMilenaPage() {
               </div>
             )}
 
-            {/* Opção Doar com Cartão */}
-            <button
-              type="button"
-              onClick={() => setStripeModalOpen(true)}
-              className="utmify-initiate-checkout mt-4 block w-full py-3.5 px-4 rounded-2xl border-2 border-[#d5c3ea] bg-[#f9f5fd] hover:bg-[#f2eafb] text-[#2d144d] font-bold text-[13px] transition-all text-center cursor-pointer shadow-2xs"
-            >
-              💳 Prefere doar no Cartão de Crédito ou Parcelar? Clique aqui ›
-            </button>
+            {/* Opção Cartão de Crédito - Design Premium */}
+            <div className="mt-4 pt-3.5 border-t border-[#ede4f5]">
+              <button
+                type="button"
+                onClick={() => setStripeModalOpen(true)}
+                className="utmify-initiate-checkout group relative w-full overflow-hidden rounded-2xl border-2 border-[#dccbe8] bg-gradient-to-r from-[#faf7fd] via-[#f5eefb] to-[#f0e4f7] p-3.5 text-left transition-all duration-200 hover:border-[#6b21a8] hover:shadow-lg hover:shadow-purple-900/10 active:scale-[0.99] cursor-pointer"
+              >
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
+
+                <div className="flex items-center justify-between gap-3 relative z-10">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#2d144d] via-[#43196f] to-[#1a0730] text-white shadow-md shadow-purple-950/25 group-hover:scale-105 transition-transform">
+                      <svg className="w-6 h-6 text-purple-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                      </svg>
+                    </div>
+
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="text-[13.5px] font-black text-[#1f0c36] group-hover:text-[#43196f] transition-colors">
+                          Doar com Cartão de Crédito
+                        </span>
+                        <span className="rounded-full bg-purple-100/90 border border-purple-200/80 px-2 py-0.5 text-[9.5px] font-extrabold uppercase text-[#43196f]">
+                          Até 12x
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 mt-0.5 text-[11px] text-[#6b5883] font-medium truncate">
+                        <span>Visa • Master • Elo • Amex • Hipercard</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex shrink-0 items-center justify-center h-8 w-8 rounded-full bg-white border border-[#dccbe8] text-[#43196f] font-black text-sm group-hover:bg-[#43196f] group-hover:text-white group-hover:border-[#43196f] shadow-2xs transition-all">
+                    ›
+                  </div>
+                </div>
+              </button>
+            </div>
 
             <StripeCardModal
               isOpen={stripeModalOpen}
@@ -440,13 +531,19 @@ export function AjudaMilenaPage() {
             />
 
             {/* Info pós-PIX */}
-            <div className="mt-5 pt-4 border-t border-[#ece4f4]">
-              <p className="text-[12px] text-[#786445] text-center leading-relaxed">
+            <div className="mt-5 pt-4 border-t border-[#ece4f4] space-y-3 text-center">
+              <p className="text-[12px] text-[#786445] leading-relaxed">
                 ✨ Após confirmar o pagamento PIX ou Cartão, você será redirecionado(a) automaticamente.
               </p>
+
+              <Link
+                to="/como-funciona"
+                className="inline-flex items-center justify-center gap-1.5 text-xs font-extrabold text-[#7c3aed] hover:text-[#5b21b6] hover:underline pt-2 cursor-pointer"
+              >
+                <span>Avançar para o Passo a Passo da Carta ›</span>
+              </Link>
             </div>
           </Reveal>
-
 
         </div>
 
