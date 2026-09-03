@@ -53,7 +53,7 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
         }}
       >
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
             <h2
               style={{
                 fontSize: "15px",
@@ -63,7 +63,7 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
                 letterSpacing: "-0.01em",
               }}
             >
-              Evolução de Receita & Vendas (PIX vs Cartão)
+              Evolução de Receita (PIX vs Cartão)
             </h2>
             <div
               style={{

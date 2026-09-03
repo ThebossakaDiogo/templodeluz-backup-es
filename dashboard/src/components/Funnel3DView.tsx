@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Lead } from "@/types";
-import { Users, Filter } from "lucide-react";
+import { Users, Filter, BarChart3, Box, CheckCircle2 } from "lucide-react";
 
 interface Funnel3DViewProps {
   leads: Lead[];
@@ -20,107 +20,109 @@ interface FunnelStage {
   accent: string;
 }
 
+// ─── Paleta Celestial & Alta Conversão (Harmonia Luxuosa) ──────────────────────
 const ETAPAS_3D: FunnelStage[] = [
   {
     index: 1,
     name: "intro",
     label: "Início do Quiz",
     sub: "Abertura do fluxo e primeiro clique",
-    colorGradStart: "#fb7185",
-    colorGradMid: "#e11d48",
-    colorGradEnd: "#881337",
-    colorHighlight: "#ffe4e6",
-    glowColor: "rgba(225, 29, 72, 0.35)",
-    accent: "#e11d48",
+    colorGradStart: "#38bdf8",
+    colorGradMid: "#0284c7",
+    colorGradEnd: "#0369a1",
+    colorHighlight: "#e0f2fe",
+    glowColor: "rgba(2, 132, 199, 0.35)",
+    accent: "#0284c7",
   },
   {
     index: 2,
     name: "ente",
     label: "Nome do Ente Querido",
     sub: "Homenagem ao ente falecido",
-    colorGradStart: "#fb923c",
-    colorGradMid: "#ea580c",
-    colorGradEnd: "#7c2d12",
-    colorHighlight: "#ffedd5",
-    glowColor: "rgba(234, 88, 12, 0.35)",
-    accent: "#ea580c",
+    colorGradStart: "#60a5fa",
+    colorGradMid: "#2563eb",
+    colorGradEnd: "#1d4ed8",
+    colorHighlight: "#dbeafe",
+    glowColor: "rgba(37, 99, 235, 0.35)",
+    accent: "#2563eb",
   },
   {
     index: 3,
     name: "relacao",
     label: "Vínculo Familiar",
     sub: "Grau de parentesco declarado",
-    colorGradStart: "#facc15",
-    colorGradMid: "#ca8a04",
-    colorGradEnd: "#713f12",
-    colorHighlight: "#fef9c3",
-    glowColor: "rgba(202, 138, 4, 0.35)",
-    accent: "#ca8a04",
+    colorGradStart: "#818cf8",
+    colorGradMid: "#4f46e5",
+    colorGradEnd: "#3730a3",
+    colorHighlight: "#e0e7ff",
+    glowColor: "rgba(79, 70, 229, 0.35)",
+    accent: "#4f46e5",
   },
   {
     index: 4,
     name: "tempo",
     label: "Tempo e Sentimento",
     sub: "Data da partida e conexão afetiva",
-    colorGradStart: "#a3e635",
-    colorGradMid: "#65a30d",
-    colorGradEnd: "#365314",
-    colorHighlight: "#ecfccb",
-    glowColor: "rgba(101, 163, 13, 0.35)",
-    accent: "#65a30d",
+    colorGradStart: "#a78bfa",
+    colorGradMid: "#7c3aed",
+    colorGradEnd: "#5b21b6",
+    colorHighlight: "#ede9fe",
+    glowColor: "rgba(124, 58, 237, 0.35)",
+    accent: "#7c3aed",
   },
   {
     index: 5,
     name: "mensagem",
     label: "Mensagem e Intenção",
-    sub: "Temas de oração e conforto espiritual",
-    colorGradStart: "#2dd4bf",
-    colorGradMid: "#0d9488",
-    colorGradEnd: "#134e4a",
-    colorHighlight: "#ccfbf1",
-    glowColor: "rgba(13, 148, 136, 0.35)",
-    accent: "#0d9488",
+    sub: "Temas de oração e intenção espiritual",
+    colorGradStart: "#c084fc",
+    colorGradMid: "#9333ea",
+    colorGradEnd: "#6b21a8",
+    colorHighlight: "#f3e8ff",
+    glowColor: "rgba(147, 51, 234, 0.35)",
+    accent: "#9333ea",
   },
   {
     index: 6,
     name: "confirma",
     label: "Confirmação dos Dados",
     sub: "Identificação completa do consulente",
-    colorGradStart: "#38bdf8",
-    colorGradMid: "#0284c7",
-    colorGradEnd: "#0c4a6e",
-    colorHighlight: "#e0f2fe",
-    glowColor: "rgba(2, 132, 199, 0.35)",
-    accent: "#0284c7",
+    colorGradStart: "#e879f9",
+    colorGradMid: "#c026d3",
+    colorGradEnd: "#86198f",
+    colorHighlight: "#fae8ff",
+    glowColor: "rgba(192, 38, 211, 0.35)",
+    accent: "#c026d3",
   },
   {
     index: 7,
     name: "loading",
     label: "Preparação da Carta",
     sub: "Psicografia e sintonização espiritual",
-    colorGradStart: "#818cf8",
-    colorGradMid: "#4f46e5",
-    colorGradEnd: "#312e81",
-    colorHighlight: "#e0e7ff",
-    glowColor: "rgba(79, 70, 229, 0.35)",
-    accent: "#4f46e5",
+    colorGradStart: "#2dd4bf",
+    colorGradMid: "#0d9488",
+    colorGradEnd: "#115e59",
+    colorHighlight: "#ccfbf1",
+    glowColor: "rgba(13, 148, 136, 0.35)",
+    accent: "#0d9488",
   },
   {
     index: 8,
     name: "result",
     label: "Altar & Doação (Checkout)",
     sub: "Geração do PIX e consagração final",
-    colorGradStart: "#c084fc",
-    colorGradMid: "#9333ea",
-    colorGradEnd: "#581c87",
-    colorHighlight: "#f3e8ff",
-    glowColor: "rgba(147, 51, 234, 0.4)",
-    accent: "#9333ea",
+    colorGradStart: "#34d399",
+    colorGradMid: "#059669",
+    colorGradEnd: "#064e3b",
+    colorHighlight: "#d1fae5",
+    glowColor: "rgba(16, 185, 129, 0.45)",
+    accent: "#10b981",
   },
 ];
 
 export function Funnel3DView({ leads }: Funnel3DViewProps) {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+  const [mobileTab, setMobileTab] = useState<"stages" | "cone">("stages");
 
   const stageStats = ETAPAS_3D.map((stage) => {
     const reached = leads.filter((l) => l.highest_step_index >= stage.index).length;
@@ -139,14 +141,14 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
   const globalConversionRate =
     totalStarted > 0 ? ((totalConverted / totalStarted) * 100).toFixed(1) : "0.0";
 
-  // Dimensões refinadas e amplas do funil 3D
+  // Dimensões refinadas da escultura 3D
   const svgW = 460;
-  const svgH = 500;
+  const svgH = 340;
   const centerX = svgW / 2;
   const numStages = ETAPAS_3D.length;
-  const topY = 16;
-  const stageH = 42;
-  const gap = 5;
+  const topY = 14;
+  const stageH = 26;
+  const gap = 4;
 
   return (
     <div
@@ -154,14 +156,14 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
       style={{
         display: "flex",
         flexDirection: "column",
-        gap: "24px",
+        gap: "20px",
         overflow: "hidden",
         width: "100%",
         maxWidth: "100%",
         boxSizing: "border-box",
       }}
     >
-      {/* Cabeçalho do Card Espaçoso */}
+      {/* Cabeçalho do Card */}
       <div
         className="funnel-header"
         style={{
@@ -181,12 +183,12 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
                 width: "34px",
                 height: "34px",
                 borderRadius: "10px",
-                background: "rgba(16, 185, 129, 0.15)",
-                border: "1px solid rgba(16, 185, 129, 0.35)",
+                background: "rgba(16, 185, 129, 0.12)",
+                border: "1px solid rgba(16, 185, 129, 0.3)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "var(--primary-green)",
+                color: "#10b981",
                 flexShrink: 0,
               }}
             >
@@ -202,7 +204,7 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
                   letterSpacing: "-0.01em",
                 }}
               >
-                Funil de Conversão 3D
+                Funil de Conversão & Retenção
               </h2>
               <p
                 style={{
@@ -212,13 +214,13 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
                   fontWeight: 500,
                 }}
               >
-                Progressão passo a passo dos consulentes
+                Jornada dos consulentes pelas 8 etapas do quiz
               </p>
             </div>
           </div>
         </div>
 
-        {/* Badges de Resumo Executivo */}
+        {/* 3 Badges de Resumo Executivo */}
         <div className="funnel-header-cards">
           <div
             className="funnel-stat-card"
@@ -238,9 +240,6 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
                 display: "block",
                 textTransform: "uppercase",
                 letterSpacing: "0.03em",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
               }}
             >
               Entradas
@@ -250,6 +249,7 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
                 fontSize: "15px",
                 fontWeight: 900,
                 color: "var(--text-primary)",
+                fontFamily: "'Space Grotesk', sans-serif",
               }}
             >
               {totalStarted} <span style={{ fontSize: "10px", fontWeight: 700, color: "var(--text-muted)" }}>leads</span>
@@ -270,13 +270,10 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
               style={{
                 fontSize: "9.5px",
                 fontWeight: 700,
-                color: "var(--primary-green)",
+                color: "#10b981",
                 display: "block",
                 textTransform: "uppercase",
                 letterSpacing: "0.03em",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
               }}
             >
               Doações
@@ -285,7 +282,8 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
               style={{
                 fontSize: "15px",
                 fontWeight: 900,
-                color: "var(--primary-green)",
+                color: "#10b981",
+                fontFamily: "'Space Grotesk', sans-serif",
               }}
             >
               {totalConverted} <span style={{ fontSize: "10px", fontWeight: 700 }}>pagos</span>
@@ -295,8 +293,8 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
           <div
             className="funnel-stat-card"
             style={{
-              background: "rgba(37, 99, 235, 0.12)",
-              border: "1px solid rgba(37, 99, 235, 0.35)",
+              background: "rgba(2, 132, 199, 0.12)",
+              border: "1px solid rgba(2, 132, 199, 0.35)",
               borderRadius: "10px",
               padding: "8px 12px",
               textAlign: "center",
@@ -306,13 +304,10 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
               style={{
                 fontSize: "9.5px",
                 fontWeight: 700,
-                color: "var(--primary-blue)",
+                color: "#0284c7",
                 display: "block",
                 textTransform: "uppercase",
                 letterSpacing: "0.03em",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
               }}
             >
               Taxa Global
@@ -321,7 +316,8 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
               style={{
                 fontSize: "15px",
                 fontWeight: 900,
-                color: "var(--primary-blue)",
+                color: "#0284c7",
+                fontFamily: "'Space Grotesk', sans-serif",
               }}
             >
               {globalConversionRate}%
@@ -330,24 +326,40 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
         </div>
       </div>
 
-      {/* Grid: Cone 3D à Esquerda e Lista de Etapas à Direita */}
-      <div className="funnel-3d-grid">
-        {/* COLUNA 1: FUNIL CÔNICO 3D ESCULPIDO COM ALVO CONCÊNTRICO */}
+      {/* Alternador de Abas para Smartphone (Otimização Mobile) */}
+      <div className="funnel-mobile-tabs">
+        <button
+          onClick={() => setMobileTab("stages")}
+          className={`funnel-tab-btn ${mobileTab === "stages" ? "active" : ""}`}
+        >
+          <BarChart3 style={{ width: "14px", height: "14px" }} />
+          Etapas & Retenção ({stageStats.length})
+        </button>
+        <button
+          onClick={() => setMobileTab("cone")}
+          className={`funnel-tab-btn ${mobileTab === "cone" ? "active" : ""}`}
+        >
+          <Box style={{ width: "14px", height: "14px" }} />
+          Escultura 3D
+        </button>
+      </div>
+
+      {/* Grid Principal: Cone 3D à Esquerda e Lista de Etapas à Direita */}
+      <div className={`funnel-3d-grid mobile-show-${mobileTab}`}>
+        {/* COLUNA 1: FUNIL CÔNICO 3D ESCULPIDO COM PROPORÇÃO COMPACTA */}
         <div
           className="funnel-cone-container"
           style={{
             position: "relative",
             background: "var(--bg-surface-alt)",
             border: "1px solid var(--border)",
-            borderRadius: "18px",
-            padding: "16px 8px 12px",
+            borderRadius: "16px",
+            padding: "16px 10px 14px",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             boxShadow: "inset 0 2px 10px rgba(0,0,0,0.03)",
             overflow: "hidden",
-            width: "100%",
-            maxWidth: "100%",
             boxSizing: "border-box",
           }}
         >
@@ -357,12 +369,12 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
           >
             <defs>
               {/* Filtro de Sombra Suave Profunda */}
-              <filter id="softGlow3D" x="-20%" y="-20%" width="140%" height="150%">
+              <filter id="softGlow3D" x="-10%" y="-10%" width="120%" height="130%">
                 <feDropShadow
                   dx="0"
-                  dy="8"
-                  stdDeviation="7"
-                  floodOpacity="0.4"
+                  dy="4"
+                  stdDeviation="4"
+                  floodOpacity="0.3"
                   floodColor="#000000"
                 />
               </filter>
@@ -408,20 +420,20 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
                 <stop offset="100%" stopColor="var(--border-subtle)" />
               </radialGradient>
               <radialGradient id="targetBullseyeGrad" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#a855f7" />
-                <stop offset="60%" stopColor="#7e22ce" />
-                <stop offset="100%" stopColor="#3b0764" />
+                <stop offset="0%" stopColor="#34d399" />
+                <stop offset="60%" stopColor="#10b981" />
+                <stop offset="100%" stopColor="#047857" />
               </radialGradient>
             </defs>
 
             {/* BASE DO FUNIL: ALVO CONCÊNTRICO 3D (TARGET DE FECHAMENTO) */}
-            <g transform={`translate(0, ${topY + numStages * (stageH + gap) + 12})`}>
+            <g transform={`translate(0, ${topY + numStages * (stageH + gap) + 8})`}>
               {/* Plataforma externa */}
               <ellipse
                 cx={centerX}
-                cy="32"
-                rx="145"
-                ry="24"
+                cy="26"
+                rx="140"
+                ry="20"
                 fill="url(#targetPlateGrad)"
                 stroke="var(--border)"
                 strokeWidth="1.5"
@@ -430,60 +442,60 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
               {/* Anel 1 */}
               <ellipse
                 cx={centerX}
-                cy="32"
-                rx="110"
-                ry="18"
+                cy="26"
+                rx="105"
+                ry="15"
                 fill="none"
                 stroke="var(--text-muted)"
-                strokeWidth="2"
+                strokeWidth="1.5"
                 opacity="0.3"
               />
               {/* Anel 2 */}
               <ellipse
                 cx={centerX}
-                cy="32"
-                rx="78"
-                ry="12"
+                cy="26"
+                rx="72"
+                ry="10"
                 fill="none"
                 stroke="var(--text-secondary)"
-                strokeWidth="2.5"
+                strokeWidth="2"
                 opacity="0.45"
               />
               {/* Anel 3 */}
               <ellipse
                 cx={centerX}
-                cy="32"
-                rx="48"
-                ry="8"
+                cy="26"
+                rx="44"
+                ry="7"
                 fill="none"
                 stroke="#ffffff"
-                strokeWidth="2.5"
+                strokeWidth="2"
                 opacity="0.85"
               />
-              {/* Centro de Conversão (Bullseye Violeta) */}
+              {/* Centro de Conversão (Bullseye Esmeralda da Conclusão) */}
               <ellipse
                 cx={centerX}
-                cy="32"
-                rx="24"
+                cy="26"
+                rx="22"
                 ry="4"
                 fill="url(#targetBullseyeGrad)"
-                stroke="#c084fc"
+                stroke="#34d399"
                 strokeWidth="1.5"
               />
               {/* Feixes do alvo */}
               <line
-                x1={centerX - 145}
-                y1="32"
-                x2={centerX + 145}
-                y2="32"
+                x1={centerX - 140}
+                y1="26"
+                x2={centerX + 140}
+                y2="26"
                 stroke="var(--border)"
                 strokeDasharray="4 4"
               />
               <line
                 x1={centerX}
-                y1="8"
+                y1="6"
                 x2={centerX}
-                y2="56"
+                y2="46"
                 stroke="var(--border)"
                 strokeDasharray="4 4"
               />
@@ -494,8 +506,8 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
               const factorTop = idx / numStages;
               const factorBottom = (idx + 1) / numStages;
 
-              const maxW = 370;
-              const minW = 66;
+              const maxW = 360;
+              const minW = 64;
 
               const wTop = maxW - factorTop * (maxW - minW);
               const wBottom = maxW - factorBottom * (maxW - minW);
@@ -508,7 +520,7 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
               const xBottomLeft = centerX - wBottom / 2;
               const xBottomRight = centerX + wBottom / 2;
 
-              const curveDepth = 12;
+              const curveDepth = 8;
               const isHovered = hoveredIdx === st.index;
 
               return (
@@ -523,65 +535,44 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
                   <path
                     d={`
                       M ${xTopLeft} ${yTop}
-                      Q ${centerX} ${yTop + curveDepth} ${xTopRight} ${yTop}
+                      L ${xTopRight} ${yTop}
                       L ${xBottomRight} ${yBottom}
                       Q ${centerX} ${yBottom + curveDepth} ${xBottomLeft} ${yBottom}
                       Z
                     `}
                     fill={`url(#funnelGrad-${st.index})`}
-                    stroke="rgba(255,255,255,0.4)"
-                    strokeWidth={isHovered ? "2.5" : "1"}
-                    style={{
-                      transform: isHovered ? "scale(1.025)" : "scale(1)",
-                      transformOrigin: `${centerX}px ${yTop + stageH / 2}px`,
-                      transition: "all 0.18s cubic-bezier(0.16, 1, 0.3, 1)",
-                    }}
+                    opacity={isHovered ? 1 : 0.94}
+                    stroke="rgba(255, 255, 255, 0.15)"
+                    strokeWidth="1"
                   />
 
-                  {/* Anel Superior Oval (Vidro 3D) */}
-                  <path
-                    d={`
-                      M ${xTopLeft} ${yTop}
-                      Q ${centerX} ${yTop + curveDepth} ${xTopRight} ${yTop}
-                      Q ${centerX} ${yTop - curveDepth * 0.55} ${xTopLeft} ${yTop}
-                      Z
-                    `}
-                    fill={`url(#funnelRing-${st.index})`}
-                    opacity="0.95"
+                  {/* Elipse Superior 3D com Brilho Refletido */}
+                  <ellipse
+                    cx={centerX}
+                    cy={yTop}
+                    rx={wTop / 2}
+                    ry={curveDepth}
+                    fill={`url(#funnelTopGrad-${st.index})`}
+                    stroke="rgba(255, 255, 255, 0.35)"
+                    strokeWidth="1.2"
                   />
 
-                  {/* Linha de reflexo branco no topo */}
-                  <path
-                    d={`M ${centerX - wTop * 0.28} ${yTop + curveDepth * 0.45} Q ${centerX} ${yTop + curveDepth * 0.65} ${centerX + wTop * 0.28} ${yTop + curveDepth * 0.45}`}
-                    stroke="rgba(255,255,255,0.7)"
-                    strokeWidth="2"
-                    fill="none"
-                    strokeLinecap="round"
-                  />
-
-                  {/* Badge de Número da Etapa no Centro */}
-                  <g
-                    transform={`translate(${centerX}, ${yTop + stageH / 2 + 5})`}
-                    style={{ pointerEvents: "none" }}
-                  >
+                  {/* Emblema Numérico Central da Etapa */}
+                  <g transform={`translate(${centerX}, ${yTop + stageH / 2})`}>
                     <circle
-                      cx="0"
-                      cy="0"
-                      r={st.index === 8 ? "12" : "13"}
-                      fill="rgba(0,0,0,0.45)"
-                      stroke="rgba(255,255,255,0.6)"
-                      strokeWidth="1.2"
+                      r={st.index === 8 ? "10" : "9"}
+                      fill="rgba(8, 14, 28, 0.85)"
+                      stroke={isHovered ? "#ffffff" : st.accent}
+                      strokeWidth="1.5"
                     />
                     <text
-                      x="0"
-                      y="4.5"
                       textAnchor="middle"
+                      dy="3.5"
                       fill="#ffffff"
-                      fontSize={st.index === 8 ? "11" : "12"}
+                      fontSize={st.index === 8 ? "9.5" : "10"}
                       fontWeight="900"
                       style={{
-                        fontFamily: "Plus Jakarta Sans, sans-serif",
-                        textShadow: "0 1px 3px rgba(0,0,0,0.8)",
+                        fontFamily: "'Space Grotesk', sans-serif",
                       }}
                     >
                       {st.index}
@@ -593,171 +584,175 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
           </svg>
         </div>
 
-        {/* COLUNA 2: PAINEL ANALÍTICO ESPAÇOSO (AMPLO RESPIRO) */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          {stageStats.map((st) => {
+        {/* COLUNA 2: PAINEL ANALÍTICO COM CARDS FLUIDOS & BARRA INTEGRADA */}
+        <div className="funnel-stages-list" style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+          {stageStats.map((st, idx) => {
             const isHovered = hoveredIdx === st.index;
             const pctGlobal =
               totalStarted > 0 ? Math.round((st.reached / totalStarted) * 100) : 0;
+            const prevStage = idx > 0 ? stageStats[idx - 1] : null;
+            const dropRate =
+              prevStage && prevStage.reached > 0
+                ? Math.round(((prevStage.reached - st.reached) / prevStage.reached) * 100)
+                : 0;
 
             return (
               <div
                 key={st.index}
                 onMouseEnter={() => setHoveredIdx(st.index)}
                 onMouseLeave={() => setHoveredIdx(null)}
+                className="stage-card-item"
                 style={{
                   display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: "12px 18px",
+                  flexDirection: "column",
+                  gap: "8px",
+                  padding: "12px 14px",
                   borderRadius: "12px",
                   background: isHovered ? "var(--bg-surface-alt)" : "var(--bg-surface)",
                   border: `1px solid ${isHovered ? st.accent : "var(--border)"}`,
                   boxShadow: isHovered
-                    ? `0 6px 20px ${st.glowColor}, 0 0 0 1px ${st.accent}`
-                    : "var(--shadow-card)",
-                  transition: "all 0.15s ease",
+                    ? `0 4px 16px ${st.glowColor}`
+                    : "0 1px 3px rgba(0,0,0,0.03)",
+                  transition: "all 0.18s ease",
                   cursor: "pointer",
                 }}
               >
-                {/* Número e Título */}
-                <div style={{ display: "flex", alignItems: "center", gap: "14px", minWidth: 0 }}>
-                  <div
-                    style={{
-                      width: "32px",
-                      height: "32px",
-                      borderRadius: "9px",
-                      background: isHovered ? st.accent : `rgba(255,255,255,0.06)`,
-                      border: `1px solid ${st.accent}`,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "13px",
-                      fontWeight: 900,
-                      color: isHovered ? "#ffffff" : st.accent,
-                      flexShrink: 0,
-                      transition: "all 0.15s ease",
-                    }}
-                  >
-                    {st.index}
-                  </div>
-
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                      <span
-                        style={{
-                          fontSize: "13.5px",
-                          fontWeight: 800,
-                          color: "var(--text-primary)",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {st.label}
-                      </span>
-                      {st.index === 8 && (
-                        <span
-                          style={{
-                            fontSize: "10px",
-                            fontWeight: 800,
-                            color: "#9333ea",
-                            background: "rgba(147, 51, 234, 0.15)",
-                            padding: "2px 7px",
-                            borderRadius: "5px",
-                            border: "1px solid rgba(147, 51, 234, 0.35)",
-                          }}
-                        >
-                          Conversão
-                        </span>
-                      )}
-                    </div>
-                    <span
-                      style={{
-                        fontSize: "11px",
-                        color: "var(--text-muted)",
-                        display: "block",
-                        marginTop: "1px",
-                      }}
-                    >
-                      {st.sub}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Métricas e Barra de Retenção */}
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "20px",
-                    flexShrink: 0,
-                  }}
-                >
-                  {/* Presença ao vivo nesta etapa */}
-                  {st.current > 0 && (
+                {/* Linha 1: Número, Nome da Etapa e Contagem em Destaque */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", width: "100%" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0, flex: 1 }}>
+                    {/* Badge do Número */}
                     <div
                       style={{
+                        width: "26px",
+                        height: "26px",
+                        borderRadius: "8px",
+                        background: isHovered ? st.accent : `rgba(255, 255, 255, 0.05)`,
+                        border: `1px solid ${st.accent}`,
                         display: "flex",
                         alignItems: "center",
-                        gap: "5px",
-                        fontSize: "11px",
-                        fontWeight: 800,
-                        color: "var(--primary-green)",
-                        background: "rgba(16, 185, 129, 0.12)",
-                        border: "1px solid rgba(16, 185, 129, 0.3)",
-                        borderRadius: "6px",
-                        padding: "3px 8px",
+                        justifyContent: "center",
+                        fontSize: "12px",
+                        fontWeight: 900,
+                        color: isHovered ? "#ffffff" : st.accent,
+                        flexShrink: 0,
+                        fontFamily: "'Space Grotesk', sans-serif",
                       }}
                     >
-                      <Users style={{ width: "11px", height: "11px" }} />
-                      {st.current} ao vivo
+                      {st.index}
                     </div>
-                  )}
 
-                  {/* Micro barra de retenção com largura ampla */}
-                  <div style={{ width: "90px", display: "flex", flexDirection: "column", gap: "3px" }}>
-                    <div
-                      style={{
-                        height: "6px",
-                        background: "var(--border)",
-                        borderRadius: "99px",
-                        overflow: "hidden",
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: `${pctGlobal}%`,
-                          height: "100%",
-                          background: st.accent,
-                          borderRadius: "99px",
-                          transition: "width 0.4s ease",
-                        }}
-                      />
+                    {/* Título e Subtítulo */}
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                        <span
+                          style={{
+                            fontSize: "13px",
+                            fontWeight: 800,
+                            color: "var(--text-primary)",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {st.label}
+                        </span>
+                        {st.index === 8 && (
+                          <span
+                            style={{
+                              fontSize: "9.5px",
+                              fontWeight: 800,
+                              color: "#10b981",
+                              background: "rgba(16, 185, 129, 0.15)",
+                              padding: "2px 6px",
+                              borderRadius: "5px",
+                              border: "1px solid rgba(16, 185, 129, 0.35)",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "3px",
+                            }}
+                          >
+                            <CheckCircle2 style={{ width: "10px", height: "10px" }} /> Conversão
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
-                  {/* Contagem e % */}
-                  <div style={{ textAlign: "right", width: "80px" }}>
+                  {/* Número de Consulentes e % */}
+                  <div style={{ textAlign: "right", flexShrink: 0 }}>
                     <span
                       style={{
                         fontSize: "14px",
                         fontWeight: 900,
                         color: "var(--text-primary)",
+                        fontFamily: "'Space Grotesk', sans-serif",
                         display: "block",
                         lineHeight: 1.1,
                       }}
                     >
-                      {st.reached}
+                      {st.reached} <span style={{ fontSize: "10px", fontWeight: 700, color: "var(--text-muted)" }}>leads</span>
                     </span>
                     <span
                       style={{
-                        fontSize: "11px",
-                        fontWeight: 700,
+                        fontSize: "10.5px",
+                        fontWeight: 800,
                         color: st.accent,
                       }}
                     >
                       {pctGlobal}% retido
                     </span>
                   </div>
+                </div>
+
+                {/* Linha 2: Barra de Retenção Visual 100% Fluida */}
+                <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "3px" }}>
+                  <div
+                    style={{
+                      height: "5px",
+                      background: "var(--border)",
+                      borderRadius: "99px",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: `${pctGlobal}%`,
+                        height: "100%",
+                        background: `linear-gradient(90deg, ${st.colorGradStart} 0%, ${st.accent} 100%)`,
+                        borderRadius: "99px",
+                        transition: "width 0.4s ease",
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Linha 3: Subtítulo e Indicador de Perda ou Presença ao Vivo */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", fontSize: "10.5px" }}>
+                  <span style={{ color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {st.sub}
+                  </span>
+
+                  {idx > 0 && dropRate > 0 && (
+                    <span style={{ color: "var(--text-muted)", flexShrink: 0, fontSize: "10px", fontWeight: 600 }}>
+                      -{dropRate}% nesta etapa
+                    </span>
+                  )}
+
+                  {st.current > 0 && (
+                    <span
+                      style={{
+                        color: "#10b981",
+                        fontWeight: 800,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "3px",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <Users style={{ width: "10px", height: "10px" }} />
+                      {st.current} ao vivo
+                    </span>
+                  )}
                 </div>
               </div>
             );
