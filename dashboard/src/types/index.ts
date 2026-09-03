@@ -33,26 +33,45 @@ export interface PaymentOrder {
   amount_cents: number;
   status: "paid" | "pending" | "failed" | "creating" | "expired";
   payment_method: "pix" | "credit_card";
+  gateway?: "connectpay" | "pushinpay" | "stripe" | string;
   created_at: string;
 }
 
 export interface DashboardStats {
+  // Gerais
   newSubscriptions: number;
   newSubscriptionsDiff: number;
   newOrders: number;
   newOrdersDiff: number;
-  avgOrderRevenue: number;
-  avgOrderRevenueDiff: number;
   totalRevenue: number;
   totalRevenueDiff: number;
+  avgOrderRevenue: number;
+  avgOrderRevenueDiff: number;
+
+  // PIX Específico
+  pixRevenue: number;
+  pixCount: number;
+  pixPendingCount: number;
+  pixPendingAmount: number;
+
+  // Cartão Específico (Stripe)
+  cardRevenue: number;
+  cardCount: number;
+  cardAvgRevenue: number;
+
+  // Geral pendente
   pendingAmount: number;
   pendingCount: number;
 }
 
-/** Ponto de dado para gráficos — chaves em PT-BR */
+/** Ponto de dado para gráficos com suporte a PIX e Cartão */
 export interface ChartDataPoint {
   dia: string;
   receita?: number;
+  receitaPix?: number;
+  receitaCartao?: number;
   vendas?: number;
+  vendasPix?: number;
+  vendasCartao?: number;
   leads?: number;
 }

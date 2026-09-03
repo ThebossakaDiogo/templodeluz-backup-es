@@ -6,189 +6,261 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
 } from "recharts";
+import { TrendingUp, QrCode, CreditCard } from "lucide-react";
 import type { ChartDataPoint } from "@/types";
 
 interface RevenueChartProps {
   data: ChartDataPoint[];
-  loading?: boolean;
+  loading: boolean;
 }
 
-const brl = (v: number) =>
-  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function CustomTooltip({ active, payload, label }: any) {
-  if (!active || !payload?.length) return null;
-  return (
-    <div
-      style={{
-        background: "#0c1527",
-        border: "1px solid rgba(16, 185, 129, 0.4)",
-        borderRadius: "10px",
-        padding: "10px 14px",
-        boxShadow: "0 10px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(16, 185, 129, 0.2)",
-        fontSize: "12px",
-      }}
-    >
-      <p style={{ color: "#94a3b8", fontWeight: 700, marginBottom: "6px", fontSize: "10px", letterSpacing: "0.06em", textTransform: "uppercase" }}>
-        {label}
-      </p>
-      {payload.map((p: { name: string; value: number; color: string }) => (
-        <div key={p.name} style={{ display: "flex", justifyContent: "space-between", gap: "20px", marginTop: "4px" }}>
-          <span style={{ color: p.color, fontWeight: 600 }}>{p.name}</span>
-          <span style={{ color: "#f8fafc", fontWeight: 800 }}>
-            {p.name === "Receita (R$)" ? brl(p.value) : p.value}
-          </span>
-        </div>
-      ))}
-    </div>
-  );
+function formatBRL(val: number): string {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(val);
 }
 
 export function RevenueChart({ data, loading }: RevenueChartProps) {
-  const hasData = data.some((d) => (d.receita ?? 0) > 0);
+  const totalRevenue = data.reduce((s, d) => s + (d.receita ?? 0), 0);
+  const totalPix = data.reduce((s, d) => s + (d.receitaPix ?? 0), 0);
+  const totalCard = data.reduce((s, d) => s + (d.receitaCartao ?? 0), 0);
+  const totalSales = data.reduce((s, d) => s + (d.vendas ?? 0), 0);
 
   return (
-    <div className="card" style={{ padding: "24px", position: "relative", overflow: "hidden" }}>
-      {/* Sutil halo esmeralda/safira de fundo */}
+    <div
+      className="card"
+      style={{
+        padding: "24px 28px",
+        display: "flex",
+        flexDirection: "column",
+        gap: "18px",
+      }}
+    >
+      {/* Cabeçalho */}
       <div
         style={{
-          position: "absolute",
-          top: "-40px",
-          right: "-40px",
-          width: "200px",
-          height: "200px",
-          background: "radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 70%)",
-          pointerEvents: "none",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          flexWrap: "wrap",
+          gap: "12px",
         }}
-      />
-
-      {/* Cabeçalho */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "22px" }}>
+      >
         <div>
-          <h3 style={{ fontSize: "14px", fontWeight: 800, color: "var(--text-primary)", margin: 0 }}>
-            Evolução de Receita & Vendas
-          </h3>
-          <p style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "3px", fontWeight: 500 }}>
-            Volume faturado e quantidade de transações PIX liquidadas
-          </p>
-        </div>
-        {loading && (
-          <span
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <h2
+              style={{
+                fontSize: "15px",
+                fontWeight: 800,
+                color: "var(--text-primary)",
+                margin: 0,
+                letterSpacing: "-0.01em",
+              }}
+            >
+              Evolução de Receita & Vendas (PIX vs Cartão)
+            </h2>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                fontSize: "11px",
+                fontWeight: 700,
+                color: "var(--primary-green)",
+                background: "rgba(16, 185, 129, 0.12)",
+                padding: "2px 8px",
+                borderRadius: "6px",
+              }}
+            >
+              <TrendingUp style={{ width: "12px", height: "12px" }} />
+              Volume Consolidado
+            </div>
+          </div>
+          <p
             style={{
-              fontSize: "10px",
-              color: "#34d399",
-              background: "rgba(16, 185, 129, 0.1)",
-              border: "1px solid rgba(16, 185, 129, 0.3)",
-              borderRadius: "99px",
-              padding: "3px 10px",
-              fontWeight: 700,
+              fontSize: "11.5px",
+              color: "var(--text-muted)",
+              margin: "3px 0 0",
+              fontWeight: 500,
             }}
           >
-            Sincronizando...
-          </span>
-        )}
-      </div>
-
-      {!hasData && !loading ? (
-        <div
-          style={{
-            height: "250px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "8px",
-          }}
-        >
-          <div style={{ fontSize: "28px", opacity: 0.3, color: "#10b981" }}>❖</div>
-          <p style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
-            Aguardando primeiras transações
-          </p>
-          <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: 0 }}>
-            Os pagamentos confirmados serão desenhados aqui em tempo real
+            Faturamento liquidado discriminado por método de pagamento em tempo real
           </p>
         </div>
-      ) : (
-        <div style={{ height: "250px" }}>
+
+        {/* Resumo e Legenda */}
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          {/* Legenda PIX */}
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11.5px" }}>
+            <span style={{ width: "10px", height: "10px", borderRadius: "3px", background: "#10b981" }} />
+            <span style={{ color: "var(--text-secondary)", fontWeight: 700 }}>PIX:</span>
+            <strong style={{ color: "#10b981" }}>{formatBRL(totalPix)}</strong>
+          </div>
+
+          {/* Legenda Cartão Stripe */}
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11.5px" }}>
+            <span style={{ width: "10px", height: "10px", borderRadius: "3px", background: "#6366f1" }} />
+            <span style={{ color: "var(--text-secondary)", fontWeight: 700 }}>Cartão:</span>
+            <strong style={{ color: "#818cf8" }}>{formatBRL(totalCard)}</strong>
+          </div>
+
+          <div style={{ width: "1px", height: "24px", background: "var(--border)" }} />
+
+          <div style={{ textAlign: "right" }}>
+            <span
+              style={{
+                fontSize: "18px",
+                fontWeight: 900,
+                color: "var(--text-primary)",
+                display: "block",
+                lineHeight: 1,
+              }}
+            >
+              {formatBRL(totalRevenue)}
+            </span>
+            <span
+              style={{
+                fontSize: "11px",
+                color: "var(--text-muted)",
+                fontWeight: 600,
+              }}
+            >
+              {totalSales} {totalSales === 1 ? "venda no total" : "vendas no total"}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Gráfico */}
+      <div style={{ height: "240px", width: "100%" }}>
+        {loading ? (
+          <div
+            className="skeleton"
+            style={{ height: "100%", width: "100%", borderRadius: "10px" }}
+          />
+        ) : (
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data} margin={{ top: 6, right: 6, left: -6, bottom: 0 }}>
+            <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <defs>
-                <linearGradient id="gradReceitaEmerald" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%"   stopColor="#10b981" stopOpacity={0.35} />
-                  <stop offset="100%" stopColor="#10b981" stopOpacity={0}    />
+                {/* Gradiente PIX */}
+                <linearGradient id="pixGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
                 </linearGradient>
-                <linearGradient id="gradVendasCyan" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%"   stopColor="#06b6d4" stopOpacity={0.25} />
-                  <stop offset="100%" stopColor="#06b6d4" stopOpacity={0}    />
+
+                {/* Gradiente Cartão Stripe */}
+                <linearGradient id="cardGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#6366f1" stopOpacity={0.4} />
+                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0.0} />
                 </linearGradient>
-                <filter id="glowEmerald">
-                  <feGaussianBlur stdDeviation="3.5" result="coloredBlur" />
-                  <feMerge>
-                    <feMergeNode in="coloredBlur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" strokeOpacity={0.6} />
+
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="var(--border-subtle)"
+                vertical={false}
+              />
               <XAxis
                 dataKey="dia"
+                stroke="var(--text-muted)"
+                fontSize={11}
                 tickLine={false}
                 axisLine={false}
-                tick={{ fontSize: 10, fill: "#94a3b8", fontWeight: 600 } as React.SVGProps<SVGTextElement>}
               />
               <YAxis
-                yAxisId="receita"
-                orientation="left"
+                stroke="var(--text-muted)"
+                fontSize={11}
                 tickLine={false}
                 axisLine={false}
-                tick={{ fontSize: 10, fill: "#94a3b8", fontWeight: 600 } as React.SVGProps<SVGTextElement>}
-                tickFormatter={(v: number) => v >= 1000 ? `R$${(v / 1000).toFixed(1)}k` : `R$${v}`}
+                tickFormatter={(v: number) => `R$${v}`}
               />
-              <YAxis
-                yAxisId="vendas"
-                orientation="right"
-                tickLine={false}
-                axisLine={false}
-                tick={{ fontSize: 10, fill: "#64748b", fontWeight: 600 } as React.SVGProps<SVGTextElement>}
-                allowDecimals={false}
-                width={28}
+              <Tooltip
+                content={({ active, payload, label }) => {
+                  if (active && payload && payload.length) {
+                    const row = payload[0].payload as ChartDataPoint;
+                    return (
+                      <div
+                        style={{
+                          background: "var(--bg-surface)",
+                          border: "1px solid var(--border)",
+                          borderRadius: "10px",
+                          padding: "12px 16px",
+                          boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
+                        }}
+                      >
+                        <p
+                          style={{
+                            fontSize: "12px",
+                            fontWeight: 800,
+                            color: "var(--text-primary)",
+                            margin: "0 0 8px",
+                            borderBottom: "1px solid var(--border-subtle)",
+                            paddingBottom: "4px",
+                          }}
+                        >
+                          Data / Horário: {label}
+                        </p>
+
+                        <div style={{ display: "flex", flexDirection: "column", gap: "5px", fontSize: "11.5px" }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", gap: "16px" }}>
+                            <span style={{ color: "#10b981", fontWeight: 700, display: "flex", alignItems: "center", gap: "4px" }}>
+                              <QrCode style={{ width: "12px", height: "12px" }} /> PIX:
+                            </span>
+                            <strong style={{ color: "var(--text-primary)" }}>
+                              {formatBRL(row.receitaPix ?? 0)} ({row.vendasPix ?? 0} vendas)
+                            </strong>
+                          </div>
+
+                          <div style={{ display: "flex", justifyContent: "space-between", gap: "16px" }}>
+                            <span style={{ color: "#818cf8", fontWeight: 700, display: "flex", alignItems: "center", gap: "4px" }}>
+                              <CreditCard style={{ width: "12px", height: "12px" }} /> Cartão Stripe:
+                            </span>
+                            <strong style={{ color: "var(--text-primary)" }}>
+                              {formatBRL(row.receitaCartao ?? 0)} ({row.vendasCartao ?? 0} vendas)
+                            </strong>
+                          </div>
+
+                          <div style={{ display: "flex", justifyContent: "space-between", gap: "16px", marginTop: "4px", paddingTop: "4px", borderTop: "1px solid var(--border-subtle)" }}>
+                            <span style={{ color: "var(--text-muted)", fontWeight: 700 }}>Total do Período:</span>
+                            <strong style={{ color: "var(--primary-green)", fontSize: "12.5px" }}>
+                              {formatBRL(row.receita ?? 0)}
+                            </strong>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
               />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend
-                iconType="circle"
-                iconSize={8}
-                wrapperStyle={{ fontSize: "11px", paddingTop: "14px", color: "#cbd5e1" }}
-              />
+
+              {/* Área do Cartão Stripe */}
               <Area
-                yAxisId="receita"
                 type="monotone"
-                dataKey="receita"
-                name="Receita (R$)"
+                dataKey="receitaCartao"
+                name="Cartão Stripe"
+                stroke="#6366f1"
+                strokeWidth={2.5}
+                fillOpacity={1}
+                fill="url(#cardGradient)"
+              />
+
+              {/* Área do PIX */}
+              <Area
+                type="monotone"
+                dataKey="receitaPix"
+                name="PIX"
                 stroke="#10b981"
-                strokeWidth={2.8}
-                fill="url(#gradReceitaEmerald)"
-                dot={false}
-                activeDot={{ r: 5, fill: "#34d399", stroke: "rgba(16, 185, 129, 0.4)", strokeWidth: 5 }}
-                filter="url(#glowEmerald)"
-              />
-              <Area
-                yAxisId="vendas"
-                type="monotone"
-                dataKey="vendas"
-                name="Vendas (qtd)"
-                stroke="#06b6d4"
-                strokeWidth={2}
-                fill="url(#gradVendasCyan)"
-                dot={false}
-                activeDot={{ r: 4, fill: "#38bdf8", stroke: "rgba(6, 182, 212, 0.4)", strokeWidth: 4 }}
+                strokeWidth={2.5}
+                fillOpacity={1}
+                fill="url(#pixGradient)"
               />
             </AreaChart>
           </ResponsiveContainer>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

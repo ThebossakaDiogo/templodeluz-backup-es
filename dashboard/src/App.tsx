@@ -9,6 +9,7 @@ import { FunnelTracker } from "./components/FunnelTracker";
 import { FunnelViz } from "./components/FunnelViz";
 import { StatusPieChart } from "./components/StatusPieChart";
 import { TrafficPieChart } from "./components/TrafficPieChart";
+import { PaymentMethodsPieChart } from "./components/PaymentMethodsPieChart";
 import { ConversionOverview } from "./components/ConversionOverview";
 import { supabase } from "./lib/supabase";
 import type { DateRangeValue } from "./components/DateRangeSelector";
@@ -32,7 +33,7 @@ function toDateString(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
-// Construtor do Gráfico de Receita baseado no intervalo
+// Construtor do Gráfico de Receita discriminando PIX e Cartão
 function buildRevenueChartRange(
   orders: PaymentOrder[],
   start: Date,
@@ -41,9 +42,12 @@ function buildRevenueChartRange(
 ): ChartDataPoint[] {
   if (isSingleDay) {
     const hours = ["00h", "04h", "08h", "12h", "16h", "20h"];
-    const buckets: Record<string, { revenue: number; sales: number }> = {};
+    const buckets: Record<
+      string,
+      { revenue: number; pix: number; card: number; sales: number; salesPix: number; salesCard: number }
+    > = {};
     hours.forEach((h) => {
-      buckets[h] = { revenue: 0, sales: 0 };
+      buckets[h] = { revenue: 0, pix: 0, card: 0, sales: 0, salesPix: 0, salesCard: 0 };
     });
 
     for (const o of orders) {
@@ -57,14 +61,27 @@ function buildRevenueChartRange(
       else if (hour < 12) slot = "08h";
       else if (hour < 16) slot = "12h";
       else if (hour < 20) slot = "16h";
-      buckets[slot].revenue += o.amount_cents / 100;
+
+      const val = o.amount_cents / 100;
+      buckets[slot].revenue += val;
       buckets[slot].sales += 1;
+      if (o.payment_method === "credit_card") {
+        buckets[slot].card += val;
+        buckets[slot].salesCard += 1;
+      } else {
+        buckets[slot].pix += val;
+        buckets[slot].salesPix += 1;
+      }
     }
 
     return Object.entries(buckets).map(([dia, v]) => ({
       dia,
       receita: Math.round(v.revenue * 100) / 100,
+      receitaPix: Math.round(v.pix * 100) / 100,
+      receitaCartao: Math.round(v.card * 100) / 100,
       vendas: v.sales,
+      vendasPix: v.salesPix,
+      vendasCartao: v.salesCard,
     }));
   }
 
@@ -72,12 +89,22 @@ function buildRevenueChartRange(
     60,
     Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 3600 * 24)))
   );
-  const buckets: Record<string, { revenue: number; sales: number }> = {};
+  const buckets: Record<
+    string,
+    { revenue: number; pix: number; card: number; sales: number; salesPix: number; salesCard: number }
+  > = {};
   for (let i = 0; i <= diffDays; i++) {
     const d = new Date(start);
     d.setDate(d.getDate() + i);
     if (d > end) break;
-    buckets[dateLabel(d.toISOString())] = { revenue: 0, sales: 0 };
+    buckets[dateLabel(d.toISOString())] = {
+      revenue: 0,
+      pix: 0,
+      card: 0,
+      sales: 0,
+      salesPix: 0,
+      salesCard: 0,
+    };
   }
 
   for (const o of orders) {
@@ -86,19 +113,31 @@ function buildRevenueChartRange(
     if (d < start || d > end) continue;
     const key = dateLabel(o.created_at);
     if (buckets[key]) {
-      buckets[key].revenue += o.amount_cents / 100;
+      const val = o.amount_cents / 100;
+      buckets[key].revenue += val;
       buckets[key].sales += 1;
+      if (o.payment_method === "credit_card") {
+        buckets[key].card += val;
+        buckets[key].salesCard += 1;
+      } else {
+        buckets[key].pix += val;
+        buckets[key].salesPix += 1;
+      }
     }
   }
 
   return Object.entries(buckets).map(([dia, v]) => ({
     dia,
     receita: Math.round(v.revenue * 100) / 100,
+    receitaPix: Math.round(v.pix * 100) / 100,
+    receitaCartao: Math.round(v.card * 100) / 100,
     vendas: v.sales,
+    vendasPix: v.salesPix,
+    vendasCartao: v.salesCard,
   }));
 }
 
-// Construtor do Gráfico de Leads baseado no intervalo
+// Construtor do Gráfico de Leads
 function buildLeadsChartRange(
   leads: Lead[],
   start: Date,
@@ -180,10 +219,8 @@ export function App() {
     return (localStorage.getItem("tl-theme") as "light" | "dark") || "dark";
   });
 
-  // Estado de Rota por Slug
   const [section, setSection] = useState<Section>(getSectionFromPath);
 
-  // Estado de Filtro de Calendário
   const [dateRange, setDateRange] = useState<DateRangeValue>(() => {
     const today = new Date();
     const start = new Date();
@@ -203,7 +240,6 @@ export function App() {
   const [allOrders, setAllOrders] = useState<PaymentOrder[]>([]);
   const [allLeads, setAllLeads] = useState<Lead[]>([]);
 
-  // Sincroniza histórico de navegação por Slug (popstate)
   useEffect(() => {
     const handlePopState = () => {
       setSection(getSectionFromPath());
@@ -227,7 +263,7 @@ export function App() {
 
   const toggleTheme = () => setTheme((t) => (t === "light" ? "dark" : "light"));
 
-  // ─── Busca de dados no Supabase ──────────────────────────────────────────
+  // Busca de dados no Supabase
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
@@ -252,7 +288,8 @@ export function App() {
         product_name: o.product_name || "Carta Sagrada",
         amount_cents: o.amount_cents ?? 0,
         status: o.status as PaymentOrder["status"],
-        payment_method: "pix" as const,
+        payment_method: (o.payment_method as "pix" | "credit_card") || "pix",
+        gateway: o.gateway || (o.payment_method === "credit_card" ? "stripe" : "connectpay"),
         created_at: o.created_at,
       }));
       setAllOrders(parsedOrders);
@@ -304,13 +341,12 @@ export function App() {
     };
   }, [fetchData]);
 
-  // ─── Cálculos reativos ao DateRange (Hoje, Personalizado, etc) ─────────────
+  // Cálculos reativos ao DateRange com separação total PIX e Cartão
   const { filteredOrders, filteredLeads, stats, revenueChart, leadsChart } = useMemo(() => {
     const startObj = new Date(dateRange.startDate + "T00:00:00");
     const endObj = new Date(dateRange.endDate + "T23:59:59");
     const isSingleDay = dateRange.startDate === dateRange.endDate;
 
-    // Período anterior correspondente para cálculo de crescimento % (Diff)
     const durationMs = endObj.getTime() - startObj.getTime();
     const prevStartObj = new Date(startObj.getTime() - durationMs);
     const prevEndObj = new Date(startObj.getTime() - 1);
@@ -345,17 +381,36 @@ export function App() {
     const avgCurr = paidCurr.length > 0 ? revCurr / paidCurr.length : 0;
     const avgPrev = paidPrev.length > 0 ? revPrev / paidPrev.length : 0;
 
+    // Subdivisão PIX
+    const pixPaidOrders = paidCurr.filter((o) => o.payment_method === "pix" || !o.payment_method);
+    const pixRev = pixPaidOrders.reduce((s, o) => s + o.amount_cents / 100, 0);
+
+    // Subdivisão Cartão Stripe
+    const cardPaidOrders = paidCurr.filter((o) => o.payment_method === "credit_card");
+    const cardRev = cardPaidOrders.reduce((s, o) => s + o.amount_cents / 100, 0);
+
     const pending = fOrders.filter((o) => o.status === "pending" || o.status === "creating");
+    const pixPending = pending.filter((o) => o.payment_method === "pix" || !o.payment_method);
 
     const calculatedStats: DashboardStats = {
       newSubscriptions: fLeads.length,
       newSubscriptionsDiff: calcDiff(fLeads.length, prevLeads.length),
       newOrders: paidCurr.length,
       newOrdersDiff: calcDiff(paidCurr.length, paidPrev.length),
-      avgOrderRevenue: avgCurr,
-      avgOrderRevenueDiff: calcDiff(avgCurr, avgPrev),
       totalRevenue: revCurr,
       totalRevenueDiff: calcDiff(revCurr, revPrev),
+      avgOrderRevenue: avgCurr,
+      avgOrderRevenueDiff: calcDiff(avgCurr, avgPrev),
+
+      pixRevenue: pixRev,
+      pixCount: pixPaidOrders.length,
+      pixPendingCount: pixPending.length,
+      pixPendingAmount: pixPending.reduce((s, o) => s + o.amount_cents / 100, 0),
+
+      cardRevenue: cardRev,
+      cardCount: cardPaidOrders.length,
+      cardAvgRevenue: cardPaidOrders.length > 0 ? cardRev / cardPaidOrders.length : 0,
+
       pendingAmount: pending.reduce((s, o) => s + o.amount_cents / 100, 0),
       pendingCount: pending.length,
     };
@@ -372,7 +427,6 @@ export function App() {
     };
   }, [allOrders, allLeads, dateRange]);
 
-  // Exportar CSV do período selecionado
   const exportCsv = () => {
     const rows = [
       "ID,Nome,E-mail,Produto,Valor (R$),Status,Metodo,Data",
@@ -387,7 +441,7 @@ export function App() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `templo-de-luz-relatorio-${dateRange.startDate}-a-${dateRange.endDate}.csv`;
+    a.download = `od-metrics-relatorio-${dateRange.startDate}-a-${dateRange.endDate}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -426,7 +480,7 @@ export function App() {
           {/* SLUG: /visao-geral */}
           {section === "visao-geral" && (
             <>
-              {/* Cards de Métricas Principais Dinâmicos com base no Período */}
+              {/* Cards de Métricas Principais (Faturamento, Conversões PIX, Conversões Cartão Stripe, Leads) */}
               <MetricCards stats={stats} loading={loading} />
 
               {/* Barra de Conversão & Saúde da Operação no Período */}
@@ -436,19 +490,20 @@ export function App() {
                 loading={loading}
               />
 
-              {/* Gráfico de Receita Full Width (Horas para Hoje, Dias para Multi-dias) */}
+              {/* Gráfico de Receita Full Width com Curvas PIX vs Cartão */}
               <RevenueChart data={revenueChart} loading={loading} />
 
-              {/* FUNIL DE CONVERSÃO 3D EM LARGURA TOTAL (ESPAÇOSO E CONFORTÁVEL) */}
+              {/* FUNIL DE CONVERSÃO 3D EM LARGURA TOTAL */}
               <FunnelViz leads={filteredLeads.length > 0 ? filteredLeads : allLeads} loading={loading} />
 
-              {/* DUPLO GRÁFICO PIZZA (Status & Origem de Tráfego do Período) */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "22px" }}>
+              {/* TRIO DE GRÁFICOS ANALÍTICOS: Métodos (PIX vs Cartão), Status e Origem UTM */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "20px" }}>
+                <PaymentMethodsPieChart orders={filteredOrders} loading={loading} />
                 <StatusPieChart orders={filteredOrders} loading={loading} />
                 <TrafficPieChart leads={filteredLeads} loading={loading} />
               </div>
 
-              {/* Volume de Leads do Período */}
+              {/* Volume Diário de Leads */}
               <LeadsChart
                 data={leadsChart}
                 total={filteredLeads.length}
@@ -456,7 +511,7 @@ export function App() {
                 loading={loading}
               />
 
-              {/* Tabela de Pedidos do Período */}
+              {/* Tabela de Pedidos com Badges e Filtro por PIX / Cartão */}
               <OrdersTable orders={filteredOrders.slice(0, 10)} loading={loading} compact />
             </>
           )}
@@ -575,11 +630,11 @@ function ReportsView({
         >
           {[
             { label: `Faturamento Líquido (${periodLabel})`, value: brl(stats.totalRevenue), color: "var(--primary-green)" },
-            { label: "Vendas Confirmadas", value: stats.newOrders, color: "var(--primary-green)" },
+            { label: "Conversões no PIX", value: `${stats.pixCount} vendas (${brl(stats.pixRevenue)})`, color: "#10b981" },
+            { label: "Conversões no Cartão (Stripe)", value: `${stats.cardCount} vendas (${brl(stats.cardRevenue)})`, color: "#818cf8" },
             { label: "Leads Capturados", value: stats.newSubscriptions, color: "var(--primary-blue)" },
-            { label: "Ticket Médio", value: brl(stats.avgOrderRevenue), color: "var(--text-primary)" },
-            { label: "Cobranças Pendentes", value: stats.pendingCount, color: "#d97706" },
-            { label: "Volume Pendente", value: brl(stats.pendingAmount), color: "#f59e0b" },
+            { label: "Ticket Médio Global", value: brl(stats.avgOrderRevenue), color: "var(--text-primary)" },
+            { label: "Cobranças Pendentes", value: `${stats.pendingCount} (${brl(stats.pendingAmount)})`, color: "#f59e0b" },
           ].map((item) => (
             <div
               key={item.label}
@@ -604,7 +659,7 @@ function ReportsView({
               </p>
               <p
                 style={{
-                  fontSize: "22px",
+                  fontSize: "20px",
                   fontWeight: 900,
                   color: item.color,
                   margin: 0,

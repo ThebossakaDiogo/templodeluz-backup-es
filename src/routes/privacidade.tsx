@@ -56,7 +56,7 @@ function Privacidade() {
           A qualquer momento você pode solicitar a correção ou a exclusão dos seus dados escrevendo
           para <span className="text-primary">tempodaluz@gmail.com</span>.
         </p>
-        <Link to="/" className="mt-2 font-semibold text-primary underline">
+        <Link to="/" search={{ step: "intro" }} className="mt-2 font-semibold text-primary underline">
           ← Voltar para o início
         </Link>
       </article>

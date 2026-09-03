@@ -56,7 +56,7 @@ function Termos() {
           O serviço é destinado a pessoas maiores de 18 anos. Ao continuar, você declara concordar
           com estas condições.
         </p>
-        <Link to="/" className="mt-2 font-semibold text-primary underline">
+        <Link to="/" search={{ step: "intro" }} className="mt-2 font-semibold text-primary underline">
           ← Voltar para o início
         </Link>
       </article>

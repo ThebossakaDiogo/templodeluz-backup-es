@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AjudaMilenaRouteImport } from './routes/ajuda-milena'
 import { Route as ApoioMilenaRouteImport } from './routes/apoio-milena'
 import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as EscreverCartaRouteImport } from './routes/escrever-carta'
 import { Route as ObrigadoRouteImport } from './routes/obrigado'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
@@ -36,6 +37,11 @@ const ApoioMilenaRoute = ApoioMilenaRouteImport.update({
 const ComoFuncionaRoute = ComoFuncionaRouteImport.update({
   id: '/como-funciona',
   path: '/como-funciona',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EscreverCartaRoute = EscreverCartaRouteImport.update({
@@ -64,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/ajuda-milena': typeof AjudaMilenaRoute
   '/apoio-milena': typeof ApoioMilenaRoute
   '/como-funciona': typeof ComoFuncionaRoute
+  '/dashboard': typeof DashboardRoute
   '/escrever-carta': typeof EscreverCartaRoute
   '/obrigado': typeof ObrigadoRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/ajuda-milena': typeof AjudaMilenaRoute
   '/apoio-milena': typeof ApoioMilenaRoute
   '/como-funciona': typeof ComoFuncionaRoute
+  '/dashboard': typeof DashboardRoute
   '/escrever-carta': typeof EscreverCartaRoute
   '/obrigado': typeof ObrigadoRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/ajuda-milena': typeof AjudaMilenaRoute
   '/apoio-milena': typeof ApoioMilenaRoute
   '/como-funciona': typeof ComoFuncionaRoute
+  '/dashboard': typeof DashboardRoute
   '/escrever-carta': typeof EscreverCartaRoute
   '/obrigado': typeof ObrigadoRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/ajuda-milena'
     | '/apoio-milena'
     | '/como-funciona'
+    | '/dashboard'
     | '/escrever-carta'
     | '/obrigado'
     | '/privacidade'
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/ajuda-milena'
     | '/apoio-milena'
     | '/como-funciona'
+    | '/dashboard'
     | '/escrever-carta'
     | '/obrigado'
     | '/privacidade'
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/ajuda-milena'
     | '/apoio-milena'
     | '/como-funciona'
+    | '/dashboard'
     | '/escrever-carta'
     | '/obrigado'
     | '/privacidade'
@@ -128,6 +140,7 @@ export interface RootRouteChildren {
   AjudaMilenaRoute: typeof AjudaMilenaRoute
   ApoioMilenaRoute: typeof ApoioMilenaRoute
   ComoFuncionaRoute: typeof ComoFuncionaRoute
+  DashboardRoute: typeof DashboardRoute
   EscreverCartaRoute: typeof EscreverCartaRoute
   ObrigadoRoute: typeof ObrigadoRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
@@ -162,6 +175,13 @@ declare module '@tanstack/react-router' {
       path: '/como-funciona'
       fullPath: '/como-funciona'
       preLoaderRoute: typeof ComoFuncionaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/escrever-carta': {
@@ -200,6 +220,7 @@ const rootRouteChildren: RootRouteChildren = {
   AjudaMilenaRoute: AjudaMilenaRoute,
   ApoioMilenaRoute: ApoioMilenaRoute,
   ComoFuncionaRoute: ComoFuncionaRoute,
+  DashboardRoute: DashboardRoute,
   EscreverCartaRoute: EscreverCartaRoute,
   ObrigadoRoute: ObrigadoRoute,
   PrivacidadeRoute: PrivacidadeRoute,

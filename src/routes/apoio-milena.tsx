@@ -93,6 +93,7 @@ function ApoioMilenaGate() {
           </p>
           <Link
             to="/"
+            search={{ step: "intro" }}
             className="mt-8 inline-flex items-center justify-center rounded-2xl bg-[#2d144d] px-6 py-3.5 text-sm font-extrabold text-white uppercase tracking-wide shadow-md hover:bg-[#1f0c36] transition-colors"
           >
             ‹ Voltar ao Início

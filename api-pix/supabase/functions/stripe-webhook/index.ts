@@ -31,6 +31,7 @@ Deno.serve(async (req) => {
       const customerName = session?.customer_details?.name || session?.metadata?.customerName || 'Consulente Templo de Luz';
       const amountTotal = Number(session?.amount_total) || 1900;
       const productId = session?.metadata?.productId || 'carta_sagrada';
+      const telemetrySessionId = session?.metadata?.telemetrySessionId || session?.client_reference_id;
 
       console.log(`[STRIPE PAGAMENTO APROVADO]`, {
         sessionId: session?.id,
@@ -38,9 +39,63 @@ Deno.serve(async (req) => {
         customerName,
         customerEmail,
         amountCents: amountTotal,
+        telemetrySessionId,
       });
 
-      // Disparo automático e redundante para a API da UTMify
+      // 1. Persistência no Supabase para o painel OD METRICS
+      try {
+        const supabaseUrl = Deno.env.get('SUPABASE_URL') || 'https://opftmzegcvfyoinjfmcj.supabase.co';
+        const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || Deno.env.get('SUPABASE_ANON_KEY');
+
+        if (supabaseKey) {
+          // Gravação do pedido de cartão na tabela pix_orders
+          await fetch(`${supabaseUrl}/rest/v1/pix_orders`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': supabaseKey,
+              'Authorization': `Bearer ${supabaseKey}`,
+              'Prefer': 'return=minimal',
+            },
+            body: JSON.stringify({
+              product_id: productId,
+              product_name: productId === 'carta_sagrada' ? 'Carta Psicografada Sagrada' : 'Cirurgia Médium Milena',
+              amount_cents: amountTotal,
+              status: 'paid',
+              customer_name: customerName,
+              customer_email: customerEmail,
+              customer_phone: session?.customer_details?.phone || '11999999999',
+              customer_cpf: '00000000000',
+              status_token_hash: '0000000000000000000000000000000000000000000000000000000000000000',
+              connectpay_transaction_id: `stripe_${session?.id}`,
+              payment_method: 'credit_card',
+              gateway: 'stripe',
+            }),
+          }).catch((e) => console.warn('[SUPABASE ORDER INSERT WARN]', e));
+
+          // Atualização da telemetria do lead no funil
+          if (telemetrySessionId) {
+            await fetch(`${supabaseUrl}/rest/v1/quiz_funnel_leads?session_id=eq.${telemetrySessionId}`, {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json',
+                'apikey': supabaseKey,
+                'Authorization': `Bearer ${supabaseKey}`,
+              },
+              body: JSON.stringify({
+                payment_status: 'paid',
+                last_amount_cents: amountTotal,
+                completed: true,
+                updated_at: new Date().toISOString(),
+              }),
+            }).catch((e) => console.warn('[SUPABASE LEAD UPDATE WARN]', e));
+          }
+        }
+      } catch (dbErr) {
+        console.warn('[SUPABASE SYNC ERROR]', dbErr);
+      }
+
+      // 2. Disparo automático e redundante para a API da UTMify
       try {
         const utmifyToken = 'Szz1ObkJ95rX3A8C3M7VcjACLPHBRAr5HGx4';
         const d = new Date();

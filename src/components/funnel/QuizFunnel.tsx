@@ -9,6 +9,7 @@ import { SacredCandle } from "./SacredCandle";
 import { StripeCardModal } from "./StripeCardModal";
 import { recordInput } from "@/lib/auto-capture";
 import { trackQuizStep } from "@/lib/metaPixel";
+import { trackQuizStep as trackQuizTelemetry } from "@/lib/funnel-telemetry";
 
 /* ─────────── helpers ─────────── */
 
@@ -1557,7 +1558,7 @@ export function QuizFunnel() {
     }
   }, [nome, ente, relacao, tempo, dorPrincipal, mensagem, modoMensagem, temasEscolhidos, horario]);
 
-  // Rastreia no Meta Pixel cada etapa do Quiz
+  // Rastreia no Meta Pixel e na Telemetria do Supabase cada etapa do Quiz
   useEffect(() => {
     trackQuizStep(step, {
       nome_consulente: nome || undefined,
@@ -1566,7 +1567,29 @@ export function QuizFunnel() {
       tempo: tempo || undefined,
       dor: dorPrincipal || undefined,
     });
-  }, [step]);
+
+    const stepOrderMap: Record<Step, number> = {
+      intro: 1,
+      ente: 2,
+      relacao: 3,
+      tempo: 4,
+      mensagem: 5,
+      confirma: 6,
+      loading: 7,
+      result: 8,
+    };
+
+    trackQuizTelemetry({
+      stepIndex: stepOrderMap[step] || 1,
+      stepName: step,
+      leadName: nome || undefined,
+      enteQuerido: ente || undefined,
+      grauParentesco: relacao || undefined,
+      mensagemPreview: mensagem || undefined,
+      temas: temasEscolhidos.length > 0 ? temasEscolhidos : undefined,
+      completed: step === "result",
+    });
+  }, [step, nome, ente, relacao, tempo, dorPrincipal, mensagem, temasEscolhidos]);
 
   const goto = (s: Step) => {
     setStep(s);

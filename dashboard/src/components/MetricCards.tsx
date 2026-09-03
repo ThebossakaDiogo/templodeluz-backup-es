@@ -1,69 +1,122 @@
-import { TrendingUp, TrendingDown, Minus, Users, ShoppingBag, Clock, DollarSign } from "lucide-react";
+import {
+  DollarSign,
+  Users,
+  CreditCard,
+  QrCode,
+  TrendingUp,
+  TrendingDown,
+  Clock,
+  CheckCircle2,
+} from "lucide-react";
 import type { DashboardStats } from "@/types";
 
 interface MetricCardsProps {
   stats: DashboardStats;
-  loading?: boolean;
+  loading: boolean;
 }
 
-interface CardConfig {
-  label: string;
-  description: string;
-  value: string;
-  diff?: number;
-  icon: typeof Users;
-  iconClass: string;
-  valueColor?: string;
-  accentGlow: string;
+function formatBRL(val: number): string {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(val);
 }
 
 export function MetricCards({ stats, loading }: MetricCardsProps) {
-  const brl = (v: number) =>
-    new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-      minimumFractionDigits: 2,
-    }).format(v);
-
-  const cards: CardConfig[] = [
+  const cards = [
     {
-      label: "Total de Leads",
-      description: "Entradas registradas no quiz",
+      id: "total",
+      label: "Faturamento Total Unificado",
+      sub: "PIX + Cartão de Crédito",
+      value: formatBRL(stats.totalRevenue),
+      diff: stats.totalRevenueDiff,
+      icon: DollarSign,
+      iconBg: "rgba(16, 185, 129, 0.15)",
+      iconBorder: "rgba(16, 185, 129, 0.35)",
+      iconColor: "var(--primary-green)",
+      accentBorder: "rgba(16, 185, 129, 0.4)",
+      extraInfo: (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "10px", fontSize: "11px" }}>
+          <span style={{ color: "var(--primary-green)", fontWeight: 700 }}>
+            PIX: {formatBRL(stats.pixRevenue)}
+          </span>
+          <span style={{ color: "var(--text-muted)" }}>•</span>
+          <span style={{ color: "#818cf8", fontWeight: 700 }}>
+            Cartão: {formatBRL(stats.cardRevenue)}
+          </span>
+        </div>
+      ),
+    },
+    {
+      id: "pix",
+      label: "Conversões no PIX",
+      sub: "Instantâneo via Banco Central",
+      value: formatBRL(stats.pixRevenue),
+      diff: null,
+      icon: QrCode,
+      iconBg: "rgba(16, 185, 129, 0.15)",
+      iconBorder: "rgba(16, 185, 129, 0.35)",
+      iconColor: "#10b981",
+      accentBorder: "rgba(16, 185, 129, 0.3)",
+      extraInfo: (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "10px", fontSize: "11px" }}>
+          <span style={{ color: "var(--text-secondary)", fontWeight: 700, display: "flex", alignItems: "center", gap: "4px" }}>
+            <CheckCircle2 style={{ width: "12px", height: "12px", color: "#10b981" }} />
+            {stats.pixCount} {stats.pixCount === 1 ? "venda paga" : "vendas pagas"}
+          </span>
+          <span style={{ color: "#f59e0b", fontWeight: 700, display: "flex", alignItems: "center", gap: "4px" }}>
+            <Clock style={{ width: "12px", height: "12px" }} />
+            {stats.pixPendingCount} pendente{stats.pixPendingCount !== 1 ? "s" : ""}
+          </span>
+        </div>
+      ),
+    },
+    {
+      id: "card",
+      label: "Conversões no Cartão (Stripe)",
+      sub: "Processamento seguro de crédito",
+      value: formatBRL(stats.cardRevenue),
+      diff: null,
+      icon: CreditCard,
+      iconBg: "rgba(99, 102, 241, 0.15)",
+      iconBorder: "rgba(99, 102, 241, 0.35)",
+      iconColor: "#818cf8",
+      accentBorder: "rgba(99, 102, 241, 0.35)",
+      extraInfo: (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "10px", fontSize: "11px" }}>
+          <span style={{ color: "var(--text-secondary)", fontWeight: 700, display: "flex", alignItems: "center", gap: "4px" }}>
+            <CheckCircle2 style={{ width: "12px", height: "12px", color: "#818cf8" }} />
+            {stats.cardCount} {stats.cardCount === 1 ? "venda aprovada" : "vendas aprovadas"}
+          </span>
+          <span style={{ color: "var(--text-muted)", fontWeight: 600 }}>
+            Ticket Médio: {formatBRL(stats.cardAvgRevenue)}
+          </span>
+        </div>
+      ),
+    },
+    {
+      id: "leads",
+      label: "Total de Leads & Funil",
+      sub: "Consulentes capturados no quiz",
       value: stats.newSubscriptions.toLocaleString("pt-BR"),
       diff: stats.newSubscriptionsDiff,
       icon: Users,
-      iconClass: "icon-navy",
-      valueColor: "var(--text-primary)",
-      accentGlow: "rgba(37, 99, 235, 0.15)",
-    },
-    {
-      label: "Vendas Confirmadas",
-      description: "PIX pagos no gateway",
-      value: stats.newOrders.toLocaleString("pt-BR"),
-      diff: stats.newOrdersDiff,
-      icon: ShoppingBag,
-      iconClass: "icon-emerald",
-      valueColor: "#059669",
-      accentGlow: "rgba(16, 185, 129, 0.18)",
-    },
-    {
-      label: "PIX Pendentes",
-      description: `${stats.pendingCount} cobrança${stats.pendingCount !== 1 ? "s" : ""} aguardando`,
-      value: brl(stats.pendingAmount),
-      icon: Clock,
-      iconClass: "icon-amber",
-      valueColor: "#d97706",
-      accentGlow: "rgba(245, 158, 11, 0.15)",
-    },
-    {
-      label: "Faturamento (30d)",
-      description: "Volume financeiro liquidado",
-      value: brl(stats.totalRevenue),
-      diff: stats.totalRevenueDiff,
-      icon: DollarSign,
-      iconClass: "icon-emerald",
-      valueColor: "var(--text-primary)",
-      accentGlow: "rgba(16, 185, 129, 0.25)",
+      iconBg: "rgba(37, 99, 235, 0.15)",
+      iconBorder: "rgba(37, 99, 235, 0.35)",
+      iconColor: "var(--primary-blue)",
+      accentBorder: "rgba(37, 99, 235, 0.3)",
+      extraInfo: (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "10px", fontSize: "11px" }}>
+          <span style={{ color: "var(--text-secondary)", fontWeight: 700 }}>
+            Vendas Totais: {stats.newOrders}
+          </span>
+          <span style={{ color: "var(--primary-green)", fontWeight: 800 }}>
+            {stats.newSubscriptions > 0
+              ? `${((stats.newOrders / stats.newSubscriptions) * 100).toFixed(1)}% conv.`
+              : "0% conv."}
+          </span>
+        </div>
+      ),
     },
   ];
 
@@ -72,129 +125,142 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
       style={{
         display: "grid",
         gridTemplateColumns: "repeat(4, 1fr)",
-        gap: "16px",
+        gap: "18px",
       }}
     >
-      {cards.map((card, i) => {
-        const Icon = card.icon;
-        const hasDiff = card.diff !== undefined;
-        const positive = (card.diff ?? 0) > 0;
-        const negative = (card.diff ?? 0) < 0;
-
-        return (
-          <div
-            key={card.label}
-            className="card fade-up"
-            style={{
-              padding: "20px 22px",
-              display: "flex",
-              flexDirection: "column",
-              gap: "14px",
-              animationDelay: `${i * 50}ms`,
-              position: "relative",
-              overflow: "hidden",
-            }}
-          >
-            {/* Glow de fundo sofisticado */}
+      {cards.map((c) => (
+        <div
+          key={c.id}
+          className="card"
+          style={{
+            padding: "20px 22px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            position: "relative",
+            overflow: "hidden",
+            transition: "all 0.2s ease",
+          }}
+        >
+          {/* Topo do Card */}
+          <div>
             <div
               style={{
-                position: "absolute",
-                top: "-30px",
-                right: "-30px",
-                width: "120px",
-                height: "120px",
-                borderRadius: "50%",
-                background: `radial-gradient(circle, ${card.accentGlow} 0%, transparent 70%)`,
-                pointerEvents: "none",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                marginBottom: "12px",
               }}
-            />
-
-            {/* Linha Superior: Ícone + Badge Diff */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-              <div className={card.iconClass}>
-                <Icon style={{ width: "19px", height: "19px" }} />
+            >
+              <div
+                style={{
+                  width: "38px",
+                  height: "38px",
+                  borderRadius: "10px",
+                  background: c.iconBg,
+                  border: `1px solid ${c.iconBorder}`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: c.iconColor,
+                  flexShrink: 0,
+                  boxShadow: `0 0 12px ${c.iconBg}`,
+                }}
+              >
+                <c.icon style={{ width: "18px", height: "18px" }} />
               </div>
 
-              {hasDiff && !loading && (
+              {c.diff !== null && (
                 <div
                   style={{
-                    display: "inline-flex",
+                    display: "flex",
                     alignItems: "center",
-                    gap: "4px",
+                    gap: "3px",
                     fontSize: "11px",
-                    fontWeight: 700,
-                    color: positive ? "#34d399" : negative ? "#f87171" : "var(--text-muted)",
-                    background: positive
-                      ? "rgba(16, 185, 129, 0.12)"
-                      : negative
-                      ? "rgba(239, 68, 68, 0.12)"
-                      : "rgba(255, 255, 255, 0.04)",
-                    border: `1px solid ${positive ? "rgba(16, 185, 129, 0.28)" : negative ? "rgba(239, 68, 68, 0.28)" : "var(--border)"}`,
-                    borderRadius: "6px",
+                    fontWeight: 800,
                     padding: "3px 8px",
+                    borderRadius: "6px",
+                    background:
+                      c.diff >= 0
+                        ? "rgba(16, 185, 129, 0.14)"
+                        : "rgba(239, 68, 68, 0.14)",
+                    color: c.diff >= 0 ? "var(--primary-green)" : "#ef4444",
+                    border: `1px solid ${
+                      c.diff >= 0
+                        ? "rgba(16, 185, 129, 0.3)"
+                        : "rgba(239, 68, 68, 0.3)"
+                    }`,
                   }}
                 >
-                  {positive ? (
-                    <TrendingUp style={{ width: "12px", height: "12px" }} />
-                  ) : negative ? (
-                    <TrendingDown style={{ width: "12px", height: "12px" }} />
+                  {c.diff >= 0 ? (
+                    <TrendingUp style={{ width: "11px", height: "11px" }} />
                   ) : (
-                    <Minus style={{ width: "12px", height: "12px" }} />
+                    <TrendingDown style={{ width: "11px", height: "11px" }} />
                   )}
-                  {positive ? "+" : ""}{card.diff}%
+                  <span>{c.diff >= 0 ? `+${c.diff}%` : `${c.diff}%`}</span>
                 </div>
               )}
             </div>
 
-            {/* Valores com Alto Contraste */}
-            <div>
+            <span
+              style={{
+                fontSize: "11px",
+                fontWeight: 700,
+                color: "var(--text-muted)",
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+                display: "block",
+              }}
+            >
+              {c.label}
+            </span>
+
+            <div style={{ marginTop: "4px" }}>
               {loading ? (
-                <>
-                  <div className="skeleton" style={{ height: "34px", width: "120px", marginBottom: "6px" }} />
-                  <div className="skeleton" style={{ height: "12px", width: "80px" }} />
-                </>
+                <div
+                  className="skeleton"
+                  style={{ height: "30px", width: "70%", borderRadius: "6px" }}
+                />
               ) : (
-                <>
-                  <div
-                    style={{
-                      fontSize: "28px",
-                      fontWeight: 900,
-                      color: card.valueColor ?? "var(--text-primary)",
-                      letterSpacing: "-0.03em",
-                      lineHeight: 1.05,
-                    }}
-                  >
-                    {card.value}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "11.5px",
-                      color: "var(--text-muted)",
-                      marginTop: "6px",
-                      fontWeight: 600,
-                    }}
-                  >
-                    {card.label}
-                  </div>
-                </>
+                <span
+                  style={{
+                    fontSize: "24px",
+                    fontWeight: 900,
+                    color: "var(--text-primary)",
+                    letterSpacing: "-0.02em",
+                    lineHeight: 1.1,
+                  }}
+                >
+                  {c.value}
+                </span>
               )}
             </div>
 
-            {/* Descrição Inferior */}
-            <div
+            <span
               style={{
-                paddingTop: "12px",
-                borderTop: "1px solid var(--border-subtle)",
-                fontSize: "11px",
-                color: "var(--text-secondary)",
+                fontSize: "10.5px",
+                color: "var(--text-muted)",
+                display: "block",
+                marginTop: "3px",
                 fontWeight: 500,
               }}
             >
-              {card.description}
-            </div>
+              {c.sub}
+            </span>
           </div>
-        );
-      })}
+
+          {/* Divisor e Detalhes de Conversão Específicos */}
+          <div
+            style={{
+              borderTop: "1px solid var(--border-subtle)",
+              marginTop: "14px",
+              paddingTop: "4px",
+            }}
+          >
+            {c.extraInfo}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

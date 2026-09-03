@@ -14,8 +14,8 @@ const DEFAULT_SUPABASE_ANON_KEY =
 import { getStoredUtms } from "./utmify";
 
 export async function createStripeCheckoutSession(input: StripeCheckoutInput): Promise<{ url: string }> {
-  const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL as string | undefined) || DEFAULT_SUPABASE_URL;
-  const anonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined) || DEFAULT_SUPABASE_ANON_KEY;
+  const supabaseUrl = (import.meta.env["VITE_SUPABASE_URL"] as string | undefined) || DEFAULT_SUPABASE_URL;
+  const anonKey = (import.meta.env["VITE_SUPABASE_ANON_KEY"] as string | undefined) || DEFAULT_SUPABASE_ANON_KEY;
 
   const endpoint = `${supabaseUrl.replace(/\/$/, "")}/functions/v1/create-stripe-checkout`;
 
