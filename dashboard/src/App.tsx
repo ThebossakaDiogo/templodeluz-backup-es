@@ -8,6 +8,8 @@ import { OrdersTable } from "./components/OrdersTable";
 import { FunnelTracker } from "./components/FunnelTracker";
 import { FunnelViz } from "./components/FunnelViz";
 import { StatusPieChart } from "./components/StatusPieChart";
+import { TrafficPieChart } from "./components/TrafficPieChart";
+import { ConversionOverview } from "./components/ConversionOverview";
 import { supabase } from "./lib/supabase";
 import type { DashboardStats, Lead, PaymentOrder, ChartDataPoint } from "./types";
 
@@ -68,17 +70,44 @@ function buildLeadsChart(leads: Lead[], days = 14): ChartDataPoint[] {
   return Object.entries(buckets).map(([dia, leads]) => ({ dia, leads }));
 }
 
-// ─── Secções do painel ───────────────────────────────────────────────────────
+// ─── Secções & Slugs do painel ───────────────────────────────────────────────
 export type Section = "visao-geral" | "rastreamento" | "pedidos" | "relatorios";
+
+const SLUG_TO_SECTION: Record<string, Section> = {
+  "/": "visao-geral",
+  "/visao-geral": "visao-geral",
+  "/rastreamento": "rastreamento",
+  "/pedidos": "pedidos",
+  "/relatorios": "relatorios",
+};
+
+const SECTION_TO_SLUG: Record<Section, string> = {
+  "visao-geral": "/visao-geral",
+  "rastreamento": "/rastreamento",
+  "pedidos": "/pedidos",
+  "relatorios": "/relatorios",
+};
+
+function getSectionFromPath(): Section {
+  if (typeof window === "undefined") return "visao-geral";
+  const path = window.location.pathname.toLowerCase().replace(/\/$/, "") || "/";
+  return SLUG_TO_SECTION[path] || "visao-geral";
+}
 
 // ─── Componente principal ────────────────────────────────────────────────────
 export function App() {
   const [theme, setTheme] = useState<"light" | "dark">(() => {
     return (localStorage.getItem("tl-theme") as "light" | "dark") || "dark";
   });
-  const [section, setSection] = useState<Section>("visao-geral");
+
+  // Estado de Rota por Slug
+  const [section, setSection] = useState<Section>(getSectionFromPath);
+  const [periodFilter, setPeriodFilter] = useState<number>(14);
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+
+  // Contagem de Pessoas Ao Vivo no Funil
+  const [onlineCount, setOnlineCount] = useState<number>(0);
 
   const [stats, setStats] = useState<DashboardStats>({
     newSubscriptions: 0,
@@ -97,6 +126,24 @@ export function App() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [revenueChart, setRevenueChart] = useState<ChartDataPoint[]>([]);
   const [leadsChart, setLeadsChart] = useState<ChartDataPoint[]>([]);
+
+  // Sincroniza histórico de navegação por Slug (popstate)
+  useEffect(() => {
+    const handlePopState = () => {
+      setSection(getSectionFromPath());
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  // Navegação para uma nova Slug
+  const handleNavigate = (newSection: Section) => {
+    const targetSlug = SECTION_TO_SLUG[newSection];
+    if (window.location.pathname !== targetSlug) {
+      window.history.pushState(null, "", targetSlug);
+    }
+    setSection(newSection);
+  };
 
   // Aplica tema no HTML
   useEffect(() => {
@@ -146,6 +193,14 @@ export function App() {
       const allLeads: Lead[] = (leadsData ?? []) as Lead[];
       setLeads(allLeads);
 
+      // Calcula Pessoas Ao Vivo (leads com atividade nos últimos 15 minutos)
+      const fifteenMinAgo = Date.now() - 15 * 60 * 1000;
+      const activeRecent = allLeads.filter(
+        (l) => new Date(l.updated_at || l.created_at).getTime() >= fifteenMinAgo
+      );
+      // Se não houver atividade real nos últimos 15 min, exibe pelo menos os leads recentes
+      setOnlineCount(activeRecent.length);
+
       // Métricas com períodos reais
       const paidCurr = allOrders.filter(
         (o) => o.status === "paid" && new Date(o.created_at) >= p30
@@ -181,24 +236,24 @@ export function App() {
         pendingCount: pending.length,
       });
 
-      setRevenueChart(buildRevenueChart(allOrders, 14));
-      setLeadsChart(buildLeadsChart(allLeads, 14));
+      setRevenueChart(buildRevenueChart(allOrders, periodFilter));
+      setLeadsChart(buildLeadsChart(allLeads, periodFilter));
       setLastUpdate(new Date());
     } catch (err) {
       console.warn("Erro ao buscar dados:", err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [periodFilter]);
 
-  // Carregamento inicial + polling 30s
+  // Carregamento inicial + polling 20s
   useEffect(() => {
     void fetchData();
-    const interval = setInterval(() => void fetchData(), 30_000);
+    const interval = setInterval(() => void fetchData(), 20_000);
     return () => clearInterval(interval);
   }, [fetchData]);
 
-  // Realtime Supabase
+  // Realtime Supabase + Presença
   useEffect(() => {
     const ch1 = supabase
       .channel("rt-orders")
@@ -206,6 +261,7 @@ export function App() {
         void fetchData()
       )
       .subscribe();
+
     const ch2 = supabase
       .channel("rt-leads")
       .on(
@@ -214,6 +270,7 @@ export function App() {
         () => void fetchData()
       )
       .subscribe();
+
     return () => {
       void supabase.removeChannel(ch1);
       void supabase.removeChannel(ch2);
@@ -241,8 +298,8 @@ export function App() {
   };
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "var(--bg-base)" }}>
-      <Sidebar section={section} onSelect={setSection} />
+    <div style={{ display: "flex", minHeight: "100vh", background: "var(--bg-root)" }}>
+      <Sidebar section={section} onSelect={handleNavigate} onlineCount={onlineCount} />
 
       <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
         <Topbar
@@ -253,56 +310,75 @@ export function App() {
           lastUpdate={lastUpdate}
           section={section}
           onExportCsv={exportCsv}
+          periodFilter={periodFilter}
+          onPeriodChange={(days) => {
+            setPeriodFilter(days);
+            setRevenueChart(buildRevenueChart(orders, days));
+            setLeadsChart(buildLeadsChart(leads, days));
+          }}
+          onlineCount={onlineCount}
         />
 
         <main
           style={{
             flex: 1,
             overflowY: "auto",
-            padding: "24px 28px",
+            padding: "24px 30px",
             display: "flex",
             flexDirection: "column",
-            gap: "20px",
+            gap: "22px",
           }}
         >
-          {/* Visão Geral */}
+          {/* SLUG: /visao-geral */}
           {section === "visao-geral" && (
             <>
+              {/* Cards de Métricas Principais */}
               <MetricCards stats={stats} loading={loading} />
 
-              {/* Gráfico de receita ocupa toda a largura */}
+              {/* Barra de Conversão & Saúde da Operação */}
+              <ConversionOverview leads={leads} orders={orders} loading={loading} />
+
+              {/* Gráfico de Receita Full Width */}
               <RevenueChart data={revenueChart} loading={loading} />
 
-              {/* Funil + Pizza + Leads em grid */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: "20px" }}>
-                <FunnelViz leads={leads} loading={loading} />
-                <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-                  <StatusPieChart orders={orders} loading={loading} />
-                  <LeadsChart
-                    data={leadsChart}
-                    total={leads.length}
-                    diff={stats.newSubscriptionsDiff}
-                    loading={loading}
-                  />
-                </div>
+              {/* DUPLO GRÁFICO PIZZA (Status & Origem de Tráfego) */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+                <StatusPieChart orders={orders} loading={loading} />
+                <TrafficPieChart leads={leads} loading={loading} />
               </div>
 
-              {/* Últimos pedidos compacto */}
-              <OrdersTable orders={orders.slice(0, 8)} loading={loading} compact />
+              {/* Funil Visual do Quiz + Gráfico de Barras de Leads */}
+              <div style={{ display: "grid", gridTemplateColumns: "1.2fr 0.8fr", gap: "20px" }}>
+                <FunnelViz leads={leads} loading={loading} />
+                <LeadsChart
+                  data={leadsChart}
+                  total={leads.length}
+                  diff={stats.newSubscriptionsDiff}
+                  loading={loading}
+                />
+              </div>
+
+              {/* Tabela de Pedidos com Filtros Rápidos */}
+              <OrdersTable orders={orders.slice(0, 10)} loading={loading} compact />
             </>
           )}
 
-          {/* Rastreamento ao Vivo */}
+          {/* SLUG: /rastreamento */}
           {section === "rastreamento" && (
-            <FunnelTracker leads={leads} loading={loading} onRefresh={fetchData} />
+            <FunnelTracker
+              leads={leads}
+              loading={loading}
+              onRefresh={fetchData}
+              onlineCount={onlineCount}
+            />
           )}
 
-          {/* Pedidos */}
+          {/* SLUG: /pedidos */}
           {section === "pedidos" && (
             <OrdersTable orders={orders} loading={loading} />
           )}
 
-          {/* Relatórios */}
+          {/* SLUG: /relatorios */}
           {section === "relatorios" && (
             <ReportsView
               orders={orders}
@@ -367,24 +443,24 @@ function ReportsView({
             <h2
               style={{
                 fontSize: "15px",
-                fontWeight: 700,
+                fontWeight: 800,
                 color: "var(--text-primary)",
                 margin: 0,
               }}
             >
-              Resumo do Período
+              Resumo Operacional (30 Dias)
             </h2>
             <p
               style={{
-                fontSize: "12px",
+                fontSize: "11px",
                 color: "var(--text-muted)",
                 margin: "4px 0 0",
               }}
             >
-              Últimos 30 dias vs. período anterior
+              Auditoria de desempenho comercial e funil de conversão
             </p>
           </div>
-          <button onClick={onExport} className="btn btn-ruby">
+          <button onClick={onExport} className="btn btn-emerald">
             Exportar CSV
           </button>
         </div>
@@ -397,12 +473,12 @@ function ReportsView({
           }}
         >
           {[
-            { label: "Faturamento (30d)", value: brl(stats.totalRevenue) },
-            { label: "Vendas confirmadas", value: stats.newOrders },
-            { label: "Total de leads", value: stats.newSubscriptions },
-            { label: "Ticket médio", value: brl(stats.avgOrderRevenue) },
-            { label: "PIX pendentes", value: stats.pendingCount },
-            { label: "Valor pendente", value: brl(stats.pendingAmount) },
+            { label: "Faturamento Líquido (30d)", value: brl(stats.totalRevenue), color: "#34d399" },
+            { label: "Vendas Confirmadas", value: stats.newOrders, color: "#10b981" },
+            { label: "Total de Leads Mapeados", value: stats.newSubscriptions, color: "#38bdf8" },
+            { label: "Ticket Médio", value: brl(stats.avgOrderRevenue), color: "#ffffff" },
+            { label: "Cobranças Pendentes", value: stats.pendingCount, color: "#fbbf24" },
+            { label: "Volume Pendente", value: brl(stats.pendingAmount), color: "#f59e0b" },
           ].map((item) => (
             <div
               key={item.label}
@@ -415,8 +491,8 @@ function ReportsView({
             >
               <p
                 style={{
-                  fontSize: "11px",
-                  fontWeight: 600,
+                  fontSize: "10.5px",
+                  fontWeight: 700,
                   color: "var(--text-muted)",
                   textTransform: "uppercase",
                   letterSpacing: "0.06em",
@@ -428,8 +504,8 @@ function ReportsView({
               <p
                 style={{
                   fontSize: "22px",
-                  fontWeight: 800,
-                  color: "var(--text-primary)",
+                  fontWeight: 900,
+                  color: item.color,
                   margin: 0,
                 }}
               >
@@ -440,7 +516,7 @@ function ReportsView({
         </div>
       </div>
 
-      {/* Distribuição */}
+      {/* Distribuição Dupla */}
       <div
         style={{
           display: "grid",
@@ -453,12 +529,12 @@ function ReportsView({
           <h3
             style={{
               fontSize: "13px",
-              fontWeight: 700,
+              fontWeight: 800,
               color: "var(--text-primary)",
               margin: "0 0 16px",
             }}
           >
-            Origem dos Leads
+            Origem dos Leads (UTMs)
           </h3>
           {Object.entries(utmSources)
             .sort((a, b) => b[1] - a[1])
@@ -494,7 +570,7 @@ function ReportsView({
                       style={{
                         width: `${pct}%`,
                         height: "100%",
-                        background: "var(--accent)",
+                        background: "linear-gradient(90deg, #2563eb, #38bdf8)",
                         borderRadius: "99px",
                         transition: "width 0.4s ease",
                       }}
@@ -515,12 +591,12 @@ function ReportsView({
           <h3
             style={{
               fontSize: "13px",
-              fontWeight: 700,
+              fontWeight: 800,
               color: "var(--text-primary)",
               margin: "0 0 16px",
             }}
           >
-            Status dos Pedidos
+            Status dos Pedidos no Gateway
           </h3>
           {Object.entries(statusDist)
             .sort((a, b) => b[1] - a[1])
@@ -528,11 +604,11 @@ function ReportsView({
               const total = orders.length || 1;
               const pct = Math.round((count / total) * 100);
               const colors: Record<string, string> = {
-                paid: "var(--success)",
-                pending: "var(--warning)",
-                failed: "var(--danger)",
-                expired: "var(--text-muted)",
-                creating: "var(--accent)",
+                paid: "#10b981",
+                pending: "#f59e0b",
+                failed: "#ef4444",
+                expired: "#64748b",
+                creating: "#06b6d4",
               };
               return (
                 <div key={status} style={{ marginBottom: "12px" }}>
@@ -563,7 +639,7 @@ function ReportsView({
                       style={{
                         width: `${pct}%`,
                         height: "100%",
-                        background: colors[status] ?? "var(--accent)",
+                        background: colors[status] ?? "#10b981",
                         borderRadius: "99px",
                         transition: "width 0.4s ease",
                       }}

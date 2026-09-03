@@ -28,12 +28,13 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
   const cards: CardConfig[] = [
     {
       label: "Total de Leads",
-      description: "Entradas no quiz",
+      description: "Entradas registradas no quiz",
       value: stats.newSubscriptions.toLocaleString("pt-BR"),
       diff: stats.newSubscriptionsDiff,
       icon: Users,
-      iconClass: "ruby-icon",
-      accentGlow: "rgba(225, 29, 72, 0.12)",
+      iconClass: "icon-navy",
+      valueColor: "#ffffff",
+      accentGlow: "rgba(37, 99, 235, 0.15)",
     },
     {
       label: "Vendas Confirmadas",
@@ -41,28 +42,28 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
       value: stats.newOrders.toLocaleString("pt-BR"),
       diff: stats.newOrdersDiff,
       icon: ShoppingBag,
-      iconClass: "green-icon",
-      valueColor: "#10b981",
-      accentGlow: "rgba(16, 185, 129, 0.1)",
+      iconClass: "icon-emerald",
+      valueColor: "#34d399",
+      accentGlow: "rgba(16, 185, 129, 0.18)",
     },
     {
       label: "PIX Pendentes",
-      description: `${stats.pendingCount} cobrança${stats.pendingCount !== 1 ? "s" : ""} gerada${stats.pendingCount !== 1 ? "s" : ""}`,
+      description: `${stats.pendingCount} cobrança${stats.pendingCount !== 1 ? "s" : ""} aguardando`,
       value: brl(stats.pendingAmount),
       icon: Clock,
-      iconClass: "amber-icon",
-      valueColor: "#f59e0b",
-      accentGlow: "rgba(245, 158, 11, 0.1)",
+      iconClass: "icon-amber",
+      valueColor: "#fbbf24",
+      accentGlow: "rgba(245, 158, 11, 0.15)",
     },
     {
       label: "Faturamento (30d)",
-      description: "Receita líquida confirmada",
+      description: "Volume financeiro liquidado",
       value: brl(stats.totalRevenue),
       diff: stats.totalRevenueDiff,
       icon: DollarSign,
-      iconClass: "ruby-icon",
+      iconClass: "icon-emerald",
       valueColor: "#ffffff",
-      accentGlow: "rgba(225, 29, 72, 0.18)",
+      accentGlow: "rgba(16, 185, 129, 0.25)",
     },
   ];
 
@@ -94,14 +95,14 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
               overflow: "hidden",
             }}
           >
-            {/* Efeito Glow Ruby de fundo */}
+            {/* Glow de fundo sofisticado */}
             <div
               style={{
                 position: "absolute",
-                top: "-25px",
-                right: "-25px",
-                width: "110px",
-                height: "110px",
+                top: "-30px",
+                right: "-30px",
+                width: "120px",
+                height: "120px",
                 borderRadius: "50%",
                 background: `radial-gradient(circle, ${card.accentGlow} 0%, transparent 70%)`,
                 pointerEvents: "none",
@@ -122,13 +123,13 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
                     gap: "4px",
                     fontSize: "11px",
                     fontWeight: 700,
-                    color: positive ? "#10b981" : negative ? "#f43f5e" : "var(--text-muted)",
+                    color: positive ? "#34d399" : negative ? "#f87171" : "var(--text-muted)",
                     background: positive
-                      ? "rgba(16, 185, 129, 0.1)"
+                      ? "rgba(16, 185, 129, 0.12)"
                       : negative
-                      ? "rgba(225, 29, 72, 0.12)"
-                      : "rgba(255,255,255,0.04)",
-                    border: `1px solid ${positive ? "rgba(16, 185, 129, 0.25)" : negative ? "rgba(225, 29, 72, 0.3)" : "var(--border)"}`,
+                      ? "rgba(239, 68, 68, 0.12)"
+                      : "rgba(255, 255, 255, 0.04)",
+                    border: `1px solid ${positive ? "rgba(16, 185, 129, 0.28)" : negative ? "rgba(239, 68, 68, 0.28)" : "var(--border)"}`,
                     borderRadius: "6px",
                     padding: "3px 8px",
                   }}

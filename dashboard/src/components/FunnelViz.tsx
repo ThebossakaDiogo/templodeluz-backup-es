@@ -6,13 +6,13 @@ interface FunnelVizProps {
 }
 
 const ETAPAS = [
-  { index: 1, name: "intro",    label: "Início do Quiz",        color: "#f43f5e", glow: "rgba(244,63,94,0.4)"   },
-  { index: 2, name: "ente",     label: "Nome do Ente Querido",  color: "#e11d48", glow: "rgba(225,29,72,0.4)"   },
-  { index: 3, name: "relacao",  label: "Vínculo Familiar",      color: "#e11d48", glow: "rgba(225,29,72,0.4)"   },
-  { index: 4, name: "tempo",    label: "Tempo e Sentimento",    color: "#be123c", glow: "rgba(190,18,60,0.4)"   },
-  { index: 5, name: "mensagem", label: "Mensagem e Intenção",   color: "#be123c", glow: "rgba(190,18,60,0.4)"   },
-  { index: 6, name: "confirma", label: "Confirmação dos Dados", color: "#9f1239", glow: "rgba(159,18,57,0.4)"   },
-  { index: 7, name: "loading",  label: "Preparação da Carta",   color: "#881337", glow: "rgba(136,19,55,0.4)"   },
+  { index: 1, name: "intro",    label: "Início do Quiz",        color: "#2563eb", glow: "rgba(37,99,235,0.4)"   },
+  { index: 2, name: "ente",     label: "Nome do Ente Querido",  color: "#0284c7", glow: "rgba(2,132,199,0.4)"   },
+  { index: 3, name: "relacao",  label: "Vínculo Familiar",      color: "#0284c7", glow: "rgba(2,132,199,0.4)"   },
+  { index: 4, name: "tempo",    label: "Tempo e Sentimento",    color: "#06b6d4", glow: "rgba(6,182,212,0.4)"   },
+  { index: 5, name: "mensagem", label: "Mensagem e Intenção",   color: "#06b6d4", glow: "rgba(6,182,212,0.4)"   },
+  { index: 6, name: "confirma", label: "Confirmação dos Dados", color: "#14b8a6", glow: "rgba(20,184,166,0.4)"  },
+  { index: 7, name: "loading",  label: "Preparação da Carta",   color: "#34d399", glow: "rgba(52,211,153,0.4)"  },
   { index: 8, name: "result",   label: "Checkout e Doação",     color: "#10b981", glow: "rgba(16,185,129,0.4)"  },
 ];
 
@@ -43,7 +43,7 @@ export function FunnelViz({ leads, loading }: FunnelVizProps) {
           Funil de Conversão do Quiz
         </h3>
         <p style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "3px", fontWeight: 500 }}>
-          Progresso dos usuários até a página de doação / checkout
+          Progressão dos consulentes até a página de doação / checkout
         </p>
       </div>
 
@@ -61,20 +61,20 @@ export function FunnelViz({ leads, loading }: FunnelVizProps) {
 
             return (
               <div key={etapa.index} style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                {/* Badge do número da etapa com estilo Ruby */}
+                {/* Badge do número da etapa com estilo Emerald/Navy */}
                 <div
                   style={{
                     width: "24px",
                     height: "24px",
                     borderRadius: "6px",
-                    background: etapa.index === 8 ? "rgba(16,185,129,0.15)" : "rgba(225,29,72,0.15)",
-                    border: `1px solid ${etapa.index === 8 ? "rgba(16,185,129,0.3)" : "rgba(225,29,72,0.35)"}`,
+                    background: etapa.index === 8 ? "rgba(16,185,129,0.2)" : "rgba(37,99,235,0.15)",
+                    border: `1px solid ${etapa.index === 8 ? "rgba(16,185,129,0.4)" : "rgba(37,99,235,0.3)"}`,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     fontSize: "11px",
                     fontWeight: 800,
-                    color: etapa.index === 8 ? "#10b981" : "#ffffff",
+                    color: etapa.index === 8 ? "#34d399" : "#38bdf8",
                     flexShrink: 0,
                   }}
                 >
@@ -93,7 +93,7 @@ export function FunnelViz({ leads, loading }: FunnelVizProps) {
                       position: "relative",
                     }}
                   >
-                    {/* Fill Ruby */}
+                    {/* Fill Gradient Azul -> Esmeralda */}
                     <div
                       style={{
                         position: "absolute",
@@ -101,9 +101,7 @@ export function FunnelViz({ leads, loading }: FunnelVizProps) {
                         top: 0,
                         bottom: 0,
                         width: `${widthPct}%`,
-                        background: etapa.index === 8
-                          ? "linear-gradient(90deg, rgba(16,185,129,0.2) 0%, rgba(16,185,129,0.45) 100%)"
-                          : `linear-gradient(90deg, rgba(225,29,72,0.15) 0%, ${etapa.color}50 100%)`,
+                        background: `linear-gradient(90deg, rgba(37,99,235,0.2) 0%, ${etapa.color}60 100%)`,
                         borderRadius: "8px",
                         borderRight: `2px solid ${etapa.color}`,
                         boxShadow: `0 0 10px ${etapa.glow}`,
@@ -150,7 +148,7 @@ export function FunnelViz({ leads, loading }: FunnelVizProps) {
                   style={{
                     fontSize: "11px",
                     fontWeight: 800,
-                    color: convPct > 50 ? "#ffffff" : "var(--text-muted)",
+                    color: convPct > 50 ? "#34d399" : "var(--text-muted)",
                     width: "36px",
                     textAlign: "right",
                     flexShrink: 0,
@@ -164,7 +162,7 @@ export function FunnelViz({ leads, loading }: FunnelVizProps) {
         </div>
       )}
 
-      {/* Resumo Ruby no rodapé */}
+      {/* Resumo Navy/Emerald no rodapé */}
       {!loading && leads.length > 0 && (
         <div
           style={{
@@ -179,12 +177,12 @@ export function FunnelViz({ leads, loading }: FunnelVizProps) {
             {
               label: "Iniciaram o Quiz",
               value: stepCounts[0]?.reached ?? 0,
-              color: "#ffffff",
+              color: "#38bdf8",
             },
             {
               label: "Alcançaram Checkout",
               value: stepCounts[7]?.reached ?? 0,
-              color: "#f43f5e",
+              color: "#34d399",
             },
             {
               label: "Taxa de Conversão",

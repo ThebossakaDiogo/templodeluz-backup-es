@@ -1,4 +1,4 @@
-import { Sun, Moon, RefreshCw, Download } from "lucide-react";
+import { Sun, Moon, RefreshCw, Download, Calendar, Users } from "lucide-react";
 import type { Section } from "../App";
 
 interface TopbarProps {
@@ -9,20 +9,23 @@ interface TopbarProps {
   lastUpdate: Date | null;
   section: Section;
   onExportCsv: () => void;
+  periodFilter: number;
+  onPeriodChange: (days: number) => void;
+  onlineCount: number;
 }
 
 const SECTION_LABELS: Record<Section, string> = {
-  "visao-geral":  "Visão Geral",
-  "rastreamento": "Rastreamento ao Vivo",
-  "pedidos":      "Histórico de Pedidos",
-  "relatorios":   "Relatórios & Métricas",
+  "visao-geral":  "Visão Geral & Gráficos",
+  "rastreamento": "Rastreamento do Quiz ao Vivo",
+  "pedidos":      "Auditoria & Pedidos do Gateway",
+  "relatorios":   "Relatórios de Canais & UTMs",
 };
 
 const SECTION_DESCRIPTIONS: Record<Section, string> = {
-  "visao-geral":  "Métricas principais, receita e conversão em tempo real",
-  "rastreamento": "Jornada dos leads no quiz e checkout passo a passo",
-  "pedidos":      "Auditoria de pagamentos e cobranças PIX geradas",
-  "relatorios":   "Origem de tráfego, UTMs e exportação de relatórios",
+  "visao-geral":  "Monitoramento de receita, pizza de canais e saúde da conversão",
+  "rastreamento": "Etapa exata de cada consulente no funil e pessoas ao vivo",
+  "pedidos":      "Extrato de transações PIX geradas, pagas e pendentes",
+  "relatorios":   "Desempenho por fonte de tráfego, campanha e exportação",
 };
 
 function formatTime(d: Date): string {
@@ -41,6 +44,9 @@ export function Topbar({
   lastUpdate,
   section,
   onExportCsv,
+  periodFilter,
+  onPeriodChange,
+  onlineCount,
 }: TopbarProps) {
   return (
     <header
@@ -84,7 +90,77 @@ export function Topbar({
         </p>
       </div>
 
-      {/* Indicador de Status com Ponto Ruby */}
+      {/* CONTADOR DE PESSOAS AO VIVO NO FUNIL (DESTAQUE) */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          background: "rgba(16, 185, 129, 0.12)",
+          border: "1px solid rgba(16, 185, 129, 0.35)",
+          borderRadius: "99px",
+          padding: "5px 14px",
+          boxShadow: "0 0 14px rgba(16, 185, 129, 0.15)",
+        }}
+      >
+        <div className="pulse-emerald" />
+        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+          <Users style={{ width: "13px", height: "13px", color: "#34d399" }} />
+          <span style={{ fontSize: "12px", fontWeight: 800, color: "#ffffff" }}>
+            {onlineCount}
+          </span>
+          <span style={{ fontSize: "11px", fontWeight: 600, color: "#34d399" }}>
+            {onlineCount === 1 ? "pessoa ao vivo no funil" : "pessoas ao vivo no funil"}
+          </span>
+        </div>
+      </div>
+
+      {/* Filtro Rápido de Período (Visão Geral) */}
+      {section === "visao-geral" && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            background: "var(--bg-surface-alt)",
+            border: "1px solid var(--border)",
+            borderRadius: "8px",
+            padding: "2px",
+            gap: "2px",
+          }}
+        >
+          <div style={{ padding: "0 6px", color: "var(--text-muted)", display: "flex", alignItems: "center" }}>
+            <Calendar style={{ width: "12px", height: "12px" }} />
+          </div>
+          {[
+            { label: "7D", days: 7 },
+            { label: "14D", days: 14 },
+            { label: "30D", days: 30 },
+          ].map((item) => {
+            const active = periodFilter === item.days;
+            return (
+              <button
+                key={item.days}
+                onClick={() => onPeriodChange(item.days)}
+                style={{
+                  fontSize: "11px",
+                  fontWeight: active ? 800 : 600,
+                  padding: "4px 10px",
+                  borderRadius: "6px",
+                  border: "none",
+                  cursor: "pointer",
+                  background: active ? "#10b981" : "transparent",
+                  color: active ? "#ffffff" : "var(--text-secondary)",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Indicador de Atualização */}
       <div
         style={{
           display: "flex",
@@ -98,30 +174,21 @@ export function Topbar({
           padding: "6px 14px",
         }}
       >
-        <div className={loading ? undefined : "pulse-ruby"}
-          style={loading ? {
-            width: "8px", height: "8px", borderRadius: "50%",
-            background: "#f59e0b",
-            boxShadow: "0 0 10px rgba(245,158,11,0.7)",
-          } : undefined}
-        />
         <span style={{ fontWeight: 600 }}>
           {loading
             ? "Sincronizando..."
             : lastUpdate
-            ? `Atualizado às ${formatTime(lastUpdate)}`
-            : "Conectado ao Supabase"}
+            ? `Sync ${formatTime(lastUpdate)}`
+            : "Supabase Conectado"}
         </span>
       </div>
 
       {/* Ações */}
       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-        {(section === "pedidos" || section === "relatorios") && (
-          <button onClick={onExportCsv} className="btn btn-ruby">
-            <Download style={{ width: "13px", height: "13px" }} />
-            Exportar CSV
-          </button>
-        )}
+        <button onClick={onExportCsv} className="btn btn-emerald">
+          <Download style={{ width: "13px", height: "13px" }} />
+          Exportar CSV
+        </button>
 
         <button
           onClick={onRefresh}

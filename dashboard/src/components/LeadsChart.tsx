@@ -15,7 +15,7 @@ export function LeadsChart({ data, total, diff, loading }: LeadsChartProps) {
   const DiffIcon =
     diff > 0 ? TrendingUp : diff < 0 ? TrendingDown : Minus;
   const diffColor =
-    diff > 0 ? "#10b981" : diff < 0 ? "#f43f5e" : "var(--text-muted)";
+    diff > 0 ? "#34d399" : diff < 0 ? "#f87171" : "var(--text-muted)";
 
   return (
     <div
@@ -33,7 +33,7 @@ export function LeadsChart({ data, total, diff, loading }: LeadsChartProps) {
             margin: 0,
           }}
         >
-          Leads do Quiz
+          Volume de Leads
         </p>
 
         <div
@@ -85,7 +85,7 @@ export function LeadsChart({ data, total, diff, loading }: LeadsChartProps) {
             fontWeight: 500,
           }}
         >
-          Últimos 14 dias · Entradas registradas
+          Distribuição diária de entradas
         </p>
       </div>
 
@@ -102,7 +102,7 @@ export function LeadsChart({ data, total, diff, loading }: LeadsChartProps) {
               textAlign: "center",
             }}
           >
-            Nenhum lead registrado nos últimos 14 dias.
+            Nenhum lead registrado no período.
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={140}>
@@ -112,32 +112,32 @@ export function LeadsChart({ data, total, diff, loading }: LeadsChartProps) {
               barCategoryGap="28%"
             >
               <defs>
-                <linearGradient id="barRubyGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#f43f5e" />
-                  <stop offset="100%" stopColor="#9f1239" />
+                <linearGradient id="barEmeraldGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#34d399" />
+                  <stop offset="100%" stopColor="#059669" />
                 </linearGradient>
               </defs>
               <XAxis
                 dataKey="dia"
                 hide={data.length > 10}
-                tick={{ fontSize: 9.5, fill: "#a1a1aa" } as React.SVGProps<SVGTextElement>}
+                tick={{ fontSize: 9.5, fill: "#94a3b8" } as React.SVGProps<SVGTextElement>}
                 tickLine={false}
                 axisLine={false}
               />
               <Tooltip
                 contentStyle={{
-                  background: "#111115",
-                  border: "1px solid rgba(225,29,72,0.4)",
+                  background: "#0c1527",
+                  border: "1px solid rgba(16,185,129,0.4)",
                   borderRadius: "8px",
                   boxShadow: "0 10px 30px rgba(0,0,0,0.8)",
                   fontSize: "11px",
-                  color: "#ffffff",
+                  color: "#f8fafc",
                 }}
                 formatter={(value: number) => [`${value} leads`, "Entradas"]}
               />
-              <Bar dataKey="leads" radius={[4, 4, 0, 0]} maxBarSize={22} fill="url(#barRubyGrad)">
+              <Bar dataKey="leads" radius={[4, 4, 0, 0]} maxBarSize={22} fill="url(#barEmeraldGrad)">
                 {data.map((_entry, i) => (
-                  <Cell key={`cell-${i}`} style={{ filter: "drop-shadow(0 0 4px rgba(225,29,72,0.3))" }} />
+                  <Cell key={`cell-${i}`} style={{ filter: "drop-shadow(0 0 4px rgba(16,185,129,0.3))" }} />
                 ))}
               </Bar>
             </BarChart>

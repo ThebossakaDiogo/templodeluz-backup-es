@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { Search } from "lucide-react";
 import type { PaymentOrder } from "@/types";
 
 interface OrdersTableProps {
@@ -15,9 +17,9 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const STATUS_CLASS: Record<string, string> = {
-  paid:     "badge badge-paid",
+  paid:     "badge badge-emerald",
   pending:  "badge badge-pending",
-  creating: "badge badge-ruby",
+  creating: "badge badge-cyan",
   failed:   "badge badge-failed",
   expired:  "badge badge-expired",
 };
@@ -41,9 +43,24 @@ function formatBRL(cents: number): string {
 }
 
 export function OrdersTable({ orders, loading, compact }: OrdersTableProps) {
+  const [statusFilter, setStatusFilter] = useState<"all" | "paid" | "pending">("all");
+  const [search, setSearch] = useState("");
+
   const COLS = compact
     ? ["Nome do Consulente", "Produto", "Valor", "Status", "Data / Hora"]
     : ["Consulente", "E-mail", "Produto", "Valor", "Status", "Método", "Data / Hora"];
+
+  const filteredOrders = orders.filter((o) => {
+    if (statusFilter === "paid" && o.status !== "paid") return false;
+    if (statusFilter === "pending" && o.status !== "pending" && o.status !== "creating") return false;
+    if (!search.trim()) return true;
+    const q = search.toLowerCase();
+    return (
+      o.customer_name.toLowerCase().includes(q) ||
+      o.customer_email.toLowerCase().includes(q) ||
+      o.product_name.toLowerCase().includes(q)
+    );
+  });
 
   return (
     <div className="card" style={{ overflow: "hidden" }}>
@@ -55,6 +72,8 @@ export function OrdersTable({ orders, loading, compact }: OrdersTableProps) {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          flexWrap: "wrap",
+          gap: "12px",
         }}
       >
         <div>
@@ -77,32 +96,108 @@ export function OrdersTable({ orders, loading, compact }: OrdersTableProps) {
             }}
           >
             {loading
-              ? "Carregando registros..."
-              : `${orders.length} ${orders.length === 1 ? "pedido encontrado" : "pedidos encontrados"} · Conectado ao Supabase`}
+              ? "Carregando transações..."
+              : `${filteredOrders.length} de ${orders.length} pedidos · Conexão ativa com o banco`}
           </p>
         </div>
 
-        {!loading && orders.length > 0 && (
+        {/* Filtros e Busca (Nova funcionalidade) */}
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          {/* Abas de Status */}
           <div
             style={{
-              fontSize: "11.5px",
-              color: "var(--text-muted)",
+              display: "flex",
+              alignItems: "center",
               background: "var(--bg-surface-alt)",
-              padding: "4px 12px",
-              borderRadius: "8px",
               border: "1px solid var(--border)",
+              borderRadius: "8px",
+              padding: "2px",
+              gap: "2px",
             }}
           >
-            Total faturado:{" "}
-            <strong style={{ color: "#10b981", fontWeight: 800 }}>
-              {formatBRL(
-                orders
-                  .filter((o) => o.status === "paid")
-                  .reduce((s, o) => s + o.amount_cents, 0)
-              )}
-            </strong>
+            {[
+              { id: "all", label: "Todos" },
+              { id: "paid", label: "Pagos" },
+              { id: "pending", label: "Pendentes" },
+            ].map((f) => {
+              const active = statusFilter === f.id;
+              return (
+                <button
+                  key={f.id}
+                  onClick={() => setStatusFilter(f.id as any)}
+                  style={{
+                    fontSize: "11px",
+                    fontWeight: active ? 800 : 600,
+                    padding: "4px 10px",
+                    borderRadius: "6px",
+                    border: "none",
+                    cursor: "pointer",
+                    background: active ? "#10b981" : "transparent",
+                    color: active ? "#064e3b" : "var(--text-secondary)",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  {f.label}
+                </button>
+              );
+            })}
           </div>
-        )}
+
+          {/* Campo de Busca nos Pedidos */}
+          {!compact && (
+            <div style={{ position: "relative" }}>
+              <Search
+                style={{
+                  position: "absolute",
+                  left: "9px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  width: "12px",
+                  height: "12px",
+                  color: "#64748b",
+                }}
+              />
+              <input
+                type="text"
+                placeholder="Filtrar pedidos..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                style={{
+                  fontSize: "11.5px",
+                  padding: "5px 10px 5px 28px",
+                  border: "1px solid var(--border)",
+                  borderRadius: "8px",
+                  background: "var(--bg-surface-alt)",
+                  color: "#ffffff",
+                  outline: "none",
+                  width: "180px",
+                }}
+              />
+            </div>
+          )}
+
+          {!loading && orders.length > 0 && (
+            <div
+              style={{
+                fontSize: "11.5px",
+                color: "var(--text-muted)",
+                background: "var(--bg-surface-alt)",
+                padding: "4px 12px",
+                borderRadius: "8px",
+                border: "1px solid var(--border)",
+              }}
+            >
+              Faturado:{" "}
+              <strong style={{ color: "#34d399", fontWeight: 800 }}>
+                {formatBRL(
+                  orders
+                    .filter((o) => o.status === "paid")
+                    .reduce((s, o) => s + o.amount_cents, 0)
+                )}
+              </strong>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Tabela */}
@@ -152,7 +247,7 @@ export function OrdersTable({ orders, loading, compact }: OrdersTableProps) {
                 </tr>
               ))}
 
-            {!loading && orders.length === 0 && (
+            {!loading && filteredOrders.length === 0 && (
               <tr>
                 <td
                   colSpan={COLS.length}
@@ -163,13 +258,13 @@ export function OrdersTable({ orders, loading, compact }: OrdersTableProps) {
                     fontSize: "12.5px",
                   }}
                 >
-                  Nenhum pedido cadastrado no momento. Cobranças PIX aparecerão aqui em tempo real.
+                  Nenhum pedido encontrado com os filtros selecionados.
                 </td>
               </tr>
             )}
 
             {!loading &&
-              orders.map((order, idx) => (
+              filteredOrders.map((order, idx) => (
                 <tr
                   key={order.id}
                   style={{
@@ -179,7 +274,7 @@ export function OrdersTable({ orders, loading, compact }: OrdersTableProps) {
                   }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLTableRowElement).style.background =
-                      "rgba(225, 29, 72, 0.05)";
+                      "rgba(16, 185, 129, 0.05)";
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLTableRowElement).style.background =
@@ -240,7 +335,7 @@ export function OrdersTable({ orders, loading, compact }: OrdersTableProps) {
                       fontWeight: 800,
                       color:
                         order.status === "paid"
-                          ? "#10b981"
+                          ? "#34d399"
                           : "#ffffff",
                       whiteSpace: "nowrap",
                     }}

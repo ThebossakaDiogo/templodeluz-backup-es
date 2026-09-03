@@ -1,21 +1,22 @@
 import { useState } from "react";
-import { RefreshCw, X, Search, Sparkles } from "lucide-react";
+import { RefreshCw, X, Search, Sparkles, Users, Radio } from "lucide-react";
 import type { Lead } from "@/types";
 
 interface FunnelTrackerProps {
   leads: Lead[];
   loading: boolean;
   onRefresh: () => void;
+  onlineCount: number;
 }
 
 const ETAPAS = [
-  { index: 1, name: "intro",    label: "Início do Quiz",        color: "#f43f5e" },
-  { index: 2, name: "ente",     label: "Nome do Ente Querido",  color: "#e11d48" },
-  { index: 3, name: "relacao",  label: "Vínculo Familiar",      color: "#e11d48" },
-  { index: 4, name: "tempo",    label: "Tempo e Sentimento",    color: "#be123c" },
-  { index: 5, name: "mensagem", label: "Mensagem e Intenção",   color: "#be123c" },
-  { index: 6, name: "confirma", label: "Confirmação dos Dados", color: "#9f1239" },
-  { index: 7, name: "loading",  label: "Preparação da Carta",   color: "#881337" },
+  { index: 1, name: "intro",    label: "Início do Quiz",        color: "#2563eb" },
+  { index: 2, name: "ente",     label: "Nome do Ente Querido",  color: "#0284c7" },
+  { index: 3, name: "relacao",  label: "Vínculo Familiar",      color: "#0284c7" },
+  { index: 4, name: "tempo",    label: "Tempo e Sentimento",    color: "#06b6d4" },
+  { index: 5, name: "mensagem", label: "Mensagem e Intenção",   color: "#06b6d4" },
+  { index: 6, name: "confirma", label: "Confirmação dos Dados", color: "#14b8a6" },
+  { index: 7, name: "loading",  label: "Preparação da Carta",   color: "#34d399" },
   { index: 8, name: "result",   label: "Checkout e Doação",     color: "#10b981" },
 ];
 
@@ -27,7 +28,7 @@ const PAYMENT_LABELS: Record<string, string> = {
 };
 
 const PAYMENT_BADGES: Record<string, string> = {
-  paid:            "badge badge-paid",
+  paid:            "badge badge-emerald",
   waiting_payment: "badge badge-pending",
   failed:          "badge badge-failed",
   none:            "badge badge-expired",
@@ -41,13 +42,21 @@ function timeAgo(dateStr: string): string {
   return `${Math.round(diff / 86400)}d atrás`;
 }
 
-export function FunnelTracker({ leads, loading, onRefresh }: FunnelTrackerProps) {
+export function FunnelTracker({ leads, loading, onRefresh, onlineCount }: FunnelTrackerProps) {
   const [selected, setSelected] = useState<Lead | null>(null);
   const [search,   setSearch]   = useState("");
+
+  // Leads ativos nos últimos 15 minutos (ao vivo)
+  const recentLeads = leads.filter(
+    (l) => new Date(l.updated_at).getTime() >= Date.now() - 15 * 60 * 1000
+  );
 
   const stepCounts = ETAPAS.map((etapa) => ({
     ...etapa,
     count: leads.filter(
+      (l) => l.current_step_index === etapa.index || l.current_step_name === etapa.name
+    ).length,
+    liveCount: recentLeads.filter(
       (l) => l.current_step_index === etapa.index || l.current_step_name === etapa.name
     ).length,
   }));
@@ -67,48 +76,105 @@ export function FunnelTracker({ leads, loading, onRefresh }: FunnelTrackerProps)
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "22px" }}>
-      {/* Cabeçalho */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <h2 style={{ fontSize: "16px", fontWeight: 800, color: "#ffffff", margin: 0 }}>
-              Rastreamento de Leads em Tempo Real
-            </h2>
-            <span className="badge badge-ruby" style={{ fontSize: "10px" }}>
-              Ao Vivo
-            </span>
+      {/* BANNER DE DESTAQUE: PESSOAS AO VIVO NO FUNIL */}
+      <div
+        className="card"
+        style={{
+          padding: "24px 28px",
+          background: "linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(6, 182, 212, 0.08) 100%)",
+          border: "1px solid rgba(16, 185, 129, 0.35)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: "20px",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "18px" }}>
+          <div
+            style={{
+              width: "52px",
+              height: "52px",
+              borderRadius: "14px",
+              background: "rgba(16, 185, 129, 0.2)",
+              border: "1px solid rgba(16, 185, 129, 0.4)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 0 20px rgba(16, 185, 129, 0.35)",
+              flexShrink: 0,
+            }}
+          >
+            <Radio style={{ width: "26px", height: "26px", color: "#34d399" }} />
           </div>
-          <p style={{ fontSize: "11.5px", color: "#a1a1aa", margin: "4px 0 0", fontWeight: 500 }}>
-            {loading ? "Sincronizando com Supabase..." : `${leads.length} lead${leads.length !== 1 ? "s" : ""} registrado${leads.length !== 1 ? "s" : ""} · Atualização automática via WebSocket`}
-          </p>
+
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div className="pulse-emerald" />
+              <span style={{ fontSize: "11px", fontWeight: 800, color: "#34d399", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                Pessoas Ao Vivo no Funil
+              </span>
+            </div>
+            <div style={{ display: "flex", alignItems: "baseline", gap: "8px", marginTop: "4px" }}>
+              <span style={{ fontSize: "34px", fontWeight: 900, color: "#ffffff", letterSpacing: "-0.03em", lineHeight: 1 }}>
+                {onlineCount}
+              </span>
+              <span style={{ fontSize: "14px", fontWeight: 700, color: "#cbd5e1" }}>
+                {onlineCount === 1 ? "consulente navegando agora" : "consulentes navegando agora"}
+              </span>
+            </div>
+            <p style={{ fontSize: "11.5px", color: "#94a3b8", margin: "4px 0 0", fontWeight: 500 }}>
+              Detecção automática em tempo real · Atualizado a cada resposta dada no quiz
+            </p>
+          </div>
         </div>
 
-        <button onClick={onRefresh} disabled={loading} className="btn btn-ruby">
-          <RefreshCw
-            style={{
-              width: "13px",
-              height: "13px",
-              animation: loading ? "spin 1s linear infinite" : "none",
-            }}
-          />
-          Sincronizar Agora
-        </button>
+        {/* Distribuição rápida dos usuários ao vivo */}
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <button onClick={onRefresh} disabled={loading} className="btn btn-emerald">
+            <RefreshCw
+              style={{
+                width: "13px",
+                height: "13px",
+                animation: loading ? "spin 1s linear infinite" : "none",
+              }}
+            />
+            Atualizar Presença
+          </button>
+        </div>
       </div>
 
-      {/* Card: Distribuição por Etapa do Quiz */}
+      {/* Card: Distribuição por Etapa do Quiz com Marcadores Ao Vivo */}
       <div className="card" style={{ padding: "24px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
           <div>
-            <h3 style={{ fontSize: "13px", fontWeight: 800, color: "#ffffff", textTransform: "uppercase", letterSpacing: "0.06em", margin: 0 }}>
+            <h3 style={{ fontSize: "13.5px", fontWeight: 800, color: "#ffffff", textTransform: "uppercase", letterSpacing: "0.06em", margin: 0 }}>
               Distribuição por Etapa do Quiz
             </h3>
-            <p style={{ fontSize: "11px", color: "#a1a1aa", margin: "3px 0 0" }}>
-              Posição atual dos usuários navegando no funil
+            <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: "3px 0 0" }}>
+              Posicionamento dos consulentes em cada tela do fluxo
             </p>
           </div>
-          <span style={{ fontSize: "11px", color: "#71717a", fontWeight: 600 }}>
-            Total: <strong style={{ color: "#ffffff" }}>{leads.length}</strong>
-          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <span style={{ fontSize: "11px", color: "var(--text-muted)", fontWeight: 600 }}>
+              Total Histórico: <strong style={{ color: "#ffffff" }}>{leads.length}</strong>
+            </span>
+            <span
+              style={{
+                fontSize: "11px",
+                color: "#34d399",
+                background: "rgba(16, 185, 129, 0.12)",
+                border: "1px solid rgba(16, 185, 129, 0.3)",
+                borderRadius: "6px",
+                padding: "2px 8px",
+                fontWeight: 700,
+              }}
+            >
+              {onlineCount} ao vivo
+            </span>
+          </div>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
@@ -125,23 +191,22 @@ export function FunnelTracker({ leads, loading, onRefresh }: FunnelTrackerProps)
                   gap: "14px",
                   padding: "6px 8px",
                   borderRadius: "8px",
-                  transition: "background 0.15s ease",
                 }}
               >
-                {/* Indicador de Número Ruby */}
+                {/* Indicador de Número */}
                 <div
                   style={{
                     width: "24px",
                     height: "24px",
                     borderRadius: "6px",
-                    background: hasLeads ? "rgba(225,29,72,0.2)" : "rgba(255,255,255,0.05)",
-                    border: `1px solid ${hasLeads ? "rgba(225,29,72,0.5)" : "rgba(255,255,255,0.1)"}`,
+                    background: hasLeads ? "rgba(16, 185, 129, 0.2)" : "rgba(37, 99, 235, 0.12)",
+                    border: `1px solid ${hasLeads ? "rgba(16, 185, 129, 0.45)" : "rgba(37, 99, 235, 0.25)"}`,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     fontSize: "11px",
                     fontWeight: 800,
-                    color: hasLeads ? "#f43f5e" : "#71717a",
+                    color: hasLeads ? "#34d399" : "#38bdf8",
                     flexShrink: 0,
                   }}
                 >
@@ -152,7 +217,7 @@ export function FunnelTracker({ leads, loading, onRefresh }: FunnelTrackerProps)
                 <span
                   style={{
                     fontSize: "12.5px",
-                    color: hasLeads ? "#ffffff" : "#d4d4d8",
+                    color: hasLeads ? "#ffffff" : "#cbd5e1",
                     width: "200px",
                     flexShrink: 0,
                     fontWeight: hasLeads ? 700 : 500,
@@ -161,13 +226,13 @@ export function FunnelTracker({ leads, loading, onRefresh }: FunnelTrackerProps)
                   {etapa.label}
                 </span>
 
-                {/* Trilha da Barra com Alta Visibilidade */}
+                {/* Trilha da Barra */}
                 <div
                   style={{
                     flex: 1,
                     height: "10px",
-                    background: "#191920",
-                    border: "1px solid #282833",
+                    background: "var(--bg-surface-alt)",
+                    border: "1px solid var(--border)",
                     borderRadius: "99px",
                     overflow: "hidden",
                     position: "relative",
@@ -177,22 +242,42 @@ export function FunnelTracker({ leads, loading, onRefresh }: FunnelTrackerProps)
                     style={{
                       width: `${pct}%`,
                       height: "100%",
-                      background: etapa.index === 8
-                        ? "linear-gradient(90deg, #10b981, #34d399)"
-                        : "linear-gradient(90deg, #e11d48, #f43f5e)",
+                      background: "linear-gradient(90deg, #059669, #10b981)",
                       borderRadius: "99px",
-                      boxShadow: hasLeads ? "0 0 10px rgba(225,29,72,0.5)" : "none",
+                      boxShadow: hasLeads ? "0 0 10px rgba(16, 185, 129, 0.5)" : "none",
                       transition: "width 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
                     }}
                   />
                 </div>
 
-                {/* Contagem */}
+                {/* Indicador de pessoas ao vivo nesta etapa */}
+                {etapa.liveCount > 0 && (
+                  <span
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      fontSize: "10.5px",
+                      fontWeight: 800,
+                      color: "#34d399",
+                      background: "rgba(16, 185, 129, 0.15)",
+                      padding: "2px 7px",
+                      borderRadius: "4px",
+                      border: "1px solid rgba(16, 185, 129, 0.3)",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    <Users style={{ width: "10px", height: "10px" }} />
+                    {etapa.liveCount} agora
+                  </span>
+                )}
+
+                {/* Contagem Histórica */}
                 <span
                   style={{
                     fontSize: "13px",
                     fontWeight: 800,
-                    color: hasLeads ? "#ffffff" : "#52525b",
+                    color: hasLeads ? "#34d399" : "var(--text-muted)",
                     width: "36px",
                     textAlign: "right",
                     flexShrink: 0,
@@ -220,14 +305,14 @@ export function FunnelTracker({ leads, loading, onRefresh }: FunnelTrackerProps)
         >
           <div>
             <h3 style={{ fontSize: "14px", fontWeight: 800, color: "#ffffff", margin: 0 }}>
-              Leads Registrados
+              Leads Registrados no Funil
             </h3>
-            <p style={{ fontSize: "11px", color: "#a1a1aa", margin: "2px 0 0", fontWeight: 500 }}>
-              Clique em qualquer lead para inspecionar os detalhes
+            <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: "2px 0 0", fontWeight: 500 }}>
+              Clique sobre a linha para abrir o dossiê do consulente
             </p>
           </div>
 
-          {/* Campo de Busca Estilizado */}
+          {/* Campo de Busca */}
           <div style={{ position: "relative" }}>
             <Search
               style={{
@@ -237,7 +322,7 @@ export function FunnelTracker({ leads, loading, onRefresh }: FunnelTrackerProps)
                 transform: "translateY(-50%)",
                 width: "13px",
                 height: "13px",
-                color: "#71717a",
+                color: "#64748b",
               }}
             />
             <input
@@ -257,8 +342,8 @@ export function FunnelTracker({ leads, loading, onRefresh }: FunnelTrackerProps)
                 transition: "all 0.15s ease",
               }}
               onFocus={(e) => {
-                e.target.style.borderColor = "rgba(225,29,72,0.5)";
-                e.target.style.boxShadow = "0 0 10px rgba(225,29,72,0.2)";
+                e.target.style.borderColor = "rgba(16, 185, 129, 0.5)";
+                e.target.style.boxShadow = "0 0 10px rgba(16, 185, 129, 0.2)";
               }}
               onBlur={(e) => {
                 e.target.style.borderColor = "var(--border)";
@@ -273,7 +358,7 @@ export function FunnelTracker({ leads, loading, onRefresh }: FunnelTrackerProps)
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
             <thead>
               <tr>
-                {["Nome do Consulente", "Ente Querido", "Etapa Atual", "Status do Pagamento", "Origem UTM", "Cadastrado Há"].map((col) => (
+                {["Nome do Consulente", "Ente Querido", "Etapa Atual", "Status do Pagamento", "Origem UTM", "Última Atividade"].map((col) => (
                   <th
                     key={col}
                     style={{
@@ -281,7 +366,7 @@ export function FunnelTracker({ leads, loading, onRefresh }: FunnelTrackerProps)
                       textAlign: "left",
                       fontSize: "10.5px",
                       fontWeight: 700,
-                      color: "#a1a1aa",
+                      color: "var(--text-muted)",
                       textTransform: "uppercase",
                       letterSpacing: "0.06em",
                       background: "var(--bg-surface-alt)",
@@ -312,15 +397,15 @@ export function FunnelTracker({ leads, loading, onRefresh }: FunnelTrackerProps)
                     style={{
                       padding: "50px 20px",
                       textAlign: "center",
-                      color: "#a1a1aa",
+                      color: "var(--text-muted)",
                       fontSize: "12.5px",
                     }}
                   >
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
-                      <Sparkles style={{ width: "24px", height: "24px", color: "#e11d48", opacity: 0.7 }} />
+                      <Sparkles style={{ width: "24px", height: "24px", color: "#10b981", opacity: 0.7 }} />
                       <span style={{ color: "#ffffff", fontWeight: 700 }}>Nenhum lead capturado no momento</span>
-                      <span style={{ fontSize: "11.5px", color: "#71717a" }}>
-                        Assim que um usuário preencher o primeiro passo do quiz, ele aparecerá aqui instantaneamente.
+                      <span style={{ fontSize: "11.5px", color: "var(--text-muted)" }}>
+                        Novos consulentes aparecem aqui automaticamente via conexão websocket em tempo real.
                       </span>
                     </div>
                   </td>
@@ -329,6 +414,8 @@ export function FunnelTracker({ leads, loading, onRefresh }: FunnelTrackerProps)
 
               {!loading && filtered.map((lead, idx) => {
                 const etapa = ETAPAS.find((e) => e.index === lead.current_step_index || e.name === lead.current_step_name);
+                const isOnline = new Date(lead.updated_at).getTime() >= Date.now() - 15 * 60 * 1000;
+
                 return (
                   <tr
                     key={lead.id}
@@ -338,16 +425,19 @@ export function FunnelTracker({ leads, loading, onRefresh }: FunnelTrackerProps)
                       cursor: "pointer",
                       transition: "background 0.15s ease",
                     }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLTableRowElement).style.background = "rgba(225,29,72,0.06)"; }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLTableRowElement).style.background = "rgba(16, 185, 129, 0.06)"; }}
                     onMouseLeave={(e) => { (e.currentTarget as HTMLTableRowElement).style.background = idx % 2 === 0 ? "var(--bg-surface)" : "var(--bg-surface-alt)"; }}
                   >
                     <td style={{ padding: "13px 20px", borderBottom: "1px solid var(--border-subtle)", fontWeight: 700, color: "#ffffff", whiteSpace: "nowrap" }}>
-                      {lead.lead_name || "Anônimo"}
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        {isOnline && <div className="pulse-emerald" style={{ width: "6px", height: "6px" }} />}
+                        <span>{lead.lead_name || "Anônimo"}</span>
+                      </div>
                     </td>
-                    <td style={{ padding: "13px 20px", borderBottom: "1px solid var(--border-subtle)", color: "#d4d4d8", fontWeight: 500 }}>
+                    <td style={{ padding: "13px 20px", borderBottom: "1px solid var(--border-subtle)", color: "#cbd5e1", fontWeight: 500 }}>
                       {lead.ente_querido || "—"}
                     </td>
-                    <td style={{ padding: "13px 20px", borderBottom: "1px solid var(--border-subtle)", color: "#ffffff", fontWeight: 600 }}>
+                    <td style={{ padding: "13px 20px", borderBottom: "1px solid var(--border-subtle)", color: "#38bdf8", fontWeight: 600 }}>
                       {etapa ? `${etapa.index}. ${etapa.label}` : lead.current_step_name || "—"}
                     </td>
                     <td style={{ padding: "13px 20px", borderBottom: "1px solid var(--border-subtle)" }}>
@@ -355,11 +445,11 @@ export function FunnelTracker({ leads, loading, onRefresh }: FunnelTrackerProps)
                         {PAYMENT_LABELS[lead.payment_status] ?? lead.payment_status}
                       </span>
                     </td>
-                    <td style={{ padding: "13px 20px", borderBottom: "1px solid var(--border-subtle)", color: "#a1a1aa", fontSize: "11px" }}>
+                    <td style={{ padding: "13px 20px", borderBottom: "1px solid var(--border-subtle)", color: "var(--text-muted)", fontSize: "11px" }}>
                       {lead.utm_source || "Orgânico"}
                     </td>
-                    <td style={{ padding: "13px 20px", borderBottom: "1px solid var(--border-subtle)", color: "#a1a1aa", fontSize: "11px", whiteSpace: "nowrap" }}>
-                      {timeAgo(lead.created_at)}
+                    <td style={{ padding: "13px 20px", borderBottom: "1px solid var(--border-subtle)", color: isOnline ? "#34d399" : "var(--text-muted)", fontSize: "11px", whiteSpace: "nowrap", fontWeight: isOnline ? 700 : 500 }}>
+                      {isOnline ? "● Ao vivo agora" : timeAgo(lead.updated_at || lead.created_at)}
                     </td>
                   </tr>
                 );
@@ -369,13 +459,13 @@ export function FunnelTracker({ leads, loading, onRefresh }: FunnelTrackerProps)
         </div>
       </div>
 
-      {/* Modal de Detalhe do Lead (Ruby Luxury) */}
+      {/* Modal de Detalhe do Lead */}
       {selected && (
         <div
           onClick={() => setSelected(null)}
           style={{
             position: "fixed", inset: 0,
-            background: "rgba(0,0,0,0.75)",
+            background: "rgba(3, 7, 18, 0.8)",
             display: "flex", alignItems: "center", justifyContent: "center",
             zIndex: 999,
             backdropFilter: "blur(6px)",
@@ -389,8 +479,8 @@ export function FunnelTracker({ leads, loading, onRefresh }: FunnelTrackerProps)
               maxHeight: "85vh",
               overflowY: "auto",
               padding: "26px",
-              border: "1px solid rgba(225,29,72,0.4)",
-              boxShadow: "0 20px 50px rgba(0,0,0,0.9), 0 0 25px rgba(225,29,72,0.25)",
+              border: "1px solid rgba(16, 185, 129, 0.4)",
+              boxShadow: "0 20px 50px rgba(0,0,0,0.9), 0 0 25px rgba(16, 185, 129, 0.25)",
             }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "22px" }}>
@@ -398,8 +488,8 @@ export function FunnelTracker({ leads, loading, onRefresh }: FunnelTrackerProps)
                 <h3 style={{ fontSize: "15px", fontWeight: 800, color: "#ffffff", margin: 0 }}>
                   Ficha do Consulente
                 </h3>
-                <p style={{ fontSize: "11px", color: "#a1a1aa", margin: "2px 0 0" }}>
-                  Informações capturadas no funil
+                <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: "2px 0 0" }}>
+                  Informações capturadas no quiz
                 </p>
               </div>
               <button
@@ -435,7 +525,7 @@ export function FunnelTracker({ leads, loading, onRefresh }: FunnelTrackerProps)
                   borderBottom: "1px solid var(--border-subtle)",
                 }}
               >
-                <span style={{ fontSize: "11px", fontWeight: 600, color: "#a1a1aa", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                   {label}
                 </span>
                 <span style={{ fontSize: "12px", fontWeight: 700, color: "#ffffff", textAlign: "right", maxWidth: "65%" }}>
@@ -446,7 +536,7 @@ export function FunnelTracker({ leads, loading, onRefresh }: FunnelTrackerProps)
 
             {selected.temas_selecionados && selected.temas_selecionados.length > 0 && (
               <div style={{ marginTop: "16px" }}>
-                <p style={{ fontSize: "11px", fontWeight: 700, color: "#a1a1aa", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 8px" }}>
+                <p style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 8px" }}>
                   Temas de Mensagem Escolhidos
                 </p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
@@ -456,11 +546,11 @@ export function FunnelTracker({ leads, loading, onRefresh }: FunnelTrackerProps)
                       style={{
                         fontSize: "11px",
                         fontWeight: 700,
-                        background: "rgba(225,29,72,0.12)",
-                        border: "1px solid rgba(225,29,72,0.3)",
+                        background: "rgba(16, 185, 129, 0.12)",
+                        border: "1px solid rgba(16, 185, 129, 0.3)",
                         borderRadius: "6px",
                         padding: "4px 10px",
-                        color: "#ffffff",
+                        color: "#34d399",
                       }}
                     >
                       {t}

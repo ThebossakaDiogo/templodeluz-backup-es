@@ -4,107 +4,118 @@ import {
   Activity,
   CreditCard,
   FileBarChart2,
-  Flame,
+  Sparkles,
 } from "lucide-react";
 
 interface SidebarProps {
   section: Section;
   onSelect: (s: Section) => void;
+  onlineCount: number;
 }
 
 const ITEMS: {
   id: Section;
+  slug: string;
   label: string;
   sub: string;
   Icon: typeof LayoutGrid;
+  accent: string;
 }[] = [
   {
     id: "visao-geral",
+    slug: "/visao-geral",
     label: "Visão Geral",
-    sub: "Métricas e receita",
+    sub: "Métricas & Pizza Charts",
     Icon: LayoutGrid,
+    accent: "#10b981", // Emerald
   },
   {
     id: "rastreamento",
+    slug: "/rastreamento",
     label: "Rastreamento",
-    sub: "Funil e leads ao vivo",
+    sub: "Funil & Pessoas Ao Vivo",
     Icon: Activity,
+    accent: "#06b6d4", // Cyan
   },
   {
     id: "pedidos",
+    slug: "/pedidos",
     label: "Pedidos",
-    sub: "Histórico de PIX",
+    sub: "Histórico & Gateway",
     Icon: CreditCard,
+    accent: "#38bdf8", // Sky Blue
   },
   {
     id: "relatorios",
+    slug: "/relatorios",
     label: "Relatórios",
-    sub: "Origem e exportação",
+    sub: "Canais & Exportação",
     Icon: FileBarChart2,
+    accent: "#34d399", // Mint
   },
 ];
 
-export function Sidebar({ section, onSelect }: SidebarProps) {
+export function Sidebar({ section, onSelect, onlineCount }: SidebarProps) {
   return (
     <aside
       style={{
-        width: "235px",
-        minWidth: "235px",
-        background: "#08080a",
+        width: "245px",
+        minWidth: "245px",
+        background: "#050a14",
         display: "flex",
         flexDirection: "column",
-        borderRight: "1px solid #1e1e24",
+        borderRight: "1px solid #16233b",
         position: "relative",
         overflow: "hidden",
       }}
     >
-      {/* Sutil glow rubi de fundo no topo */}
+      {/* Glow de fundo */}
       <div
         style={{
           position: "absolute",
           top: "-50px",
           left: "-50px",
-          width: "160px",
-          height: "160px",
-          background: "radial-gradient(circle, rgba(225,29,72,0.12) 0%, transparent 70%)",
+          width: "180px",
+          height: "180px",
+          background: "radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 70%)",
           pointerEvents: "none",
         }}
       />
 
-      {/* Logo Ruby & Branco */}
+      {/* Logo */}
       <div
         style={{
           padding: "22px 20px 18px",
-          borderBottom: "1px solid #1a1a20",
+          borderBottom: "1px solid #142036",
           display: "flex",
           alignItems: "center",
-          gap: "10px",
+          gap: "11px",
         }}
       >
         <div
           style={{
-            width: "34px",
-            height: "34px",
+            width: "35px",
+            height: "35px",
             borderRadius: "10px",
-            background: "linear-gradient(135deg, #e11d48, #9f1239)",
-            border: "1px solid rgba(255,255,255,0.2)",
+            background: "linear-gradient(135deg, #059669, #10b981)",
+            border: "1px solid rgba(255, 255, 255, 0.2)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            boxShadow: "0 0 16px rgba(225,29,72,0.45)",
+            boxShadow: "0 0 16px rgba(16, 185, 129, 0.4)",
             flexShrink: 0,
           }}
         >
-          <Flame style={{ width: "18px", height: "18px", color: "#ffffff" }} />
+          <Sparkles style={{ width: "18px", height: "18px", color: "#ffffff" }} />
         </div>
         <div>
           <span
             style={{
               display: "block",
-              fontSize: "13.5px",
+              fontSize: "14px",
               fontWeight: 800,
               color: "#ffffff",
-              letterSpacing: "0.02em",
+              letterSpacing: "-0.01em",
             }}
           >
             Templo de Luz
@@ -112,9 +123,9 @@ export function Sidebar({ section, onSelect }: SidebarProps) {
           <span
             style={{
               fontSize: "10px",
-              color: "#71717a",
-              fontWeight: 600,
-              letterSpacing: "0.04em",
+              color: "#34d399",
+              fontWeight: 700,
+              letterSpacing: "0.06em",
               textTransform: "uppercase",
             }}
           >
@@ -123,23 +134,23 @@ export function Sidebar({ section, onSelect }: SidebarProps) {
         </div>
       </div>
 
-      {/* Navegação */}
-      <nav style={{ flex: 1, padding: "14px 10px" }}>
+      {/* Navegação por Slugs */}
+      <nav style={{ flex: 1, padding: "16px 12px" }}>
         <p
           style={{
             fontSize: "9.5px",
             fontWeight: 700,
-            color: "#52525b",
-            letterSpacing: "0.08em",
+            color: "#64748b",
+            letterSpacing: "0.09em",
             textTransform: "uppercase",
             padding: "0 10px",
             marginBottom: "8px",
           }}
         >
-          Navegação
+          Páginas (Rotas Únicas)
         </p>
 
-        {ITEMS.map(({ id, label, sub, Icon }) => {
+        {ITEMS.map(({ id, slug, label, sub, Icon, accent }) => {
           const active = section === id;
           return (
             <button
@@ -155,11 +166,11 @@ export function Sidebar({ section, onSelect }: SidebarProps) {
                 border: "none",
                 cursor: "pointer",
                 background: active
-                  ? "linear-gradient(90deg, rgba(225,29,72,0.14) 0%, rgba(225,29,72,0.02) 100%)"
+                  ? "linear-gradient(90deg, rgba(16, 185, 129, 0.12) 0%, rgba(6, 182, 212, 0.04) 100%)"
                   : "transparent",
                 textAlign: "left",
                 transition: "all 0.15s ease",
-                marginBottom: "3px",
+                marginBottom: "4px",
                 position: "relative",
                 outline: "none",
               }}
@@ -174,7 +185,7 @@ export function Sidebar({ section, onSelect }: SidebarProps) {
                 }
               }}
             >
-              {/* Barra lateral Ruby ativa */}
+              {/* Barra lateral ativa */}
               {active && (
                 <div
                   style={{
@@ -184,13 +195,13 @@ export function Sidebar({ section, onSelect }: SidebarProps) {
                     bottom: "7px",
                     width: "3px",
                     borderRadius: "99px",
-                    background: "#e11d48",
-                    boxShadow: "0 0 10px rgba(225,29,72,0.8)",
+                    background: accent,
+                    boxShadow: `0 0 10px ${accent}`,
                   }}
                 />
               )}
 
-              {/* Ícone com acabamento Ruby */}
+              {/* Ícone */}
               <div
                 style={{
                   width: "34px",
@@ -199,9 +210,9 @@ export function Sidebar({ section, onSelect }: SidebarProps) {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  background: active ? "rgba(225,29,72,0.18)" : "rgba(255,255,255,0.03)",
-                  border: `1px solid ${active ? "rgba(225,29,72,0.4)" : "#222228"}`,
-                  boxShadow: active ? "0 0 12px rgba(225,29,72,0.3)" : "none",
+                  background: active ? "rgba(16, 185, 129, 0.18)" : "rgba(255,255,255,0.03)",
+                  border: `1px solid ${active ? "rgba(16, 185, 129, 0.35)" : "#16233b"}`,
+                  boxShadow: active ? "0 0 12px rgba(16, 185, 129, 0.25)" : "none",
                   flexShrink: 0,
                   transition: "all 0.15s ease",
                 }}
@@ -210,29 +221,43 @@ export function Sidebar({ section, onSelect }: SidebarProps) {
                   style={{
                     width: "16px",
                     height: "16px",
-                    color: active ? "#f43f5e" : "#a1a1aa",
-                    filter: active ? "drop-shadow(0 0 4px rgba(225,29,72,0.5))" : "none",
+                    color: active ? accent : "#94a3b8",
+                    filter: active ? `drop-shadow(0 0 4px ${accent})` : "none",
                   }}
                 />
               </div>
 
-              <div>
-                <span
-                  style={{
-                    display: "block",
-                    fontSize: "12.5px",
-                    fontWeight: active ? 700 : 500,
-                    color: active ? "#ffffff" : "#a1a1aa",
-                    transition: "color 0.15s",
-                  }}
-                >
-                  {label}
-                </span>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <span
+                    style={{
+                      fontSize: "12.5px",
+                      fontWeight: active ? 800 : 500,
+                      color: active ? "#ffffff" : "#cbd5e1",
+                    }}
+                  >
+                    {label}
+                  </span>
+                  {/* Slug da rota */}
+                  <span
+                    style={{
+                      fontSize: "9px",
+                      fontWeight: 700,
+                      color: active ? accent : "#475569",
+                      background: "rgba(255,255,255,0.04)",
+                      padding: "1px 5px",
+                      borderRadius: "4px",
+                      fontFamily: "monospace",
+                    }}
+                  >
+                    {slug}
+                  </span>
+                </div>
                 <span
                   style={{
                     display: "block",
                     fontSize: "10px",
-                    color: active ? "#fda4af" : "#71717a",
+                    color: active ? "#6ee7b7" : "#64748b",
                     marginTop: "1px",
                   }}
                 >
@@ -244,20 +269,44 @@ export function Sidebar({ section, onSelect }: SidebarProps) {
         })}
       </nav>
 
-      {/* Rodapé com pulse ruby */}
+      {/* Card de Pessoas ao Vivo na base da Sidebar */}
       <div
         style={{
-          padding: "14px 18px",
-          borderTop: "1px solid #1a1a20",
+          margin: "12px",
+          padding: "12px 14px",
+          background: "rgba(16, 185, 129, 0.08)",
+          border: "1px solid rgba(16, 185, 129, 0.25)",
+          borderRadius: "10px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "4px",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <div className="pulse-emerald" />
+          <span style={{ fontSize: "11px", fontWeight: 700, color: "#34d399" }}>
+            Monitoramento Ao Vivo
+          </span>
+        </div>
+        <div style={{ fontSize: "13px", fontWeight: 900, color: "#ffffff", marginTop: "2px" }}>
+          {onlineCount} {onlineCount === 1 ? "usuário ativo" : "usuários ativos"}
+        </div>
+        <span style={{ fontSize: "10px", color: "#94a3b8" }}>
+          Navegando no quiz neste instante
+        </span>
+      </div>
+
+      {/* Rodapé */}
+      <div
+        style={{
+          padding: "12px 18px",
+          borderTop: "1px solid #142036",
           background: "rgba(0,0,0,0.2)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <div className="pulse-ruby" />
-          <span style={{ fontSize: "10.5px", color: "#a1a1aa", fontWeight: 600 }}>
-            Tempo Real · Supabase
-          </span>
-        </div>
+        <span style={{ fontSize: "10px", color: "#64748b", fontWeight: 600 }}>
+          Supabase Realtime v2.49
+        </span>
       </div>
     </aside>
   );
