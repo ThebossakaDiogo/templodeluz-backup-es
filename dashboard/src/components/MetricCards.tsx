@@ -26,22 +26,22 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
   const cards = [
     {
       id: "total",
-      label: "Faturamento Total Unificado",
+      label: "Faturamento Total",
       sub: "PIX + Cartão de Crédito",
       value: formatBRL(stats.totalRevenue),
       diff: stats.totalRevenueDiff,
       icon: DollarSign,
-      iconBg: "rgba(16, 185, 129, 0.15)",
-      iconBorder: "rgba(16, 185, 129, 0.35)",
-      iconColor: "var(--primary-green)",
-      accentBorder: "rgba(16, 185, 129, 0.4)",
+      iconGrad: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+      iconShadow: "0 4px 14px rgba(16, 185, 129, 0.28)",
       extraInfo: (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "10px", fontSize: "11px" }}>
-          <span style={{ color: "var(--primary-green)", fontWeight: 700 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "8px", fontSize: "11.5px" }}>
+          <span style={{ color: "var(--primary-green)", fontWeight: 700, display: "flex", alignItems: "center", gap: "4px" }}>
+            <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--primary-green)", display: "inline-block" }} />
             PIX: {formatBRL(stats.pixRevenue)}
           </span>
           <span style={{ color: "var(--text-muted)" }}>•</span>
-          <span style={{ color: "#818cf8", fontWeight: 700 }}>
+          <span style={{ color: "#3b82f6", fontWeight: 700, display: "flex", alignItems: "center", gap: "4px" }}>
+            <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#3b82f6", display: "inline-block" }} />
             Cartão: {formatBRL(stats.cardRevenue)}
           </span>
         </div>
@@ -50,22 +50,20 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
     {
       id: "pix",
       label: "Conversões no PIX",
-      sub: "Instantâneo via Banco Central",
+      sub: "Instantâneo Banco Central",
       value: formatBRL(stats.pixRevenue),
       diff: null,
       icon: QrCode,
-      iconBg: "rgba(16, 185, 129, 0.15)",
-      iconBorder: "rgba(16, 185, 129, 0.35)",
-      iconColor: "#10b981",
-      accentBorder: "rgba(16, 185, 129, 0.3)",
+      iconGrad: "linear-gradient(135deg, #06b6d4 0%, #0284c7 100%)",
+      iconShadow: "0 4px 14px rgba(6, 182, 212, 0.28)",
       extraInfo: (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "10px", fontSize: "11px" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "8px", fontSize: "11.5px" }}>
           <span style={{ color: "var(--text-secondary)", fontWeight: 700, display: "flex", alignItems: "center", gap: "4px" }}>
-            <CheckCircle2 style={{ width: "12px", height: "12px", color: "#10b981" }} />
+            <CheckCircle2 style={{ width: "13px", height: "13px", color: "#10b981" }} />
             {stats.pixCount} {stats.pixCount === 1 ? "venda paga" : "vendas pagas"}
           </span>
-          <span style={{ color: "#f59e0b", fontWeight: 700, display: "flex", alignItems: "center", gap: "4px" }}>
-            <Clock style={{ width: "12px", height: "12px" }} />
+          <span style={{ color: stats.pixPendingCount > 0 ? "#f59e0b" : "var(--text-muted)", fontWeight: 700, display: "flex", alignItems: "center", gap: "4px" }}>
+            <Clock style={{ width: "13px", height: "13px" }} />
             {stats.pixPendingCount} pendente{stats.pixPendingCount !== 1 ? "s" : ""}
           </span>
         </div>
@@ -73,23 +71,21 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
     },
     {
       id: "card",
-      label: "Conversões no Cartão (Stripe)",
-      sub: "Processamento seguro de crédito",
+      label: "Cartão de Crédito",
+      sub: "Processamento Stripe",
       value: formatBRL(stats.cardRevenue),
       diff: null,
       icon: CreditCard,
-      iconBg: "rgba(99, 102, 241, 0.15)",
-      iconBorder: "rgba(99, 102, 241, 0.35)",
-      iconColor: "#818cf8",
-      accentBorder: "rgba(99, 102, 241, 0.35)",
+      iconGrad: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
+      iconShadow: "0 4px 14px rgba(59, 130, 246, 0.28)",
       extraInfo: (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "10px", fontSize: "11px" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "8px", fontSize: "11.5px" }}>
           <span style={{ color: "var(--text-secondary)", fontWeight: 700, display: "flex", alignItems: "center", gap: "4px" }}>
-            <CheckCircle2 style={{ width: "12px", height: "12px", color: "#818cf8" }} />
+            <CheckCircle2 style={{ width: "13px", height: "13px", color: "#3b82f6" }} />
             {stats.cardCount} {stats.cardCount === 1 ? "venda aprovada" : "vendas aprovadas"}
           </span>
           <span style={{ color: "var(--text-muted)", fontWeight: 600 }}>
-            Ticket Médio: {formatBRL(stats.cardAvgRevenue)}
+            TM: {formatBRL(stats.cardAvgRevenue)}
           </span>
         </div>
       ),
@@ -97,18 +93,16 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
     {
       id: "leads",
       label: "Total de Leads & Funil",
-      sub: "Consulentes capturados no quiz",
+      sub: "Consulentes no quiz",
       value: stats.newSubscriptions.toLocaleString("pt-BR"),
       diff: stats.newSubscriptionsDiff,
       icon: Users,
-      iconBg: "rgba(37, 99, 235, 0.15)",
-      iconBorder: "rgba(37, 99, 235, 0.35)",
-      iconColor: "var(--primary-blue)",
-      accentBorder: "rgba(37, 99, 235, 0.3)",
+      iconGrad: "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)",
+      iconShadow: "0 4px 14px rgba(139, 92, 246, 0.28)",
       extraInfo: (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "10px", fontSize: "11px" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "8px", fontSize: "11.5px" }}>
           <span style={{ color: "var(--text-secondary)", fontWeight: 700 }}>
-            Vendas Totais: {stats.newOrders}
+            Vendas: {stats.newOrders}
           </span>
           <span style={{ color: "var(--primary-green)", fontWeight: 800 }}>
             {stats.newSubscriptions > 0
@@ -127,7 +121,7 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
           key={c.id}
           className="card"
           style={{
-            padding: "20px 22px",
+            padding: "18px 20px",
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
@@ -142,26 +136,26 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
               style={{
                 display: "flex",
                 justifyContent: "space-between",
-                alignItems: "flex-start",
+                alignItems: "center",
                 marginBottom: "12px",
               }}
             >
+              {/* Ícone FinTech Circular de Luxo */}
               <div
                 style={{
-                  width: "38px",
-                  height: "38px",
-                  borderRadius: "10px",
-                  background: c.iconBg,
-                  border: `1px solid ${c.iconBorder}`,
+                  width: "36px",
+                  height: "36px",
+                  borderRadius: "50%",
+                  background: c.iconGrad,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  color: c.iconColor,
+                  color: "#ffffff",
                   flexShrink: 0,
-                  boxShadow: `0 0 12px ${c.iconBg}`,
+                  boxShadow: c.iconShadow,
                 }}
               >
-                <c.icon style={{ width: "18px", height: "18px" }} />
+                <c.icon style={{ width: "17px", height: "17px" }} strokeWidth={2.3} />
               </div>
 
               {c.diff !== null && (
@@ -176,20 +170,20 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
                     borderRadius: "6px",
                     background:
                       c.diff >= 0
-                        ? "rgba(16, 185, 129, 0.14)"
-                        : "rgba(239, 68, 68, 0.14)",
+                        ? "rgba(16, 185, 129, 0.12)"
+                        : "rgba(239, 68, 68, 0.12)",
                     color: c.diff >= 0 ? "var(--primary-green)" : "#ef4444",
                     border: `1px solid ${
                       c.diff >= 0
-                        ? "rgba(16, 185, 129, 0.3)"
-                        : "rgba(239, 68, 68, 0.3)"
+                        ? "rgba(16, 185, 129, 0.25)"
+                        : "rgba(239, 68, 68, 0.25)"
                     }`,
                   }}
                 >
                   {c.diff >= 0 ? (
-                    <TrendingUp style={{ width: "11px", height: "11px" }} />
+                    <TrendingUp style={{ width: "11px", height: "11px" }} strokeWidth={2.4} />
                   ) : (
-                    <TrendingDown style={{ width: "11px", height: "11px" }} />
+                    <TrendingDown style={{ width: "11px", height: "11px" }} strokeWidth={2.4} />
                   )}
                   <span>{c.diff >= 0 ? `+${c.diff}%` : `${c.diff}%`}</span>
                 </div>
@@ -202,7 +196,7 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
                 fontWeight: 700,
                 color: "var(--text-muted)",
                 textTransform: "uppercase",
-                letterSpacing: "0.06em",
+                letterSpacing: "0.04em",
                 display: "block",
               }}
             >
@@ -213,16 +207,18 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
               {loading ? (
                 <div
                   className="skeleton"
-                  style={{ height: "30px", width: "70%", borderRadius: "6px" }}
+                  style={{ height: "28px", width: "65%", borderRadius: "6px" }}
                 />
               ) : (
                 <span
                   style={{
-                    fontSize: "24px",
-                    fontWeight: 900,
+                    fontSize: "23px",
+                    fontWeight: 800,
                     color: "var(--text-primary)",
-                    letterSpacing: "-0.02em",
-                    lineHeight: 1.1,
+                    letterSpacing: "-0.025em",
+                    lineHeight: 1.15,
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    display: "block",
                   }}
                 >
                   {c.value}
@@ -232,10 +228,10 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
 
             <span
               style={{
-                fontSize: "10.5px",
+                fontSize: "11px",
                 color: "var(--text-muted)",
                 display: "block",
-                marginTop: "3px",
+                marginTop: "2px",
                 fontWeight: 500,
               }}
             >
@@ -247,8 +243,8 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
           <div
             style={{
               borderTop: "1px solid var(--border-subtle)",
-              marginTop: "14px",
-              paddingTop: "4px",
+              marginTop: "12px",
+              paddingTop: "2px",
             }}
           >
             {c.extraInfo}

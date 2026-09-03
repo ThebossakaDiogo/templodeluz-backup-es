@@ -77,47 +77,44 @@ export function MobileBottomNav({
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              gap: "4px",
+              gap: "2px",
               background: "none",
               border: "none",
               cursor: "pointer",
-              padding: "8px 4px",
-              minHeight: "48px", // Touch target confortável
+              padding: "6px 2px",
+              minHeight: "48px",
               position: "relative",
-              color: active ? "#10b981" : "#8292a8",
-              transition: "all 0.2s ease",
+              color: active ? "var(--primary-green)" : "var(--text-muted)",
+              transition: "all 0.18s ease",
             }}
           >
-            {/* Indicador de Seleção Luminoso no Topo */}
-            {active && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  width: "20px",
-                  height: "3px",
-                  borderRadius: "99px",
-                  background: "linear-gradient(90deg, #10b981, #06b6d4)",
-                  boxShadow: "0 0 10px #10b981",
-                }}
-              />
-            )}
-
-            <div style={{ position: "relative" }}>
-              <Icon style={{ width: "20px", height: "20px" }} />
+            {/* Ícone com Pill Suave no Ativo */}
+            <div
+              style={{
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "3px 12px",
+                borderRadius: "10px",
+                background: active ? "rgba(16, 185, 129, 0.12)" : "transparent",
+                transition: "all 0.18s ease",
+              }}
+            >
+              <Icon style={{ width: "19px", height: "19px" }} strokeWidth={active ? 2.4 : 1.9} />
               {item.badge !== undefined && (
                 <span
                   style={{
                     position: "absolute",
-                    top: "-4px",
-                    right: "-8px",
+                    top: "-2px",
+                    right: "2px",
                     background: "#10b981",
-                    color: "#03060d",
+                    color: "#ffffff",
                     fontSize: "9px",
                     fontWeight: 900,
                     borderRadius: "99px",
                     padding: "1px 5px",
-                    boxShadow: "0 0 8px rgba(16, 185, 129, 0.5)",
+                    boxShadow: "0 2px 6px rgba(16, 185, 129, 0.4)",
                   }}
                 >
                   {item.badge}
@@ -127,9 +124,10 @@ export function MobileBottomNav({
 
             <span
               style={{
-                fontSize: "10.5px",
-                fontWeight: active ? 800 : 600,
+                fontSize: "10px",
+                fontWeight: active ? 800 : 500,
                 letterSpacing: "-0.01em",
+                marginTop: "1px",
               }}
             >
               {item.label}

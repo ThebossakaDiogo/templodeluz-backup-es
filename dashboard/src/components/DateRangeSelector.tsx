@@ -124,17 +124,17 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
 
   return (
     <div ref={containerRef} style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
-      {/* Barra de Filtro Rápido com Botão de Calendário */}
+      {/* Barra de Filtro Rápido com Segmented Control Estilo iOS */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
           background: "var(--bg-surface-alt)",
           border: "1px solid var(--border)",
-          borderRadius: "10px",
+          borderRadius: "11px",
           padding: "3px",
           gap: "2px",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.03)",
         }}
       >
         {/* Presets Rápidos */}
@@ -152,13 +152,14 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
               style={{
                 fontSize: "11px",
                 fontWeight: active ? 800 : 600,
-                padding: "4px 10px",
-                borderRadius: "7px",
-                border: "none",
+                padding: "5px 11px",
+                borderRadius: "8px",
+                border: active ? "1px solid rgba(0,0,0,0.04)" : "none",
                 cursor: "pointer",
-                background: active ? "var(--primary-green)" : "transparent",
-                color: active ? "#ffffff" : "var(--text-secondary)",
-                transition: "all 0.15s ease",
+                background: active ? "var(--bg-surface)" : "transparent",
+                color: active ? "var(--text-primary)" : "var(--text-muted)",
+                boxShadow: active ? "0 2px 8px rgba(0, 0, 0, 0.08)" : "none",
+                transition: "all 0.18s ease",
               }}
             >
               {item.label}
@@ -167,7 +168,7 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
         })}
 
         {/* Divisor */}
-        <div style={{ width: "1px", height: "16px", background: "var(--border)", margin: "0 2px" }} />
+        <div style={{ width: "1px", height: "14px", background: "var(--border)", margin: "0 3px" }} />
 
         {/* Botão de Calendário / Personalizado */}
         <button
@@ -178,17 +179,18 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
             gap: "5px",
             fontSize: "11px",
             fontWeight: isCustomActive ? 800 : 600,
-            padding: "4px 9px",
-            borderRadius: "7px",
-            border: "none",
+            padding: "5px 10px",
+            borderRadius: "8px",
+            border: isCustomActive ? "1px solid rgba(0,0,0,0.04)" : "none",
             cursor: "pointer",
-            background: isCustomActive ? "rgba(16, 185, 129, 0.2)" : "transparent",
-            color: isCustomActive ? "var(--primary-green)" : "var(--text-secondary)",
-            transition: "all 0.15s ease",
+            background: isCustomActive ? "var(--bg-surface)" : "transparent",
+            color: isCustomActive ? "var(--primary-green)" : "var(--text-muted)",
+            boxShadow: isCustomActive ? "0 2px 8px rgba(0, 0, 0, 0.08)" : "none",
+            transition: "all 0.18s ease",
           }}
           title="Selecionar período personalizado"
         >
-          <Calendar style={{ width: "13px", height: "13px" }} />
+          <Calendar style={{ width: "12px", height: "12px" }} strokeWidth={2.2} />
           <span>{isCustomActive ? value.label : "Personalizar"}</span>
           <ChevronDown
             style={{

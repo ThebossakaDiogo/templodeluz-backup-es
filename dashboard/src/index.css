@@ -397,12 +397,12 @@ body {
 
   /* Topbar adaptada com 2 linhas e fundo solido */
   .dashboard-topbar {
-    padding: 10px 12px 0 !important;
+    padding: 10px 14px 4px !important;
     height: auto !important;
     min-height: 52px !important;
     display: flex !important;
     flex-direction: column !important;
-    gap: 0 !important;
+    gap: 2px !important;
     background: var(--bg-surface) !important;
     border-bottom: 1px solid var(--border) !important;
     position: sticky !important;
@@ -421,13 +421,13 @@ body {
   /* Sub-barra de datas no mobile com scroll horizontal touch suave e fundo solido */
   .mobile-date-subbar {
     display: flex !important;
+    align-items: center;
     width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     padding: 6px 0 8px !important;
     background: var(--bg-surface) !important;
-    border-top: 1px solid var(--border-subtle) !important;
   }
   .mobile-date-subbar::-webkit-scrollbar {
     display: none;
