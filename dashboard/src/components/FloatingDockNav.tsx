@@ -71,8 +71,10 @@ export function FloatingDockNav({
                 aria-label={item.label}
                 aria-current={isActive ? "page" : undefined}
               >
-                {/* Ícone */}
-                <Icon className="dock-icon" strokeWidth={isActive ? 2.0 : 1.6} />
+                {/* Ícone Nítido com Tile Iluminado */}
+                <div className="dock-icon-tile">
+                  <Icon className="dock-icon" strokeWidth={isActive ? 2.0 : 1.7} />
+                </div>
 
                 {/* Nome no modo ativo ou texto */}
                 <span className="dock-item-label">{item.label}</span>

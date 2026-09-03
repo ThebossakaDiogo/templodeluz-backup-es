@@ -229,11 +229,11 @@ input, select, textarea {
 }
 
 /* ══════════════════════════════════════════════════════════════════════
-   FLOATING DOCK NAVIGATION (MENU DE RODAPÉ FLUTUANTE ULTRA-PREMIUM)
+   FLOATING DOCK NAVIGATION (MENU FLUTUANTE COM EDGE LIGHT & GLASSMORPHISM)
    ══════════════════════════════════════════════════════════════════════ */
 .floating-dock-container {
   position: fixed;
-  bottom: 22px;
+  bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 999;
@@ -246,28 +246,48 @@ input, select, textarea {
   pointer-events: auto;
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 6px 8px;
+  gap: 5px;
+  padding: 7px 10px;
   background: var(--dock-bg);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid var(--dock-border);
+  backdrop-filter: blur(32px) saturate(210%);
+  -webkit-backdrop-filter: blur(32px) saturate(210%);
   border-radius: 999px;
-  box-shadow: var(--shadow-dock);
+  position: relative;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ── Efeito EDGE LIGHT: Borda Iluminada Cósmica & Halo Neon ── */
+  border: 1px solid rgba(189, 180, 239, 0.45);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.12),
+    0 0 26px -2px rgba(124, 92, 255, 0.45),
+    0 0 55px -8px rgba(189, 180, 239, 0.25),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.32),
+    inset 0 0 14px rgba(124, 92, 255, 0.14),
+    0 20px 48px -6px rgba(0, 0, 0, 0.7);
+}
+
+[data-theme="light"] .floating-dock-bar {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(110, 80, 224, 0.38);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.85),
+    0 0 25px -2px rgba(110, 80, 224, 0.32),
+    0 0 50px -10px rgba(110, 80, 224, 0.18),
+    inset 0 1px 2px 0 rgba(255, 255, 255, 0.95),
+    0 18px 40px -6px rgba(0, 0, 0, 0.12);
 }
 
 .dock-nav-group {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
 }
 
 .dock-item-btn {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
   padding: 8px 14px;
   border-radius: 999px;
   border: 1px solid transparent;
@@ -285,14 +305,30 @@ input, select, textarea {
 .dock-item-btn:hover {
   color: var(--text-primary);
   background: var(--surface-hover);
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 .dock-item-btn.active {
   color: var(--text-primary);
   background: var(--surface-selected);
-  border-color: var(--border-strong);
+  border: 1px solid var(--accent-border);
   font-weight: 550;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 0 14px rgba(124, 92, 255, 0.3), 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.dock-icon-tile {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s ease;
+}
+
+.dock-item-btn.active .dock-icon-tile {
+  background: var(--accent-soft-bg);
+  color: var(--accent-strong);
 }
 
 .dock-icon {

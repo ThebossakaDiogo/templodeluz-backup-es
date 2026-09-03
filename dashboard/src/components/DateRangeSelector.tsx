@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Calendar, ChevronDown, X } from "lucide-react";
 
 export type DateRangePreset = "today" | "yesterday" | "7d" | "14d" | "30d" | "this_month" | "custom";
@@ -201,8 +202,8 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
         </button>
       </div>
 
-      {/* MODAL / BOTTOM SHEET DE CALENDÁRIO PERSONALIZADO (FIXED - NUNCA CORTADO POR OVERFLOW) */}
-      {isOpen && (
+      {/* MODAL / BOTTOM SHEET DE CALENDÁRIO PERSONALIZADO (PORTALIZADO NO BODY - NUNCA CORTADO POR OVERFLOW OU HEAD) */}
+      {isOpen && typeof document !== "undefined" && createPortal(
         <div
           style={{
             position: "fixed",
@@ -211,170 +212,173 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "16px",
-            background: "rgba(0, 0, 0, 0.62)",
-            backdropFilter: "blur(8px)",
-            WebkitBackdropFilter: "blur(8px)",
+            padding: "20px",
+            background: "rgba(0, 0, 0, 0.65)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            animation: "fadeIn 0.15s ease-out",
           }}
           onClick={(e) => {
             if (e.target === e.currentTarget) setIsOpen(false);
           }}
         >
           <div
-            className="fade-up"
+            className="card"
             style={{
               width: "100%",
-              maxWidth: "360px",
-              background: "#11121A",
-              border: "1px solid #2A2C38",
-              borderRadius: "18px",
-              padding: "20px",
-              boxShadow: "0 16px 50px rgba(0, 0, 0, 0.45)",
+              maxWidth: "370px",
+              background: "var(--surface-card)",
+              border: "1px solid var(--border-strong)",
+              borderRadius: "20px",
+              padding: "22px",
+              boxShadow: "var(--shadow-dock, 0 20px 60px rgba(0, 0, 0, 0.5))",
+              position: "relative",
             }}
           >
-          {/* Cabeçalho do Popover */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "14px",
-              paddingBottom: "10px",
-              borderBottom: "1px solid rgba(255,255,255,0.075)",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <Calendar style={{ width: "14px", height: "14px", color: "#BDB4EF" }} />
-              <span style={{ fontSize: "13px", fontWeight: 600, color: "#F5F4FA" }}>
-                Filtrar por Período
-              </span>
-            </div>
-            <button
-              onClick={() => setIsOpen(false)}
+            {/* Cabeçalho do Popover */}
+            <div
               style={{
-                background: "transparent",
-                border: "none",
-                cursor: "pointer",
-                color: "#707281",
-                padding: "2px",
                 display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "16px",
+                paddingBottom: "12px",
+                borderBottom: "1px solid var(--border-subtle)",
               }}
             >
-              <X style={{ width: "14px", height: "14px" }} />
-            </button>
-          </div>
-
-          {/* Atalhos Rápidos */}
-          <div style={{ marginBottom: "14px" }}>
-            <span style={{ fontSize: "10.5px", fontWeight: 500, color: "#707281", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: "6px" }}>
-              Atalhos Rápidos
-            </span>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
-              {[
-                { key: "today", label: "Hoje" },
-                { key: "yesterday", label: "Ontem" },
-                { key: "7d", label: "Últimos 7 dias" },
-                { key: "14d", label: "Últimos 14 dias" },
-                { key: "this_month", label: "Este Mês" },
-                { key: "30d", label: "Últimos 30 dias" },
-              ].map((p) => (
-                <button
-                  key={p.key}
-                  onClick={() => selectPreset(p.key as DateRangePreset)}
-                  style={{
-                    fontSize: "11px",
-                    fontWeight: value.preset === p.key ? 600 : 400,
-                    padding: "7px 10px",
-                    borderRadius: "8px",
-                    border: value.preset === p.key ? "1px solid rgba(189, 180, 239, 0.35)" : "1px solid #232532",
-                    background: value.preset === p.key ? "rgba(189, 180, 239, 0.12)" : "#0B0C14",
-                    color: value.preset === p.key ? "#BDB4EF" : "#A2A3AE",
-                    cursor: "pointer",
-                    textAlign: "left",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    transition: "all 0.14s ease",
-                  }}
-                >
-                  <span>{p.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Intervalo Customizado */}
-          <div style={{ marginBottom: "16px" }}>
-            <span style={{ fontSize: "10.5px", fontWeight: 500, color: "#707281", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: "6px" }}>
-              Intervalo Específico
-            </span>
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              <div>
-                <label style={{ fontSize: "11px", color: "#A2A3AE", display: "block", marginBottom: "3px" }}>
-                  Data Inicial:
-                </label>
-                <input
-                  type="date"
-                  value={tempStart}
-                  onChange={(e) => setTempStart(e.target.value)}
-                  style={{
-                    width: "100%",
-                    fontSize: "12px",
-                    padding: "7px 10px",
-                    borderRadius: "8px",
-                    border: "1px solid #282A36",
-                    background: "#0B0C14",
-                    color: "#F5F4FA",
-                    outline: "none",
-                    fontFamily: "inherit",
-                  }}
-                />
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <Calendar style={{ width: "15px", height: "15px", color: "var(--accent-strong)" }} />
+                <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--text-primary)" }}>
+                  Filtrar por Período
+                </span>
               </div>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="btn"
+                style={{
+                  width: "28px",
+                  height: "28px",
+                  padding: 0,
+                  borderRadius: "7px",
+                }}
+              >
+                <X style={{ width: "13px", height: "13px" }} />
+              </button>
+            </div>
 
-              <div>
-                <label style={{ fontSize: "11px", color: "#A2A3AE", display: "block", marginBottom: "3px" }}>
-                  Data Final:
-                </label>
-                <input
-                  type="date"
-                  value={tempEnd}
-                  onChange={(e) => setTempEnd(e.target.value)}
-                  style={{
-                    width: "100%",
-                    fontSize: "12px",
-                    padding: "7px 10px",
-                    borderRadius: "8px",
-                    border: "1px solid #282A36",
-                    background: "#0B0C14",
-                    color: "#F5F4FA",
-                    outline: "none",
-                    fontFamily: "inherit",
-                  }}
-                />
+            {/* Atalhos Rápidos */}
+            <div style={{ marginBottom: "16px" }}>
+              <span style={{ fontSize: "10.5px", fontWeight: 500, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: "8px" }}>
+                Atalhos Rápidos
+              </span>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
+                {[
+                  { key: "today", label: "Hoje" },
+                  { key: "yesterday", label: "Ontem" },
+                  { key: "7d", label: "Últimos 7 dias" },
+                  { key: "14d", label: "Últimos 14 dias" },
+                  { key: "this_month", label: "Este Mês" },
+                  { key: "30d", label: "Últimos 30 dias" },
+                ].map((p) => {
+                  const active = value.preset === p.key;
+                  return (
+                    <button
+                      key={p.key}
+                      onClick={() => selectPreset(p.key as DateRangePreset)}
+                      style={{
+                        fontSize: "11.5px",
+                        fontWeight: active ? 600 : 400,
+                        padding: "8px 11px",
+                        borderRadius: "8px",
+                        border: active ? "1px solid var(--accent-border)" : "1px solid var(--border-subtle)",
+                        background: active ? "var(--accent-soft-bg)" : "var(--surface-1)",
+                        color: active ? "var(--accent-strong)" : "var(--text-secondary)",
+                        cursor: "pointer",
+                        textAlign: "left",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        transition: "all 0.14s ease",
+                      }}
+                    >
+                      <span>{p.label}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
-          </div>
 
-          {/* Botões de Ação */}
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="btn"
-              style={{ fontSize: "12px", height: "34px", padding: "0 12px" }}
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={applyCustom}
-              className="btn btn-primary"
-              style={{ fontSize: "12px", height: "34px", padding: "0 14px" }}
-            >
-              Aplicar Filtro
-            </button>
+            {/* Intervalo Customizado */}
+            <div style={{ marginBottom: "18px" }}>
+              <span style={{ fontSize: "10.5px", fontWeight: 500, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: "8px" }}>
+                Intervalo Específico
+              </span>
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                <div>
+                  <label style={{ fontSize: "11.5px", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>
+                    Data Inicial:
+                  </label>
+                  <input
+                    type="date"
+                    value={tempStart}
+                    onChange={(e) => setTempStart(e.target.value)}
+                    style={{
+                      width: "100%",
+                      fontSize: "12px",
+                      padding: "8px 11px",
+                      borderRadius: "8px",
+                      border: "1px solid var(--border-subtle)",
+                      background: "var(--surface-1)",
+                      color: "var(--text-primary)",
+                      outline: "none",
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: "11.5px", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>
+                    Data Final:
+                  </label>
+                  <input
+                    type="date"
+                    value={tempEnd}
+                    onChange={(e) => setTempEnd(e.target.value)}
+                    style={{
+                      width: "100%",
+                      fontSize: "12px",
+                      padding: "8px 11px",
+                      borderRadius: "8px",
+                      border: "1px solid var(--border-subtle)",
+                      background: "var(--surface-1)",
+                      color: "var(--text-primary)",
+                      outline: "none",
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Botões de Ação */}
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="btn"
+                style={{ fontSize: "12px", height: "36px", padding: "0 13px" }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={applyCustom}
+                className="btn btn-primary"
+                style={{ fontSize: "12px", height: "36px", padding: "0 16px" }}
+              >
+                Aplicar Filtro
+              </button>
+            </div>
           </div>
-        </div>
-      </div>
-    )}
-  </div>
-);
+        </div>,
+        document.body
+      )}
+    </div>
+  );
 }

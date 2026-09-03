@@ -56,19 +56,22 @@ export function Topbar({
     <header
       className="dashboard-topbar"
       style={{
-        height: "62px",
-        background: "var(--topbar-bg, rgba(13, 15, 21, 0.85))",
-        backdropFilter: "blur(20px) saturate(180%)",
-        WebkitBackdropFilter: "blur(20px) saturate(180%)",
+        height: "68px",
+        minHeight: "68px",
+        background: "var(--topbar-bg, rgba(13, 15, 21, 0.88))",
+        backdropFilter: "blur(24px) saturate(190%)",
+        WebkitBackdropFilter: "blur(24px) saturate(190%)",
         borderBottom: "1px solid var(--border-subtle, #1E202B)",
-        padding: "0 28px",
+        padding: "0 32px",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        gap: "16px",
+        gap: "18px",
         zIndex: 100,
         position: "sticky",
         top: 0,
+        width: "100%",
+        boxSizing: "border-box",
       }}
     >
       {/* ─── LADO ESQUERDO: Marca OD METRICS + Seletor de Modo + Status Ao Vivo ─── */}
