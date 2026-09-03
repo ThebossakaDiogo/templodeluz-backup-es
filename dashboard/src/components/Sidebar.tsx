@@ -7,6 +7,7 @@ import {
   LogOut,
   MessageCircle,
 } from "lucide-react";
+import { PwaInstallPrompt } from "./PwaInstallPrompt";
 
 interface SidebarProps {
   section: Section;
@@ -321,6 +322,11 @@ export function Sidebar({ section, onSelect, onlineCount, currentUserEmail, onSi
         <span style={{ fontSize: "10px", color: "#94a3b8" }}>
           Navegando no quiz neste instante
         </span>
+      </div>
+
+      {/* Botão de Instalação PWA (iPhone / Android / Desktop) */}
+      <div style={{ margin: "0 12px 10px" }}>
+        <PwaInstallPrompt />
       </div>
 
       {/* Perfil do Administrador Logado & Sair */}

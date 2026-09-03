@@ -1,0 +1,61 @@
+{
+  "id": "/?source=pwa",
+  "name": "OD METRICS - Terminal Operacional",
+  "short_name": "OD METRICS",
+  "description": "Plataforma de Inteligência, Tracking e Conversões em Tempo Real",
+  "start_url": "/visao-geral",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#03060d",
+  "theme_color": "#03060d",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Visão Geral",
+      "url": "/visao-geral",
+      "description": "Métricas de faturamento e funil"
+    },
+    {
+      "name": "WhatsApp Tracker",
+      "url": "/whatsapp",
+      "description": "Metrificação de conversas do WhatsApp"
+    },
+    {
+      "name": "Rastreamento Ao Vivo",
+      "url": "/rastreamento",
+      "description": "Pessoas navegando em tempo real"
+    },
+    {
+      "name": "Pedidos",
+      "url": "/pedidos",
+      "description": "Auditoria de pagamentos PIX e Cartão"
+    }
+  ],
+  "categories": ["business", "finance", "productivity"]
+}

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="favBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#09101f"/>
+      <stop offset="100%" stop-color="#03060d"/>
+    </linearGradient>
+    <linearGradient id="favNeon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="32" fill="url(#favBg)"/>
+  <rect width="126" height="126" x="1" y="1" rx="31" fill="none" stroke="url(#favNeon)" stroke-width="2" stroke-opacity="0.5"/>
+  <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="52" fill="url(#favNeon)" letter-spacing="-3">OD</text>
+  <circle cx="106" cy="22" r="4" fill="#10b981"/>
+</svg>
