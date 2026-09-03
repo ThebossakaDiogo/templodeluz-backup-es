@@ -393,10 +393,10 @@ export function App() {
   };
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "var(--bg-root)" }}>
+    <div style={{ display: "flex", height: "100vh", width: "100vw", overflow: "hidden", background: "var(--bg-root)" }}>
       <Sidebar section={section} onSelect={handleNavigate} onlineCount={onlineCount} />
 
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      <div style={{ flex: 1, height: "100vh", display: "flex", flexDirection: "column", overflow: "hidden", minWidth: 0 }}>
         <Topbar
           theme={theme}
           onToggleTheme={toggleTheme}
@@ -413,11 +413,14 @@ export function App() {
         <main
           style={{
             flex: 1,
+            height: "calc(100vh - 64px)",
             overflowY: "auto",
+            overflowX: "hidden",
             padding: "26px 32px",
             display: "flex",
             flexDirection: "column",
             gap: "24px",
+            minWidth: 0,
           }}
         >
           {/* SLUG: /visao-geral */}

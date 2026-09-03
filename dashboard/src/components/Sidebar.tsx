@@ -60,12 +60,19 @@ export function Sidebar({ section, onSelect, onlineCount }: SidebarProps) {
       style={{
         width: "245px",
         minWidth: "245px",
+        height: "100vh",
+        maxHeight: "100vh",
         background: "#050a14",
         display: "flex",
         flexDirection: "column",
         borderRight: "1px solid #16233b",
-        position: "relative",
-        overflow: "hidden",
+        position: "sticky",
+        top: 0,
+        left: 0,
+        overflowY: "auto",
+        overflowX: "hidden",
+        flexShrink: 0,
+        zIndex: 20,
       }}
     >
       {/* Glow de fundo */}
