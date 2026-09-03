@@ -27,13 +27,13 @@ const SECTION_LABELS: Record<Section, string> = {
 };
 
 const SECTION_DESCRIPTIONS: Record<Section, string> = {
-  "visao-geral":  "Métricas de faturamento unificado, PIX vs Cartão Stripe e telemetria",
-  "rastreamento": "Etapa exata de cada consulente no funil e pessoas navegando agora",
-  "pedidos":      "Auditoria em tempo real de doações pagas, pendentes e gateways",
-  "relatorios":   "Desempenho por fonte de tráfego, campanha e exportação consolidada",
-  "whatsapp":     "Metrificação de clientes que enviaram mensagens e forma de pagamento",
-  "perfil":       "Gerenciamento de conta, alteração de credenciais e segurança",
-  "login":        "Terminal seguro de autenticação",
+  "visao-geral":  "PIX vs Cartão · Funil de Conversão · Telemetria",
+  "rastreamento": "Funil de consulentes ao vivo · Etapas em tempo real",
+  "pedidos":      "Doações PIX & Cartão · Auditoria de gateways",
+  "relatorios":   "Tráfego · Campanhas · Exportação consolidada",
+  "whatsapp":     "Conversas · Formas de pagamento · Metrificação",
+  "perfil":       "Conta · Credenciais · Segurança",
+  "login":        "Autenticação segura",
 };
 
 function formatTime(d: Date): string {
@@ -96,7 +96,7 @@ export function Topbar({
             </div>
           </div>
 
-          <div style={{ minWidth: 0 }}>
+          <div style={{ minWidth: 0, flex: "0 1 auto", maxWidth: "260px" }}>
             <h1
               style={{
                 fontSize: "13.5px",
@@ -121,7 +121,6 @@ export function Topbar({
                 whiteSpace: "nowrap",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
-                maxWidth: "320px",
               }}
             >
               {SECTION_DESCRIPTIONS[section]}
