@@ -282,14 +282,10 @@ body {
   gap: 20px;
 }
 
-.funnel-mobile-tabs {
-  display: none;
-}
-
 .funnel-3d-grid {
   display: grid;
-  grid-template-columns: 380px 1fr;
-  gap: 32px;
+  grid-template-columns: 460px 1fr;
+  gap: 36px;
   align-items: center;
 }
 
@@ -448,64 +444,11 @@ body {
     padding: 8px 6px !important;
   }
 
-  /* Abas de alternancia mobile */
-  .funnel-mobile-tabs {
-    display: flex !important;
-    gap: 6px;
-    background: var(--bg-surface-alt);
-    padding: 4px;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    margin: 2px 0 4px;
-  }
-
-  .funnel-tab-btn {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 11.5px;
-    font-weight: 700;
-    color: var(--text-muted);
-    background: none;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 9px;
-    cursor: pointer;
-    transition: all 0.18s ease;
-  }
-
-  .funnel-tab-btn.active {
-    background: var(--bg-surface);
-    color: var(--text-primary);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  }
-
   .funnel-3d-grid {
-    display: block !important;
-    width: 100% !important;
-  }
-
-  .funnel-3d-grid.mobile-show-stages .funnel-cone-container {
-    display: none !important;
-  }
-
-  .funnel-3d-grid.mobile-show-stages .funnel-stages-list {
     display: flex !important;
+    flex-direction: column !important;
+    gap: 20px !important;
     width: 100% !important;
-  }
-
-  .funnel-3d-grid.mobile-show-cone .funnel-cone-container {
-    display: flex !important;
-    width: 100% !important;
-    max-width: 320px !important;
-    margin: 0 auto !important;
-  }
-
-  .funnel-3d-grid.mobile-show-cone .funnel-stages-list {
-    display: none !important;
   }
 
   .funnel-cone-container {
@@ -514,6 +457,32 @@ body {
     width: 100% !important;
     overflow: hidden !important;
     box-sizing: border-box !important;
+  }
+
+  .funnel-stage-card {
+    padding: 10px 12px !important;
+    gap: 8px !important;
+  }
+
+  .funnel-stage-info {
+    gap: 10px !important;
+    min-width: 0 !important;
+  }
+
+  .funnel-stage-title {
+    font-size: 12.5px !important;
+  }
+
+  .funnel-stage-metrics {
+    gap: 8px !important;
+  }
+
+  .funnel-stage-bar {
+    width: 50px !important;
+  }
+
+  .funnel-stage-count {
+    min-width: 52px !important;
   }
 
   /* Grades de metricas */
