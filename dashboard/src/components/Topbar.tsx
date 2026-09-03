@@ -19,14 +19,18 @@ const SECTION_LABELS: Record<Section, string> = {
 };
 
 const SECTION_DESCRIPTIONS: Record<Section, string> = {
-  "visao-geral":  "Resumo das métricas principais e gráficos de desempenho",
+  "visao-geral":  "Métricas, gráficos de receita e funil de conversão",
   "rastreamento": "Leads navegando pelo funil em tempo real",
-  "pedidos":      "Histórico completo de cobranças PIX e pagamentos",
-  "relatorios":   "Distribuição, origem e exportação de dados",
+  "pedidos":      "Histórico completo de cobranças e pagamentos PIX",
+  "relatorios":   "Distribuição, origem de tráfego e exportação",
 };
 
 function formatTime(d: Date): string {
-  return d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  return d.toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
 }
 
 export function Topbar({
@@ -41,36 +45,28 @@ export function Topbar({
   return (
     <header
       style={{
-        height: "64px",
+        height: "60px",
         background: "var(--bg-surface)",
         borderBottom: "1px solid var(--border)",
         display: "flex",
         alignItems: "center",
-        padding: "0 28px",
+        padding: "0 24px",
         gap: "16px",
         flexShrink: 0,
+        position: "sticky",
+        top: 0,
+        zIndex: 10,
+        backdropFilter: "blur(10px)",
       }}
     >
-      {/* Título da seção */}
+      {/* Título */}
       <div style={{ flex: 1 }}>
-        <h1
-          style={{
-            fontSize: "14px",
-            fontWeight: 700,
-            color: "var(--text-primary)",
-            margin: 0,
-          }}
-        >
-          {SECTION_LABELS[section]}
-        </h1>
-        <p
-          style={{
-            fontSize: "11px",
-            color: "var(--text-muted)",
-            margin: "1px 0 0",
-            fontWeight: 400,
-          }}
-        >
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <h1 style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
+            {SECTION_LABELS[section]}
+          </h1>
+        </div>
+        <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: 0, fontWeight: 400 }}>
           {SECTION_DESCRIPTIONS[section]}
         </p>
       </div>
@@ -83,28 +79,30 @@ export function Topbar({
           gap: "6px",
           fontSize: "11px",
           color: "var(--text-muted)",
+          background: "var(--bg-surface-alt)",
+          border: "1px solid var(--border)",
+          borderRadius: "99px",
+          padding: "5px 12px",
         }}
       >
-        <span
-          style={{
-            display: "inline-block",
-            width: "6px",
-            height: "6px",
-            borderRadius: "50%",
-            background: loading ? "var(--warning)" : "var(--success)",
-            animation: "pulse 2s infinite",
-          }}
+        <div className={loading ? undefined : "pulse-dot"}
+          style={loading ? {
+            width: "7px", height: "7px", borderRadius: "50%",
+            background: "#f59e0b",
+            boxShadow: "0 0 8px rgba(245,158,11,0.6)",
+          } : undefined}
         />
-        {loading
-          ? "Atualizando..."
-          : lastUpdate
-          ? `Atualizado às ${formatTime(lastUpdate)}`
-          : "Aguardando dados..."}
+        <span style={{ fontWeight: 600 }}>
+          {loading
+            ? "Atualizando..."
+            : lastUpdate
+            ? `Atualizado às ${formatTime(lastUpdate)}`
+            : "Aguardando dados..."}
+        </span>
       </div>
 
       {/* Ações */}
       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-        {/* Exportar */}
         {(section === "pedidos" || section === "relatorios") && (
           <button onClick={onExportCsv} className="btn">
             <Download style={{ width: "13px", height: "13px" }} />
@@ -112,13 +110,12 @@ export function Topbar({
           </button>
         )}
 
-        {/* Atualizar */}
         <button
           onClick={onRefresh}
           disabled={loading}
           className="btn"
-          title="Atualizar dados agora"
-          style={{ padding: "6px 10px" }}
+          title="Atualizar agora"
+          style={{ padding: "7px 11px" }}
         >
           <RefreshCw
             style={{
@@ -129,12 +126,11 @@ export function Topbar({
           />
         </button>
 
-        {/* Tema */}
         <button
           onClick={onToggleTheme}
           className="btn"
-          title={theme === "light" ? "Ativar tema escuro" : "Ativar tema claro"}
-          style={{ padding: "6px 10px" }}
+          title={theme === "light" ? "Tema escuro" : "Tema claro"}
+          style={{ padding: "7px 11px" }}
         >
           {theme === "light" ? (
             <Moon style={{ width: "13px", height: "13px" }} />
@@ -143,13 +139,6 @@ export function Topbar({
           )}
         </button>
       </div>
-
-      <style>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
-        }
-      `}</style>
     </header>
   );
 }

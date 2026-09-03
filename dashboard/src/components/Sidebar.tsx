@@ -4,6 +4,7 @@ import {
   Activity,
   CreditCard,
   FileBarChart2,
+  Flame,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -11,71 +12,152 @@ interface SidebarProps {
   onSelect: (s: Section) => void;
 }
 
-const ITEMS: { id: Section; label: string; Icon: typeof LayoutGrid }[] = [
-  { id: "visao-geral",  label: "Visão Geral",          Icon: LayoutGrid    },
-  { id: "rastreamento", label: "Rastreamento ao Vivo",  Icon: Activity      },
-  { id: "pedidos",      label: "Pedidos",               Icon: CreditCard    },
-  { id: "relatorios",   label: "Relatórios",            Icon: FileBarChart2 },
+const ITEMS: {
+  id: Section;
+  label: string;
+  sub: string;
+  Icon: typeof LayoutGrid;
+  neon: string;
+  glow: string;
+}[] = [
+  {
+    id: "visao-geral",
+    label: "Visão Geral",
+    sub: "Métricas e gráficos",
+    Icon: LayoutGrid,
+    neon: "#00b4ff",
+    glow: "rgba(0,180,255,0.3)",
+  },
+  {
+    id: "rastreamento",
+    label: "Rastreamento",
+    sub: "Funil e leads ao vivo",
+    Icon: Activity,
+    neon: "#a855f7",
+    glow: "rgba(168,85,247,0.3)",
+  },
+  {
+    id: "pedidos",
+    label: "Pedidos",
+    sub: "Histórico de pagamentos",
+    Icon: CreditCard,
+    neon: "#00e5a0",
+    glow: "rgba(0,229,160,0.3)",
+  },
+  {
+    id: "relatorios",
+    label: "Relatórios",
+    sub: "Análises e exportação",
+    Icon: FileBarChart2,
+    neon: "#f472b6",
+    glow: "rgba(244,114,182,0.3)",
+  },
 ];
 
 export function Sidebar({ section, onSelect }: SidebarProps) {
   return (
     <aside
       style={{
-        width: "220px",
-        minWidth: "220px",
-        background: "var(--bg-sidebar)",
+        width: "230px",
+        minWidth: "230px",
+        background: "#060c1a",
         display: "flex",
         flexDirection: "column",
         borderRight: "1px solid rgba(255,255,255,0.04)",
+        position: "relative",
+        overflow: "hidden",
       }}
     >
+      {/* Glow de fundo decorativo */}
+      <div
+        style={{
+          position: "absolute",
+          top: "-60px",
+          left: "-60px",
+          width: "180px",
+          height: "180px",
+          background: "radial-gradient(circle, rgba(0,180,255,0.06) 0%, transparent 70%)",
+          pointerEvents: "none",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          bottom: "60px",
+          right: "-40px",
+          width: "140px",
+          height: "140px",
+          background: "radial-gradient(circle, rgba(168,85,247,0.06) 0%, transparent 70%)",
+          pointerEvents: "none",
+        }}
+      />
+
       {/* Logo */}
       <div
         style={{
-          padding: "24px 20px 20px",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          padding: "22px 20px 18px",
+          borderBottom: "1px solid rgba(255,255,255,0.05)",
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
         }}
       >
-        <span
+        <div
           style={{
-            fontSize: "13px",
-            fontWeight: 700,
-            color: "#f1f5f9",
-            letterSpacing: "0.05em",
-            textTransform: "uppercase",
+            width: "32px",
+            height: "32px",
+            borderRadius: "8px",
+            background: "linear-gradient(135deg, #00b4ff22, #a855f722)",
+            border: "1px solid rgba(0,180,255,0.2)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 0 12px rgba(0,180,255,0.15)",
           }}
         >
-          Templo de Luz
-        </span>
-        <p
-          style={{
-            fontSize: "10px",
-            color: "#475569",
-            margin: "3px 0 0",
-            fontWeight: 500,
-          }}
-        >
-          Painel de Controle
-        </p>
+          <Flame style={{ width: "16px", height: "16px", color: "#00b4ff" }} />
+        </div>
+        <div>
+          <span
+            style={{
+              display: "block",
+              fontSize: "13px",
+              fontWeight: 800,
+              color: "#e8f0ff",
+              letterSpacing: "0.02em",
+            }}
+          >
+            Templo de Luz
+          </span>
+          <span
+            style={{
+              fontSize: "10px",
+              color: "#2a4060",
+              fontWeight: 500,
+            }}
+          >
+            Painel de Controle
+          </span>
+        </div>
       </div>
 
-      {/* Navegação */}
-      <nav style={{ flex: 1, padding: "12px 10px" }}>
+      {/* Nav */}
+      <nav style={{ flex: 1, padding: "14px 10px" }}>
         <p
           style={{
             fontSize: "9px",
             fontWeight: 700,
-            color: "#334155",
-            letterSpacing: "0.08em",
+            color: "#1e3a5f",
+            letterSpacing: "0.1em",
             textTransform: "uppercase",
             padding: "0 10px",
-            margin: "0 0 6px",
+            marginBottom: "8px",
           }}
         >
-          Menu Principal
+          Navegação
         </p>
-        {ITEMS.map(({ id, label, Icon }) => {
+
+        {ITEMS.map(({ id, label, sub, Icon, neon, glow }) => {
           const active = section === id;
           return (
             <button
@@ -84,42 +166,88 @@ export function Sidebar({ section, onSelect }: SidebarProps) {
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "10px",
+                gap: "11px",
                 width: "100%",
-                padding: "9px 10px",
-                borderRadius: "8px",
+                padding: "10px 10px",
+                borderRadius: "10px",
                 border: "none",
                 cursor: "pointer",
-                background: active ? "rgba(59,130,246,0.12)" : "transparent",
-                color: active ? "#3b82f6" : "#475569",
-                fontSize: "13px",
-                fontWeight: active ? 600 : 500,
+                background: active
+                  ? `rgba(${neon.replace("#","").match(/.{2}/g)!.map(h=>parseInt(h,16)).join(",")}, 0.08)`
+                  : "transparent",
                 textAlign: "left",
-                transition: "background 0.15s, color 0.15s",
-                marginBottom: "2px",
-              }}
-              onMouseEnter={(e) => {
-                if (!active) {
-                  (e.currentTarget as HTMLButtonElement).style.background =
-                    "rgba(255,255,255,0.04)";
-                  (e.currentTarget as HTMLButtonElement).style.color = "#94a3b8";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!active) {
-                  (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-                  (e.currentTarget as HTMLButtonElement).style.color = "#475569";
-                }
+                transition: "all 0.2s ease",
+                marginBottom: "3px",
+                position: "relative",
+                outline: "none",
               }}
             >
-              <Icon
+              {/* Linha de ativo */}
+              {active && (
+                <div
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    top: "6px",
+                    bottom: "6px",
+                    width: "3px",
+                    borderRadius: "99px",
+                    background: neon,
+                    boxShadow: `0 0 8px ${glow}`,
+                  }}
+                />
+              )}
+
+              {/* Ícone com neon */}
+              <div
                 style={{
-                  width: "15px",
-                  height: "15px",
+                  width: "34px",
+                  height: "34px",
+                  borderRadius: "9px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: active ? `${neon}18` : "rgba(255,255,255,0.03)",
+                  border: `1px solid ${active ? `${neon}30` : "rgba(255,255,255,0.04)"}`,
+                  boxShadow: active ? `0 0 10px ${glow}` : "none",
                   flexShrink: 0,
+                  transition: "all 0.2s ease",
                 }}
-              />
-              {label}
+              >
+                <Icon
+                  style={{
+                    width: "15px",
+                    height: "15px",
+                    color: active ? neon : "#2a4060",
+                    filter: active ? `drop-shadow(0 0 4px ${glow})` : "none",
+                    transition: "all 0.2s ease",
+                  }}
+                />
+              </div>
+
+              <div>
+                <span
+                  style={{
+                    display: "block",
+                    fontSize: "12.5px",
+                    fontWeight: active ? 700 : 500,
+                    color: active ? "#e8f0ff" : "#3a5878",
+                    transition: "color 0.2s",
+                  }}
+                >
+                  {label}
+                </span>
+                <span
+                  style={{
+                    display: "block",
+                    fontSize: "10px",
+                    color: active ? "#4a6a8a" : "#1e3050",
+                    marginTop: "1px",
+                  }}
+                >
+                  {sub}
+                </span>
+              </div>
             </button>
           );
         })}
@@ -128,16 +256,16 @@ export function Sidebar({ section, onSelect }: SidebarProps) {
       {/* Rodapé */}
       <div
         style={{
-          padding: "16px 20px",
-          borderTop: "1px solid rgba(255,255,255,0.06)",
+          padding: "14px 20px",
+          borderTop: "1px solid rgba(255,255,255,0.04)",
         }}
       >
-        <p style={{ fontSize: "10px", color: "#334155", margin: 0 }}>
-          médium Milena · Templo de Luz
-        </p>
-        <p style={{ fontSize: "10px", color: "#1e3a5f", margin: "2px 0 0" }}>
-          v1.0 · Dados ao vivo
-        </p>
+        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <div className="pulse-dot" />
+          <span style={{ fontSize: "10px", color: "#1e3a5f", fontWeight: 600 }}>
+            Dados ao vivo · Supabase Realtime
+          </span>
+        </div>
       </div>
     </aside>
   );

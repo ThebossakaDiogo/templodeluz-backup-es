@@ -6,6 +6,8 @@ import { RevenueChart } from "./components/RevenueChart";
 import { LeadsChart } from "./components/LeadsChart";
 import { OrdersTable } from "./components/OrdersTable";
 import { FunnelTracker } from "./components/FunnelTracker";
+import { FunnelViz } from "./components/FunnelViz";
+import { StatusPieChart } from "./components/StatusPieChart";
 import { supabase } from "./lib/supabase";
 import type { DashboardStats, Lead, PaymentOrder, ChartDataPoint } from "./types";
 
@@ -72,7 +74,7 @@ export type Section = "visao-geral" | "rastreamento" | "pedidos" | "relatorios";
 // ─── Componente principal ────────────────────────────────────────────────────
 export function App() {
   const [theme, setTheme] = useState<"light" | "dark">(() => {
-    return (localStorage.getItem("tl-theme") as "light" | "dark") || "light";
+    return (localStorage.getItem("tl-theme") as "light" | "dark") || "dark";
   });
   const [section, setSection] = useState<Section>("visao-geral");
   const [loading, setLoading] = useState(true);
@@ -267,22 +269,26 @@ export function App() {
           {section === "visao-geral" && (
             <>
               <MetricCards stats={stats} loading={loading} />
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 340px",
-                  gap: "20px",
-                }}
-              >
-                <RevenueChart data={revenueChart} loading={loading} />
-                <LeadsChart
-                  data={leadsChart}
-                  total={leads.length}
-                  diff={stats.newSubscriptionsDiff}
-                  loading={loading}
-                />
+
+              {/* Gráfico de receita ocupa toda a largura */}
+              <RevenueChart data={revenueChart} loading={loading} />
+
+              {/* Funil + Pizza + Leads em grid */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: "20px" }}>
+                <FunnelViz leads={leads} loading={loading} />
+                <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                  <StatusPieChart orders={orders} loading={loading} />
+                  <LeadsChart
+                    data={leadsChart}
+                    total={leads.length}
+                    diff={stats.newSubscriptionsDiff}
+                    loading={loading}
+                  />
+                </div>
               </div>
-              <OrdersTable orders={orders.slice(0, 10)} loading={loading} compact />
+
+              {/* Últimos pedidos compacto */}
+              <OrdersTable orders={orders.slice(0, 8)} loading={loading} compact />
             </>
           )}
 

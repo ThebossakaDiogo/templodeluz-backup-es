@@ -18,50 +18,73 @@ interface RevenueChartProps {
 const brl = (v: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function CustomTooltip({ active, payload, label }: any) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div
+      style={{
+        background: "var(--bg-surface)",
+        border: "1px solid var(--border)",
+        borderRadius: "12px",
+        padding: "10px 14px",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+        fontSize: "12px",
+      }}
+    >
+      <p style={{ color: "var(--text-muted)", fontWeight: 700, marginBottom: "6px", fontSize: "10px", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+        {label}
+      </p>
+      {payload.map((p: { name: string; value: number; color: string }) => (
+        <div key={p.name} style={{ display: "flex", justifyContent: "space-between", gap: "20px", marginTop: "3px" }}>
+          <span style={{ color: p.color, fontWeight: 600 }}>{p.name}</span>
+          <span style={{ color: "var(--text-primary)", fontWeight: 800 }}>
+            {p.name === "Receita (R$)" ? brl(p.value) : p.value}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function RevenueChart({ data, loading }: RevenueChartProps) {
   const hasData = data.some((d) => (d.receita ?? 0) > 0);
 
   return (
-    <div className="card" style={{ padding: "20px" }}>
+    <div className="card" style={{ padding: "22px", position: "relative", overflow: "hidden" }}>
+      {/* Glow decorativo */}
       <div
         style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          marginBottom: "20px",
+          position: "absolute",
+          top: "-30px",
+          right: "-30px",
+          width: "160px",
+          height: "160px",
+          background: "radial-gradient(circle, rgba(0,180,255,0.06) 0%, transparent 70%)",
+          pointerEvents: "none",
         }}
-      >
+      />
+
+      {/* Cabeçalho */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "22px" }}>
         <div>
-          <h3
-            style={{
-              fontSize: "13px",
-              fontWeight: 700,
-              color: "var(--text-primary)",
-              margin: 0,
-            }}
-          >
+          <h3 style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
             Receita por Dia
           </h3>
-          <p
-            style={{
-              fontSize: "11px",
-              color: "var(--text-muted)",
-              margin: "3px 0 0",
-            }}
-          >
-            Últimos 14 dias · Apenas vendas confirmadas (PIX pago)
+          <p style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "3px", fontWeight: 400 }}>
+            Últimos 14 dias · Apenas vendas confirmadas
           </p>
         </div>
         {loading && (
           <span
             style={{
               fontSize: "10px",
-              color: "var(--text-muted)",
-              background: "var(--bg-surface-alt)",
-              border: "1px solid var(--border)",
+              color: "#00b4ff",
+              background: "rgba(0,180,255,0.08)",
+              border: "1px solid rgba(0,180,255,0.2)",
               borderRadius: "99px",
               padding: "3px 10px",
-              fontWeight: 600,
+              fontWeight: 700,
             }}
           >
             Atualizando...
@@ -77,17 +100,11 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            gap: "6px",
+            gap: "8px",
           }}
         >
-          <p
-            style={{
-              fontSize: "13px",
-              fontWeight: 600,
-              color: "var(--text-secondary)",
-              margin: 0,
-            }}
-          >
+          <div style={{ fontSize: "28px", opacity: 0.2 }}>—</div>
+          <p style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-secondary)", margin: 0 }}>
             Nenhuma venda registrada ainda
           </p>
           <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: 0 }}>
@@ -97,94 +114,76 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
       ) : (
         <div style={{ height: "240px" }}>
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart
-              data={data}
-              margin={{ top: 4, right: 4, left: -8, bottom: 0 }}
-            >
+            <AreaChart data={data} margin={{ top: 4, right: 4, left: -8, bottom: 0 }}>
               <defs>
                 <linearGradient id="gradReceita" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%"  stopColor="#3b82f6" stopOpacity={0.2} />
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}   />
+                  <stop offset="0%"   stopColor="#00b4ff" stopOpacity={0.3} />
+                  <stop offset="100%" stopColor="#00b4ff" stopOpacity={0}   />
                 </linearGradient>
                 <linearGradient id="gradVendas" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%"  stopColor="#10b981" stopOpacity={0.15} />
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0}    />
+                  <stop offset="0%"   stopColor="#a855f7" stopOpacity={0.2} />
+                  <stop offset="100%" stopColor="#a855f7" stopOpacity={0}   />
                 </linearGradient>
+                <filter id="glowBlue">
+                  <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                  <feMerge>
+                    <feMergeNode in="coloredBlur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
               </defs>
-              <CartesianGrid
-                strokeDasharray="3 3"
-                vertical={false}
-                stroke="var(--border)"
-              />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" strokeOpacity={0.5} />
               <XAxis
                 dataKey="dia"
                 tickLine={false}
                 axisLine={false}
-                tick={{ fontSize: 10, fill: "var(--text-muted)" } as React.SVGProps<SVGTextElement>}
+                tick={{ fontSize: 10, fill: "var(--text-muted)", fontFamily: "Inter" } as React.SVGProps<SVGTextElement>}
               />
               <YAxis
                 yAxisId="receita"
                 orientation="left"
                 tickLine={false}
                 axisLine={false}
-                tick={{ fontSize: 10, fill: "var(--text-muted)" } as React.SVGProps<SVGTextElement>}
-                tickFormatter={(v: number) =>
-                  v >= 1000 ? `R$${(v / 1000).toFixed(1)}k` : `R$${v}`
-                }
+                tick={{ fontSize: 10, fill: "var(--text-muted)", fontFamily: "Inter" } as React.SVGProps<SVGTextElement>}
+                tickFormatter={(v: number) => v >= 1000 ? `R$${(v / 1000).toFixed(1)}k` : `R$${v}`}
               />
               <YAxis
                 yAxisId="vendas"
                 orientation="right"
                 tickLine={false}
                 axisLine={false}
-                tick={{ fontSize: 10, fill: "var(--text-muted)" } as React.SVGProps<SVGTextElement>}
+                tick={{ fontSize: 10, fill: "var(--text-muted)", fontFamily: "Inter" } as React.SVGProps<SVGTextElement>}
                 allowDecimals={false}
-                width={30}
+                width={28}
               />
-              <Tooltip
-                contentStyle={{
-                  background: "var(--bg-surface)",
-                  border: "1px solid var(--border)",
-                  borderRadius: "10px",
-                  boxShadow: "var(--shadow-card)",
-                  fontSize: "11px",
-                  color: "var(--text-primary)",
-                }}
-                labelStyle={{ fontWeight: 700, color: "var(--text-primary)", marginBottom: "4px" }}
-                formatter={(value: number, name: string) =>
-                  name === "Receita (R$)" ? [brl(value), name] : [value, name]
-                }
-              />
+              <Tooltip content={<CustomTooltip />} />
               <Legend
                 iconType="circle"
                 iconSize={7}
-                wrapperStyle={{
-                  fontSize: "11px",
-                  paddingTop: "10px",
-                  color: "var(--text-secondary)",
-                }}
+                wrapperStyle={{ fontSize: "11px", paddingTop: "12px", color: "var(--text-secondary)" }}
               />
               <Area
                 yAxisId="receita"
                 type="monotone"
                 dataKey="receita"
                 name="Receita (R$)"
-                stroke="#3b82f6"
-                strokeWidth={2}
+                stroke="#00b4ff"
+                strokeWidth={2.5}
                 fill="url(#gradReceita)"
                 dot={false}
-                activeDot={{ r: 4, fill: "#3b82f6" }}
+                activeDot={{ r: 5, fill: "#00b4ff", stroke: "rgba(0,180,255,0.3)", strokeWidth: 4 }}
+                filter="url(#glowBlue)"
               />
               <Area
                 yAxisId="vendas"
                 type="monotone"
                 dataKey="vendas"
                 name="Vendas (qtd)"
-                stroke="#10b981"
-                strokeWidth={1.5}
+                stroke="#a855f7"
+                strokeWidth={2}
                 fill="url(#gradVendas)"
                 dot={false}
-                activeDot={{ r: 3, fill: "#10b981" }}
+                activeDot={{ r: 4, fill: "#a855f7", stroke: "rgba(168,85,247,0.3)", strokeWidth: 4 }}
               />
             </AreaChart>
           </ResponsiveContainer>
