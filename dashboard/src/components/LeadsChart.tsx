@@ -20,7 +20,16 @@ export function LeadsChart({ data, total, diff, loading }: LeadsChartProps) {
   return (
     <div
       className="card"
-      style={{ padding: "22px", display: "flex", flexDirection: "column", gap: "16px" }}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "16px",
+        minWidth: 0,
+        width: "100%",
+        maxWidth: "100%",
+        overflow: "hidden",
+        boxSizing: "border-box",
+      }}
     >
       <div>
         <p
@@ -51,7 +60,7 @@ export function LeadsChart({ data, total, diff, loading }: LeadsChartProps) {
               style={{
                 fontSize: "26px",
                 fontWeight: 900,
-                color: "#ffffff",
+                color: "var(--text-primary)",
                 letterSpacing: "-0.02em",
               }}
             >
@@ -89,7 +98,7 @@ export function LeadsChart({ data, total, diff, loading }: LeadsChartProps) {
         </p>
       </div>
 
-      <div style={{ flex: 1, minHeight: "140px" }}>
+      <div style={{ flex: 1, minHeight: "140px", minWidth: 0, width: "100%", overflow: "hidden" }}>
         {!hasData && !loading ? (
           <div
             style={{
@@ -104,8 +113,13 @@ export function LeadsChart({ data, total, diff, loading }: LeadsChartProps) {
           >
             Nenhum lead registrado no período.
           </div>
+        ) : loading ? (
+          <div
+            className="skeleton"
+            style={{ height: "100%", width: "100%", borderRadius: "8px" }}
+          />
         ) : (
-          <ResponsiveContainer width="100%" height={140}>
+          <ResponsiveContainer width="99%" height="100%">
             <BarChart
               data={data}
               margin={{ top: 4, right: 0, left: 0, bottom: 0 }}

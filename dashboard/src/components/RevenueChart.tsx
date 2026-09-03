@@ -30,12 +30,16 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
 
   return (
     <div
-      className="card"
+      className="card revenue-card"
       style={{
-        padding: "24px 28px",
         display: "flex",
         flexDirection: "column",
         gap: "18px",
+        minWidth: 0,
+        width: "100%",
+        maxWidth: "100%",
+        overflow: "hidden",
+        boxSizing: "border-box",
       }}
     >
       {/* Cabeçalho */}
@@ -134,14 +138,14 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
       </div>
 
       {/* Gráfico */}
-      <div style={{ height: "240px", width: "100%" }}>
+      <div style={{ height: "230px", width: "100%", minWidth: 0, overflow: "hidden" }}>
         {loading ? (
           <div
             className="skeleton"
             style={{ height: "100%", width: "100%", borderRadius: "10px" }}
           />
         ) : (
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="99%" height="100%">
             <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <defs>
                 {/* Gradiente PIX */}

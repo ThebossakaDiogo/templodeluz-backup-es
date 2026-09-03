@@ -141,23 +141,24 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
 
   // Dimensões refinadas e amplas do funil 3D
   const svgW = 460;
-  const svgH = 520;
+  const svgH = 500;
   const centerX = svgW / 2;
   const numStages = ETAPAS_3D.length;
-  const topY = 22;
-  const stageH = 44;
-  const gap = 6;
+  const topY = 16;
+  const stageH = 42;
+  const gap = 5;
 
   return (
     <div
-      className="card"
+      className="card funnel-card-container"
       style={{
-        padding: "30px 34px",
         display: "flex",
         flexDirection: "column",
-        gap: "28px",
+        gap: "24px",
         overflow: "hidden",
         width: "100%",
+        maxWidth: "100%",
+        boxSizing: "border-box",
       }}
     >
       {/* Cabeçalho do Card Espaçoso */}
@@ -339,16 +340,20 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
             background: "var(--bg-surface-alt)",
             border: "1px solid var(--border)",
             borderRadius: "18px",
-            padding: "18px 12px 12px",
+            padding: "16px 8px 12px",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             boxShadow: "inset 0 2px 10px rgba(0,0,0,0.03)",
+            overflow: "hidden",
+            width: "100%",
+            maxWidth: "100%",
+            boxSizing: "border-box",
           }}
         >
           <svg
             viewBox={`0 0 ${svgW} ${svgH}`}
-            style={{ width: "100%", height: "auto", overflow: "visible" }}
+            style={{ width: "100%", height: "auto", overflow: "hidden", display: "block" }}
           >
             <defs>
               {/* Filtro de Sombra Suave Profunda */}
@@ -372,28 +377,27 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
                   x2="100%"
                   y2="0%"
                 >
-                  <stop offset="0%" stopColor={st.colorGradEnd} />
-                  <stop offset="22%" stopColor={st.colorGradMid} />
-                  <stop offset="42%" stopColor={st.colorHighlight} />
-                  <stop offset="60%" stopColor={st.colorGradMid} />
+                  <stop offset="0%" stopColor={st.colorGradStart} />
+                  <stop offset="25%" stopColor={st.colorHighlight} stopOpacity="0.75" />
+                  <stop offset="55%" stopColor={st.colorGradMid} />
                   <stop offset="85%" stopColor={st.colorGradEnd} />
-                  <stop offset="100%" stopColor={st.colorGradEnd} />
+                  <stop offset="100%" stopColor="#050a14" />
                 </linearGradient>
               ))}
 
-              {/* Anel de Vidro do Topo */}
+              {/* Gradientes de Elipse de Topo */}
               {stageStats.map((st) => (
                 <linearGradient
-                  id={`funnelRing-${st.index}`}
-                  key={`ring-${st.index}`}
+                  id={`funnelTopGrad-${st.index}`}
+                  key={`top-${st.index}`}
                   x1="0%"
                   y1="0%"
                   x2="100%"
-                  y2="0%"
+                  y2="100%"
                 >
-                  <stop offset="0%" stopColor={st.colorGradMid} stopOpacity="0.8" />
-                  <stop offset="40%" stopColor={st.colorHighlight} stopOpacity="0.95" />
-                  <stop offset="100%" stopColor={st.colorGradEnd} stopOpacity="0.8" />
+                  <stop offset="0%" stopColor={st.colorHighlight} stopOpacity="0.9" />
+                  <stop offset="40%" stopColor={st.colorGradStart} />
+                  <stop offset="100%" stopColor={st.colorGradMid} />
                 </linearGradient>
               ))}
 
@@ -411,13 +415,13 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
             </defs>
 
             {/* BASE DO FUNIL: ALVO CONCÊNTRICO 3D (TARGET DE FECHAMENTO) */}
-            <g transform={`translate(0, ${topY + numStages * (stageH + gap) + 14})`}>
+            <g transform={`translate(0, ${topY + numStages * (stageH + gap) + 12})`}>
               {/* Plataforma externa */}
               <ellipse
                 cx={centerX}
                 cy="32"
-                rx="180"
-                ry="28"
+                rx="145"
+                ry="24"
                 fill="url(#targetPlateGrad)"
                 stroke="var(--border)"
                 strokeWidth="1.5"
@@ -427,59 +431,59 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
               <ellipse
                 cx={centerX}
                 cy="32"
-                rx="140"
-                ry="21"
+                rx="110"
+                ry="18"
                 fill="none"
                 stroke="var(--text-muted)"
-                strokeWidth="2.5"
+                strokeWidth="2"
                 opacity="0.3"
               />
               {/* Anel 2 */}
               <ellipse
                 cx={centerX}
                 cy="32"
-                rx="100"
-                ry="15"
+                rx="78"
+                ry="12"
                 fill="none"
                 stroke="var(--text-secondary)"
-                strokeWidth="3.5"
+                strokeWidth="2.5"
                 opacity="0.45"
               />
               {/* Anel 3 */}
               <ellipse
                 cx={centerX}
                 cy="32"
-                rx="60"
-                ry="9"
+                rx="48"
+                ry="8"
                 fill="none"
                 stroke="#ffffff"
-                strokeWidth="3"
+                strokeWidth="2.5"
                 opacity="0.85"
               />
               {/* Centro de Conversão (Bullseye Violeta) */}
               <ellipse
                 cx={centerX}
                 cy="32"
-                rx="30"
-                ry="5"
+                rx="24"
+                ry="4"
                 fill="url(#targetBullseyeGrad)"
                 stroke="#c084fc"
-                strokeWidth="2"
+                strokeWidth="1.5"
               />
               {/* Feixes do alvo */}
               <line
-                x1={centerX - 180}
+                x1={centerX - 145}
                 y1="32"
-                x2={centerX + 180}
+                x2={centerX + 145}
                 y2="32"
                 stroke="var(--border)"
                 strokeDasharray="4 4"
               />
               <line
                 x1={centerX}
-                y1="4"
+                y1="8"
                 x2={centerX}
-                y2="60"
+                y2="56"
                 stroke="var(--border)"
                 strokeDasharray="4 4"
               />
@@ -490,8 +494,8 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
               const factorTop = idx / numStages;
               const factorBottom = (idx + 1) / numStages;
 
-              const maxW = 420;
-              const minW = 74;
+              const maxW = 370;
+              const minW = 66;
 
               const wTop = maxW - factorTop * (maxW - minW);
               const wBottom = maxW - factorBottom * (maxW - minW);
