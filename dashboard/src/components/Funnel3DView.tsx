@@ -510,6 +510,8 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
 
               const curveDepth = 12;
               const isHovered = hoveredIdx === st.index;
+              const pctGlobal =
+                totalStarted > 0 ? Math.round((st.reached / totalStarted) * 100) : 0;
 
               return (
                 <g
@@ -559,32 +561,59 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
                     strokeLinecap="round"
                   />
 
-                  {/* Badge de Número da Etapa no Centro */}
+                  {/* Badge de Número da Etapa e Porcentagem no Centro */}
                   <g
                     transform={`translate(${centerX}, ${yTop + stageH / 2 + 5})`}
                     style={{ pointerEvents: "none" }}
                   >
+                    {/* Pílula com fundo escuro e borda fina */}
+                    <rect
+                      x={st.index >= 7 ? "-25" : "-28"}
+                      y="-10"
+                      width={st.index >= 7 ? "50" : "56"}
+                      height="20"
+                      rx="10"
+                      fill="rgba(5, 10, 20, 0.82)"
+                      stroke={isHovered ? "#ffffff" : "rgba(255, 255, 255, 0.45)"}
+                      strokeWidth={isHovered ? "1.5" : "1"}
+                    />
+
+                    {/* Círculo com o número da etapa */}
                     <circle
-                      cx="0"
+                      cx={st.index >= 7 ? "-13" : "-15"}
                       cy="0"
-                      r={st.index === 8 ? "12" : "13"}
-                      fill="rgba(0,0,0,0.45)"
-                      stroke="rgba(255,255,255,0.6)"
-                      strokeWidth="1.2"
+                      r={st.index >= 7 ? "6.5" : "7.5"}
+                      fill={st.accent}
                     />
                     <text
-                      x="0"
-                      y="4.5"
+                      x={st.index >= 7 ? "-13" : "-15"}
+                      y="3"
                       textAnchor="middle"
                       fill="#ffffff"
-                      fontSize={st.index === 8 ? "11" : "12"}
+                      fontSize={st.index >= 7 ? "8.5" : "9.5"}
                       fontWeight="900"
                       style={{
                         fontFamily: "Plus Jakarta Sans, sans-serif",
-                        textShadow: "0 1px 3px rgba(0,0,0,0.8)",
                       }}
                     >
                       {st.index}
+                    </text>
+
+                    {/* Porcentagem em Destaque */}
+                    <text
+                      x={st.index >= 7 ? "9" : "10"}
+                      y="3.5"
+                      textAnchor="middle"
+                      fill="#ffffff"
+                      fontSize={st.index >= 7 ? "9.5" : "10.5"}
+                      fontWeight="900"
+                      style={{
+                        fontFamily: "'Space Grotesk', sans-serif",
+                        letterSpacing: "-0.02em",
+                        textShadow: "0 1px 3px rgba(0,0,0,0.9)",
+                      }}
+                    >
+                      {pctGlobal}%
                     </text>
                   </g>
                 </g>
@@ -746,7 +775,7 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
                   </div>
 
                   {/* Contagem e % */}
-                  <div className="funnel-stage-count" style={{ textAlign: "right", minWidth: "64px" }}>
+                  <div className="funnel-stage-count" style={{ textAlign: "right", minWidth: "70px" }}>
                     <span
                       style={{
                         fontSize: "14px",
@@ -754,15 +783,23 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
                         color: "var(--text-primary)",
                         display: "block",
                         lineHeight: 1.1,
+                        fontFamily: "'Space Grotesk', sans-serif",
                       }}
                     >
-                      {st.reached}
+                      {st.reached} <span style={{ fontSize: "10px", fontWeight: 700, color: "var(--text-muted)" }}>leads</span>
                     </span>
                     <span
                       style={{
-                        fontSize: "10.5px",
-                        fontWeight: 700,
-                        color: st.accent,
+                        fontSize: "11px",
+                        fontWeight: 800,
+                        color: isHovered ? "#ffffff" : st.accent,
+                        background: "rgba(255, 255, 255, 0.08)",
+                        border: `1px solid ${isHovered ? st.accent : "rgba(255, 255, 255, 0.12)"}`,
+                        padding: "1px 7px",
+                        borderRadius: "6px",
+                        display: "inline-block",
+                        marginTop: "3px",
+                        fontFamily: "'Space Grotesk', sans-serif",
                       }}
                     >
                       {pctGlobal}% retido
