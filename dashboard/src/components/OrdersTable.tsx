@@ -17,7 +17,7 @@ const STATUS_LABELS: Record<string, string> = {
 const STATUS_CLASS: Record<string, string> = {
   paid:     "badge badge-paid",
   pending:  "badge badge-pending",
-  creating: "badge badge-pending",
+  creating: "badge badge-ruby",
   failed:   "badge badge-failed",
   expired:  "badge badge-expired",
 };
@@ -42,15 +42,15 @@ function formatBRL(cents: number): string {
 
 export function OrdersTable({ orders, loading, compact }: OrdersTableProps) {
   const COLS = compact
-    ? ["Nome", "Produto", "Valor", "Status", "Data"]
-    : ["Nome", "E-mail", "Produto", "Valor", "Status", "Método", "Data"];
+    ? ["Nome do Consulente", "Produto", "Valor", "Status", "Data / Hora"]
+    : ["Consulente", "E-mail", "Produto", "Valor", "Status", "Método", "Data / Hora"];
 
   return (
     <div className="card" style={{ overflow: "hidden" }}>
-      {/* Cabeçalho */}
+      {/* Cabeçalho do Card */}
       <div
         style={{
-          padding: "16px 20px",
+          padding: "18px 24px",
           borderBottom: "1px solid var(--border)",
           display: "flex",
           justifyContent: "space-between",
@@ -60,37 +60,48 @@ export function OrdersTable({ orders, loading, compact }: OrdersTableProps) {
         <div>
           <h3
             style={{
-              fontSize: "13px",
-              fontWeight: 700,
+              fontSize: "14px",
+              fontWeight: 800,
               color: "var(--text-primary)",
               margin: 0,
             }}
           >
-            {compact ? "Últimos Pedidos" : "Todos os Pedidos"}
+            {compact ? "Últimos Pedidos Registrados" : "Todos os Pedidos do Gateway"}
           </h3>
           <p
             style={{
               fontSize: "11px",
               color: "var(--text-muted)",
               margin: "2px 0 0",
+              fontWeight: 500,
             }}
           >
             {loading
-              ? "Carregando..."
-              : `${orders.length} ${orders.length === 1 ? "pedido" : "pedidos"} · Dados reais do Supabase`}
+              ? "Carregando registros..."
+              : `${orders.length} ${orders.length === 1 ? "pedido encontrado" : "pedidos encontrados"} · Conectado ao Supabase`}
           </p>
         </div>
+
         {!loading && orders.length > 0 && (
-          <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>
-            Total pago:{" "}
-            <strong style={{ color: "var(--success)" }}>
+          <div
+            style={{
+              fontSize: "11.5px",
+              color: "var(--text-muted)",
+              background: "var(--bg-surface-alt)",
+              padding: "4px 12px",
+              borderRadius: "8px",
+              border: "1px solid var(--border)",
+            }}
+          >
+            Total faturado:{" "}
+            <strong style={{ color: "#10b981", fontWeight: 800 }}>
               {formatBRL(
                 orders
                   .filter((o) => o.status === "paid")
                   .reduce((s, o) => s + o.amount_cents, 0)
               )}
             </strong>
-          </span>
+          </div>
         )}
       </div>
 
@@ -109,9 +120,9 @@ export function OrdersTable({ orders, loading, compact }: OrdersTableProps) {
                 <th
                   key={col}
                   style={{
-                    padding: "10px 16px",
+                    padding: "11px 20px",
                     textAlign: "left",
-                    fontSize: "10px",
+                    fontSize: "10.5px",
                     fontWeight: 700,
                     color: "var(--text-muted)",
                     textTransform: "uppercase",
@@ -133,9 +144,9 @@ export function OrdersTable({ orders, loading, compact }: OrdersTableProps) {
                   {COLS.map((col) => (
                     <td
                       key={col}
-                      style={{ padding: "12px 16px", borderBottom: "1px solid var(--border-subtle)" }}
+                      style={{ padding: "14px 20px", borderBottom: "1px solid var(--border-subtle)" }}
                     >
-                      <div className="skeleton" style={{ height: "12px", width: "80%" }} />
+                      <div className="skeleton" style={{ height: "14px", width: "80%" }} />
                     </td>
                   ))}
                 </tr>
@@ -146,13 +157,13 @@ export function OrdersTable({ orders, loading, compact }: OrdersTableProps) {
                 <td
                   colSpan={COLS.length}
                   style={{
-                    padding: "40px 16px",
+                    padding: "45px 20px",
                     textAlign: "center",
                     color: "var(--text-muted)",
-                    fontSize: "12px",
+                    fontSize: "12.5px",
                   }}
                 >
-                  Nenhum pedido encontrado. Os pedidos aparecerão aqui em tempo real.
+                  Nenhum pedido cadastrado no momento. Cobranças PIX aparecerão aqui em tempo real.
                 </td>
               </tr>
             )}
@@ -164,11 +175,11 @@ export function OrdersTable({ orders, loading, compact }: OrdersTableProps) {
                   style={{
                     background:
                       idx % 2 === 0 ? "var(--bg-surface)" : "var(--bg-surface-alt)",
-                    transition: "background 0.1s",
+                    transition: "background 0.15s ease",
                   }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLTableRowElement).style.background =
-                      "var(--border-subtle)";
+                      "rgba(225, 29, 72, 0.05)";
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLTableRowElement).style.background =
@@ -178,21 +189,21 @@ export function OrdersTable({ orders, loading, compact }: OrdersTableProps) {
                   {/* Nome */}
                   <td
                     style={{
-                      padding: "11px 16px",
+                      padding: "13px 20px",
                       borderBottom: "1px solid var(--border-subtle)",
-                      fontWeight: 600,
-                      color: "var(--text-primary)",
+                      fontWeight: 700,
+                      color: "#ffffff",
                       whiteSpace: "nowrap",
                     }}
                   >
                     {order.customer_name}
                   </td>
 
-                  {/* E-mail (somente não-compact) */}
+                  {/* E-mail (somente completo) */}
                   {!compact && (
                     <td
                       style={{
-                        padding: "11px 16px",
+                        padding: "13px 20px",
                         borderBottom: "1px solid var(--border-subtle)",
                         color: "var(--text-secondary)",
                         maxWidth: "180px",
@@ -208,13 +219,14 @@ export function OrdersTable({ orders, loading, compact }: OrdersTableProps) {
                   {/* Produto */}
                   <td
                     style={{
-                      padding: "11px 16px",
+                      padding: "13px 20px",
                       borderBottom: "1px solid var(--border-subtle)",
                       color: "var(--text-secondary)",
-                      maxWidth: "200px",
+                      maxWidth: "220px",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
+                      fontWeight: 500,
                     }}
                   >
                     {order.product_name}
@@ -223,13 +235,13 @@ export function OrdersTable({ orders, loading, compact }: OrdersTableProps) {
                   {/* Valor */}
                   <td
                     style={{
-                      padding: "11px 16px",
+                      padding: "13px 20px",
                       borderBottom: "1px solid var(--border-subtle)",
-                      fontWeight: 700,
+                      fontWeight: 800,
                       color:
                         order.status === "paid"
-                          ? "var(--success)"
-                          : "var(--text-primary)",
+                          ? "#10b981"
+                          : "#ffffff",
                       whiteSpace: "nowrap",
                     }}
                   >
@@ -239,7 +251,7 @@ export function OrdersTable({ orders, loading, compact }: OrdersTableProps) {
                   {/* Status */}
                   <td
                     style={{
-                      padding: "11px 16px",
+                      padding: "13px 20px",
                       borderBottom: "1px solid var(--border-subtle)",
                       whiteSpace: "nowrap",
                     }}
@@ -249,17 +261,17 @@ export function OrdersTable({ orders, loading, compact }: OrdersTableProps) {
                     </span>
                   </td>
 
-                  {/* Método (somente não-compact) */}
+                  {/* Método (somente completo) */}
                   {!compact && (
                     <td
                       style={{
-                        padding: "11px 16px",
+                        padding: "13px 20px",
                         borderBottom: "1px solid var(--border-subtle)",
                         color: "var(--text-muted)",
                         textTransform: "uppercase",
                         fontSize: "10px",
-                        fontWeight: 700,
-                        letterSpacing: "0.05em",
+                        fontWeight: 800,
+                        letterSpacing: "0.06em",
                       }}
                     >
                       {order.payment_method}
@@ -269,11 +281,12 @@ export function OrdersTable({ orders, loading, compact }: OrdersTableProps) {
                   {/* Data */}
                   <td
                     style={{
-                      padding: "11px 16px",
+                      padding: "13px 20px",
                       borderBottom: "1px solid var(--border-subtle)",
                       color: "var(--text-muted)",
                       whiteSpace: "nowrap",
                       fontSize: "11px",
+                      fontWeight: 500,
                     }}
                   >
                     {formatDate(order.created_at)}

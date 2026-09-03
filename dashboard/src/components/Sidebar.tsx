@@ -17,40 +17,30 @@ const ITEMS: {
   label: string;
   sub: string;
   Icon: typeof LayoutGrid;
-  neon: string;
-  glow: string;
 }[] = [
   {
     id: "visao-geral",
     label: "Visão Geral",
-    sub: "Métricas e gráficos",
+    sub: "Métricas e receita",
     Icon: LayoutGrid,
-    neon: "#00b4ff",
-    glow: "rgba(0,180,255,0.3)",
   },
   {
     id: "rastreamento",
     label: "Rastreamento",
     sub: "Funil e leads ao vivo",
     Icon: Activity,
-    neon: "#a855f7",
-    glow: "rgba(168,85,247,0.3)",
   },
   {
     id: "pedidos",
     label: "Pedidos",
-    sub: "Histórico de pagamentos",
+    sub: "Histórico de PIX",
     Icon: CreditCard,
-    neon: "#00e5a0",
-    glow: "rgba(0,229,160,0.3)",
   },
   {
     id: "relatorios",
     label: "Relatórios",
-    sub: "Análises e exportação",
+    sub: "Origem e exportação",
     Icon: FileBarChart2,
-    neon: "#f472b6",
-    glow: "rgba(244,114,182,0.3)",
   },
 ];
 
@@ -58,45 +48,34 @@ export function Sidebar({ section, onSelect }: SidebarProps) {
   return (
     <aside
       style={{
-        width: "230px",
-        minWidth: "230px",
-        background: "#060c1a",
+        width: "235px",
+        minWidth: "235px",
+        background: "#08080a",
         display: "flex",
         flexDirection: "column",
-        borderRight: "1px solid rgba(255,255,255,0.04)",
+        borderRight: "1px solid #1e1e24",
         position: "relative",
         overflow: "hidden",
       }}
     >
-      {/* Glow de fundo decorativo */}
+      {/* Sutil glow rubi de fundo no topo */}
       <div
         style={{
           position: "absolute",
-          top: "-60px",
-          left: "-60px",
-          width: "180px",
-          height: "180px",
-          background: "radial-gradient(circle, rgba(0,180,255,0.06) 0%, transparent 70%)",
-          pointerEvents: "none",
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          bottom: "60px",
-          right: "-40px",
-          width: "140px",
-          height: "140px",
-          background: "radial-gradient(circle, rgba(168,85,247,0.06) 0%, transparent 70%)",
+          top: "-50px",
+          left: "-50px",
+          width: "160px",
+          height: "160px",
+          background: "radial-gradient(circle, rgba(225,29,72,0.12) 0%, transparent 70%)",
           pointerEvents: "none",
         }}
       />
 
-      {/* Logo */}
+      {/* Logo Ruby & Branco */}
       <div
         style={{
           padding: "22px 20px 18px",
-          borderBottom: "1px solid rgba(255,255,255,0.05)",
+          borderBottom: "1px solid #1a1a20",
           display: "flex",
           alignItems: "center",
           gap: "10px",
@@ -104,26 +83,27 @@ export function Sidebar({ section, onSelect }: SidebarProps) {
       >
         <div
           style={{
-            width: "32px",
-            height: "32px",
-            borderRadius: "8px",
-            background: "linear-gradient(135deg, #00b4ff22, #a855f722)",
-            border: "1px solid rgba(0,180,255,0.2)",
+            width: "34px",
+            height: "34px",
+            borderRadius: "10px",
+            background: "linear-gradient(135deg, #e11d48, #9f1239)",
+            border: "1px solid rgba(255,255,255,0.2)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            boxShadow: "0 0 12px rgba(0,180,255,0.15)",
+            boxShadow: "0 0 16px rgba(225,29,72,0.45)",
+            flexShrink: 0,
           }}
         >
-          <Flame style={{ width: "16px", height: "16px", color: "#00b4ff" }} />
+          <Flame style={{ width: "18px", height: "18px", color: "#ffffff" }} />
         </div>
         <div>
           <span
             style={{
               display: "block",
-              fontSize: "13px",
+              fontSize: "13.5px",
               fontWeight: 800,
-              color: "#e8f0ff",
+              color: "#ffffff",
               letterSpacing: "0.02em",
             }}
           >
@@ -132,23 +112,25 @@ export function Sidebar({ section, onSelect }: SidebarProps) {
           <span
             style={{
               fontSize: "10px",
-              color: "#2a4060",
-              fontWeight: 500,
+              color: "#71717a",
+              fontWeight: 600,
+              letterSpacing: "0.04em",
+              textTransform: "uppercase",
             }}
           >
-            Painel de Controle
+            Painel Executivo
           </span>
         </div>
       </div>
 
-      {/* Nav */}
+      {/* Navegação */}
       <nav style={{ flex: 1, padding: "14px 10px" }}>
         <p
           style={{
-            fontSize: "9px",
+            fontSize: "9.5px",
             fontWeight: 700,
-            color: "#1e3a5f",
-            letterSpacing: "0.1em",
+            color: "#52525b",
+            letterSpacing: "0.08em",
             textTransform: "uppercase",
             padding: "0 10px",
             marginBottom: "8px",
@@ -157,7 +139,7 @@ export function Sidebar({ section, onSelect }: SidebarProps) {
           Navegação
         </p>
 
-        {ITEMS.map(({ id, label, sub, Icon, neon, glow }) => {
+        {ITEMS.map(({ id, label, sub, Icon }) => {
           const active = section === id;
           return (
             <button
@@ -173,32 +155,42 @@ export function Sidebar({ section, onSelect }: SidebarProps) {
                 border: "none",
                 cursor: "pointer",
                 background: active
-                  ? `rgba(${neon.replace("#","").match(/.{2}/g)!.map(h=>parseInt(h,16)).join(",")}, 0.08)`
+                  ? "linear-gradient(90deg, rgba(225,29,72,0.14) 0%, rgba(225,29,72,0.02) 100%)"
                   : "transparent",
                 textAlign: "left",
-                transition: "all 0.2s ease",
+                transition: "all 0.15s ease",
                 marginBottom: "3px",
                 position: "relative",
                 outline: "none",
               }}
+              onMouseEnter={(e) => {
+                if (!active) {
+                  (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.03)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!active) {
+                  (e.currentTarget as HTMLButtonElement).style.background = "transparent";
+                }
+              }}
             >
-              {/* Linha de ativo */}
+              {/* Barra lateral Ruby ativa */}
               {active && (
                 <div
                   style={{
                     position: "absolute",
                     left: 0,
-                    top: "6px",
-                    bottom: "6px",
+                    top: "7px",
+                    bottom: "7px",
                     width: "3px",
                     borderRadius: "99px",
-                    background: neon,
-                    boxShadow: `0 0 8px ${glow}`,
+                    background: "#e11d48",
+                    boxShadow: "0 0 10px rgba(225,29,72,0.8)",
                   }}
                 />
               )}
 
-              {/* Ícone com neon */}
+              {/* Ícone com acabamento Ruby */}
               <div
                 style={{
                   width: "34px",
@@ -207,20 +199,19 @@ export function Sidebar({ section, onSelect }: SidebarProps) {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  background: active ? `${neon}18` : "rgba(255,255,255,0.03)",
-                  border: `1px solid ${active ? `${neon}30` : "rgba(255,255,255,0.04)"}`,
-                  boxShadow: active ? `0 0 10px ${glow}` : "none",
+                  background: active ? "rgba(225,29,72,0.18)" : "rgba(255,255,255,0.03)",
+                  border: `1px solid ${active ? "rgba(225,29,72,0.4)" : "#222228"}`,
+                  boxShadow: active ? "0 0 12px rgba(225,29,72,0.3)" : "none",
                   flexShrink: 0,
-                  transition: "all 0.2s ease",
+                  transition: "all 0.15s ease",
                 }}
               >
                 <Icon
                   style={{
-                    width: "15px",
-                    height: "15px",
-                    color: active ? neon : "#2a4060",
-                    filter: active ? `drop-shadow(0 0 4px ${glow})` : "none",
-                    transition: "all 0.2s ease",
+                    width: "16px",
+                    height: "16px",
+                    color: active ? "#f43f5e" : "#a1a1aa",
+                    filter: active ? "drop-shadow(0 0 4px rgba(225,29,72,0.5))" : "none",
                   }}
                 />
               </div>
@@ -231,8 +222,8 @@ export function Sidebar({ section, onSelect }: SidebarProps) {
                     display: "block",
                     fontSize: "12.5px",
                     fontWeight: active ? 700 : 500,
-                    color: active ? "#e8f0ff" : "#3a5878",
-                    transition: "color 0.2s",
+                    color: active ? "#ffffff" : "#a1a1aa",
+                    transition: "color 0.15s",
                   }}
                 >
                   {label}
@@ -241,7 +232,7 @@ export function Sidebar({ section, onSelect }: SidebarProps) {
                   style={{
                     display: "block",
                     fontSize: "10px",
-                    color: active ? "#4a6a8a" : "#1e3050",
+                    color: active ? "#fda4af" : "#71717a",
                     marginTop: "1px",
                   }}
                 >
@@ -253,17 +244,18 @@ export function Sidebar({ section, onSelect }: SidebarProps) {
         })}
       </nav>
 
-      {/* Rodapé */}
+      {/* Rodapé com pulse ruby */}
       <div
         style={{
-          padding: "14px 20px",
-          borderTop: "1px solid rgba(255,255,255,0.04)",
+          padding: "14px 18px",
+          borderTop: "1px solid #1a1a20",
+          background: "rgba(0,0,0,0.2)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-          <div className="pulse-dot" />
-          <span style={{ fontSize: "10px", color: "#1e3a5f", fontWeight: 600 }}>
-            Dados ao vivo · Supabase Realtime
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <div className="pulse-ruby" />
+          <span style={{ fontSize: "10.5px", color: "#a1a1aa", fontWeight: 600 }}>
+            Tempo Real · Supabase
           </span>
         </div>
       </div>

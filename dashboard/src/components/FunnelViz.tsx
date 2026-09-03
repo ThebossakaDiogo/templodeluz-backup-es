@@ -6,14 +6,14 @@ interface FunnelVizProps {
 }
 
 const ETAPAS = [
-  { index: 1, name: "intro",    label: "Início do Quiz",        color: "#00b4ff", glow: "rgba(0,180,255,0.4)"   },
-  { index: 2, name: "ente",     label: "Nome do Ente Querido",  color: "#3b82f6", glow: "rgba(59,130,246,0.4)"  },
-  { index: 3, name: "relacao",  label: "Vínculo Familiar",      color: "#6366f1", glow: "rgba(99,102,241,0.4)"  },
-  { index: 4, name: "tempo",    label: "Tempo e Sentimento",    color: "#8b5cf6", glow: "rgba(139,92,246,0.4)"  },
-  { index: 5, name: "mensagem", label: "Mensagem e Intenção",   color: "#a855f7", glow: "rgba(168,85,247,0.4)"  },
-  { index: 6, name: "confirma", label: "Confirmação dos Dados", color: "#d946ef", glow: "rgba(217,70,239,0.4)"  },
-  { index: 7, name: "loading",  label: "Preparação da Carta",   color: "#f472b6", glow: "rgba(244,114,182,0.4)" },
-  { index: 8, name: "result",   label: "Checkout e Doação",     color: "#00e5a0", glow: "rgba(0,229,160,0.4)"   },
+  { index: 1, name: "intro",    label: "Início do Quiz",        color: "#f43f5e", glow: "rgba(244,63,94,0.4)"   },
+  { index: 2, name: "ente",     label: "Nome do Ente Querido",  color: "#e11d48", glow: "rgba(225,29,72,0.4)"   },
+  { index: 3, name: "relacao",  label: "Vínculo Familiar",      color: "#e11d48", glow: "rgba(225,29,72,0.4)"   },
+  { index: 4, name: "tempo",    label: "Tempo e Sentimento",    color: "#be123c", glow: "rgba(190,18,60,0.4)"   },
+  { index: 5, name: "mensagem", label: "Mensagem e Intenção",   color: "#be123c", glow: "rgba(190,18,60,0.4)"   },
+  { index: 6, name: "confirma", label: "Confirmação dos Dados", color: "#9f1239", glow: "rgba(159,18,57,0.4)"   },
+  { index: 7, name: "loading",  label: "Preparação da Carta",   color: "#881337", glow: "rgba(136,19,55,0.4)"   },
+  { index: 8, name: "result",   label: "Checkout e Doação",     color: "#10b981", glow: "rgba(16,185,129,0.4)"  },
 ];
 
 export function FunnelViz({ leads, loading }: FunnelVizProps) {
@@ -36,59 +36,64 @@ export function FunnelViz({ leads, loading }: FunnelVizProps) {
   return (
     <div
       className="card"
-      style={{ padding: "22px", display: "flex", flexDirection: "column", gap: "20px" }}
+      style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "20px" }}
     >
       <div>
-        <h3 style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
-          Funil de Conversão
+        <h3 style={{ fontSize: "14px", fontWeight: 800, color: "var(--text-primary)", margin: 0 }}>
+          Funil de Conversão do Quiz
         </h3>
-        <p style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "3px" }}>
-          Leads que alcançaram cada etapa do quiz
+        <p style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "3px", fontWeight: 500 }}>
+          Progresso dos usuários até a página de doação / checkout
         </p>
       </div>
 
       {loading ? (
         <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="skeleton" style={{ height: "36px", borderRadius: "8px" }} />
+            <div key={i} className="skeleton" style={{ height: "38px", borderRadius: "8px" }} />
           ))}
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "7px" }}>
           {stepCounts.map((etapa, idx) => {
             const widthPct = Math.round((etapa.reached / maxReached) * 100);
             const convPct = idx === 0 ? 100 : Math.round((etapa.reached / firstCount) * 100);
 
             return (
               <div key={etapa.index} style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                {/* Número da etapa */}
-                <span
+                {/* Badge do número da etapa com estilo Ruby */}
+                <div
                   style={{
-                    fontSize: "10px",
+                    width: "24px",
+                    height: "24px",
+                    borderRadius: "6px",
+                    background: etapa.index === 8 ? "rgba(16,185,129,0.15)" : "rgba(225,29,72,0.15)",
+                    border: `1px solid ${etapa.index === 8 ? "rgba(16,185,129,0.3)" : "rgba(225,29,72,0.35)"}`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "11px",
                     fontWeight: 800,
-                    color: etapa.color,
-                    width: "20px",
-                    textAlign: "center",
+                    color: etapa.index === 8 ? "#10b981" : "#ffffff",
                     flexShrink: 0,
-                    filter: `drop-shadow(0 0 4px ${etapa.glow})`,
                   }}
                 >
                   {etapa.index}
-                </span>
+                </div>
 
-                {/* Barra do funil */}
+                {/* Barra do Funil */}
                 <div style={{ flex: 1, position: "relative" }}>
-                  {/* Track */}
                   <div
                     style={{
-                      height: "34px",
-                      background: "var(--border-subtle)",
+                      height: "36px",
+                      background: "var(--bg-surface-alt)",
+                      border: "1px solid var(--border)",
                       borderRadius: "8px",
                       overflow: "hidden",
                       position: "relative",
                     }}
                   >
-                    {/* Fill */}
+                    {/* Fill Ruby */}
                     <div
                       style={{
                         position: "absolute",
@@ -96,54 +101,56 @@ export function FunnelViz({ leads, loading }: FunnelVizProps) {
                         top: 0,
                         bottom: 0,
                         width: `${widthPct}%`,
-                        background: `linear-gradient(90deg, ${etapa.color}30, ${etapa.color}60)`,
+                        background: etapa.index === 8
+                          ? "linear-gradient(90deg, rgba(16,185,129,0.2) 0%, rgba(16,185,129,0.45) 100%)"
+                          : `linear-gradient(90deg, rgba(225,29,72,0.15) 0%, ${etapa.color}50 100%)`,
                         borderRadius: "8px",
                         borderRight: `2px solid ${etapa.color}`,
-                        boxShadow: `inset 0 0 0 1px ${etapa.color}20, 0 0 8px ${etapa.glow}`,
-                        transition: "width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                        boxShadow: `0 0 10px ${etapa.glow}`,
+                        transition: "width 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
                       }}
                     />
-                    {/* Label */}
+
+                    {/* Texto sobre a barra */}
                     <div
                       style={{
                         position: "absolute",
                         inset: 0,
                         display: "flex",
                         alignItems: "center",
-                        padding: "0 12px",
+                        padding: "0 14px",
                         justifyContent: "space-between",
                       }}
                     >
                       <span
                         style={{
-                          fontSize: "11.5px",
+                          fontSize: "12px",
                           fontWeight: 600,
-                          color: "var(--text-secondary)",
+                          color: "#ffffff",
                         }}
                       >
                         {etapa.label}
                       </span>
                       <span
                         style={{
-                          fontSize: "11px",
+                          fontSize: "11.5px",
                           fontWeight: 800,
-                          color: etapa.count > 0 ? etapa.color : "var(--text-muted)",
-                          filter: etapa.count > 0 ? `drop-shadow(0 0 4px ${etapa.glow})` : "none",
+                          color: etapa.reached > 0 ? "#ffffff" : "var(--text-muted)",
                           whiteSpace: "nowrap",
                         }}
                       >
-                        {etapa.reached} leads
+                        {etapa.reached} <span style={{ fontSize: "10px", fontWeight: 500, color: "var(--text-muted)" }}>leads</span>
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {/* Taxa de conversão */}
+                {/* % de conversão da etapa */}
                 <span
                   style={{
-                    fontSize: "10px",
+                    fontSize: "11px",
                     fontWeight: 800,
-                    color: convPct > 50 ? etapa.color : "var(--text-muted)",
+                    color: convPct > 50 ? "#ffffff" : "var(--text-muted)",
                     width: "36px",
                     textAlign: "right",
                     flexShrink: 0,
@@ -157,12 +164,12 @@ export function FunnelViz({ leads, loading }: FunnelVizProps) {
         </div>
       )}
 
-      {/* Resumo de conversão */}
+      {/* Resumo Ruby no rodapé */}
       {!loading && leads.length > 0 && (
         <div
           style={{
-            paddingTop: "14px",
-            borderTop: "1px solid var(--border-subtle)",
+            paddingTop: "16px",
+            borderTop: "1px solid var(--border)",
             display: "grid",
             gridTemplateColumns: "1fr 1fr 1fr",
             gap: "12px",
@@ -170,21 +177,21 @@ export function FunnelViz({ leads, loading }: FunnelVizProps) {
         >
           {[
             {
-              label: "Iniciaram",
+              label: "Iniciaram o Quiz",
               value: stepCounts[0]?.reached ?? 0,
-              color: "#00b4ff",
+              color: "#ffffff",
             },
             {
-              label: "Chegaram ao checkout",
+              label: "Alcançaram Checkout",
               value: stepCounts[7]?.reached ?? 0,
-              color: "#00e5a0",
+              color: "#f43f5e",
             },
             {
-              label: "Taxa final",
+              label: "Taxa de Conversão",
               value: `${stepCounts[0]?.reached > 0
                 ? Math.round(((stepCounts[7]?.reached ?? 0) / stepCounts[0].reached) * 100)
                 : 0}%`,
-              color: "#a855f7",
+              color: "#10b981",
             },
           ].map((stat) => (
             <div
@@ -193,21 +200,20 @@ export function FunnelViz({ leads, loading }: FunnelVizProps) {
                 background: "var(--bg-surface-alt)",
                 border: "1px solid var(--border)",
                 borderRadius: "10px",
-                padding: "10px 12px",
+                padding: "12px",
                 textAlign: "center",
               }}
             >
               <div
                 style={{
-                  fontSize: "18px",
-                  fontWeight: 800,
+                  fontSize: "20px",
+                  fontWeight: 900,
                   color: stat.color,
-                  filter: `drop-shadow(0 0 6px ${stat.color}60)`,
                 }}
               >
                 {stat.value}
               </div>
-              <div style={{ fontSize: "10px", color: "var(--text-muted)", marginTop: "3px", fontWeight: 500 }}>
+              <div style={{ fontSize: "10.5px", color: "var(--text-muted)", marginTop: "4px", fontWeight: 600 }}>
                 {stat.label}
               </div>
             </div>

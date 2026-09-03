@@ -14,13 +14,13 @@ interface StatusPieChartProps {
 
 const STATUS_CONFIG: Record<
   string,
-  { label: string; color: string; glow: string }
+  { label: string; color: string }
 > = {
-  paid:     { label: "Pago",          color: "#00e5a0", glow: "rgba(0,229,160,0.4)"   },
-  pending:  { label: "Pendente",      color: "#f59e0b", glow: "rgba(245,158,11,0.4)"  },
-  creating: { label: "Gerando PIX",   color: "#00b4ff", glow: "rgba(0,180,255,0.4)"   },
-  failed:   { label: "Falhou",        color: "#ef4444", glow: "rgba(239,68,68,0.4)"   },
-  expired:  { label: "Expirado",      color: "#475569", glow: "rgba(71,85,105,0.4)"   },
+  paid:     { label: "Confirmado (Pago)", color: "#10b981" },
+  pending:  { label: "PIX Pendente",      color: "#f59e0b" },
+  creating: { label: "Gerando Cobrança",  color: "#e11d48" },
+  failed:   { label: "Falhou / Cancelado",color: "#f43f5e" },
+  expired:  { label: "PIX Expirado",      color: "#52525b" },
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -30,19 +30,19 @@ function CustomTooltip({ active, payload }: any) {
   return (
     <div
       style={{
-        background: "var(--bg-surface)",
+        background: "#111115",
         border: "1px solid var(--border)",
         borderRadius: "10px",
         padding: "10px 14px",
-        boxShadow: "0 8px 24px rgba(0,0,0,0.3)",
+        boxShadow: "0 10px 30px rgba(0, 0, 0, 0.8)",
         fontSize: "12px",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
         <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: p.color }} />
-        <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>{name}</span>
+        <span style={{ fontWeight: 700, color: "#ffffff" }}>{name}</span>
       </div>
-      <div style={{ color: "var(--text-muted)", fontWeight: 600 }}>
+      <div style={{ color: "#a1a1aa", fontWeight: 600 }}>
         {value} pedido{value !== 1 ? "s" : ""} · {p.pct}%
       </div>
     </div>
@@ -52,10 +52,10 @@ function CustomTooltip({ active, payload }: any) {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function CustomLegend({ payload }: any) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "8px", padding: "0 8px" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "8px", padding: "0 4px" }}>
       {payload?.map((entry: { color: string; value: string; payload: { count: number; pct: number } }) => (
         <div key={entry.value} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <div
               style={{
                 width: "8px",
@@ -66,12 +66,12 @@ function CustomLegend({ payload }: any) {
                 flexShrink: 0,
               }}
             />
-            <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-secondary)" }}>
+            <span style={{ fontSize: "11.5px", fontWeight: 600, color: "#d4d4d8" }}>
               {entry.value}
             </span>
           </div>
-          <span style={{ fontSize: "11px", fontWeight: 800, color: "var(--text-primary)" }}>
-            {entry.payload.count} <span style={{ color: "var(--text-muted)", fontWeight: 400 }}>({entry.payload.pct}%)</span>
+          <span style={{ fontSize: "11.5px", fontWeight: 800, color: "#ffffff" }}>
+            {entry.payload.count} <span style={{ color: "#71717a", fontWeight: 500 }}>({entry.payload.pct}%)</span>
           </span>
         </div>
       ))}
@@ -80,7 +80,6 @@ function CustomLegend({ payload }: any) {
 }
 
 export function StatusPieChart({ orders, loading }: StatusPieChartProps) {
-  // Agrupa por status
   const counts = Object.keys(STATUS_CONFIG).reduce<Record<string, number>>(
     (acc, key) => {
       acc[key] = orders.filter((o) => o.status === key).length;
@@ -97,7 +96,7 @@ export function StatusPieChart({ orders, loading }: StatusPieChartProps) {
       value: count,
       count,
       pct: Math.round((count / total) * 100),
-      color: STATUS_CONFIG[status]?.color ?? "#64748b",
+      color: STATUS_CONFIG[status]?.color ?? "#71717a",
     }));
 
   return (
@@ -106,49 +105,36 @@ export function StatusPieChart({ orders, loading }: StatusPieChartProps) {
       style={{ padding: "22px", display: "flex", flexDirection: "column", gap: "16px" }}
     >
       <div>
-        <h3 style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
-          Distribuição de Pedidos
+        <h3 style={{ fontSize: "14px", fontWeight: 800, color: "var(--text-primary)", margin: 0 }}>
+          Distribuição dos Pedidos
         </h3>
-        <p style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "3px" }}>
-          Por status de pagamento
+        <p style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "3px", fontWeight: 500 }}>
+          Proporção por status no gateway
         </p>
       </div>
 
       {loading || orders.length === 0 ? (
-        <div style={{ height: "220px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ height: "180px", display: "flex", alignItems: "center", justifyContent: "center" }}>
           {loading ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%", padding: "0 16px" }}>
-              <div className="skeleton" style={{ height: "160px", borderRadius: "50%", width: "160px", margin: "0 auto" }} />
-            </div>
+            <div className="skeleton" style={{ height: "140px", borderRadius: "50%", width: "140px" }} />
           ) : (
             <p style={{ fontSize: "12px", color: "var(--text-muted)", textAlign: "center" }}>
-              Nenhum pedido ainda.
+              Nenhum pedido registrado ainda.
             </p>
           )}
         </div>
       ) : (
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-          {/* Donut */}
-          <div style={{ width: "160px", height: "160px", flexShrink: 0 }}>
+          {/* Donut Chart */}
+          <div style={{ width: "150px", height: "150px", flexShrink: 0 }}>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <defs>
-                  {data.map((entry) => (
-                    <filter key={entry.name} id={`glow-${entry.name}`}>
-                      <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
-                      <feMerge>
-                        <feMergeNode in="coloredBlur" />
-                        <feMergeNode in="SourceGraphic" />
-                      </feMerge>
-                    </filter>
-                  ))}
-                </defs>
                 <Pie
                   data={data}
                   cx="50%"
                   cy="50%"
-                  innerRadius={50}
-                  outerRadius={72}
+                  innerRadius={46}
+                  outerRadius={68}
                   paddingAngle={3}
                   dataKey="value"
                   strokeWidth={0}
@@ -157,7 +143,7 @@ export function StatusPieChart({ orders, loading }: StatusPieChartProps) {
                     <Cell
                       key={entry.name}
                       fill={entry.color}
-                      style={{ filter: `drop-shadow(0 0 6px ${entry.color}80)` }}
+                      style={{ filter: `drop-shadow(0 0 6px ${entry.color}60)` }}
                     />
                   ))}
                 </Pie>
@@ -166,7 +152,7 @@ export function StatusPieChart({ orders, loading }: StatusPieChartProps) {
             </ResponsiveContainer>
           </div>
 
-          {/* Legenda personalizada */}
+          {/* Legenda */}
           <div style={{ flex: 1 }}>
             <CustomLegend
               payload={data.map((d) => ({
@@ -179,19 +165,19 @@ export function StatusPieChart({ orders, loading }: StatusPieChartProps) {
         </div>
       )}
 
-      {/* Total */}
+      {/* Rodapé do Total */}
       {!loading && orders.length > 0 && (
         <div
           style={{
             paddingTop: "12px",
-            borderTop: "1px solid var(--border-subtle)",
+            borderTop: "1px solid var(--border)",
             display: "flex",
             justifyContent: "space-between",
-            fontSize: "11px",
+            fontSize: "11.5px",
           }}
         >
-          <span style={{ color: "var(--text-muted)", fontWeight: 500 }}>Total de pedidos</span>
-          <span style={{ color: "var(--text-primary)", fontWeight: 800 }}>
+          <span style={{ color: "var(--text-muted)", fontWeight: 500 }}>Total de pedidos auditados</span>
+          <span style={{ color: "#ffffff", fontWeight: 800 }}>
             {orders.length}
           </span>
         </div>

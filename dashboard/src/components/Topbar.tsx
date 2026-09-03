@@ -14,15 +14,15 @@ interface TopbarProps {
 const SECTION_LABELS: Record<Section, string> = {
   "visao-geral":  "Visão Geral",
   "rastreamento": "Rastreamento ao Vivo",
-  "pedidos":      "Pedidos",
-  "relatorios":   "Relatórios",
+  "pedidos":      "Histórico de Pedidos",
+  "relatorios":   "Relatórios & Métricas",
 };
 
 const SECTION_DESCRIPTIONS: Record<Section, string> = {
-  "visao-geral":  "Métricas, gráficos de receita e funil de conversão",
-  "rastreamento": "Leads navegando pelo funil em tempo real",
-  "pedidos":      "Histórico completo de cobranças e pagamentos PIX",
-  "relatorios":   "Distribuição, origem de tráfego e exportação",
+  "visao-geral":  "Métricas principais, receita e conversão em tempo real",
+  "rastreamento": "Jornada dos leads no quiz e checkout passo a passo",
+  "pedidos":      "Auditoria de pagamentos e cobranças PIX geradas",
+  "relatorios":   "Origem de tráfego, UTMs e exportação de relatórios",
 };
 
 function formatTime(d: Date): string {
@@ -45,66 +45,79 @@ export function Topbar({
   return (
     <header
       style={{
-        height: "60px",
+        height: "64px",
         background: "var(--bg-surface)",
         borderBottom: "1px solid var(--border)",
         display: "flex",
         alignItems: "center",
-        padding: "0 24px",
+        padding: "0 28px",
         gap: "16px",
         flexShrink: 0,
         position: "sticky",
         top: 0,
         zIndex: 10,
-        backdropFilter: "blur(10px)",
+        backdropFilter: "blur(12px)",
       }}
     >
-      {/* Título */}
+      {/* Título e Descrição */}
       <div style={{ flex: 1 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <h1 style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
-            {SECTION_LABELS[section]}
-          </h1>
-        </div>
-        <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: 0, fontWeight: 400 }}>
+        <h1
+          style={{
+            fontSize: "14px",
+            fontWeight: 800,
+            color: "var(--text-primary)",
+            margin: 0,
+            letterSpacing: "-0.01em",
+          }}
+        >
+          {SECTION_LABELS[section]}
+        </h1>
+        <p
+          style={{
+            fontSize: "11px",
+            color: "var(--text-muted)",
+            margin: "2px 0 0",
+            fontWeight: 500,
+          }}
+        >
           {SECTION_DESCRIPTIONS[section]}
         </p>
       </div>
 
-      {/* Status ao vivo */}
+      {/* Indicador de Status com Ponto Ruby */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
-          gap: "6px",
+          gap: "8px",
           fontSize: "11px",
-          color: "var(--text-muted)",
+          color: "var(--text-secondary)",
           background: "var(--bg-surface-alt)",
           border: "1px solid var(--border)",
           borderRadius: "99px",
-          padding: "5px 12px",
+          padding: "6px 14px",
         }}
       >
-        <div className={loading ? undefined : "pulse-dot"}
+        <div className={loading ? undefined : "pulse-ruby"}
           style={loading ? {
-            width: "7px", height: "7px", borderRadius: "50%",
+            width: "8px", height: "8px", borderRadius: "50%",
             background: "#f59e0b",
-            boxShadow: "0 0 8px rgba(245,158,11,0.6)",
+            boxShadow: "0 0 10px rgba(245,158,11,0.7)",
           } : undefined}
         />
         <span style={{ fontWeight: 600 }}>
           {loading
-            ? "Atualizando..."
+            ? "Sincronizando..."
             : lastUpdate
             ? `Atualizado às ${formatTime(lastUpdate)}`
-            : "Aguardando dados..."}
+            : "Conectado ao Supabase"}
         </span>
       </div>
 
       {/* Ações */}
       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
         {(section === "pedidos" || section === "relatorios") && (
-          <button onClick={onExportCsv} className="btn">
+          <button onClick={onExportCsv} className="btn btn-ruby">
             <Download style={{ width: "13px", height: "13px" }} />
             Exportar CSV
           </button>
@@ -114,8 +127,8 @@ export function Topbar({
           onClick={onRefresh}
           disabled={loading}
           className="btn"
-          title="Atualizar agora"
-          style={{ padding: "7px 11px" }}
+          title="Atualizar dados agora"
+          style={{ padding: "7px 12px" }}
         >
           <RefreshCw
             style={{
@@ -129,8 +142,8 @@ export function Topbar({
         <button
           onClick={onToggleTheme}
           className="btn"
-          title={theme === "light" ? "Tema escuro" : "Tema claro"}
-          style={{ padding: "7px 11px" }}
+          title={theme === "light" ? "Mudar para Modo Escuro" : "Mudar para Modo Claro"}
+          style={{ padding: "7px 12px" }}
         >
           {theme === "light" ? (
             <Moon style={{ width: "13px", height: "13px" }} />

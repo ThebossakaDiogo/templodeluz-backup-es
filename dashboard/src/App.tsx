@@ -384,7 +384,7 @@ function ReportsView({
               Últimos 30 dias vs. período anterior
             </p>
           </div>
-          <button onClick={onExport} className="btn btn-primary">
+          <button onClick={onExport} className="btn btn-ruby">
             Exportar CSV
           </button>
         </div>

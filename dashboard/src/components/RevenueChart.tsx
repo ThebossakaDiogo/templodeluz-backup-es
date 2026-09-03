@@ -24,21 +24,21 @@ function CustomTooltip({ active, payload, label }: any) {
   return (
     <div
       style={{
-        background: "var(--bg-surface)",
-        border: "1px solid var(--border)",
-        borderRadius: "12px",
+        background: "#111115",
+        border: "1px solid rgba(225, 29, 72, 0.4)",
+        borderRadius: "10px",
         padding: "10px 14px",
-        boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+        boxShadow: "0 10px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(225, 29, 72, 0.2)",
         fontSize: "12px",
       }}
     >
-      <p style={{ color: "var(--text-muted)", fontWeight: 700, marginBottom: "6px", fontSize: "10px", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+      <p style={{ color: "#a1a1aa", fontWeight: 700, marginBottom: "6px", fontSize: "10px", letterSpacing: "0.06em", textTransform: "uppercase" }}>
         {label}
       </p>
       {payload.map((p: { name: string; value: number; color: string }) => (
-        <div key={p.name} style={{ display: "flex", justifyContent: "space-between", gap: "20px", marginTop: "3px" }}>
+        <div key={p.name} style={{ display: "flex", justifyContent: "space-between", gap: "20px", marginTop: "4px" }}>
           <span style={{ color: p.color, fontWeight: 600 }}>{p.name}</span>
-          <span style={{ color: "var(--text-primary)", fontWeight: 800 }}>
+          <span style={{ color: "#ffffff", fontWeight: 800 }}>
             {p.name === "Receita (R$)" ? brl(p.value) : p.value}
           </span>
         </div>
@@ -51,16 +51,16 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
   const hasData = data.some((d) => (d.receita ?? 0) > 0);
 
   return (
-    <div className="card" style={{ padding: "22px", position: "relative", overflow: "hidden" }}>
-      {/* Glow decorativo */}
+    <div className="card" style={{ padding: "24px", position: "relative", overflow: "hidden" }}>
+      {/* Sutil halo ruby no topo */}
       <div
         style={{
           position: "absolute",
-          top: "-30px",
-          right: "-30px",
-          width: "160px",
-          height: "160px",
-          background: "radial-gradient(circle, rgba(0,180,255,0.06) 0%, transparent 70%)",
+          top: "-40px",
+          right: "-40px",
+          width: "180px",
+          height: "180px",
+          background: "radial-gradient(circle, rgba(225,29,72,0.12) 0%, transparent 70%)",
           pointerEvents: "none",
         }}
       />
@@ -68,20 +68,20 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
       {/* Cabeçalho */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "22px" }}>
         <div>
-          <h3 style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
-            Receita por Dia
+          <h3 style={{ fontSize: "14px", fontWeight: 800, color: "var(--text-primary)", margin: 0 }}>
+            Desempenho de Receita Diária
           </h3>
-          <p style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "3px", fontWeight: 400 }}>
-            Últimos 14 dias · Apenas vendas confirmadas
+          <p style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "3px", fontWeight: 500 }}>
+            Últimos 14 dias · Pagamentos PIX confirmados em tempo real
           </p>
         </div>
         {loading && (
           <span
             style={{
               fontSize: "10px",
-              color: "#00b4ff",
-              background: "rgba(0,180,255,0.08)",
-              border: "1px solid rgba(0,180,255,0.2)",
+              color: "#f43f5e",
+              background: "rgba(225,29,72,0.1)",
+              border: "1px solid rgba(225,29,72,0.3)",
               borderRadius: "99px",
               padding: "3px 10px",
               fontWeight: 700,
@@ -95,7 +95,7 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
       {!hasData && !loading ? (
         <div
           style={{
-            height: "240px",
+            height: "250px",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -103,48 +103,48 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
             gap: "8px",
           }}
         >
-          <div style={{ fontSize: "28px", opacity: 0.2 }}>—</div>
-          <p style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-secondary)", margin: 0 }}>
-            Nenhuma venda registrada ainda
+          <div style={{ fontSize: "28px", opacity: 0.25, color: "#e11d48" }}>❖</div>
+          <p style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
+            Aguardando primeiras vendas
           </p>
           <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: 0 }}>
-            As vendas confirmadas aparecerão aqui em tempo real
+            Os pagamentos confirmados serão desenhados aqui automaticamente
           </p>
         </div>
       ) : (
-        <div style={{ height: "240px" }}>
+        <div style={{ height: "250px" }}>
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data} margin={{ top: 4, right: 4, left: -8, bottom: 0 }}>
+            <AreaChart data={data} margin={{ top: 6, right: 6, left: -6, bottom: 0 }}>
               <defs>
-                <linearGradient id="gradReceita" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%"   stopColor="#00b4ff" stopOpacity={0.3} />
-                  <stop offset="100%" stopColor="#00b4ff" stopOpacity={0}   />
+                <linearGradient id="gradReceitaRuby" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%"   stopColor="#e11d48" stopOpacity={0.35} />
+                  <stop offset="100%" stopColor="#e11d48" stopOpacity={0}    />
                 </linearGradient>
-                <linearGradient id="gradVendas" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%"   stopColor="#a855f7" stopOpacity={0.2} />
-                  <stop offset="100%" stopColor="#a855f7" stopOpacity={0}   />
+                <linearGradient id="gradVendasWhite" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%"   stopColor="#ffffff" stopOpacity={0.2}  />
+                  <stop offset="100%" stopColor="#ffffff" stopOpacity={0}    />
                 </linearGradient>
-                <filter id="glowBlue">
-                  <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                <filter id="glowRuby">
+                  <feGaussianBlur stdDeviation="3.5" result="coloredBlur" />
                   <feMerge>
                     <feMergeNode in="coloredBlur" />
                     <feMergeNode in="SourceGraphic" />
                   </feMerge>
                 </filter>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" strokeOpacity={0.5} />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" strokeOpacity={0.6} />
               <XAxis
                 dataKey="dia"
                 tickLine={false}
                 axisLine={false}
-                tick={{ fontSize: 10, fill: "var(--text-muted)", fontFamily: "Inter" } as React.SVGProps<SVGTextElement>}
+                tick={{ fontSize: 10, fill: "#a1a1aa", fontWeight: 600 } as React.SVGProps<SVGTextElement>}
               />
               <YAxis
                 yAxisId="receita"
                 orientation="left"
                 tickLine={false}
                 axisLine={false}
-                tick={{ fontSize: 10, fill: "var(--text-muted)", fontFamily: "Inter" } as React.SVGProps<SVGTextElement>}
+                tick={{ fontSize: 10, fill: "#a1a1aa", fontWeight: 600 } as React.SVGProps<SVGTextElement>}
                 tickFormatter={(v: number) => v >= 1000 ? `R$${(v / 1000).toFixed(1)}k` : `R$${v}`}
               />
               <YAxis
@@ -152,38 +152,38 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
                 orientation="right"
                 tickLine={false}
                 axisLine={false}
-                tick={{ fontSize: 10, fill: "var(--text-muted)", fontFamily: "Inter" } as React.SVGProps<SVGTextElement>}
+                tick={{ fontSize: 10, fill: "#71717a", fontWeight: 600 } as React.SVGProps<SVGTextElement>}
                 allowDecimals={false}
                 width={28}
               />
               <Tooltip content={<CustomTooltip />} />
               <Legend
                 iconType="circle"
-                iconSize={7}
-                wrapperStyle={{ fontSize: "11px", paddingTop: "12px", color: "var(--text-secondary)" }}
+                iconSize={8}
+                wrapperStyle={{ fontSize: "11px", paddingTop: "14px", color: "#a1a1aa" }}
               />
               <Area
                 yAxisId="receita"
                 type="monotone"
                 dataKey="receita"
                 name="Receita (R$)"
-                stroke="#00b4ff"
-                strokeWidth={2.5}
-                fill="url(#gradReceita)"
+                stroke="#e11d48"
+                strokeWidth={2.8}
+                fill="url(#gradReceitaRuby)"
                 dot={false}
-                activeDot={{ r: 5, fill: "#00b4ff", stroke: "rgba(0,180,255,0.3)", strokeWidth: 4 }}
-                filter="url(#glowBlue)"
+                activeDot={{ r: 5, fill: "#f43f5e", stroke: "rgba(225,29,72,0.4)", strokeWidth: 5 }}
+                filter="url(#glowRuby)"
               />
               <Area
                 yAxisId="vendas"
                 type="monotone"
                 dataKey="vendas"
                 name="Vendas (qtd)"
-                stroke="#a855f7"
+                stroke="#ffffff"
                 strokeWidth={2}
-                fill="url(#gradVendas)"
+                fill="url(#gradVendasWhite)"
                 dot={false}
-                activeDot={{ r: 4, fill: "#a855f7", stroke: "rgba(168,85,247,0.3)", strokeWidth: 4 }}
+                activeDot={{ r: 4, fill: "#ffffff", stroke: "rgba(255,255,255,0.4)", strokeWidth: 4 }}
               />
             </AreaChart>
           </ResponsiveContainer>

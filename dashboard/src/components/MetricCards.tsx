@@ -12,8 +12,9 @@ interface CardConfig {
   value: string;
   diff?: number;
   icon: typeof Users;
-  neonClass: string;
-  neonColor: string;
+  iconClass: string;
+  valueColor?: string;
+  accentGlow: string;
 }
 
 export function MetricCards({ stats, loading }: MetricCardsProps) {
@@ -31,34 +32,37 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
       value: stats.newSubscriptions.toLocaleString("pt-BR"),
       diff: stats.newSubscriptionsDiff,
       icon: Users,
-      neonClass: "neon-blue",
-      neonColor: "#00b4ff",
+      iconClass: "ruby-icon",
+      accentGlow: "rgba(225, 29, 72, 0.12)",
     },
     {
       label: "Vendas Confirmadas",
-      description: "PIX pagos",
+      description: "PIX pagos no gateway",
       value: stats.newOrders.toLocaleString("pt-BR"),
       diff: stats.newOrdersDiff,
       icon: ShoppingBag,
-      neonClass: "neon-green",
-      neonColor: "#00e5a0",
+      iconClass: "green-icon",
+      valueColor: "#10b981",
+      accentGlow: "rgba(16, 185, 129, 0.1)",
     },
     {
       label: "PIX Pendentes",
-      description: `${stats.pendingCount} cobrança${stats.pendingCount !== 1 ? "s" : ""} aguardando`,
+      description: `${stats.pendingCount} cobrança${stats.pendingCount !== 1 ? "s" : ""} gerada${stats.pendingCount !== 1 ? "s" : ""}`,
       value: brl(stats.pendingAmount),
       icon: Clock,
-      neonClass: "neon-amber",
-      neonColor: "#f59e0b",
+      iconClass: "amber-icon",
+      valueColor: "#f59e0b",
+      accentGlow: "rgba(245, 158, 11, 0.1)",
     },
     {
       label: "Faturamento (30d)",
-      description: "Receita confirmada",
+      description: "Receita líquida confirmada",
       value: brl(stats.totalRevenue),
       diff: stats.totalRevenueDiff,
       icon: DollarSign,
-      neonClass: "neon-purple",
-      neonColor: "#a855f7",
+      iconClass: "ruby-icon",
+      valueColor: "#ffffff",
+      accentGlow: "rgba(225, 29, 72, 0.18)",
     },
   ];
 
@@ -81,33 +85,33 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
             key={card.label}
             className="card fade-up"
             style={{
-              padding: "20px",
+              padding: "20px 22px",
               display: "flex",
               flexDirection: "column",
               gap: "14px",
-              animationDelay: `${i * 60}ms`,
+              animationDelay: `${i * 50}ms`,
               position: "relative",
               overflow: "hidden",
             }}
           >
-            {/* Glow de fundo decorativo */}
+            {/* Efeito Glow Ruby de fundo */}
             <div
               style={{
                 position: "absolute",
-                top: "-20px",
-                right: "-20px",
-                width: "100px",
-                height: "100px",
+                top: "-25px",
+                right: "-25px",
+                width: "110px",
+                height: "110px",
                 borderRadius: "50%",
-                background: `radial-gradient(circle, ${card.neonColor}0A 0%, transparent 70%)`,
+                background: `radial-gradient(circle, ${card.accentGlow} 0%, transparent 70%)`,
                 pointerEvents: "none",
               }}
             />
 
-            {/* Topo: ícone + diff */}
+            {/* Linha Superior: Ícone + Badge Diff */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-              <div className={`neon-icon ${card.neonClass}`}>
-                <Icon style={{ width: "18px", height: "18px" }} />
+              <div className={card.iconClass}>
+                <Icon style={{ width: "19px", height: "19px" }} />
               </div>
 
               {hasDiff && !loading && (
@@ -115,58 +119,58 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
-                    gap: "3px",
+                    gap: "4px",
                     fontSize: "11px",
                     fontWeight: 700,
-                    color: positive ? "#00e5a0" : negative ? "#ef4444" : "var(--text-muted)",
+                    color: positive ? "#10b981" : negative ? "#f43f5e" : "var(--text-muted)",
                     background: positive
-                      ? "rgba(0,229,160,0.08)"
+                      ? "rgba(16, 185, 129, 0.1)"
                       : negative
-                      ? "rgba(239,68,68,0.08)"
-                      : "transparent",
-                    border: `1px solid ${positive ? "rgba(0,229,160,0.2)" : negative ? "rgba(239,68,68,0.2)" : "transparent"}`,
+                      ? "rgba(225, 29, 72, 0.12)"
+                      : "rgba(255,255,255,0.04)",
+                    border: `1px solid ${positive ? "rgba(16, 185, 129, 0.25)" : negative ? "rgba(225, 29, 72, 0.3)" : "var(--border)"}`,
                     borderRadius: "6px",
-                    padding: "2px 7px",
+                    padding: "3px 8px",
                   }}
                 >
                   {positive ? (
-                    <TrendingUp style={{ width: "11px", height: "11px" }} />
+                    <TrendingUp style={{ width: "12px", height: "12px" }} />
                   ) : negative ? (
-                    <TrendingDown style={{ width: "11px", height: "11px" }} />
+                    <TrendingDown style={{ width: "12px", height: "12px" }} />
                   ) : (
-                    <Minus style={{ width: "11px", height: "11px" }} />
+                    <Minus style={{ width: "12px", height: "12px" }} />
                   )}
                   {positive ? "+" : ""}{card.diff}%
                 </div>
               )}
             </div>
 
-            {/* Valor */}
+            {/* Valores com Alto Contraste */}
             <div>
               {loading ? (
                 <>
-                  <div className="skeleton" style={{ height: "32px", width: "110px", marginBottom: "6px" }} />
-                  <div className="skeleton" style={{ height: "11px", width: "80px" }} />
+                  <div className="skeleton" style={{ height: "34px", width: "120px", marginBottom: "6px" }} />
+                  <div className="skeleton" style={{ height: "12px", width: "80px" }} />
                 </>
               ) : (
                 <>
                   <div
                     style={{
-                      fontSize: "26px",
-                      fontWeight: 800,
-                      color: "var(--text-primary)",
+                      fontSize: "28px",
+                      fontWeight: 900,
+                      color: card.valueColor ?? "var(--text-primary)",
                       letterSpacing: "-0.03em",
-                      lineHeight: 1,
+                      lineHeight: 1.05,
                     }}
                   >
                     {card.value}
                   </div>
                   <div
                     style={{
-                      fontSize: "11px",
+                      fontSize: "11.5px",
                       color: "var(--text-muted)",
-                      marginTop: "5px",
-                      fontWeight: 500,
+                      marginTop: "6px",
+                      fontWeight: 600,
                     }}
                   >
                     {card.label}
@@ -175,13 +179,13 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
               )}
             </div>
 
-            {/* Barra de detalhe */}
+            {/* Descrição Inferior */}
             <div
               style={{
                 paddingTop: "12px",
                 borderTop: "1px solid var(--border-subtle)",
-                fontSize: "10.5px",
-                color: "var(--text-muted)",
+                fontSize: "11px",
+                color: "var(--text-secondary)",
                 fontWeight: 500,
               }}
             >
