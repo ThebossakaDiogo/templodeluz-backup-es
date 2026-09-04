@@ -16,9 +16,7 @@ export default defineConfig(({ command }) => ({
     ...(command === "build"
       ? [
           nitro({
-            preset:
-              process.env["NITRO_PRESET"] ||
-              (process.env["VERCEL"] ? "vercel" : "cloudflare-module"),
+            preset: process.env["NITRO_PRESET"] || "vercel",
           }),
         ]
       : []),

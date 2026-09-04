@@ -339,12 +339,18 @@ const SLUG_TO_SECTION: Record<string, Section> = {
   "/painel": "visao-geral",
   "/admin": "visao-geral",
   "/rastreamento": "rastreamento",
+  "/telemetria": "rastreamento",
   "/abandonos": "abandonos",
   "/pedidos": "pedidos",
+  "/vendas": "pedidos",
   "/relatorios": "relatorios",
+  "/metricas": "relatorios",
   "/whatsapp": "whatsapp",
+  "/conversas": "whatsapp",
   "/perfil": "perfil",
+  "/configuracoes": "perfil",
   "/login": "login",
+  "/entrar": "login",
 };
 
 const SECTION_TO_SLUG: Record<Section, string> = {
@@ -362,7 +368,18 @@ function getSectionFromPath(): Section {
   if (typeof window === "undefined") return "visao-geral";
   const rawPath = window.location.pathname.toLowerCase().replace(/\/$/, "") || "/";
   const normalized = rawPath.replaceAll("_", "-");
-  return SLUG_TO_SECTION[rawPath] || SLUG_TO_SECTION[normalized] || "visao-geral";
+
+  if (SLUG_TO_SECTION[rawPath]) return SLUG_TO_SECTION[rawPath];
+  if (SLUG_TO_SECTION[normalized]) return SLUG_TO_SECTION[normalized];
+
+  // Suporte a subrotas como /dashboard/pedidos, /painel/rastreamento etc.
+  const segments = rawPath.split("/").filter(Boolean);
+  for (let i = segments.length - 1; i >= 0; i--) {
+    const candidate = `/${segments[i]}`;
+    if (SLUG_TO_SECTION[candidate]) return SLUG_TO_SECTION[candidate];
+  }
+
+  return "visao-geral";
 }
 
 const ALLOWED_ADMIN_EMAILS = new Set([

@@ -29,6 +29,7 @@ acesso-*.txt
 .wrangler/
 .dev.vars
 .kilo/
+.vercel/
 Feedbacks/*.png
 selos/
 /hero-image.jpeg
