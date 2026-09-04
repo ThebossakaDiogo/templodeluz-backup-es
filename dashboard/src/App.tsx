@@ -12,6 +12,7 @@ import { TrafficPieChart } from "@/components/TrafficPieChart";
 import { PaymentMethodsPieChart } from "@/components/PaymentMethodsPieChart";
 import { ConversionOverview } from "@/components/ConversionOverview";
 import { ConsulentesTelemetryTable } from "@/components/ConsulentesTelemetryTable";
+import { TodayHeroMetric } from "@/components/TodayHeroMetric";
 import { WhatsAppTracker } from "@/components/WhatsAppTracker";
 import { ProfileView } from "@/components/ProfileView";
 import { LoginPage } from "@/components/LoginPage";
@@ -422,7 +423,16 @@ export function App() {
   }, [fetchData]);
 
   // Cálculos reativos ao DateRange com separação total PIX e Cartão
-  const { filteredOrders, filteredLeads, stats, revenueChart, leadsChart } = useMemo(() => {
+  const {
+    filteredOrders,
+    filteredLeads,
+    stats,
+    revenueChart,
+    leadsChart,
+    todayEntriesCount,
+    todayCheckoutsCount,
+    todayPixCount,
+  } = useMemo(() => {
     const startObj = new Date(dateRange.startDate + "T00:00:00");
     const endObj = new Date(dateRange.endDate + "T23:59:59");
     const isSingleDay = dateRange.startDate === dateRange.endDate;
@@ -524,12 +534,37 @@ export function App() {
     const revData = buildRevenueChartRange(allOrders, startObj, endObj, isSingleDay);
     const leadsData = buildLeadsChartRange(allLeads, startObj, endObj, isSingleDay);
 
+    // ─── Métrica de Maior Destaque: Entradas do Dia (Fuso Brasília) ───
+    const now = new Date();
+    const todayInBR = now.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+
+    const leadsToday = allLeads.filter((l) => {
+      if (!l.created_at) return false;
+      const leadDateInBR = new Date(l.created_at).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+      return leadDateInBR === todayInBR;
+    });
+
+    const todayEntries = leadsToday.length;
+
+    const todayCheckouts = leadsToday.filter(
+      (l) => l.checkout_initiated || l.highest_step_index >= 8 || l.checkout_status === "checkout_initiated"
+    ).length;
+
+    const todayPix = allOrders.filter((o) => {
+      if (!o.created_at) return false;
+      const orderDateInBR = new Date(o.created_at).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+      return orderDateInBR === todayInBR && (o.payment_method === "pix" || !o.payment_method);
+    }).length;
+
     return {
       filteredOrders: fOrders,
       filteredLeads: fLeads,
       stats: calculatedStats,
       revenueChart: revData,
       leadsChart: leadsData,
+      todayEntriesCount: todayEntries,
+      todayCheckoutsCount: todayCheckouts,
+      todayPixCount: todayPix,
     };
   }, [allOrders, allLeads, dateRange]);
 
@@ -650,6 +685,16 @@ export function App() {
           {/* SLUG: /visao-geral */}
           {section === "visao-geral" && (
             <>
+              {/* MÉTRICA DE MAIOR DESTAQUE NO DASHBOARD: ENTRADAS DO DIA & TELEMETRIA AO VIVO */}
+              <TodayHeroMetric
+                todayEntriesCount={todayEntriesCount}
+                onlineCount={onlineCount}
+                todayCheckoutsCount={todayCheckoutsCount}
+                todayPixCount={todayPixCount}
+                avgQuizTimeSeconds={stats.avgQuizTimeSeconds}
+                loading={loading}
+              />
+
               {/* Cards de Métricas Principais (Faturamento, Conversões PIX, Conversões Cartão Stripe, Leads) */}
               <MetricCards stats={stats} loading={loading} />
 

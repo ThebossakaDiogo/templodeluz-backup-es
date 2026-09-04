@@ -110,6 +110,58 @@ export function trackQuizStep(payload: FunnelProgressPayload): void {
       p_src: utms["src"] || null,
     };
 
+    // 1. Gravação direta via REST na tabela quiz_funnel_leads (Garantida e imune a erros de overload de RPC)
+    const directLeadRow: Record<string, unknown> = {
+      session_id: sessionId,
+      current_step_index: payload.stepIndex,
+      current_step_name: payload.stepName,
+      highest_step_index: payload.stepIndex,
+      updated_at: new Date().toISOString(),
+      time_spent_seconds: timeSpentSeconds,
+    };
+
+    if (payload.leadName) directLeadRow["lead_name"] = payload.leadName;
+    if (payload.leadEmail) directLeadRow["lead_email"] = payload.leadEmail;
+    if (payload.leadPhone) directLeadRow["lead_phone"] = payload.leadPhone;
+    if (payload.enteQuerido) directLeadRow["ente_querido"] = payload.enteQuerido;
+    if (payload.grauParentesco) directLeadRow["grau_parentesco"] = payload.grauParentesco;
+    if (payload.mensagemPreview) directLeadRow["mensagem_preview"] = payload.mensagemPreview;
+    if (payload.temas && payload.temas.length > 0) directLeadRow["temas_selecionados"] = payload.temas;
+    if (payload.completed) directLeadRow["completed"] = true;
+
+    if (payload.checkoutEvent === "checkout_initiated" || payload.stepIndex >= 8) {
+      directLeadRow["checkout_initiated"] = true;
+      directLeadRow["checkout_initiated_at"] = new Date().toISOString();
+      directLeadRow["checkout_status"] = "checkout_initiated";
+    }
+    if (payload.checkoutEvent === "pix_generated") {
+      directLeadRow["pix_generated"] = true;
+      directLeadRow["pix_generated_at"] = new Date().toISOString();
+      directLeadRow["checkout_status"] = "pix_generated";
+    }
+    if (payload.paymentStatus) directLeadRow["payment_status"] = payload.paymentStatus;
+    if (payload.amountCents) directLeadRow["last_amount_cents"] = payload.amountCents;
+
+    if (utms["utm_source"]) directLeadRow["utm_source"] = utms["utm_source"];
+    if (utms["utm_medium"]) directLeadRow["utm_medium"] = utms["utm_medium"];
+    if (utms["utm_campaign"]) directLeadRow["utm_campaign"] = utms["utm_campaign"];
+    if (utms["utm_content"]) directLeadRow["utm_content"] = utms["utm_content"];
+    if (utms["utm_term"]) directLeadRow["utm_term"] = utms["utm_term"];
+    if (utms["src"]) directLeadRow["src"] = utms["src"];
+
+    // Envio direto via REST Upsert (Merge on conflict session_id)
+    fetch(`${supabaseUrl}/rest/v1/quiz_funnel_leads?on_conflict=session_id`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: supabaseAnonKey,
+        Authorization: `Bearer ${supabaseAnonKey}`,
+        Prefer: "resolution=merge-duplicates",
+      },
+      body: JSON.stringify(directLeadRow),
+    }).catch(() => {});
+
+    // 2. Tenta também a chamada da RPC como redundância
     fetch(`${supabaseUrl}/rest/v1/rpc/track_quiz_progress`, {
       method: "POST",
       headers: {
@@ -118,9 +170,7 @@ export function trackQuizStep(payload: FunnelProgressPayload): void {
         Authorization: `Bearer ${supabaseAnonKey}`,
       },
       body: JSON.stringify(rpcBody),
-    }).catch((err) => {
-      console.warn("[TELEMETRY] Aviso ao sincronizar progresso:", err);
-    });
+    }).catch(() => {});
   } catch {
     // Silencia erros para não interferir na navegação do consulente
   }
