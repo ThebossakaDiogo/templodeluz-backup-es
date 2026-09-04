@@ -64,7 +64,10 @@ async function createPixCharge(
   amountCents: number,
   productId: string
 ): Promise<PixCharge> {
-  const url = `${config.supabaseUrl}/functions/v1/create-pix-charge`;
+  const url = `${config.supabaseUrl}/functions/v1/create-connectpay-pix`;
+  const idempotencyKey = crypto.randomUUID();
+  const statusToken = `${crypto.randomUUID()}${crypto.randomUUID()}`;
+
   const response = await fetch(url, {
     method: "POST",
     headers: {
@@ -76,9 +79,8 @@ async function createPixCharge(
       productId,
       amountCents,
       customerName: payerName,
-      customerEmail: "consulente@templodeluz.com",
-      customerPhone: "11999999999",
-      customerCpf: "00000000000",
+      idempotencyKey,
+      statusToken,
     }),
   });
 
@@ -93,20 +95,23 @@ async function createPixCharge(
     pixPayload: data.pixPayload,
     qrCodeBase64: data.qrCodeBase64,
     expiresAt: data.expiresAt,
-    statusToken: data.statusToken,
+    statusToken,
   };
 }
 
 async function getPixStatus(charge: PixCharge): Promise<{ status: PixPaymentStatus }> {
-  const url = `${config.supabaseUrl}/functions/v1/get-pix-status?orderId=${encodeURIComponent(
-    charge.orderId
-  )}&token=${encodeURIComponent(charge.statusToken)}`;
+  const url = `${config.supabaseUrl}/functions/v1/get-connectpay-pix-status`;
   const response = await fetch(url, {
-    method: "GET",
+    method: "POST",
     headers: {
+      "Content-Type": "application/json",
       Authorization: `Bearer ${config.supabaseAnonKey}`,
       apikey: config.supabaseAnonKey,
     },
+    body: JSON.stringify({
+      orderId: charge.orderId,
+      statusToken: charge.statusToken,
+    }),
   });
 
   if (!response.ok) {

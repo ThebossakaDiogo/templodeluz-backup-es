@@ -13,6 +13,8 @@ import { DateRangeSelector, type DateRangeValue } from "./DateRangeSelector";
 import { NotificationCenter } from "./NotificationCenter";
 import type { Section } from "../App";
 
+import type { PaymentOrder, Lead } from "@/types";
+
 interface TopbarProps {
   theme: "light" | "dark";
   onToggleTheme: () => void;
@@ -25,6 +27,8 @@ interface TopbarProps {
   dateRange: DateRangeValue;
   onDateRangeChange: (val: DateRangeValue) => void;
   onlineCount: number;
+  orders?: PaymentOrder[];
+  leads?: Lead[];
 }
 
 const SECTION_LABELS: Record<Section, string> = {
@@ -49,6 +53,8 @@ export function Topbar({
   dateRange,
   onDateRangeChange,
   onlineCount,
+  orders = [],
+  leads = [],
 }: TopbarProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -214,8 +220,13 @@ export function Topbar({
           />
         </div>
 
-        {/* Central de Notificações com Dropdown Popover */}
-        <NotificationCenter onNavigate={onNavigate} onlineCount={onlineCount} />
+        {/* Central de Notificações com Dropdown Popover (Dados Reais) */}
+        <NotificationCenter
+          onNavigate={onNavigate}
+          onlineCount={onlineCount}
+          orders={orders}
+          leads={leads}
+        />
 
         {/* Seletor de Período / Datas no Desktop */}
         {section === "visao-geral" && (

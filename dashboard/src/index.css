@@ -136,8 +136,30 @@ html, body {
   --bg-surface:     var(--surface-card);
   --bg-surface-alt: var(--surface-3);
   --border:         var(--border-subtle);
-  --primary-blue:   var(--accent-strong);
-  --primary-green:  var(--accent-primary);
+  --primary-blue:   #1D4ED8;
+  --primary-green:  #15803D;
+}
+
+/* ─── Garantia de Alto Contraste para Números e Algorismos no Modo Claro ─── */
+[data-theme="light"] .font-numeric {
+  color: #10121D !important;
+  font-weight: 700;
+}
+
+[data-theme="light"] strong {
+  color: #10121D;
+}
+
+[data-theme="light"] .recharts-default-tooltip {
+  background: #FFFFFF !important;
+  border: 1px solid var(--border-subtle) !important;
+  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.12) !important;
+  color: #10121D !important;
+  border-radius: 10px !important;
+}
+
+[data-theme="light"] .recharts-tooltip-item {
+  color: #10121D !important;
 }
 
 /* ── Reset e Estrutura ─────────────────────────────────────────────── */

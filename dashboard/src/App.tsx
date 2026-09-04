@@ -627,6 +627,8 @@ export function App() {
         dateRange={dateRange}
         onDateRangeChange={setDateRange}
         onlineCount={onlineCount}
+        orders={allOrders}
+        leads={allLeads}
       />
 
       {/* Área Principal de Conteúdo em Largura Total */}
