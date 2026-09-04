@@ -18,6 +18,8 @@ import { Route as EscreverCartaRouteImport } from './routes/escrever-carta'
 import { Route as ObrigadoRouteImport } from './routes/obrigado'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as TermosRouteImport } from './routes/termos'
+import { Route as VisaoGeralRouteImport } from './routes/visao-geral'
+import { Route as Visao_geralRouteImport } from './routes/visao_geral'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -64,6 +66,16 @@ const TermosRoute = TermosRouteImport.update({
   path: '/termos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VisaoGeralRoute = VisaoGeralRouteImport.update({
+  id: '/visao-geral',
+  path: '/visao-geral',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Visao_geralRoute = Visao_geralRouteImport.update({
+  id: '/visao_geral',
+  path: '/visao_geral',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -75,6 +87,8 @@ export interface FileRoutesByFullPath {
   '/obrigado': typeof ObrigadoRoute
   '/privacidade': typeof PrivacidadeRoute
   '/termos': typeof TermosRoute
+  '/visao-geral': typeof VisaoGeralRoute
+  '/visao_geral': typeof Visao_geralRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -86,6 +100,8 @@ export interface FileRoutesByTo {
   '/obrigado': typeof ObrigadoRoute
   '/privacidade': typeof PrivacidadeRoute
   '/termos': typeof TermosRoute
+  '/visao-geral': typeof VisaoGeralRoute
+  '/visao_geral': typeof Visao_geralRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -98,6 +114,8 @@ export interface FileRoutesById {
   '/obrigado': typeof ObrigadoRoute
   '/privacidade': typeof PrivacidadeRoute
   '/termos': typeof TermosRoute
+  '/visao-geral': typeof VisaoGeralRoute
+  '/visao_geral': typeof Visao_geralRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -111,6 +129,8 @@ export interface FileRouteTypes {
     | '/obrigado'
     | '/privacidade'
     | '/termos'
+    | '/visao-geral'
+    | '/visao_geral'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -122,6 +142,8 @@ export interface FileRouteTypes {
     | '/obrigado'
     | '/privacidade'
     | '/termos'
+    | '/visao-geral'
+    | '/visao_geral'
   id:
     | '__root__'
     | '/'
@@ -133,6 +155,8 @@ export interface FileRouteTypes {
     | '/obrigado'
     | '/privacidade'
     | '/termos'
+    | '/visao-geral'
+    | '/visao_geral'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -145,6 +169,8 @@ export interface RootRouteChildren {
   ObrigadoRoute: typeof ObrigadoRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   TermosRoute: typeof TermosRoute
+  VisaoGeralRoute: typeof VisaoGeralRoute
+  Visao_geralRoute: typeof Visao_geralRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -212,6 +238,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/visao-geral': {
+      id: '/visao-geral'
+      path: '/visao-geral'
+      fullPath: '/visao-geral'
+      preLoaderRoute: typeof VisaoGeralRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/visao_geral': {
+      id: '/visao_geral'
+      path: '/visao_geral'
+      fullPath: '/visao_geral'
+      preLoaderRoute: typeof Visao_geralRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -225,6 +265,8 @@ const rootRouteChildren: RootRouteChildren = {
   ObrigadoRoute: ObrigadoRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   TermosRoute: TermosRoute,
+  VisaoGeralRoute: VisaoGeralRoute,
+  Visao_geralRoute: Visao_geralRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

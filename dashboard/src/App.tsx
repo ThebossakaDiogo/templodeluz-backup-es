@@ -201,6 +201,10 @@ export type Section = "visao-geral" | "rastreamento" | "pedidos" | "relatorios" 
 const SLUG_TO_SECTION: Record<string, Section> = {
   "/": "visao-geral",
   "/visao-geral": "visao-geral",
+  "/visao_geral": "visao-geral",
+  "/dashboard": "visao-geral",
+  "/painel": "visao-geral",
+  "/admin": "visao-geral",
   "/rastreamento": "rastreamento",
   "/pedidos": "pedidos",
   "/relatorios": "relatorios",
@@ -221,8 +225,9 @@ const SECTION_TO_SLUG: Record<Section, string> = {
 
 function getSectionFromPath(): Section {
   if (typeof window === "undefined") return "visao-geral";
-  const path = window.location.pathname.toLowerCase().replace(/\/$/, "") || "/";
-  return SLUG_TO_SECTION[path] || "visao-geral";
+  const rawPath = window.location.pathname.toLowerCase().replace(/\/$/, "") || "/";
+  const normalized = rawPath.replace(/_/g, "-");
+  return SLUG_TO_SECTION[rawPath] || SLUG_TO_SECTION[normalized] || "visao-geral";
 }
 
 const ALLOWED_ADMIN_EMAILS = new Set([
