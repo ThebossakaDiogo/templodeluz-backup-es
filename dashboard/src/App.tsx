@@ -279,6 +279,32 @@ function reconcileSingleOrder(
   return order;
 }
 
+function buildPaidLookups(orders: PaymentOrder[]) {
+  const paidPhones = new Map<string, PaymentOrder>();
+  const paidEmails = new Map<string, PaymentOrder>();
+  for (const order of orders) {
+    if (order.status === "paid") {
+      const phoneDigits = cleanDigits(order.customer_phone);
+      if (phoneDigits.length >= 8) paidPhones.set(phoneDigits, order);
+      const email = order.customer_email?.trim().toLowerCase();
+      if (email?.includes("@")) paidEmails.set(email, order);
+    }
+  }
+  return { paidPhones, paidEmails };
+}
+
+function buildLeadLookups(leads: Lead[]) {
+  const leadsByPhone = new Map<string, Lead>();
+  const leadsByEmail = new Map<string, Lead>();
+  for (const lead of leads) {
+    const phone = cleanDigits(lead.lead_phone);
+    if (phone.length >= 8 && !leadsByPhone.has(phone)) leadsByPhone.set(phone, lead);
+    const email = lead.lead_email?.trim().toLowerCase();
+    if (email?.includes("@") && !leadsByEmail.has(email)) leadsByEmail.set(email, lead);
+  }
+  return { leadsByPhone, leadsByEmail };
+}
+
 // Reconciliação e Unificação Total dos Dados: cruza Pedidos, Leads e WhatsApp
 function reconcileDashboardData(
   orders: PaymentOrder[],
@@ -289,26 +315,8 @@ function reconcileDashboardData(
   reconciledLeads: Lead[];
   reconciledWhatsApp: WhatsAppMessage[];
 } {
-  const paidPhones = new Map<string, PaymentOrder>();
-  const paidEmails = new Map<string, PaymentOrder>();
-
-  for (const order of orders) {
-    if (order.status === "paid") {
-      const phoneDigits = cleanDigits(order.customer_phone);
-      if (phoneDigits.length >= 8) paidPhones.set(phoneDigits, order);
-      const email = order.customer_email?.trim().toLowerCase();
-      if (email?.includes("@")) paidEmails.set(email, order);
-    }
-  }
-
-  const leadsByPhone = new Map<string, Lead>();
-  const leadsByEmail = new Map<string, Lead>();
-  for (const lead of leads) {
-    const phone = cleanDigits(lead.lead_phone);
-    if (phone.length >= 8 && !leadsByPhone.has(phone)) leadsByPhone.set(phone, lead);
-    const email = lead.lead_email?.trim().toLowerCase();
-    if (email?.includes("@") && !leadsByEmail.has(email)) leadsByEmail.set(email, lead);
-  }
+  const { paidPhones, paidEmails } = buildPaidLookups(orders);
+  const { leadsByPhone, leadsByEmail } = buildLeadLookups(leads);
 
   return {
     reconciledOrders: orders.map((o) => reconcileSingleOrder(o, leadsByPhone, leadsByEmail)),
