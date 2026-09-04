@@ -1,16 +1,16 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
 
 interface Props {
-  children: ReactNode;
+  readonly children: ReactNode;
 }
 
 interface State {
-  hasError: boolean;
-  error: Error | null;
+  readonly hasError: boolean;
+  readonly error: Error | null;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
-  public state: State = {
+  public override state: State = {
     hasError: false,
     error: null,
   };
@@ -19,15 +19,15 @@ export class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  public override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error("[OD METRICS ERROR BOUNDARY]", error, errorInfo);
   }
 
-  private handleReload = () => {
+  private readonly handleReload = () => {
     window.location.reload();
   };
 
-  private handleClearAndReload = () => {
+  private readonly handleClearAndReload = () => {
     try {
       localStorage.clear();
       sessionStorage.clear();

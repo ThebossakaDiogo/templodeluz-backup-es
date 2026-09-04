@@ -148,18 +148,6 @@ function buildMultiDayRevenue(orders: PaymentOrder[], start: Date, end: Date): C
   }));
 }
 
-// Construtor do Gráfico de Receita discriminando PIX e Cartão
-function buildRevenueChartRange(
-  orders: PaymentOrder[],
-  start: Date,
-  end: Date,
-  isSingleDay: boolean
-): ChartDataPoint[] {
-  return isSingleDay
-    ? buildSingleDayRevenue(orders, start, end)
-    : buildMultiDayRevenue(orders, start, end);
-}
-
 function buildSingleDayLeads(leads: Lead[], start: Date, end: Date): ChartDataPoint[] {
   const hours = ["00h", "04h", "08h", "12h", "16h", "20h"];
   const buckets: Record<string, number> = {};
@@ -198,20 +186,97 @@ function buildMultiDayLeads(leads: Lead[], start: Date, end: Date): ChartDataPoi
   return Object.entries(buckets).map(([dia, leadsCount]) => ({ dia, leads: leadsCount }));
 }
 
-// Construtor do Gráfico de Leads
-function buildLeadsChartRange(
-  leads: Lead[],
-  start: Date,
-  end: Date,
-  isSingleDay: boolean
-): ChartDataPoint[] {
-  return isSingleDay
-    ? buildSingleDayLeads(leads, start, end)
-    : buildMultiDayLeads(leads, start, end);
-}
-
 function cleanDigits(val: string | null | undefined): string {
   return val ? val.replace(/\D/g, "") : "";
+}
+
+function getMatchingOrder(
+  phone: string,
+  email: string | undefined,
+  paidPhones: Map<string, PaymentOrder>,
+  paidEmails: Map<string, PaymentOrder>
+): PaymentOrder | undefined {
+  if (phone.length >= 8 && paidPhones.has(phone)) return paidPhones.get(phone);
+  if (email && paidEmails.has(email)) return paidEmails.get(email);
+  return undefined;
+}
+
+function getMatchingLead(
+  phone: string,
+  email: string | undefined,
+  leadsByPhone: Map<string, Lead>,
+  leadsByEmail: Map<string, Lead>
+): Lead | undefined {
+  if (phone.length >= 8 && leadsByPhone.has(phone)) return leadsByPhone.get(phone);
+  if (email && leadsByEmail.has(email)) return leadsByEmail.get(email);
+  return undefined;
+}
+
+function reconcileSingleLead(
+  lead: Lead,
+  paidPhones: Map<string, PaymentOrder>,
+  paidEmails: Map<string, PaymentOrder>
+): Lead {
+  const phone = cleanDigits(lead.lead_phone);
+  const email = lead.lead_email?.trim().toLowerCase();
+  const match = getMatchingOrder(phone, email, paidPhones, paidEmails);
+  if (!match) return lead;
+
+  return {
+    ...lead,
+    payment_status: "paid" as const,
+    checkout_status: "paid",
+    completed: true,
+    last_amount_cents:
+      lead.last_amount_cents && lead.last_amount_cents > 0
+        ? lead.last_amount_cents
+        : match.amount_cents,
+  };
+}
+
+function reconcileSingleWhatsApp(
+  wa: WhatsAppMessage,
+  paidPhones: Map<string, PaymentOrder>,
+  paidEmails: Map<string, PaymentOrder>,
+  leadsByPhone: Map<string, Lead>,
+  leadsByEmail: Map<string, Lead>
+): WhatsAppMessage {
+  const phone = cleanDigits(wa.customer_phone);
+  const email = wa.customer_email?.trim().toLowerCase();
+  const matchOrder = getMatchingOrder(phone, email, paidPhones, paidEmails);
+  const matchLead = getMatchingLead(phone, email, leadsByPhone, leadsByEmail);
+
+  const updated = { ...wa };
+  if (matchOrder) {
+    updated.payment_status = "paid";
+    updated.payment_method = matchOrder.payment_method;
+    if (!updated.amount_cents) {
+      updated.amount_cents = matchOrder.amount_cents;
+    }
+  }
+  if (matchLead) {
+    updated.ente_querido = updated.ente_querido || matchLead.ente_querido || undefined;
+    updated.grau_parentesco = updated.grau_parentesco || matchLead.grau_parentesco || undefined;
+    updated.customer_email = updated.customer_email || matchLead.lead_email || undefined;
+  }
+  return updated;
+}
+
+function reconcileSingleOrder(
+  order: PaymentOrder,
+  leadsByPhone: Map<string, Lead>,
+  leadsByEmail: Map<string, Lead>
+): PaymentOrder {
+  const phone = cleanDigits(order.customer_phone);
+  const email = order.customer_email?.trim().toLowerCase();
+  const match = getMatchingLead(phone, email, leadsByPhone, leadsByEmail);
+  if (match?.ente_querido && order.product_name && !order.product_name.includes("—")) {
+    return {
+      ...order,
+      product_name: `${order.product_name} — ${match.ente_querido}`,
+    };
+  }
+  return order;
 }
 
 // Reconciliação e Unificação Total dos Dados: cruza Pedidos, Leads e WhatsApp
@@ -232,7 +297,7 @@ function reconcileDashboardData(
       const phoneDigits = cleanDigits(order.customer_phone);
       if (phoneDigits.length >= 8) paidPhones.set(phoneDigits, order);
       const email = order.customer_email?.trim().toLowerCase();
-      if (email && email.includes("@")) paidEmails.set(email, order);
+      if (email?.includes("@")) paidEmails.set(email, order);
     }
   }
 
@@ -242,85 +307,16 @@ function reconcileDashboardData(
     const phone = cleanDigits(lead.lead_phone);
     if (phone.length >= 8 && !leadsByPhone.has(phone)) leadsByPhone.set(phone, lead);
     const email = lead.lead_email?.trim().toLowerCase();
-    if (email && email.includes("@") && !leadsByEmail.has(email)) leadsByEmail.set(email, lead);
+    if (email?.includes("@") && !leadsByEmail.has(email)) leadsByEmail.set(email, lead);
   }
 
-  const reconciledLeads = leads.map((lead) => {
-    const phone = cleanDigits(lead.lead_phone);
-    const email = lead.lead_email?.trim().toLowerCase();
-    const matchingOrder =
-      (phone && paidPhones.get(phone)) ||
-      (email && paidEmails.get(email)) ||
-      null;
-
-    if (matchingOrder) {
-      return {
-        ...lead,
-        payment_status: "paid" as const,
-        checkout_status: "paid",
-        completed: true,
-        last_amount_cents:
-          lead.last_amount_cents && lead.last_amount_cents > 0
-            ? lead.last_amount_cents
-            : matchingOrder.amount_cents,
-      };
-    }
-    return lead;
-  });
-
-  const reconciledWhatsApp = whatsApp.map((wa) => {
-    const phone = cleanDigits(wa.customer_phone);
-    const email = wa.customer_email?.trim().toLowerCase();
-    const matchingOrder =
-      (phone && paidPhones.get(phone)) ||
-      (email && paidEmails.get(email)) ||
-      null;
-
-    const matchingLead =
-      (phone && leadsByPhone.get(phone)) ||
-      (email && leadsByEmail.get(email)) ||
-      null;
-
-    const updated = { ...wa };
-    if (matchingOrder) {
-      updated.payment_status = "paid";
-      updated.payment_method = matchingOrder.payment_method;
-      if (!updated.amount_cents || updated.amount_cents === 0) {
-        updated.amount_cents = matchingOrder.amount_cents;
-      }
-    }
-    if (matchingLead) {
-      if (!updated.ente_querido && matchingLead.ente_querido) {
-        updated.ente_querido = matchingLead.ente_querido;
-      }
-      if (!updated.grau_parentesco && matchingLead.grau_parentesco) {
-        updated.grau_parentesco = matchingLead.grau_parentesco;
-      }
-      if (!updated.customer_email && matchingLead.lead_email) {
-        updated.customer_email = matchingLead.lead_email;
-      }
-    }
-    return updated;
-  });
-
-  const reconciledOrders = orders.map((order) => {
-    const phone = cleanDigits(order.customer_phone);
-    const email = order.customer_email?.trim().toLowerCase();
-    const matchingLead =
-      (phone && leadsByPhone.get(phone)) ||
-      (email && leadsByEmail.get(email)) ||
-      null;
-
-    if (matchingLead?.ente_querido && order.product_name && !order.product_name.includes("—")) {
-      return {
-        ...order,
-        product_name: `${order.product_name} — ${matchingLead.ente_querido}`,
-      };
-    }
-    return order;
-  });
-
-  return { reconciledOrders, reconciledLeads, reconciledWhatsApp };
+  return {
+    reconciledOrders: orders.map((o) => reconcileSingleOrder(o, leadsByPhone, leadsByEmail)),
+    reconciledLeads: leads.map((l) => reconcileSingleLead(l, paidPhones, paidEmails)),
+    reconciledWhatsApp: whatsApp.map((w) =>
+      reconcileSingleWhatsApp(w, paidPhones, paidEmails, leadsByPhone, leadsByEmail)
+    ),
+  };
 }
 
 // ─── Secções & Slugs do painel ───────────────────────────────────────────────
@@ -670,8 +666,12 @@ export function App() {
       pendingCount: pending.length,
     };
 
-    const revData = buildRevenueChartRange(allOrders, startObj, endObj, isSingleDay);
-    const leadsData = buildLeadsChartRange(allLeads, startObj, endObj, isSingleDay);
+    const revData = isSingleDay
+      ? buildSingleDayRevenue(allOrders, startObj, endObj)
+      : buildMultiDayRevenue(allOrders, startObj, endObj);
+    const leadsData = isSingleDay
+      ? buildSingleDayLeads(allLeads, startObj, endObj)
+      : buildMultiDayLeads(allLeads, startObj, endObj);
 
     // ─── Métrica de Maior Destaque: Entradas do Dia (Fuso Brasília) ───
     const now = new Date();
@@ -706,6 +706,16 @@ export function App() {
       todayPixCount: todayPix,
     };
   }, [allOrders, allLeads, dateRange]);
+
+  // Hook incondicional executado em toda renderização (respeitando as Rules of Hooks)
+  const NAV_TABS = useMemo(() => [
+    { id: "visao-geral" as Section, label: "Visão Geral", icon: LayoutGrid },
+    { id: "rastreamento" as Section, label: "Funil & Telemetria", icon: Activity, badge: onlineCount > 0 ? `${onlineCount}` : undefined },
+    { id: "pedidos" as Section, label: "Pedidos & Vendas", icon: CreditCard },
+    { id: "relatorios" as Section, label: "Relatórios & UTMs", icon: BarChart3 },
+    { id: "whatsapp" as Section, label: "WhatsApp Tracker", icon: MessageSquare, badge: allWhatsApp.filter((w) => w.payment_status !== "paid").length || undefined },
+    { id: "perfil" as Section, label: "Meu Perfil", icon: User },
+  ], [onlineCount, allWhatsApp]);
 
   const exportCsv = () => {
     const rows = [
@@ -785,15 +795,6 @@ export function App() {
       />
     );
   }
-
-  const NAV_TABS = useMemo(() => [
-    { id: "visao-geral" as Section, label: "Visão Geral", icon: LayoutGrid },
-    { id: "rastreamento" as Section, label: "Funil & Telemetria", icon: Activity, badge: onlineCount > 0 ? `${onlineCount}` : undefined },
-    { id: "pedidos" as Section, label: "Pedidos & Vendas", icon: CreditCard },
-    { id: "relatorios" as Section, label: "Relatórios & UTMs", icon: BarChart3 },
-    { id: "whatsapp" as Section, label: "WhatsApp Tracker", icon: MessageSquare, badge: allWhatsApp.filter((w) => w.payment_status !== "paid").length || undefined },
-    { id: "perfil" as Section, label: "Meu Perfil", icon: User },
-  ], [onlineCount, allWhatsApp]);
 
   return (
     <div className="dashboard-root" style={{ flexDirection: "column", height: "100vh", overflow: "hidden" }}>
