@@ -1,45 +1,24 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
-  LayoutDashboard,
-  CheckSquare,
   Users,
-  ShieldAlert,
-  AlertCircle,
-  Settings,
-  Code2,
-  ChevronDown,
-  ChevronRight,
-  Radio,
-  Download,
-  Calendar,
-  Activity,
-  BarChart3,
-  FileText,
-  Bell,
-  SlidersHorizontal,
-  MoreHorizontal,
-  ArrowUpDown,
-  CheckCircle2,
-  Clock,
-  Flame,
-  Info,
-  ArrowUpRight,
+  MessageCircle,
+  TrendingUp,
+  CreditCard,
   RefreshCw,
-  Eye,
+  Download,
+  Search,
+  Clock,
+  ExternalLink,
+  ChevronDown,
+  ChevronUp,
+  Phone,
+  AlertCircle,
+  Copy,
+  Check,
+  BarChart3,
+  Sparkles,
 } from "lucide-react";
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  BarChart as RechartsBarChart,
-  Bar,
-  Cell,
-} from "recharts";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -47,37 +26,21 @@ export const Route = createFileRoute("/dashboard")({
       { title: "Dashboard Executiva & Tracking de Leads · Templo de Luz" },
       {
         name: "description",
-        content: "Painel de controle em tempo real para monitoramento de leads, quiz e vendas.",
+        content: "Painel de controle em tempo real para monitoramento de leads, quiz e WhatsApps.",
       },
     ],
   }),
   component: DashboardPage,
 });
 
-interface DashboardStats {
-  newSubscriptions: number;
-  newSubscriptionsDiff: number;
-  newOrders: number;
-  newOrdersDiff: number;
-  avgOrderRevenue: number;
-  avgOrderRevenueDiff: number;
-  totalRevenue: number;
-  totalRevenueDiff: number;
-  pendingAmount: number;
-  pendingCount: number;
-}
+const DEFAULT_SUPABASE_URL = "https://opftmzegcvfyoinjfmcj.supabase.co";
+const DEFAULT_SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZnRtemVnY3ZmeW9pbmpmbWNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNzgyMDksImV4cCI6MjEwMzg1NDIwOX0.VpQitxh7x5v_0k5q35hhMz3eAATUHGERubdmA_TnR24";
 
-interface PaymentOrder {
-  id: string;
-  order_id?: string;
-  customer_name: string;
-  customer_email: string;
-  product_name: string;
-  amount_cents: number;
-  status: "paid" | "pending" | "failed" | "creating" | "expired";
-  payment_method: "pix" | "credit_card";
-  created_at: string;
-}
+type FilterQuickOption = "all" | "with_phone" | "paid" | "pending" | "quiz";
+type DashboardTab = "leads" | "orders" | "metrics";
+type PaymentStatusType = "none" | "waiting_payment" | "paid" | "failed";
+type OrderStatusType = "paid" | "pending" | "failed" | "creating" | "expired";
 
 interface Lead {
   id: string;
@@ -93,1130 +56,938 @@ interface Lead {
   current_step_name: string;
   highest_step_index: number;
   completed: boolean;
-  payment_status: "none" | "waiting_payment" | "paid" | "failed";
+  payment_status: PaymentStatusType;
   last_amount_cents: number;
   utm_source: string | null;
   utm_medium: string | null;
   utm_campaign: string | null;
+  utm_content: string | null;
   created_at: string;
   updated_at: string;
+  time_spent_seconds?: number;
 }
 
-const DEFAULT_CHART_DATA = [
-  { month: "Jan", sales: 1200, revenue: 2400 },
-  { month: "Feb", sales: 2100, revenue: 4200 },
-  { month: "Mar", sales: 1800, revenue: 3600 },
-  { month: "Apr", sales: 2780, revenue: 5500 },
-  { month: "May", sales: 3200, revenue: 6400 },
-  { month: "Jun", sales: 4300, revenue: 8600 },
-];
+interface PaymentOrder {
+  id: string;
+  customer_name: string;
+  customer_email: string;
+  customer_phone?: string;
+  product_name: string;
+  amount_cents: number;
+  status: OrderStatusType;
+  payment_method: "pix" | "credit_card";
+  created_at: string;
+}
 
-const BAR_DATA = [
-  { name: "1", value: 35, color: "#f87171" },
-  { name: "2", value: 20, color: "#2dd4bf" },
-  { name: "3", value: 45, color: "#f87171" },
-  { name: "4", value: 25, color: "#2dd4bf" },
-  { name: "5", value: 30, color: "#2dd4bf" },
-  { name: "6", value: 55, color: "#f87171" },
-  { name: "7", value: 70, color: "#0d9488" },
-  { name: "8", value: 40, color: "#f87171" },
-  { name: "9", value: 20, color: "#2dd4bf" },
-  { name: "10", value: 48, color: "#f87171" },
-  { name: "11", value: 95, color: "#0d9488" },
-  { name: "12", value: 50, color: "#f87171" },
-  { name: "13", value: 60, color: "#2dd4bf" },
-];
+function formatPhoneDisplay(raw: string | null | undefined): string {
+  if (!raw) return "";
+  const digits = raw.replace(/\D/g, "");
+  const clean = digits.startsWith("55") && digits.length >= 12 ? digits.slice(2) : digits;
+  if (clean.length === 11) {
+    return `(${clean.slice(0, 2)}) ${clean.slice(2, 7)}-${clean.slice(7)}`;
+  }
+  if (clean.length === 10) {
+    return `(${clean.slice(0, 2)}) ${clean.slice(2, 6)}-${clean.slice(6)}`;
+  }
+  return raw;
+}
 
-const MEMBERS = [
-  {
-    name: "Médium Milena",
-    email: "milena@templodeluz.com",
-    role: "Owner",
-    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&auto=format&fit=crop&q=60",
-  },
-  {
-    name: "Diogo (Admin)",
-    email: "diogo@templodeluz.com",
-    role: "Owner",
-    avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=60",
-  },
-  {
-    name: "Equipe de Acolhimento",
-    email: "acolhimento@templodeluz.com",
-    role: "Member",
-    avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&auto=format&fit=crop&q=60",
-  },
-  {
-    name: "Suporte WhatsApp",
-    email: "suporte@templodeluz.com",
-    role: "Member",
-    avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&auto=format&fit=crop&q=60",
-  },
-];
+function getWhatsAppLink(phone: string, leadName?: string | null, ente?: string | null): string {
+  const digits = phone.replace(/\D/g, "");
+  const fullNumber = digits.startsWith("55") ? digits : `55${digits}`;
+  const nomeConsulente = leadName && leadName !== "Consulente" && leadName !== "Você" ? leadName : "irmão(ã)";
+  const saudacao = ente
+    ? `Olá, ${nomeConsulente}! Que a paz de Jesus esteja com você. Aqui é da equipe do Templo de Luz da médium Milena Medeiros. Vimos o seu pedido de oração e acolhimento para a memória de ${ente}. Como podemos te confortar hoje?`
+    : `Olá, ${nomeConsulente}! Que a paz de Jesus esteja com você. Aqui é da equipe do Templo de Luz da médium Milena Medeiros. Vimos seu contato para a psicografia e viemos te acolher com carinho.`;
+  return `https://wa.me/${fullNumber}?text=${encodeURIComponent(saudacao)}`;
+}
 
-const STEP_LABELS = [
-  { index: 1, name: "intro", label: "1. Início do Quiz", icon: "✨" },
-  { index: 2, name: "ente", label: "2. Nome do Ente", icon: "🤍" },
-  { index: 3, name: "relacao", label: "3. Vínculo Familiar", icon: "🕊️" },
-  { index: 4, name: "tempo", label: "4. Tempo & Sentimento", icon: "⏳" },
-  { index: 5, name: "mensagem", label: "5. Intenção / Mensagem", icon: "✍️" },
-  { index: 6, name: "confirma", label: "6. Confirmação dos Dados", icon: "📋" },
-  { index: 7, name: "loading", label: "7. Preparação Sagrada", icon: "🕯️" },
-  { index: 8, name: "result", label: "8. Altar & Checkout PIX", icon: "💳" },
-];
+function formatRelativeTime(dateStr: string): string {
+  try {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const minutes = Math.floor(diff / 60000);
+    if (minutes < 1) return "Agora mesmo";
+    if (minutes === 1) return "Há 1 min";
+    if (minutes < 60) return `Há ${minutes} min`;
+    const hours = Math.floor(minutes / 60);
+    if (hours === 1) return "Há 1 hora";
+    if (hours < 24) return `Há ${hours} horas`;
+    const days = Math.floor(hours / 24);
+    if (days === 1) return "Ontem";
+    return `Há ${days} dias`;
+  } catch {
+    return dateStr;
+  }
+}
 
-const DEFAULT_SUPABASE_URL = "https://opftmzegcvfyoinjfmcj.supabase.co";
-const DEFAULT_SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZnRtemVnY3ZmeW9pbmpmbWNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNzgyMDksImV4cCI6MjEwMzg1NDIwOX0.VpQitxh7x5v_0k5q35hhMz3eAATUHGERubdmA_TnR24";
+function formatCurrency(val: number): string {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(val);
+}
 
-function renderLeadPaymentStatusBadge(paymentStatus: Lead["payment_status"]) {
-  if (paymentStatus === "paid") {
+function LeadStatusBadge({ lead }: { readonly lead: Lead }) {
+  if (lead.payment_status === "paid") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 text-[10.5px] font-bold">
-        ✓ Pago
+      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 px-2.5 py-0.5 text-[10px] font-black text-emerald-300">
+        ✓ Pago {lead.last_amount_cents ? formatCurrency(lead.last_amount_cents / 100) : ""}
       </span>
     );
   }
-  if (paymentStatus === "waiting_payment") {
+  if (lead.payment_status === "waiting_payment") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 text-[10.5px] font-bold">
-        ⏳ PIX Pendente
+      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/20 border border-amber-500/40 px-2.5 py-0.5 text-[10px] font-bold text-amber-300">
+        ⏳ PIX Gerado
+      </span>
+    );
+  }
+  if (lead.current_step_index >= 8) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-indigo-500/20 border border-indigo-500/40 px-2.5 py-0.5 text-[10px] font-bold text-indigo-300">
+        No Checkout
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 text-slate-600 px-2 py-0.5 text-[10.5px] font-semibold">
-      Em Navegação
+    <span className="inline-flex items-center gap-1 rounded-full bg-stone-800 text-stone-300 px-2 py-0.5 text-[10px] font-semibold">
+      Passo {lead.current_step_index || 1}: {lead.current_step_name || "intro"}
     </span>
   );
 }
 
-function DashboardPage() {
-  const [currentTab, setCurrentTab] = useState("dashboard-1");
-  const [activeViewTab, setActiveViewTab] = useState("overview");
-  const [dateFilter, setDateFilter] = useState("all");
-  const [filterText, setFilterText] = useState("");
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
-  const [loading, setLoading] = useState(false);
+function LeadCardItem({
+  lead,
+  isExpanded,
+  onToggleExpand,
+  onCopyPhone,
+  isCopied,
+}: {
+  readonly lead: Lead;
+  readonly isExpanded: boolean;
+  readonly onToggleExpand: () => void;
+  readonly onCopyPhone: (phone: string) => void;
+  readonly isCopied: boolean;
+}) {
+  const hasPhone = Boolean(lead.lead_phone && lead.lead_phone.replace(/\D/g, "").length >= 8);
+  const formattedPhone = formatPhoneDisplay(lead.lead_phone);
 
-  const [dashboardOpen, setDashboardOpen] = useState(true);
-  const [developersOpen, setDevelopersOpen] = useState(true);
+  return (
+    <article
+      className={`rounded-2xl border transition-all duration-200 ${
+        hasPhone
+          ? "border-emerald-500/30 bg-gradient-to-br from-[#120a1c] via-[#101713] to-[#0f1412]"
+          : "border-purple-900/40 bg-[#120a1c]"
+      } p-3.5 sm:p-4.5 shadow-md`}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="font-extrabold text-sm sm:text-base text-white truncate">
+              {lead.lead_name && lead.lead_name !== "Consulente" ? lead.lead_name : "Consulente no Quiz"}
+            </h3>
+            <span className="text-[10.5px] font-semibold text-purple-300/60">
+              · {formatRelativeTime(lead.updated_at || lead.created_at)}
+            </span>
+          </div>
 
-  const [stats, setStats] = useState<DashboardStats>({
-    newSubscriptions: 4682,
-    newSubscriptionsDiff: 15.54,
-    newOrders: 1226,
-    newOrdersDiff: 40.2,
-    avgOrderRevenue: 27.5,
-    avgOrderRevenueDiff: 10.8,
-    totalRevenue: 15231.89,
-    totalRevenueDiff: 20.1,
-    pendingAmount: 185.0,
-    pendingCount: 6,
-  });
+          <p className="text-xs text-purple-200/80 mt-0.5 flex items-center gap-1.5 flex-wrap">
+            <span className="text-amber-400 font-bold">🤍 Ente:</span>
+            <span className="font-semibold text-white">
+              {lead.ente_querido || "Não informado"}
+            </span>
+            {lead.grau_parentesco && (
+              <span className="text-purple-300/70">({lead.grau_parentesco})</span>
+            )}
+          </p>
+        </div>
 
-  const [orders, setOrders] = useState<PaymentOrder[]>([
-    {
-      id: "ord_1",
-      customer_name: "Diogo",
-      customer_email: "diogo@exemplo.com",
-      product_name: "Carta Sagrada",
-      amount_cents: 2000,
-      status: "pending",
-      payment_method: "pix",
-      created_at: new Date().toISOString(),
-    },
-    {
-      id: "ord_2",
-      customer_name: "Jucilene Ap Andrade de Melo",
-      customer_email: "jucilene@exemplo.com",
-      product_name: "Doacao ao Templo de Luz",
-      amount_cents: 3500,
-      status: "pending",
-      payment_method: "pix",
-      created_at: new Date(Date.now() - 3600000).toISOString(),
-    },
-    {
-      id: "ord_3",
-      customer_name: "Lourdes Maria",
-      customer_email: "lourdes99@yahoo.com",
-      product_name: "Carta Psicografada Sagrada",
-      amount_cents: 2000,
-      status: "paid",
-      payment_method: "pix",
-      created_at: new Date(Date.now() - 7200000).toISOString(),
-    },
-    {
-      id: "ord_4",
-      customer_name: "Cláudia Fernandes",
-      customer_email: "claudia.f@gmail.com",
-      product_name: "Campanha Cirurgia Médium Milena",
-      amount_cents: 3500,
-      status: "paid",
-      payment_method: "credit_card",
-      created_at: new Date(Date.now() - 10800000).toISOString(),
-    },
-  ]);
+        <div className="shrink-0 flex flex-col items-end gap-1">
+          <LeadStatusBadge lead={lead} />
+          {lead.utm_source && (
+            <span className="text-[9.5px] font-mono text-purple-400/80 bg-purple-950/60 px-1.5 py-0.5 rounded-md border border-purple-800/40">
+              {lead.utm_source}
+            </span>
+          )}
+        </div>
+      </div>
 
-  const [leads, setLeads] = useState<Lead[]>([
-    {
-      id: "lead_1",
-      session_id: "tl_178844001",
-      lead_name: "Dona Lourdes",
-      lead_email: null,
-      lead_phone: "11987654321",
-      ente_querido: "Leonardo",
-      grau_parentesco: "Filho",
-      mensagem_preview: "Quero saber se ele está em paz e se perdoou a família...",
-      temas_selecionados: ["Notícias de Paz e Conforto", "Perdão e Reconciliação"],
-      current_step_index: 8,
-      current_step_name: "result",
-      highest_step_index: 8,
-      completed: true,
-      payment_status: "waiting_payment",
-      last_amount_cents: 2000,
-      utm_source: "facebook_ads",
-      utm_medium: "cpc",
-      utm_campaign: "campanha_psicografia_kardec",
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: "lead_2",
-      session_id: "tl_178844002",
-      lead_name: "Roberto Silva",
-      lead_email: null,
-      lead_phone: "21998877665",
-      ente_querido: "Maria Helena",
-      grau_parentesco: "Mãe",
-      mensagem_preview: "Mãe querida, sinto tantas saudades das suas orações.",
-      temas_selecionados: ["Sinal de Presença"],
-      current_step_index: 5,
-      current_step_name: "mensagem",
-      highest_step_index: 5,
-      completed: false,
-      payment_status: "none",
-      last_amount_cents: 0,
-      utm_source: "instagram",
-      utm_medium: "stories",
-      utm_campaign: "reels_milena",
-      created_at: new Date(Date.now() - 1800000).toISOString(),
-      updated_at: new Date(Date.now() - 1800000).toISOString(),
-    },
-  ]);
+      <div className="mt-3 pt-2.5 border-t border-purple-900/30 flex items-center justify-between gap-2 flex-wrap">
+        {hasPhone ? (
+          <div className="flex items-center gap-2 flex-1 min-w-[200px]">
+            <a
+              href={getWhatsAppLink(lead.lead_phone!, lead.lead_name, lead.ente_querido)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white px-3.5 py-2 text-xs font-black tracking-wide shadow-md shadow-emerald-950/50 transition-all hover:scale-[1.02] active:scale-95 flex-1"
+            >
+              <MessageCircle className="w-4 h-4 fill-white" />
+              <span>Chamar no WhatsApp ({formattedPhone})</span>
+              <ExternalLink className="w-3 h-3 opacity-80" />
+            </a>
 
-  const formatCurrency = (val: number) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(val);
+            <button
+              type="button"
+              onClick={() => onCopyPhone(lead.lead_phone!)}
+              title="Copiar número"
+              className="h-8 w-8 flex items-center justify-center rounded-xl border border-emerald-600/30 bg-emerald-950/40 text-emerald-300 hover:bg-emerald-900/50"
+            >
+              {isCopied ? (
+                <Check className="w-3.5 h-3.5 text-emerald-400" />
+              ) : (
+                <Copy className="w-3.5 h-3.5" />
+              )}
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 text-[11px] text-purple-300/50 italic">
+            <AlertCircle className="w-3.5 h-3.5 text-purple-400/60" />
+            <span>Ainda no quiz (telefone pendente)</span>
+          </div>
+        )}
+
+        <button
+          type="button"
+          onClick={onToggleExpand}
+          className="flex items-center gap-1 text-[11px] font-bold text-purple-300 hover:text-white px-2 py-1 rounded-lg hover:bg-purple-950/60 transition-colors"
+        >
+          <span>{isExpanded ? "Ocultar" : "Ver Detalhes"}</span>
+          {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+        </button>
+      </div>
+
+      {isExpanded && (
+        <div className="mt-3 pt-3 border-t border-purple-900/40 space-y-2.5 text-xs text-stone-200 animate-fadeIn">
+          {lead.mensagem_preview && (
+            <div className="p-2.5 rounded-xl bg-purple-950/50 border border-purple-900/60">
+              <span className="block text-[10px] font-bold uppercase text-amber-400 mb-1">
+                Mensagem digitada pelo consulente:
+              </span>
+              <p className="italic text-purple-100/90 leading-relaxed font-serif">
+                "{lead.mensagem_preview}"
+              </p>
+            </div>
+          )}
+
+          {lead.temas_selecionados && lead.temas_selecionados.length > 0 && (
+            <div>
+              <span className="block text-[10px] font-bold uppercase text-purple-300/80 mb-1">
+                Temas e Intenções Selecionadas:
+              </span>
+              <div className="flex flex-wrap gap-1">
+                {lead.temas_selecionados.map((t) => (
+                  <span
+                    key={t}
+                    className="rounded-md bg-purple-900/40 border border-purple-800/50 px-2 py-0.5 text-[10.5px] text-purple-200"
+                  >
+                    {t}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-[10.5px] text-purple-300/70 font-mono">
+            <div>
+              <span className="block text-[9px] uppercase text-stone-400">Tempo no Quiz</span>
+              <span>
+                {lead.time_spent_seconds
+                  ? `${Math.floor(lead.time_spent_seconds / 60)}m ${lead.time_spent_seconds % 60}s`
+                  : "—"}
+              </span>
+            </div>
+            <div>
+              <span className="block text-[9px] uppercase text-stone-400">Campanha</span>
+              <span className="truncate block">{lead.utm_campaign || "—"}</span>
+            </div>
+            <div>
+              <span className="block text-[9px] uppercase text-stone-400">Medium</span>
+              <span className="truncate block">{lead.utm_medium || "—"}</span>
+            </div>
+            <div>
+              <span className="block text-[9px] uppercase text-stone-400">Criado em</span>
+              <span>{new Date(lead.created_at).toLocaleTimeString("pt-BR")}</span>
+            </div>
+          </div>
+        </div>
+      )}
+    </article>
+  );
+}
+
+interface DashboardKpiSectionProps {
+  readonly metrics: {
+    readonly leadsWithPhoneCount: number;
+    readonly phoneCaptureRate: number;
+    readonly paidCount: number;
+    readonly totalPaidRevenue: number;
+    readonly pendingCount: number;
+    readonly totalPendingRevenue: number;
+    readonly totalLeads: number;
+    readonly conversionRate: number;
   };
+}
 
-  const fetchData = async () => {
-    setLoading(true);
+function DashboardKpiSection({ metrics }: Readonly<DashboardKpiSectionProps>) {
+  return (
+    <section className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+      <div className="col-span-2 sm:col-span-1 rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-950/40 via-[#141d19] to-[#0f1412] p-3.5 sm:p-4 shadow-lg shadow-emerald-950/20 relative overflow-hidden">
+        <div className="absolute top-2 right-2 p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400">
+          <MessageCircle className="w-4 h-4" />
+        </div>
+        <span className="text-[11px] font-bold text-emerald-300/80 uppercase tracking-wider block">
+          WhatsApps Capturados
+        </span>
+        <div className="mt-1 flex items-baseline gap-2">
+          <span className="text-2xl sm:text-3xl font-black text-emerald-400">
+            {metrics.leadsWithPhoneCount}
+          </span>
+          <span className="text-xs font-semibold text-emerald-300/60">
+            ({metrics.phoneCaptureRate.toFixed(0)}% do funil)
+          </span>
+        </div>
+        <p className="mt-1 text-[10.5px] text-emerald-200/50">Prontos para contato e acolhimento</p>
+      </div>
+
+      <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-950/40 via-[#1e1710] to-[#140f09] p-3.5 sm:p-4 shadow-lg shadow-amber-950/20 relative overflow-hidden">
+        <div className="absolute top-2 right-2 p-1.5 rounded-lg bg-amber-500/10 text-amber-400">
+          <TrendingUp className="w-4 h-4" />
+        </div>
+        <span className="text-[11px] font-bold text-amber-300/80 uppercase tracking-wider block">
+          Doações Pagas
+        </span>
+        <div className="mt-1 flex items-baseline gap-1.5">
+          <span className="text-xl sm:text-2xl font-black text-amber-300">
+            {formatCurrency(metrics.totalPaidRevenue)}
+          </span>
+        </div>
+        <p className="mt-1 text-[10.5px] text-amber-200/50">{metrics.paidCount} pedidos concluídos</p>
+      </div>
+
+      <div className="rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-950/40 via-[#181024] to-[#120a1c] p-3.5 sm:p-4 shadow-lg shadow-purple-950/20 relative overflow-hidden">
+        <div className="absolute top-2 right-2 p-1.5 rounded-lg bg-purple-500/10 text-purple-400">
+          <Clock className="w-4 h-4" />
+        </div>
+        <span className="text-[11px] font-bold text-purple-300/80 uppercase tracking-wider block">
+          PIX Aguardando
+        </span>
+        <div className="mt-1 flex items-baseline gap-1.5">
+          <span className="text-xl sm:text-2xl font-black text-purple-300">
+            {metrics.pendingCount}
+          </span>
+          <span className="text-xs font-semibold text-purple-400">
+            ({formatCurrency(metrics.totalPendingRevenue)})
+          </span>
+        </div>
+        <p className="mt-1 text-[10.5px] text-purple-200/50">Cobranças abertas a recuperar</p>
+      </div>
+
+      <div className="rounded-2xl border border-stone-800 bg-[#150f20]/60 p-3.5 sm:p-4 shadow-md relative overflow-hidden">
+        <div className="absolute top-2 right-2 p-1.5 rounded-lg bg-stone-800 text-stone-300">
+          <Users className="w-4 h-4" />
+        </div>
+        <span className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block">
+          Sessões do Quiz
+        </span>
+        <div className="mt-1 flex items-baseline gap-2">
+          <span className="text-xl sm:text-2xl font-black text-stone-200">
+            {metrics.totalLeads}
+          </span>
+          <span className="text-xs font-semibold text-purple-400">
+            {metrics.conversionRate.toFixed(1)}% conv.
+          </span>
+        </div>
+        <p className="mt-1 text-[10.5px] text-stone-400/60">Interações registradas no total</p>
+      </div>
+    </section>
+  );
+}
+
+interface DashboardLeadsTabProps {
+  readonly filteredLeads: readonly Lead[];
+  readonly totalLeadsCount: number;
+  readonly leadsWithPhoneCount: number;
+  readonly paidCount: number;
+  readonly pendingCount: number;
+  readonly quizCount: number;
+  readonly loading: boolean;
+  readonly searchQuery: string;
+  readonly filterQuick: FilterQuickOption;
+  readonly expandedLeadId: string | null;
+  readonly copiedPhone: string | null;
+  readonly onSearchChange: (value: string) => void;
+  readonly onClearSearch: () => void;
+  readonly onFilterChange: (filter: FilterQuickOption) => void;
+  readonly onToggleExpand: (leadId: string) => void;
+  readonly onCopyPhone: (phone: string) => void;
+}
+
+interface LeadListContentProps {
+  readonly loading: boolean;
+  readonly filteredLeads: readonly Lead[];
+  readonly expandedLeadId: string | null;
+  readonly copiedPhone: string | null;
+  readonly onToggleExpand: (leadId: string) => void;
+  readonly onCopyPhone: (phone: string) => void;
+}
+
+function LeadListContent({
+  loading,
+  filteredLeads,
+  expandedLeadId,
+  copiedPhone,
+  onToggleExpand,
+  onCopyPhone,
+}: Readonly<LeadListContentProps>) {
+  if (loading) {
+    return (
+      <div className="p-12 text-center text-purple-300/60 flex flex-col items-center gap-3">
+        <RefreshCw className="w-6 h-6 animate-spin text-amber-400" />
+        <p className="text-sm font-semibold">Carregando contatos em tempo real...</p>
+      </div>
+    );
+  }
+
+  if (filteredLeads.length === 0) {
+    return (
+      <div className="p-10 text-center rounded-2xl border border-dashed border-purple-900/50 bg-[#130b1e]/50">
+        <p className="text-sm font-semibold text-purple-300">Nenhum lead encontrado com esse filtro.</p>
+        <p className="text-xs text-purple-400/60 mt-1">Experimente limpar a busca ou selecionar "Todos".</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2.5 sm:space-y-3">
+      {filteredLeads.map((lead) => (
+        <LeadCardItem
+          key={lead.id}
+          lead={lead}
+          isExpanded={expandedLeadId === lead.id}
+          onToggleExpand={() => onToggleExpand(lead.id)}
+          onCopyPhone={onCopyPhone}
+          isCopied={copiedPhone === lead.lead_phone}
+        />
+      ))}
+    </div>
+  );
+}
+
+function DashboardLeadsTab({
+  filteredLeads,
+  totalLeadsCount,
+  leadsWithPhoneCount,
+  paidCount,
+  pendingCount,
+  quizCount,
+  loading,
+  searchQuery,
+  filterQuick,
+  expandedLeadId,
+  copiedPhone,
+  onSearchChange,
+  onClearSearch,
+  onFilterChange,
+  onToggleExpand,
+  onCopyPhone,
+}: Readonly<DashboardLeadsTabProps>) {
+  const filterButtons: Array<{ id: FilterQuickOption; label: string; count: number }> = [
+    { id: "all", label: "Todos", count: totalLeadsCount },
+    { id: "with_phone", label: "📱 Com WhatsApp", count: leadsWithPhoneCount },
+    { id: "paid", label: "✅ Pagos", count: paidCount },
+    { id: "pending", label: "⏳ PIX Aguardando", count: pendingCount },
+    { id: "quiz", label: "✍️ No Quiz", count: quizCount },
+  ];
+
+  return (
+    <div className="space-y-3 sm:space-y-4">
+      <div className="space-y-2.5">
+        <div className="relative">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder="Buscar por nome, WhatsApp (DDD), ente querido ou UTM..."
+            className="w-full h-11 pl-10 pr-4 rounded-2xl border border-purple-900/40 bg-[#130b1e] text-xs sm:text-sm text-stone-100 placeholder:text-purple-300/40 focus:outline-none focus:border-amber-400 transition-colors shadow-inner"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={onClearSearch}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-purple-400 hover:text-white"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
+          {filterButtons.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => onFilterChange(item.id)}
+              className={`whitespace-nowrap px-3 py-1.5 rounded-xl font-bold transition-all ${
+                filterQuick === item.id
+                  ? "bg-amber-400 text-stone-950 shadow-sm"
+                  : "bg-[#170e24] text-purple-200/70 border border-purple-900/40 hover:bg-purple-950"
+              }`}
+            >
+              {item.label} ({item.count})
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <LeadListContent
+        loading={loading}
+        filteredLeads={filteredLeads}
+        expandedLeadId={expandedLeadId}
+        copiedPhone={copiedPhone}
+        onToggleExpand={onToggleExpand}
+        onCopyPhone={onCopyPhone}
+      />
+    </div>
+  );
+}
+
+interface DashboardOrdersTabProps {
+  readonly orders: readonly PaymentOrder[];
+}
+
+function DashboardOrdersTab({ orders }: Readonly<DashboardOrdersTabProps>) {
+  if (orders.length === 0) {
+    return (
+      <div className="p-10 text-center rounded-2xl border border-dashed border-purple-900/50 bg-[#130b1e]/50">
+        <p className="text-sm font-semibold text-purple-300">Nenhum pedido PIX registrado ainda.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      {orders.map((ord) => (
+        <div
+          key={ord.id}
+          className="flex items-center justify-between gap-3 rounded-2xl border border-purple-900/40 bg-[#120a1c] p-3.5 sm:p-4 shadow-sm"
+        >
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <span className="font-extrabold text-sm text-white truncate">{ord.customer_name}</span>
+              <span className="text-[10px] text-purple-400">· {formatRelativeTime(ord.created_at)}</span>
+            </div>
+            <p className="text-xs text-purple-300/70 mt-0.5 truncate">{ord.product_name}</p>
+            {ord.customer_phone && (
+              <p className="text-xs text-emerald-400 font-medium mt-0.5 flex items-center gap-1">
+                <Phone className="w-3 h-3" />
+                <span>{formatPhoneDisplay(ord.customer_phone)}</span>
+              </p>
+            )}
+          </div>
+
+          <div className="text-right shrink-0">
+            <span className="font-black text-sm sm:text-base text-amber-400 block">
+              {formatCurrency(ord.amount_cents / 100)}
+            </span>
+            {ord.status === "paid" ? (
+              <span className="inline-flex items-center gap-1 text-[10px] font-black text-emerald-400">
+                ✓ PAGO
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-400">
+                ⏳ AGUARDANDO
+              </span>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+interface DashboardMetricsTabProps {
+  readonly leads: readonly Lead[];
+  readonly totalLeads: number;
+  readonly paidCount: number;
+}
+
+function DashboardMetricsTab({ leads, totalLeads, paidCount }: Readonly<DashboardMetricsTabProps>) {
+  const utmDistribution = useMemo(() => {
+    return leads.reduce((acc: Record<string, number>, l) => {
+      const src = l.utm_source || "Direto/Orgânico";
+      acc[src] = (acc[src] || 0) + 1;
+      return acc;
+    }, {});
+  }, [leads]);
+
+  return (
+    <div className="space-y-4 sm:space-y-6">
+      <div className="rounded-2xl border border-purple-900/40 bg-[#120a1c] p-4 sm:p-6 shadow-md">
+        <h3 className="text-sm font-extrabold text-white flex items-center gap-2 mb-4">
+          <BarChart3 className="w-4 h-4 text-amber-400" />
+          Retenção por Etapa do Quiz
+        </h3>
+
+        <div className="space-y-3">
+          {[
+            { step: 1, name: "Intro (Nome)", count: leads.length },
+            { step: 2, name: "Ente Querido", count: leads.filter((l) => l.highest_step_index >= 2).length },
+            { step: 3, name: "Vínculo Familiar", count: leads.filter((l) => l.highest_step_index >= 3).length },
+            { step: 4, name: "Tempo de Luto", count: leads.filter((l) => l.highest_step_index >= 4).length },
+            { step: 5, name: "Mensagem / Temas", count: leads.filter((l) => l.highest_step_index >= 5).length },
+            { step: 6, name: "Confirmação", count: leads.filter((l) => l.highest_step_index >= 6).length },
+            { step: 8, name: "Checkout & WhatsApp", count: leads.filter((l) => l.highest_step_index >= 8).length },
+            { step: 9, name: "Doação Concluída (Paga)", count: paidCount },
+          ].map((item) => {
+            const pct = totalLeads > 0 ? (item.count / totalLeads) * 100 : 0;
+            return (
+              <div key={item.step} className="space-y-1">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-purple-200">
+                    {item.step}. {item.name}
+                  </span>
+                  <span className="font-mono text-purple-400">
+                    {item.count} ({pct.toFixed(0)}%)
+                  </span>
+                </div>
+                <div className="h-2 w-full rounded-full bg-stone-900 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-purple-500 to-amber-400 transition-all duration-500"
+                    style={{ width: `${Math.max(pct, 2)}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-purple-900/40 bg-[#120a1c] p-4 sm:p-6 shadow-md">
+        <h3 className="text-sm font-extrabold text-white flex items-center gap-2 mb-3">
+          <TrendingUp className="w-4 h-4 text-emerald-400" />
+          Origem dos Visitantes (UTM Source)
+        </h3>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {Object.entries(utmDistribution).map(([source, count]) => (
+            <div key={source} className="p-3 rounded-xl bg-purple-950/40 border border-purple-900/50">
+              <span className="block text-[11px] font-mono text-purple-300 truncate">{source}</span>
+              <span className="text-lg font-black text-white">{count}</span>
+              <span className="text-[10px] text-purple-400/60 block">
+                {((count / (leads.length || 1)) * 100).toFixed(0)}% do tráfego
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function DashboardPage() {
+  const [activeTab, setActiveTab] = useState<DashboardTab>("leads");
+  const [filterQuick, setFilterQuick] = useState<FilterQuickOption>("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [expandedLeadId, setExpandedLeadId] = useState<string | null>(null);
+  const [copiedPhone, setCopiedPhone] = useState<string | null>(null);
+
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [orders, setOrders] = useState<PaymentOrder[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [lastSync, setLastSync] = useState<Date>(new Date());
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const supabaseUrl =
+    (import.meta.env["VITE_SUPABASE_URL"] as string | undefined) || DEFAULT_SUPABASE_URL;
+  const supabaseAnonKey =
+    (import.meta.env["VITE_SUPABASE_ANON_KEY"] as string | undefined) || DEFAULT_SUPABASE_ANON_KEY;
+
+  const fetchData = async (showLoadingState = false) => {
+    if (showLoadingState) setIsRefreshing(true);
     try {
-      const supabaseUrl =
-        (import.meta.env["VITE_SUPABASE_URL"] as string | undefined) || DEFAULT_SUPABASE_URL;
-      const supabaseAnonKey =
-        (import.meta.env["VITE_SUPABASE_ANON_KEY"] as string | undefined) || DEFAULT_SUPABASE_ANON_KEY;
+      const resLeads = await fetch(
+        `${supabaseUrl}/rest/v1/quiz_funnel_leads?select=*&order=updated_at.desc,created_at.desc&limit=250`,
+        {
+          headers: {
+            apikey: supabaseAnonKey,
+            Authorization: `Bearer ${supabaseAnonKey}`,
+          },
+        }
+      );
+      if (resLeads.ok) {
+        const data = await resLeads.json();
+        if (Array.isArray(data)) {
+          setLeads(data);
+        }
+      }
 
-      const res = await fetch(`${supabaseUrl}/rest/v1/pix_orders?select=*&order=created_at.desc&limit=50`, {
-        headers: {
-          apikey: supabaseAnonKey,
-          Authorization: `Bearer ${supabaseAnonKey}`,
-        },
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
+      const resOrders = await fetch(
+        `${supabaseUrl}/rest/v1/pix_orders?select=*&order=created_at.desc&limit=250`,
+        {
+          headers: {
+            apikey: supabaseAnonKey,
+            Authorization: `Bearer ${supabaseAnonKey}`,
+          },
+        }
+      );
+      if (resOrders.ok) {
+        const data = await resOrders.json();
+        if (Array.isArray(data)) {
           const mapped: PaymentOrder[] = data.map((o: any) => ({
             id: o.id,
             customer_name: o.customer_name || "Consulente",
             customer_email: o.customer_email || "contato@templodeluz.com",
-            product_name: o.product_name || "Carta Sagrada",
+            customer_phone: o.customer_phone || undefined,
+            product_name: o.product_name || "Doação ao Templo de Luz",
             amount_cents: o.amount_cents || 0,
-            status: o.status,
+            status: o.status || "pending",
             payment_method: "pix",
             created_at: o.created_at,
           }));
           setOrders(mapped);
-
-          const paidOrders = mapped.filter((o) => o.status === "paid");
-          const pendingOrders = mapped.filter(
-            (o) => o.status === "pending" || o.status === "creating",
-          );
-
-          const totalPaid = paidOrders.reduce((sum, o) => sum + o.amount_cents, 0) / 100;
-          const totalPending = pendingOrders.reduce((sum, o) => sum + o.amount_cents, 0) / 100;
-          const avg = paidOrders.length > 0 ? totalPaid / paidOrders.length : 20.0;
-
-          setStats((prev) => ({
-            ...prev,
-            newOrders: paidOrders.length,
-            totalRevenue: totalPaid > 0 ? totalPaid : prev.totalRevenue,
-            avgOrderRevenue: avg,
-            pendingAmount: totalPending,
-            pendingCount: pendingOrders.length,
-          }));
         }
       }
-
-      // Busca leads
-      const resLeads = await fetch(`${supabaseUrl}/rest/v1/quiz_funnel_leads?select=*&order=created_at.desc&limit=100`, {
-        headers: {
-          apikey: supabaseAnonKey,
-          Authorization: `Bearer ${supabaseAnonKey}`,
-        },
-      });
-
-      if (resLeads.ok) {
-        const leadsData = await resLeads.json();
-        if (Array.isArray(leadsData) && leadsData.length > 0) {
-          setLeads(leadsData);
-          setStats((prev) => ({ ...prev, newSubscriptions: leadsData.length }));
-        }
-      }
-    } catch {
-      // ignore
+      setLastSync(new Date());
+    } catch (err) {
+      console.warn("Erro ao buscar dados do Dashboard:", err);
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
   };
 
   useEffect(() => {
-    void fetchData();
-    const interval = setInterval(() => void fetchData(), 10000);
+    void fetchData(true);
+    const interval = setInterval(() => void fetchData(false), 10000);
     return () => clearInterval(interval);
   }, []);
 
+  const metrics = useMemo(() => {
+    const totalLeads = leads.length;
+    const leadsWithPhone = leads.filter((l) => l.lead_phone && l.lead_phone.replace(/\D/g, "").length >= 8);
+    const paidOrders = orders.filter((o) => o.status === "paid");
+    const totalPaidRevenue = paidOrders.reduce((sum, o) => sum + o.amount_cents, 0) / 100;
+    const pendingOrders = orders.filter((o) => o.status === "pending" || o.status === "creating");
+    const totalPendingRevenue = pendingOrders.reduce((sum, o) => sum + o.amount_cents, 0) / 100;
+    const phoneCaptureRate = totalLeads > 0 ? (leadsWithPhone.length / totalLeads) * 100 : 0;
+    const conversionRate = totalLeads > 0 ? (paidOrders.length / totalLeads) * 100 : 0;
+
+    return {
+      totalLeads,
+      leadsWithPhoneCount: leadsWithPhone.length,
+      phoneCaptureRate,
+      paidCount: paidOrders.length,
+      totalPaidRevenue,
+      pendingCount: pendingOrders.length,
+      totalPendingRevenue,
+      conversionRate,
+    };
+  }, [leads, orders]);
+
+  const filteredLeads = useMemo(() => {
+    return leads.filter((lead) => {
+      if (filterQuick === "with_phone") {
+        if (!lead.lead_phone || lead.lead_phone.replace(/\D/g, "").length < 8) return false;
+      } else if (filterQuick === "paid") {
+        if (lead.payment_status !== "paid") return false;
+      } else if (filterQuick === "pending") {
+        if (lead.payment_status !== "waiting_payment") return false;
+      } else if (filterQuick === "quiz") {
+        if (lead.current_step_index >= 8 || lead.payment_status === "paid") return false;
+      }
+
+      if (!searchQuery.trim()) return true;
+      const q = searchQuery.toLowerCase().trim();
+      const matchName = lead.lead_name?.toLowerCase().includes(q) || false;
+      const matchEnte = lead.ente_querido?.toLowerCase().includes(q) || false;
+      const matchPhone = lead.lead_phone?.includes(q) || false;
+      const matchRelacao = lead.grau_parentesco?.toLowerCase().includes(q) || false;
+      const matchUtm = lead.utm_source?.toLowerCase().includes(q) || false;
+
+      return matchName || matchEnte || matchPhone || matchRelacao || matchUtm;
+    });
+  }, [leads, filterQuick, searchQuery]);
+
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedPhone(text);
+    setTimeout(() => setCopiedPhone(null), 2000);
+  };
+
+  const handleToggleExpand = (leadId: string) => {
+    setExpandedLeadId((prev) => (prev === leadId ? null : leadId));
+  };
+
   const handleExportCsv = () => {
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      ["ID,Nome,Email,Produto,Valor(BRL),Status,Metodo,Data"]
-        .concat(
-          orders.map(
-            (o) =>
-              `${o.id},"${o.customer_name}","${o.customer_email}","${o.product_name}",${(
-                o.amount_cents / 100
-              ).toFixed(2)},${o.status},${o.payment_method},${o.created_at}`,
-          ),
-        )
-        .join("\n");
-    const encodedUri = encodeURI(csvContent);
+    const headers = [
+      "Data/Hora",
+      "Nome Consulente",
+      "WhatsApp",
+      "Ente Querido",
+      "Parentesco",
+      "Etapa do Quiz",
+      "Status Pagamento",
+      "Valor (R$)",
+      "Origem (UTM Source)",
+      "Campanha (UTM Campaign)",
+      "Mensagem Livre",
+    ];
+
+    const rows = leads.map((l) => [
+      `"${new Date(l.updated_at || l.created_at).toLocaleString("pt-BR")}"`,
+      `"${l.lead_name || "Não informado"}"`,
+      `"${l.lead_phone || ""}"`,
+      `"${l.ente_querido || ""}"`,
+      `"${l.grau_parentesco || ""}"`,
+      `"Passo ${l.current_step_index}: ${l.current_step_name}"`,
+      `"${l.payment_status}"`,
+      `"${((l.last_amount_cents || 0) / 100).toFixed(2)}"`,
+      `"${l.utm_source || "Direto/Orgânico"}"`,
+      `"${l.utm_campaign || ""}"`,
+      `"${(l.mensagem_preview || "").replaceAll('"', '""')}"`,
+    ]);
+
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const encoded = encodeURI(csvContent);
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `relatorio_templo_de_luz_${Date.now()}.csv`);
+    link.setAttribute("href", encoded);
+    link.setAttribute("download", `leads_templo_de_luz_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     link.remove();
   };
 
-  const filteredOrders = orders.filter(
-    (o) =>
-      o.customer_email.toLowerCase().includes(filterText.toLowerCase()) ||
-      o.customer_name.toLowerCase().includes(filterText.toLowerCase()),
-  );
-
-  const toggleSelect = (id: string) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
-    );
-  };
-
-  const toggleSelectAll = () => {
-    if (selectedIds.length === filteredOrders.length) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(filteredOrders.map((o) => o.id));
-    }
-  };
+  const quizInProgressCount = useMemo(() => {
+    return leads.filter((l) => l.current_step_index < 8 && l.payment_status !== "paid").length;
+  }, [leads]);
 
   return (
-    <div className="flex min-h-screen bg-[#f8fafc] text-slate-900 font-sans antialiased">
-      {/* Sidebar Lateral */}
-      <aside className="w-64 shrink-0 border-r border-slate-200 bg-white flex flex-col justify-between h-screen sticky top-0 select-none">
-        <div className="p-4 flex-1 overflow-y-auto">
-          {/* Logo */}
-          <div className="flex items-center gap-2.5 px-2 py-2 mb-4">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-500/25">
-              <Flame className="w-4 h-4" />
+    <div className="min-h-screen bg-[#0d0714] text-stone-100 font-sans antialiased pb-20 selection:bg-purple-500 selection:text-white">
+      <header className="sticky top-0 z-40 border-b border-purple-900/40 bg-[#130b1e]/90 backdrop-blur-md px-4 py-3 sm:px-6">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-amber-500 to-purple-600 text-white shadow-md shadow-purple-900/30">
+              <Sparkles className="w-5 h-5 text-amber-200" />
             </div>
             <div>
-              <h1 className="text-sm font-extrabold text-slate-900 leading-tight">
-                Templo de Luz
-              </h1>
-              <span className="text-[10.5px] font-bold text-slate-400">
-                Tracking & Analytics Hub
-              </span>
-            </div>
-          </div>
-
-          <div className="space-y-6 text-[13px]">
-            <div>
-              <button
-                type="button"
-                onClick={() => setDashboardOpen(!dashboardOpen)}
-                className="flex w-full items-center justify-between px-2 py-1.5 text-xs font-semibold text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
-              >
-                <span className="flex items-center gap-2">
-                  <LayoutDashboard className="w-3.5 h-3.5" />
-                  <span>Dashboard</span>
+              <div className="flex items-center gap-2">
+                <h1 className="text-sm sm:text-base font-black tracking-tight text-white">
+                  Templo de Luz <span className="text-amber-400 font-medium text-xs">Tracking</span>
+                </h1>
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-extrabold text-emerald-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>AO VIVO</span>
                 </span>
-                {dashboardOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
-              </button>
-
-              {dashboardOpen && (
-                <div className="mt-1 space-y-0.5 pl-2">
-                  <button
-                    type="button"
-                    onClick={() => setCurrentTab("dashboard-1")}
-                    className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 font-medium transition-all cursor-pointer ${
-                      currentTab === "dashboard-1"
-                        ? "bg-slate-100 text-slate-900 font-semibold"
-                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                    }`}
-                  >
-                    <span>Dashboard 1 (Geral)</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setCurrentTab("dashboard-2")}
-                    className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 font-medium transition-all cursor-pointer ${
-                      currentTab === "dashboard-2"
-                        ? "bg-slate-100 text-slate-900 font-semibold"
-                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                    }`}
-                  >
-                    <span>Dashboard 2 (Quiz Funnel)</span>
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-0.5">
-              <button
-                type="button"
-                onClick={() => setCurrentTab("dashboard-2")}
-                className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 font-medium transition-all cursor-pointer ${
-                  currentTab === "dashboard-2"
-                    ? "bg-slate-100 text-slate-900 font-semibold"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                }`}
-              >
-                <Radio className="w-4 h-4 text-emerald-500 animate-pulse" />
-                <span>Leads em Tempo Real</span>
-              </button>
-              <button
-                type="button"
-                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 font-medium text-slate-600 hover:bg-slate-50"
-              >
-                <CheckSquare className="w-4 h-4 text-slate-400" />
-                <span>Tarefas</span>
-              </button>
-              <button
-                type="button"
-                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 font-medium text-slate-600 hover:bg-slate-50"
-              >
-                <Users className="w-4 h-4 text-slate-400" />
-                <span>Usuários & Clientes</span>
-              </button>
-            </div>
-
-            <div className="pt-2">
-              <span className="block px-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-                Pages
-              </span>
-              <div className="space-y-0.5">
-                <button
-                  type="button"
-                  className="flex w-full items-center justify-between rounded-lg px-3 py-2 font-medium text-slate-600 hover:bg-slate-50"
-                >
-                  <span className="flex items-center gap-2.5">
-                    <ShieldAlert className="w-4 h-4 text-slate-400" />
-                    <span>Auth</span>
-                  </span>
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-                </button>
-                <button
-                  type="button"
-                  className="flex w-full items-center justify-between rounded-lg px-3 py-2 font-medium text-slate-600 hover:bg-slate-50"
-                >
-                  <span className="flex items-center gap-2.5">
-                    <AlertCircle className="w-4 h-4 text-slate-400" />
-                    <span>Errors</span>
-                  </span>
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-                </button>
               </div>
-            </div>
-
-            <div className="pt-2">
-              <span className="block px-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-                Other
-              </span>
-              <div className="space-y-0.5">
-                <button
-                  type="button"
-                  className="flex w-full items-center justify-between rounded-lg px-3 py-2 font-medium text-slate-600 hover:bg-slate-50"
-                >
-                  <span className="flex items-center gap-2.5">
-                    <Settings className="w-4 h-4 text-slate-400" />
-                    <span>Settings</span>
-                  </span>
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-                </button>
-                <div>
-                  <button
-                    type="button"
-                    onClick={() => setDevelopersOpen(!developersOpen)}
-                    className="flex w-full items-center justify-between px-3 py-2 font-medium text-slate-600 hover:bg-slate-50 cursor-pointer"
-                  >
-                    <span className="flex items-center gap-2.5">
-                      <Code2 className="w-4 h-4 text-slate-400" />
-                      <span>Developers</span>
-                    </span>
-                    {developersOpen ? <ChevronDown className="w-3.5 h-3.5 text-slate-400" /> : <ChevronRight className="w-3.5 h-3.5 text-slate-400" />}
-                  </button>
-                  {developersOpen && (
-                    <div className="mt-1 space-y-0.5 pl-6 text-xs text-slate-500">
-                      <span className="block py-1 px-2 text-slate-400 font-semibold">Overview</span>
-                      <span className="block py-1 px-2 text-slate-400 font-semibold">API Keys</span>
-                      <span className="block py-1 px-2 text-slate-400 font-semibold">Webhooks</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="p-3 border-t border-slate-200">
-          <div className="flex items-center gap-3 px-2 py-1.5 rounded-xl hover:bg-slate-50">
-            <div className="h-9 w-9 rounded-full bg-slate-900 flex items-center justify-center text-white font-bold text-xs shadow-xs">
-              TL
-            </div>
-            <div className="flex-1 min-w-0">
-              <span className="block text-xs font-bold text-slate-900 truncate">
-                Administrador
-              </span>
-              <span className="block text-[11px] text-slate-400 truncate">
-                admin@templodeluz.com
-              </span>
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      {/* Conteúdo Central */}
-      <main className="flex-1 p-6 lg:p-8 max-w-7xl mx-auto space-y-6 overflow-x-hidden">
-        {/* Top Header */}
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">
-                Dashboard
-              </h2>
-              <p className="text-xs text-slate-500 mt-0.5 font-medium">
-                Monitoramento em tempo real do quiz, leads, vendas e telemetria de tráfego.
+              <p className="text-[10px] text-purple-300/70 hidden sm:block">
+                Sincronizado {formatRelativeTime(lastSync.toISOString())} · Vercel Ready
               </p>
             </div>
-
-            <div className="flex items-center gap-2.5">
-              <button
-                type="button"
-                onClick={handleExportCsv}
-                className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3.5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 transition-colors cursor-pointer"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>Download</span>
-              </button>
-
-              <div className="relative">
-                <select
-                  value={dateFilter}
-                  onChange={(e) => setDateFilter(e.target.value)}
-                  className="appearance-none inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2 pr-8 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 transition-colors cursor-pointer outline-none"
-                >
-                  <option value="today">Hoje</option>
-                  <option value="7d">Últimos 7 dias</option>
-                  <option value="30d">Últimos 30 dias</option>
-                  <option value="all">Todo o período</option>
-                </select>
-                <Calendar className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-2.5 pointer-events-none" />
-              </div>
-            </div>
           </div>
 
-          <div className="flex items-center gap-1 border-b border-slate-200 text-xs font-semibold">
+          <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => setActiveViewTab("overview")}
-              className={`inline-flex items-center gap-1.5 pb-2.5 px-3 border-b-2 transition-all cursor-pointer ${
-                activeViewTab === "overview"
-                  ? "border-slate-900 text-slate-900 font-bold"
-                  : "border-transparent text-slate-500 hover:text-slate-700"
-              }`}
+              onClick={() => void fetchData(true)}
+              disabled={isRefreshing}
+              className="flex h-9 items-center gap-1.5 rounded-xl border border-purple-800/60 bg-purple-950/50 px-3 text-xs font-bold text-purple-200 hover:bg-purple-900/60 transition-all active:scale-95"
             >
-              <Activity className="w-3.5 h-3.5" />
-              <span>Overview</span>
+              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin text-amber-400" : ""}`} />
+              <span className="hidden xs:inline">Atualizar</span>
             </button>
+
             <button
               type="button"
-              onClick={() => setActiveViewTab("analytics")}
-              className={`inline-flex items-center gap-1.5 pb-2.5 px-3 border-b-2 transition-all cursor-pointer ${
-                activeViewTab === "analytics"
-                  ? "border-slate-900 text-slate-900 font-bold"
-                  : "border-transparent text-slate-500 hover:text-slate-700"
-              }`}
+              onClick={handleExportCsv}
+              className="flex h-9 items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-3 text-xs font-black text-white hover:brightness-110 shadow-sm shadow-amber-600/30 transition-all active:scale-95"
             >
-              <BarChart3 className="w-3.5 h-3.5" />
-              <span>Analytics</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveViewTab("reports")}
-              className={`inline-flex items-center gap-1.5 pb-2.5 px-3 border-b-2 transition-all cursor-pointer ${
-                activeViewTab === "reports"
-                  ? "border-slate-900 text-slate-900 font-bold"
-                  : "border-transparent text-slate-500 hover:text-slate-700"
-              }`}
-            >
-              <FileText className="w-3.5 h-3.5" />
-              <span>Reports</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveViewTab("notifications")}
-              className={`inline-flex items-center gap-1.5 pb-2.5 px-3 border-b-2 transition-all cursor-pointer ${
-                activeViewTab === "notifications"
-                  ? "border-slate-900 text-slate-900 font-bold"
-                  : "border-transparent text-slate-500 hover:text-slate-700"
-              }`}
-            >
-              <Bell className="w-3.5 h-3.5" />
-              <span>Notifications</span>
+              <Download className="w-3.5 h-3.5" />
+              <span className="hidden xs:inline">Exportar CSV</span>
             </button>
           </div>
         </div>
+      </header>
 
-        {/* Visualização de Funil / Leads em Tempo Real */}
-        {currentTab === "dashboard-2" ? (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-extrabold text-slate-900">
-                  Jornada do Quiz & Leads em Tempo Real
-                </h3>
-                <p className="text-xs text-slate-500 font-medium">
-                  Acompanhe exatamente onde os visitantes estão e recupere leads que abandonaram o formulário.
-                </p>
-              </div>
+      <main className="mx-auto max-w-6xl px-3 sm:px-6 pt-4 sm:pt-6 space-y-4 sm:space-y-6">
+        <DashboardKpiSection metrics={metrics} />
 
-              <button
-                type="button"
-                onClick={fetchData}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 transition-colors cursor-pointer"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${loading ? "animate-spin" : ""}`} />
-                <span>Atualizar</span>
-              </button>
-            </div>
+        <div className="flex rounded-2xl bg-[#140b20] p-1 border border-purple-900/40">
+          <button
+            type="button"
+            onClick={() => setActiveTab("leads")}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all ${
+              activeTab === "leads"
+                ? "bg-gradient-to-r from-purple-700 to-indigo-700 text-white shadow-md shadow-purple-900/40"
+                : "text-purple-300/70 hover:text-white"
+            }`}
+          >
+            <Phone className="w-4 h-4" />
+            <span>Leads & WhatsApps</span>
+            <span className="ml-1 rounded-full bg-black/30 px-1.5 py-0.2 text-[10px]">
+              {filteredLeads.length}
+            </span>
+          </button>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
-              {STEP_LABELS.map((step) => {
-                const count = leads.filter(
-                  (l) => l.current_step_index === step.index || l.current_step_name === step.name,
-                ).length;
-                return (
-                  <div
-                    key={step.index}
-                    className="rounded-xl border border-slate-200 bg-white p-3 shadow-2xs text-center flex flex-col justify-between"
-                  >
-                    <span className="text-lg block mb-1">{step.icon}</span>
-                    <span className="text-xs font-bold text-slate-900 block truncate" title={step.label}>
-                      {step.label}
-                    </span>
-                    <div className="mt-2 pt-2 border-t border-slate-100">
-                      <span className="text-lg font-black text-indigo-600 block">{count}</span>
-                      <span className="text-[10px] text-slate-400 font-semibold block">visitantes</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+          <button
+            type="button"
+            onClick={() => setActiveTab("orders")}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all ${
+              activeTab === "orders"
+                ? "bg-gradient-to-r from-purple-700 to-indigo-700 text-white shadow-md shadow-purple-900/40"
+                : "text-purple-300/70 hover:text-white"
+            }`}
+          >
+            <CreditCard className="w-4 h-4" />
+            <span>Doações PIX</span>
+            <span className="ml-1 rounded-full bg-black/30 px-1.5 py-0.2 text-[10px]">
+              {orders.length}
+            </span>
+          </button>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
-              <div className="mb-4 flex items-center justify-between">
-                <h4 className="text-sm font-extrabold text-slate-900">
-                  Últimos Leads Registrados ({leads.length})
-                </h4>
-              </div>
+          <button
+            type="button"
+            onClick={() => setActiveTab("metrics")}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all ${
+              activeTab === "metrics"
+                ? "bg-gradient-to-r from-purple-700 to-indigo-700 text-white shadow-md shadow-purple-900/40"
+                : "text-purple-300/70 hover:text-white"
+            }`}
+          >
+            <BarChart3 className="w-4 h-4" />
+            <span>Funil & Tráfego</span>
+          </button>
+        </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs text-slate-600">
-                  <thead className="border-b border-slate-100 bg-slate-50/60 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    <tr>
-                      <th className="py-3 px-3">Lead / Consulente</th>
-                      <th className="py-3 px-3">Ente Querido</th>
-                      <th className="py-3 px-3">Vínculo</th>
-                      <th className="py-3 px-3">Etapa Atual</th>
-                      <th className="py-3 px-3">Status Pagamento</th>
-                      <th className="py-3 px-3">Origem (UTM)</th>
-                      <th className="py-3 px-3">Data</th>
-                      <th className="py-3 px-3 text-right">Ação</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 font-medium">
-                    {leads.map((lead) => (
-                      <tr key={lead.id || lead.session_id} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="py-3.5 px-3">
-                          <span className="font-bold text-slate-900 block truncate max-w-[150px]">
-                            {lead.lead_name || "Visitante Anônimo"}
-                          </span>
-                        </td>
-                        <td className="py-3.5 px-3 font-semibold text-slate-800 truncate max-w-[140px]">
-                          {lead.ente_querido || "—"}
-                        </td>
-                        <td className="py-3.5 px-3 text-slate-500">{lead.grau_parentesco || "—"}</td>
-                        <td className="py-3.5 px-3">
-                          <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 border border-indigo-200 px-2.5 py-0.5 text-[10.5px] font-bold text-indigo-700">
-                            {lead.current_step_name || `Etapa ${lead.current_step_index}`}
-                          </span>
-                        </td>
-                        <td className="py-3.5 px-3">
-                          {renderLeadPaymentStatusBadge(lead.payment_status)}
-                        </td>
-                        <td className="py-3.5 px-3 text-[11px] text-slate-500">
-                          <span className="block font-bold text-slate-700">{lead.utm_source || "Orgânico / Direto"}</span>
-                        </td>
-                        <td className="py-3.5 px-3 text-slate-400 text-[11px]">
-                          {new Date(lead.created_at || Date.now()).toLocaleTimeString("pt-BR", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </td>
-                        <td className="py-3.5 px-3 text-right">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedLead(lead)}
-                            className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-1 text-[11px] font-bold text-slate-700 hover:bg-slate-200 cursor-pointer"
-                          >
-                            <Eye className="w-3 h-3" />
-                            <span>Ver</span>
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <>
-            {/* 4 Cards de Métricas Principais (Fiel ao Design) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-                    <span className="flex items-center gap-1.5 font-bold text-slate-700">
-                      <span className="text-slate-400">⚡</span> New Subscriptions
-                    </span>
-                    <Info className="w-3.5 h-3.5 text-slate-300" />
-                  </div>
-                  <div className="mt-3 flex items-baseline justify-between">
-                    <div>
-                      <span className="text-3xl font-extrabold text-slate-900 tracking-tight">
-                        {stats.newSubscriptions.toLocaleString("pt-BR")}
-                      </span>
-                      <span className="block text-[11px] text-slate-400 font-medium mt-0.5">
-                        Since last week
-                      </span>
-                    </div>
-                    <div className="w-16 h-8 text-red-400">
-                      <svg viewBox="0 0 60 30" className="w-full h-full stroke-current fill-none stroke-[2.5] stroke-linecap-round">
-                        <path d="M0,25 Q15,10 30,18 T60,5" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                  <span className="text-slate-500 font-medium">Details</span>
-                  <span className="inline-flex items-center font-bold text-emerald-600 gap-0.5">
-                    <ArrowUpRight className="w-3.5 h-3.5" />
-                    <span>{stats.newSubscriptionsDiff}% ▲</span>
-                  </span>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-                    <span className="flex items-center gap-1.5 font-bold text-slate-700">
-                      <span className="text-slate-400">📦</span> New Orders
-                    </span>
-                    <Info className="w-3.5 h-3.5 text-slate-300" />
-                  </div>
-                  <div className="mt-3 flex items-baseline justify-between">
-                    <div>
-                      <span className="text-3xl font-extrabold text-slate-900 tracking-tight">
-                        {stats.newOrders.toLocaleString("pt-BR")}
-                      </span>
-                      <span className="block text-[11px] text-slate-400 font-medium mt-0.5">
-                        Since last week
-                      </span>
-                    </div>
-                    <div className="w-16 h-8 text-teal-500">
-                      <svg viewBox="0 0 60 30" className="w-full h-full stroke-current fill-none stroke-[2.5] stroke-linecap-round">
-                        <path d="M0,20 Q15,28 30,15 T60,8" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                  <span className="text-slate-500 font-medium">Details</span>
-                  <span className="inline-flex items-center font-bold text-red-500 gap-0.5">
-                    <span>{stats.newOrdersDiff}% ▼</span>
-                  </span>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-                    <span className="flex items-center gap-1.5 font-bold text-slate-700">
-                      <span className="text-slate-400">🎁</span> Avg Order Revenue
-                    </span>
-                    <Info className="w-3.5 h-3.5 text-slate-300" />
-                  </div>
-                  <div className="mt-3 flex items-baseline justify-between">
-                    <div>
-                      <span className="text-3xl font-extrabold text-slate-900 tracking-tight">
-                        {formatCurrency(stats.avgOrderRevenue)}
-                      </span>
-                      <span className="block text-[11px] text-slate-400 font-medium mt-0.5">
-                        Since last week
-                      </span>
-                    </div>
-                    <div className="w-16 h-8 text-indigo-400">
-                      <svg viewBox="0 0 60 30" className="w-full h-full stroke-current fill-none stroke-[2.5] stroke-linecap-round">
-                        <path d="M0,15 Q20,5 40,22 T60,10" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                  <span className="text-slate-500 font-medium">Details</span>
-                  <span className="inline-flex items-center font-bold text-emerald-600 gap-0.5">
-                    <ArrowUpRight className="w-3.5 h-3.5" />
-                    <span>{stats.avgOrderRevenueDiff}% ▲</span>
-                  </span>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-                    <span className="flex items-center gap-1.5 font-bold text-slate-700">
-                      Total Revenue
-                    </span>
-                  </div>
-                  <div className="mt-3">
-                    <span className="text-3xl font-extrabold text-slate-900 tracking-tight">
-                      {formatCurrency(stats.totalRevenue)}
-                    </span>
-                    <span className="block text-[11px] text-slate-400 font-medium mt-0.5">
-                      +{stats.totalRevenueDiff}% from last month
-                    </span>
-                  </div>
-                </div>
-                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                  <div className="w-full h-8 text-slate-800">
-                    <svg viewBox="0 0 160 30" className="w-full h-full">
-                      <path d="M 5,22 Q 35,24 65,20 T 115,18 T 155,5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                      <circle cx="5" cy="22" r="3" fill="#1e293b" />
-                      <circle cx="65" cy="20" r="3" fill="#1e293b" />
-                      <circle cx="115" cy="18" r="3" fill="#1e293b" />
-                      <circle cx="155" cy="5" r="3.5" fill="#1e293b" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Gráficos Centrais (Sale Activity & Subscriptions) */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
-                <div className="mb-4">
-                  <h3 className="text-base font-extrabold text-slate-900">
-                    Sale Activity - Monthly
-                  </h3>
-                  <p className="text-xs text-slate-400 font-medium mt-0.5">
-                    Showing total sales for the last 6 months
-                  </p>
-                </div>
-                <div className="h-64 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={DEFAULT_CHART_DATA} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id="colorSalesMain" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
-                        </linearGradient>
-                        <linearGradient id="colorRevenueMain" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis dataKey="month" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "#94a3b8" }} />
-                      <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "#94a3b8" }} />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "#ffffff",
-                          borderRadius: "12px",
-                          border: "1px solid #e2e8f0",
-                          boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-                          fontSize: "12px",
-                        }}
-                      />
-                      <Area type="monotone" dataKey="revenue" stroke="#ef4444" strokeWidth={2} fillOpacity={1} fill="url(#colorSalesMain)" />
-                      <Area type="monotone" dataKey="sales" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorRevenueMain)" />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs flex flex-col justify-between">
-                <div>
-                  <span className="text-xs font-semibold text-slate-500 block">Subscriptions</span>
-                  <div className="mt-1 flex items-baseline gap-2">
-                    <span className="text-2xl font-extrabold text-slate-900">+2350</span>
-                    <span className="text-xs font-bold text-emerald-600">+180.1% from last month</span>
-                  </div>
-                </div>
-                <div className="h-56 w-full mt-4">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RechartsBarChart data={BAR_DATA} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
-                      <XAxis dataKey="name" hide />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "#ffffff",
-                          borderRadius: "10px",
-                          border: "1px solid #e2e8f0",
-                          fontSize: "11px",
-                        }}
-                      />
-                      <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                        {BAR_DATA.map((entry) => (
-                          <Cell key={`cell-${entry.name}`} fill={entry.color} />
-                        ))}
-                      </Bar>
-                    </RechartsBarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            </div>
-
-            {/* Tabela de Pagamentos e Equipe */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-                  <div>
-                    <h3 className="text-base font-extrabold text-slate-900">Payments</h3>
-                    <p className="text-xs text-slate-400 font-medium">Manage your payments.</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={filterText}
-                      onChange={(e) => setFilterText(e.target.value)}
-                      placeholder="Filter emails..."
-                      className="rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-1.5 text-xs text-slate-700 placeholder:text-slate-400 outline-none focus:border-slate-400 w-48 sm:w-64"
-                    />
-                    <button
-                      type="button"
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                    >
-                      <SlidersHorizontal className="w-3 h-3 text-slate-500" />
-                      <span>Columns</span>
-                    </button>
-                  </div>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs text-slate-600">
-                    <thead className="border-b border-slate-100 bg-slate-50/60 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                      <tr>
-                        <th className="py-3 px-3 w-10">
-                          <input
-                            type="checkbox"
-                            checked={filteredOrders.length > 0 && selectedIds.length === filteredOrders.length}
-                            onChange={toggleSelectAll}
-                            className="rounded border-slate-300 text-slate-900 focus:ring-0 cursor-pointer"
-                          />
-                        </th>
-                        <th className="py-3 px-3 font-semibold">Status</th>
-                        <th className="py-3 px-3 font-semibold">
-                          <button type="button" className="inline-flex items-center gap-1 hover:text-slate-700">
-                            <span>Email</span>
-                            <ArrowUpDown className="w-3 h-3" />
-                          </button>
-                        </th>
-                        <th className="py-3 px-3 font-semibold text-right">Amount</th>
-                        <th className="py-3 px-3 w-10"></th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 font-medium">
-                      {filteredOrders.map((order) => {
-                        const isSelected = selectedIds.includes(order.id);
-                        return (
-                          <tr key={order.id} className={`hover:bg-slate-50/80 transition-colors ${isSelected ? "bg-slate-50" : ""}`}>
-                            <td className="py-3.5 px-3">
-                              <input
-                                type="checkbox"
-                                checked={isSelected}
-                                onChange={() => toggleSelect(order.id)}
-                                className="rounded border-slate-300 text-slate-900 focus:ring-0 cursor-pointer"
-                              />
-                            </td>
-                            <td className="py-3.5 px-3">
-                              {order.status === "paid" ? (
-                                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 border border-emerald-200">
-                                  <CheckCircle2 className="w-3.5 h-3.5" />
-                                  <span>Success</span>
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700 border border-amber-200">
-                                  <Clock className="w-3.5 h-3.5" />
-                                  <span>Processing</span>
-                                </span>
-                              )}
-                            </td>
-                            <td className="py-3.5 px-3">
-                              <span className="font-bold text-slate-900 block truncate max-w-[220px]">
-                                {order.customer_email}
-                              </span>
-                            </td>
-                            <td className="py-3.5 px-3 text-right font-bold text-slate-900">
-                              {formatCurrency(order.amount_cents / 100)}
-                            </td>
-                            <td className="py-3.5 px-3 text-right">
-                              <button type="button" className="p-1 text-slate-400 hover:text-slate-700 rounded-md">
-                                <MoreHorizontal className="w-4 h-4" />
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs flex flex-col justify-between">
-                <div>
-                  <h3 className="text-base font-extrabold text-slate-900">Team Members</h3>
-                  <p className="text-xs text-slate-400 font-medium mt-0.5">
-                    Invite your team members to collaborate.
-                  </p>
-                  <div className="mt-5 space-y-4">
-                    {MEMBERS.map((member) => (
-                      <div key={member.email} className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-3 min-w-0">
-                          <img
-                            src={member.avatar}
-                            alt={member.name}
-                            className="h-9 w-9 rounded-full object-cover border border-slate-200"
-                          />
-                          <div className="min-w-0">
-                            <span className="block text-xs font-bold text-slate-900 truncate">
-                              {member.name}
-                            </span>
-                            <span className="block text-[11px] text-slate-400 truncate">
-                              {member.email}
-                            </span>
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                        >
-                          <span>{member.role}</span>
-                          <ChevronDown className="w-3 h-3 text-slate-400" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </>
+        {activeTab === "leads" && (
+          <DashboardLeadsTab
+            filteredLeads={filteredLeads}
+            totalLeadsCount={leads.length}
+            leadsWithPhoneCount={metrics.leadsWithPhoneCount}
+            paidCount={metrics.paidCount}
+            pendingCount={metrics.pendingCount}
+            quizCount={quizInProgressCount}
+            loading={loading}
+            searchQuery={searchQuery}
+            filterQuick={filterQuick}
+            expandedLeadId={expandedLeadId}
+            copiedPhone={copiedPhone}
+            onSearchChange={setSearchQuery}
+            onClearSearch={() => setSearchQuery("")}
+            onFilterChange={setFilterQuick}
+            onToggleExpand={handleToggleExpand}
+            onCopyPhone={handleCopy}
+          />
         )}
 
-        {/* Modal de Detalhes do Lead */}
-        {selectedLead && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
-            <div className="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl space-y-4">
-              <div className="flex items-start justify-between border-b border-slate-100 pb-3">
-                <div>
-                  <h4 className="text-base font-extrabold text-slate-900">
-                    Ficha do Lead: {selectedLead.lead_name || "Visitante"}
-                  </h4>
-                  <span className="text-xs text-slate-400">ID: {selectedLead.session_id}</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setSelectedLead(null)}
-                  className="text-slate-400 hover:text-slate-700 text-lg font-bold"
-                >
-                  ✕
-                </button>
-              </div>
+        {activeTab === "orders" && <DashboardOrdersTab orders={orders} />}
 
-              <div className="grid grid-cols-2 gap-3 text-xs">
-                <div className="p-3 rounded-xl bg-slate-50">
-                  <span className="text-slate-400 block font-bold">Ente Querido:</span>
-                  <span className="text-slate-900 font-extrabold text-sm mt-0.5 block">
-                    {selectedLead.ente_querido || "Não informado"}
-                  </span>
-                </div>
-                <div className="p-3 rounded-xl bg-slate-50">
-                  <span className="text-slate-400 block font-bold">Vínculo:</span>
-                  <span className="text-slate-900 font-extrabold text-sm mt-0.5 block">
-                    {selectedLead.grau_parentesco || "Não informado"}
-                  </span>
-                </div>
-              </div>
-
-              {selectedLead.mensagem_preview && (
-                <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 text-xs">
-                  <span className="text-amber-900 font-bold block mb-1">✍️ Conteúdo Digitado da Carta:</span>
-                  <p className="text-slate-700 italic leading-relaxed">
-                    "{selectedLead.mensagem_preview}"
-                  </p>
-                </div>
-              )}
-
-              <div className="p-3 rounded-xl bg-slate-50 text-xs space-y-1">
-                <span className="text-slate-400 font-bold block">Rastreamento de Tráfego:</span>
-                <p className="text-slate-600"><strong>Source:</strong> {selectedLead.utm_source || "None"}</p>
-                <p className="text-slate-600"><strong>Campaign:</strong> {selectedLead.utm_campaign || "None"}</p>
-              </div>
-
-              <div className="pt-2 flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => setSelectedLead(null)}
-                  className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white hover:bg-slate-800"
-                >
-                  Fechar
-                </button>
-              </div>
-            </div>
-          </div>
+        {activeTab === "metrics" && (
+          <DashboardMetricsTab
+            leads={leads}
+            totalLeads={metrics.totalLeads}
+            paidCount={metrics.paidCount}
+          />
         )}
       </main>
     </div>

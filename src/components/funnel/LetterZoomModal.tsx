@@ -107,6 +107,7 @@ export function LetterZoomModal({ isOpen, onClose, onCtaClick }: LetterZoomModal
               src={IMAGES.carta}
               alt="Carta psicografada escrita à mão por Milena Medeiros"
               draggable={false}
+              decoding="async"
               onClick={() => setIsZoomed((current) => !current)}
               className={
                 isZoomed

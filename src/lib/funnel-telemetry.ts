@@ -122,7 +122,10 @@ export function trackQuizStep(payload: FunnelProgressPayload): void {
 
     if (payload.leadName) directLeadRow["lead_name"] = payload.leadName;
     if (payload.leadEmail) directLeadRow["lead_email"] = payload.leadEmail;
-    if (payload.leadPhone) directLeadRow["lead_phone"] = payload.leadPhone;
+    if (payload.leadPhone) {
+      const clean = payload.leadPhone.replace(/\D/g, "");
+      if (clean) directLeadRow["lead_phone"] = clean;
+    }
     if (payload.enteQuerido) directLeadRow["ente_querido"] = payload.enteQuerido;
     if (payload.grauParentesco) directLeadRow["grau_parentesco"] = payload.grauParentesco;
     if (payload.mensagemPreview) directLeadRow["mensagem_preview"] = payload.mensagemPreview;
@@ -180,15 +183,17 @@ export function trackQuizStep(payload: FunnelProgressPayload): void {
  * Disparado no momento exato em que a pessoa inicia o Checkout
  */
 export function trackCheckoutInitiated(params: {
-  leadName?: string;
-  leadEmail?: string;
-  amountCents?: number;
+  leadName?: string | undefined;
+  leadEmail?: string | undefined;
+  leadPhone?: string | undefined;
+  amountCents?: number | undefined;
 }): void {
   trackQuizStep({
     stepIndex: 8,
     stepName: "checkout",
     leadName: params.leadName,
     leadEmail: params.leadEmail,
+    leadPhone: params.leadPhone,
     amountCents: params.amountCents,
     checkoutEvent: "checkout_initiated",
     paymentStatus: "waiting_payment",
@@ -199,15 +204,17 @@ export function trackCheckoutInitiated(params: {
  * Disparado no momento em que um código PIX é gerado na tela
  */
 export function trackPixGenerated(params: {
-  leadName?: string;
-  leadEmail?: string;
-  amountCents?: number;
+  leadName?: string | undefined;
+  leadEmail?: string | undefined;
+  leadPhone?: string | undefined;
+  amountCents?: number | undefined;
 }): void {
   trackQuizStep({
     stepIndex: 8,
     stepName: "checkout_pix",
     leadName: params.leadName,
     leadEmail: params.leadEmail,
+    leadPhone: params.leadPhone,
     amountCents: params.amountCents,
     checkoutEvent: "pix_generated",
     paymentStatus: "waiting_payment",
@@ -218,15 +225,17 @@ export function trackPixGenerated(params: {
  * Disparado quando uma transação com cartão é recusada ou falha
  */
 export function trackCardDeclined(params: {
-  leadName?: string;
-  leadEmail?: string;
-  amountCents?: number;
+  leadName?: string | undefined;
+  leadEmail?: string | undefined;
+  leadPhone?: string | undefined;
+  amountCents?: number | undefined;
 }): void {
   trackQuizStep({
     stepIndex: 8,
     stepName: "checkout_card_failed",
     leadName: params.leadName,
     leadEmail: params.leadEmail,
+    leadPhone: params.leadPhone,
     amountCents: params.amountCents,
     checkoutEvent: "card_declined",
     paymentStatus: "failed",
@@ -237,14 +246,71 @@ export function trackCardDeclined(params: {
  * Disparado quando a pessoa chega no checkout e abandona/fecha
  */
 export function trackCardAbandoned(params: {
-  leadName?: string;
-  leadEmail?: string;
+  leadName?: string | undefined;
+  leadEmail?: string | undefined;
+  leadPhone?: string | undefined;
 }): void {
   trackQuizStep({
     stepIndex: 8,
     stepName: "checkout_abandoned",
     leadName: params.leadName,
     leadEmail: params.leadEmail,
+    leadPhone: params.leadPhone,
     checkoutEvent: "card_abandoned",
   });
 }
+
+let phoneSyncDebounce: number | undefined;
+
+/**
+ * Sincroniza em tempo real o número de WhatsApp/telefone do lead no Supabase.
+ * Executado no onChange do campo com debounce de 400ms para salvar mesmo em abandonos.
+ */
+export function syncLeadPhone(phone: string, leadName?: string): void {
+  if (typeof window === "undefined") return;
+  const cleanPhone = phone.replace(/\D/g, "");
+  if (cleanPhone.length < 9) return;
+
+  if (phoneSyncDebounce) {
+    window.clearTimeout(phoneSyncDebounce);
+  }
+
+  phoneSyncDebounce = window.setTimeout(() => {
+    syncLeadPhoneImmediate(cleanPhone, leadName);
+  }, 400);
+}
+
+/**
+ * Envia o WhatsApp/telefone imediatamente (ex: onBlur ou submit)
+ */
+export function syncLeadPhoneImmediate(phone: string, leadName?: string): void {
+  if (typeof window === "undefined") return;
+  const cleanPhone = phone.replace(/\D/g, "");
+  if (cleanPhone.length < 9) return;
+
+  try {
+    const sessionId = getTelemetrySessionId();
+    const payload: Record<string, unknown> = {
+      session_id: sessionId,
+      lead_phone: cleanPhone,
+      updated_at: new Date().toISOString(),
+    };
+    if (leadName && leadName.trim() && leadName !== "Consulente") {
+      payload["lead_name"] = leadName.trim();
+    }
+
+    fetch(`${supabaseUrl}/rest/v1/quiz_funnel_leads?on_conflict=session_id`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: supabaseAnonKey,
+        Authorization: `Bearer ${supabaseAnonKey}`,
+        Prefer: "resolution=merge-duplicates",
+      },
+      body: JSON.stringify(payload),
+    }).catch(() => {});
+  } catch {
+    // ignore
+  }
+}
+

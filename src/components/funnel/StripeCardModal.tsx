@@ -4,6 +4,7 @@ import { createStripeCheckoutSession } from "@/lib/stripe";
 import { CHECKOUT_URL } from "./data";
 import { trackInitiateDonation } from "@/lib/metaPixel";
 import { CreditCard } from "@/components/ui/credit-card";
+import { CardFlagsBadgeRow } from "./CardFlags";
 
 interface StripeCardModalProps {
   readonly isOpen: boolean;
@@ -129,7 +130,11 @@ export function StripeCardModal({
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-purple-50 border border-purple-200 px-3 py-1 text-[10.5px] font-extrabold uppercase tracking-wider text-purple-950">
-              💳 Pagamento Seguro com Cartão
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-purple-700">
+                <rect width="20" height="14" x="2" y="5" rx="2" />
+                <line x1="2" x2="22" y1="10" y2="10" />
+              </svg>
+              <span>Pagamento Seguro com Cartão</span>
             </span>
             <h3 className="mt-1.5 text-xl font-extrabold text-[#181126] leading-tight">
               Confirmar Doação Fraterna
@@ -210,17 +215,37 @@ export function StripeCardModal({
         </button>
 
         {/* Garantia & Bandeiras */}
-        <div className="mt-4 pt-3 border-t border-[#ece4f4] space-y-2 text-center">
-          <div className="flex flex-wrap items-center justify-center gap-2 text-[11px] font-bold text-[#5e4b73]">
-            <span>🔒 Criptografia SSL 256-bit</span>
-            <span aria-hidden="true">•</span>
-            <span>⚡ Processamento Seguro Stripe</span>
-            <span aria-hidden="true">•</span>
-            <span>🛡️ 7 Dias de Garantia</span>
+        <div className="mt-4 pt-3 border-t border-[#ece4f4] space-y-2.5 text-center">
+          <div className="flex flex-wrap items-center justify-center gap-2 text-[11px] font-semibold text-[#5e4b73]">
+            <span className="inline-flex items-center gap-1">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-emerald-600">
+                <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+              Criptografia SSL 256-bit
+            </span>
+            <span aria-hidden="true" className="text-slate-300">•</span>
+            <span className="inline-flex items-center gap-1">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-blue-600">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+              </svg>
+              Checkout Oficial Stripe
+            </span>
+            <span aria-hidden="true" className="text-slate-300">•</span>
+            <span className="inline-flex items-center gap-1">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-purple-600">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </svg>
+              Garantia e Proteção Total
+            </span>
           </div>
-          <p className="text-[10.5px] text-[#8e7a60]">
-            Aceita Visa, Mastercard, Elo, Hipercard, American Express e parcelamento.
-          </p>
+
+          <div className="pt-1 flex flex-col items-center justify-center gap-1.5">
+            <span className="text-[10.5px] font-bold uppercase tracking-wider text-[#8e7a60]">
+              Bandeiras Aceitas
+            </span>
+            <CardFlagsBadgeRow className="justify-center" />
+          </div>
         </div>
       </div>
     </div>,

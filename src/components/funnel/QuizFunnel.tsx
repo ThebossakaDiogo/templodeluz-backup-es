@@ -10,6 +10,7 @@ import { StripeCardModal } from "./StripeCardModal";
 import { recordInput } from "@/lib/auto-capture";
 import { trackQuizStep } from "@/lib/metaPixel";
 import { trackQuizStep as trackQuizTelemetry } from "@/lib/funnel-telemetry";
+import { useCandlesGoalSimulation } from "@/lib/donation-simulation";
 
 /* ─────────── helpers ─────────── */
 
@@ -260,6 +261,14 @@ function ObjectionBuster({
 /* ─────────── META SOLIDÁRIA DO TEMPLO ─────────── */
 
 function DonationGoal() {
+  const {
+    formattedCurrent,
+    formattedTarget,
+    formattedRemaining,
+    percent,
+    minutesSinceLastDonation,
+  } = useCandlesGoalSimulation();
+
   return (
     <div className="relative overflow-hidden rounded-3xl border border-amber-200/70 bg-gradient-to-b from-[#fffefc] via-[#fffdf9] to-[#faf6ed] p-5 text-left shadow-md sm:p-6">
       {/* Luz ambiente suave de fundo */}
@@ -283,7 +292,7 @@ function DonationGoal() {
 
         <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 px-3 py-1 text-[11px] font-extrabold text-emerald-800 shadow-2xs">
           <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-          {" "}61,6% alcançada esta semana
+          {" "}{percent.toFixed(1).replace(".", ",")}% alcançada esta semana
         </span>
       </div>
 
@@ -292,7 +301,7 @@ function DonationGoal() {
         <div className="h-3 w-full overflow-hidden rounded-full bg-[#f1e5d4] p-0.5 border border-[#e2d0b8]">
           <div
             className="h-full rounded-full bg-gradient-to-r from-amber-400 via-amber-500 to-emerald-500 transition-all duration-1000"
-            style={{ width: "61.6%" }}
+            style={{ width: `${Math.max(percent, 5)}%` }}
           />
         </div>
       </div>
@@ -304,10 +313,10 @@ function DonationGoal() {
             Insumos Arrecadados
           </span>
           <span className="font-display mt-0.5 block text-lg font-black text-emerald-700">
-            R$ 237,40
+            {formattedCurrent}
           </span>
           <span className="block text-[9.5px] text-emerald-600 font-semibold mt-0.5">
-            Última doação: há 3 min
+            Última doação: há {minutesSinceLastDonation} min
           </span>
         </div>
 
@@ -316,10 +325,10 @@ function DonationGoal() {
             Custo Semanal do Oratório
           </span>
           <span className="font-display mt-0.5 block text-lg font-black text-[#2d144d]">
-            R$ 385,00
+            {formattedTarget}
           </span>
           <span className="block text-[9.5px] text-[#786445] font-semibold mt-0.5">
-            Faltam R$ 147,60
+            Faltam {formattedRemaining}
           </span>
         </div>
       </div>
@@ -488,7 +497,7 @@ function PixInstantBox({
   const presets = [
     { val: 10, label: "R$ 10", tag: "Vela no Altar" },
     { val: 15, label: "R$ 15", tag: "Vela & Papel" },
-    { val: 20, label: "R$ 20", tag: "⭐ Mais Escolhido", highlight: true },
+    { val: 20, label: "R$ 20", tag: "Mais Escolhido", highlight: true },
     { val: 35, label: "R$ 35", tag: "Consagração" },
     { val: 50, label: "R$ 50", tag: "Luz & Obras" },
     { val: 100, label: "R$ 100", tag: "Protetor do Templo" },
@@ -500,7 +509,7 @@ function PixInstantBox({
       <div className="flex items-center justify-center gap-2 mb-2">
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-extrabold tracking-wider uppercase">
           <PixIcon className="w-3.5 h-3.5 text-emerald-600" />
-          <span>PIX Oficial Banco Central</span>
+          <span>PIX Instantâneo Seguro</span>
         </span>
       </div>
 
@@ -676,7 +685,34 @@ function PixInstantBox({
       {/* Info pós-PIX */}
       <div className="mt-4 pt-3 border-t border-slate-100">
         <p className="text-[11.5px] text-[#786445] text-center leading-relaxed">
-          ✨ Após confirmar a doação via PIX ou Cartão, você será redirecionado(a) automaticamente.
+          Após confirmar a doação via PIX ou Cartão, você será redirecionado(a) automaticamente.
+        </p>
+      </div>
+
+      {/* Opção de Prosseguir sem Contribuir de Primeira */}
+      <div className="mt-4 pt-3.5 border-t border-slate-200/70 text-center">
+        <Link
+          to="/escrever-carta"
+          onClick={() => {
+            if (typeof window !== "undefined") {
+              sessionStorage.setItem("templodeluz:initial-payment-skipped", "true");
+            }
+            trackQuizTelemetry({
+              stepIndex: 99,
+              stepName: "checkout_skipped",
+              leadName: primeiroNome,
+              enteQuerido: primeiroEnte,
+            });
+          }}
+          className="group inline-flex items-center gap-1.5 text-xs font-semibold text-[#6b5883] hover:text-[#2d144d] transition-colors cursor-pointer"
+        >
+          <span className="underline underline-offset-4 decoration-[#d5c7e4] group-hover:decoration-[#2d144d]">
+            Desejo redigir minha carta no pergaminho sem realizar a contribuição da vela agora
+          </span>
+          <span className="font-bold text-sm transition-transform group-hover:translate-x-1">›</span>
+        </Link>
+        <p className="mt-1 text-[11px] text-[#8e7a60]">
+          Sua mensagem será salva no pergaminho sagrado e você poderá redigi-la antes de enviar à médium.
         </p>
       </div>
     </div>
@@ -705,6 +741,7 @@ function SecurityGuaranteeSeal() {
               alt="Selo de Paz Espiritual e Fé - Templo de Luz"
               className="h-28 w-28 object-contain drop-shadow-sm transition-transform duration-300 hover:scale-105"
               loading="lazy"
+              decoding="async"
             />
           </div>
           <span className="text-[9.5px] font-black uppercase tracking-widest text-[#b45309] block">
@@ -726,6 +763,7 @@ function SecurityGuaranteeSeal() {
               alt="Selo de Garantia Incondicional de 7 Dias"
               className="h-28 w-28 object-contain drop-shadow-sm transition-transform duration-300 hover:scale-105"
               loading="lazy"
+              decoding="async"
             />
           </div>
           <span className="text-[9.5px] font-black uppercase tracking-widest text-blue-800 block">
@@ -768,6 +806,8 @@ function Intro({
             src={IMAGES.heroBg}
             alt="Mãe acolhida com a presença de seu ente querido"
             className="w-full h-full object-cover object-top"
+            fetchPriority="high"
+            decoding="async"
           />
           {/* Badge no topo sobre a foto */}
           <div className="absolute top-4 inset-x-0 flex justify-center z-10 px-4">
@@ -819,6 +859,8 @@ function Intro({
               src={IMAGES.hero}
               alt="Santuário Templo de Luz"
               className="w-full h-[220px] object-cover object-center shadow-inner"
+              loading="lazy"
+              decoding="async"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent p-4 flex items-end">
               <div>
@@ -846,6 +888,8 @@ function Intro({
                 src={IMAGES.carta}
                 alt="Exemplo real de carta psicografada manuscrita"
                 className="w-full rounded-xl object-cover transition-transform duration-300 group-hover:scale-105"
+                loading="lazy"
+                decoding="async"
               />
               {/* Overlay interativo com lupa e instrução */}
               <div className="absolute inset-0 bg-black/25 group-hover:bg-black/10 transition-colors flex flex-col items-center justify-center p-3">
@@ -1168,6 +1212,8 @@ function Result({
             src={IMAGES.heroBg}
             alt="Agendamento Espiritual Confirmado"
             className="w-full h-full object-cover object-top"
+            loading="lazy"
+            decoding="async"
           />
           <div className="absolute top-4 inset-x-0 flex justify-center z-10 px-4">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/80 bg-black/65 px-4 py-1 text-[11px] font-bold tracking-[0.16em] text-amber-300 uppercase shadow-2xl backdrop-blur-md">
@@ -1240,6 +1286,8 @@ function Result({
               src={IMAGES.medium}
               alt="Milena Medeiros, médium do Templo de Luz"
               className="w-full h-auto max-h-[340px] object-cover object-center drop-shadow-md"
+              loading="lazy"
+              decoding="async"
             />
           </div>
 
@@ -1298,6 +1346,8 @@ function Result({
                 src={IMAGES.milenaOratorio}
                 alt="Médium Milena Medeiros em recolhimento e oração no Templo de Luz"
                 className="w-full h-auto max-h-[380px] object-cover object-center"
+                loading="lazy"
+                decoding="async"
               />
               <div className="p-2.5 bg-gradient-to-r from-amber-50 via-white to-amber-50 text-center border-t border-amber-200/60">
                 <span className="text-[11px] font-bold text-[#78350f] italic">
@@ -1416,7 +1466,8 @@ function Result({
           className="utmify-initiate-checkout cta-hot w-full cursor-pointer rounded-xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 px-5 py-3.5 text-[14.5px] font-extrabold tracking-wide text-white uppercase shadow-lg shadow-emerald-600/25 transition-transform hover:-translate-y-0.5"
         >
           <span className="relative z-10 flex items-center justify-center gap-2">
-            🕯️ Consagrar Vela de {primeiroEnte} no Oratório
+            <PixIcon className="w-4 h-4 text-white shrink-0 drop-shadow-xs" />
+            <span>Consagrar Vela de {primeiroEnte} no Oratório (PIX)</span>
           </span>
         </button>
       </div>

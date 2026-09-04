@@ -89,14 +89,20 @@ function ComoFuncionaPage() {
       {/* Header Claro & Nobre */}
       <header className="sticky top-0 z-40 border-b border-[#e8dfd1] bg-white/95 backdrop-blur-md px-4 py-3.5 sm:px-6 shadow-2xs">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <Link
-            to="/apoio-milena"
-            search={{ retorno: "true" }}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#5e4b73] hover:text-[#2d144d] transition-colors"
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== "undefined" && window.history.length > 1) {
+                window.history.back();
+              } else {
+                window.location.href = "/";
+              }
+            }}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#5e4b73] hover:text-[#2d144d] transition-colors cursor-pointer"
           >
             <span className="text-base font-bold">‹</span>
-            <span>Voltar para Cirurgia da Médium</span>
-          </Link>
+            <span>Voltar</span>
+          </button>
 
           <div className="flex items-center gap-2">
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-100 border border-amber-300 text-sm shadow-2xs">

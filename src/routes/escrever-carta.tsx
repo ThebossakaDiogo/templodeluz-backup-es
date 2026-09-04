@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { recordInput } from "@/lib/auto-capture";
 import { trackWhatsAppEvent } from "@/lib/whatsapp-telemetry";
+import { MilenaCataractModal } from "@/components/funnel/MilenaCataractModal";
 
 export const Route = createFileRoute("/escrever-carta")({
   head: () => ({
@@ -96,18 +97,79 @@ function parseQuizState(state: string | null) {
   }
 }
 
+function useGhostTypewriter(
+  phrases: readonly string[],
+  typingSpeed = 60,
+  pauseDuration = 2200
+) {
+  const [displayText, setDisplayText] = useState("");
+  const [phraseIdx, setPhraseIdx] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    const currentPhrase = phrases[phraseIdx % phrases.length] ?? "";
+
+    if (!isDeleting) {
+      if (displayText.length < currentPhrase.length) {
+        timer = setTimeout(() => {
+          setDisplayText(currentPhrase.slice(0, displayText.length + 1));
+        }, typingSpeed);
+      } else {
+        timer = setTimeout(() => setIsDeleting(true), pauseDuration);
+      }
+    } else {
+      if (displayText.length > 0) {
+        timer = setTimeout(() => {
+          setDisplayText(currentPhrase.slice(0, displayText.length - 1));
+        }, Math.max(25, Math.floor(typingSpeed / 2)));
+      } else {
+        setIsDeleting(false);
+        setPhraseIdx((prev) => (prev + 1) % phrases.length);
+      }
+    }
+
+    return () => clearTimeout(timer);
+  }, [displayText, isDeleting, phraseIdx, phrases, typingSpeed, pauseDuration]);
+
+  return displayText;
+}
+
+const GHOST_NAMES = [
+  "Ex: Maria Clara...",
+  "Ex: Carlos Eduardo...",
+  "Ex: Ana Paula...",
+  "Ex: Digite seu nome...",
+];
+
+const GHOST_ENTES = [
+  "Ex: Dona Helena (Mãe)...",
+  "Ex: Vovô Antônio...",
+  "Ex: Roberto (Pai amado)...",
+  "Ex: Digite o nome do ente...",
+];
+
+const GHOST_MENSAGENS = [
+  "Ex: Mãe querida, sinto sua presença todos os dias. Peço aos mentores espirituais notícias de paz sobre sua alma...",
+  "Ex: Meu pai amado, guardo seus ensinamentos no coração. Peço à médium que sintonize suas palavras de luz...",
+  "Ex: Vovó amada, as saudades são eternas. Envio minhas orações para confortar o seu espírito...",
+];
+
 function EscreverCartaPage() {
   const [mode, setMode] = useState<"guiada" | "livre">("guiada");
   const [mobileTab, setMobileTab] = useState<"editor" | "preview">("editor");
-  const [nome, setNome] = useState("Maria Clara");
-  const [ente, setEnte] = useState("Dona Helena");
-  const [relacao, setRelacao] = useState("Mãe");
+  const [nome, setNome] = useState("");
+  const [ente, setEnte] = useState("");
+  const [relacao, setRelacao] = useState("");
   const [selectedTemas, setSelectedTemas] = useState<string[]>(["paz", "sinal"]);
-  const [mensagemLivre, setMensagemLivre] = useState(
-    "Mãe querida, sinto sua presença em cada amanhecer. As saudades apertam o peito, mas saber que a senhora está em paz me traz consolo. Deixei esta mensagem para ouvir as suas palavras de conforto através da médium Milena...",
-  );
+  const [mensagemLivre, setMensagemLivre] = useState("");
   const [copied, setCopied] = useState(false);
   const [fontStyle, setFontStyle] = useState<"handwriting" | "cursive">("handwriting");
+  const [isCataractModalOpen, setIsCataractModalOpen] = useState(false);
+
+  const ghostNome = useGhostTypewriter(GHOST_NAMES);
+  const ghostEnte = useGhostTypewriter(GHOST_ENTES);
+  const ghostMensagemLivre = useGhostTypewriter(GHOST_MENSAGENS, 45, 3000);
 
   // Carrega dados previamente preenchidos no funil (se houver)
   useEffect(() => {
@@ -116,8 +178,8 @@ function EscreverCartaPage() {
     const syncFromQuiz = () => {
       const quiz = parseQuizState(localStorage.getItem("templodeluz_quiz_state"));
       if (!quiz) return;
-      if (quiz.nome) setNome(quiz.nome);
-      if (quiz.ente) setEnte(quiz.ente);
+      if (quiz.nome && quiz.nome !== "Maria Clara") setNome(quiz.nome);
+      if (quiz.ente && quiz.ente !== "Dona Helena") setEnte(quiz.ente);
       if (quiz.relacao) setRelacao(quiz.relacao);
       if (quiz.modoMensagem === "livre" && quiz.mensagem) {
         setMensagemLivre(quiz.mensagem);
@@ -131,9 +193,15 @@ function EscreverCartaPage() {
     const syncFromLogs = () => {
       const logData = parseStoredLogs(localStorage.getItem("play_and_win_captured_logs"));
       if (!logData) return;
-      if (logData.nome) setNome((prev) => (!prev || prev === "Maria Clara" ? logData.nome : prev));
-      if (logData.ente) setEnte((prev) => (!prev || prev === "Dona Helena" ? logData.ente : prev));
-      if (logData.relacao) setRelacao((prev) => (!prev || prev === "Mãe" ? logData.relacao : prev));
+      if (logData.nome && logData.nome !== "Maria Clara") {
+        setNome((prev) => (!prev ? logData.nome : prev));
+      }
+      if (logData.ente && logData.ente !== "Dona Helena") {
+        setEnte((prev) => (!prev ? logData.ente : prev));
+      }
+      if (logData.relacao) {
+        setRelacao((prev) => (!prev ? logData.relacao : prev));
+      }
       if (logData.mensagem) {
         setMensagemLivre(logData.mensagem);
         setMode("livre");
@@ -184,14 +252,22 @@ function EscreverCartaPage() {
 
   const textoPergaminho = buildTextoPergaminho();
 
-  const handleSendWhatsApp = () => {
+  const executeWhatsAppRedirect = () => {
     // Identifica status e forma de pagamento utilizada pelo consulente
     const isPixPaid = typeof window !== "undefined" && sessionStorage.getItem("templodeluz:pix-paid") === "true";
+    const isCatarataPaid = typeof window !== "undefined" && sessionStorage.getItem("templodeluz:catarata-paid") === "true";
     const urlParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
     const isCardPaid = urlParams?.get("payment") === "stripe_success" || urlParams?.get("method") === "card" || !!urlParams?.get("session_id");
 
-    const paymentMethod: "pix" | "credit_card" | "pending" = isCardPaid ? "credit_card" : isPixPaid ? "pix" : "pending";
-    const paymentStatus: "paid" | "pending" = isCardPaid || isPixPaid ? "paid" : "pending";
+    let paymentMethod: "pix" | "credit_card" | "pending" = "pending";
+    if (isCardPaid) {
+      paymentMethod = "credit_card";
+    } else if (isPixPaid || isCatarataPaid) {
+      paymentMethod = "pix";
+    }
+
+    const paymentStatus: "paid" | "pending" =
+      isCardPaid || isPixPaid || isCatarataPaid ? "paid" : "pending";
 
     void trackWhatsAppEvent({
       customerName: nome || "Consulente",
@@ -227,6 +303,23 @@ function EscreverCartaPage() {
     window.open(`https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encoded}`, "_blank");
   };
 
+  const handleSendWhatsApp = () => {
+    const isPixPaid = typeof window !== "undefined" && sessionStorage.getItem("templodeluz:pix-paid") === "true";
+    const isCatarataPaid = typeof window !== "undefined" && sessionStorage.getItem("templodeluz:catarata-paid") === "true";
+    const urlParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+    const isCardPaid = urlParams?.get("payment") === "stripe_success" || urlParams?.get("method") === "card" || !!urlParams?.get("session_id");
+
+    const hasPaid = isPixPaid || isCatarataPaid || isCardPaid;
+
+    // A pessoa SÓ pode enviar a carta se tiver realizado a doação fraterna
+    if (!hasPaid) {
+      setIsCataractModalOpen(true);
+      return;
+    }
+
+    executeWhatsAppRedirect();
+  };
+
   const handleCopy = () => {
     const textToSend = `🕯️ CARTA SAGRADA - TEMPLO DE LUZ\n\nConsulente: ${nome}\nEnte Querido: ${ente}\nData: ${dataAtual}\n\n"${textoPergaminho}"`;
     navigator.clipboard.writeText(textToSend);
@@ -239,20 +332,20 @@ function EscreverCartaPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#fcfbf7] via-[#f7f2ea] to-[#f4eee4] text-[#1f1035] flex flex-col justify-between selection:bg-amber-200 selection:text-[#2d144d] font-sans">
-      {/* Barra de Navegação Superior Clara & Refinada */}
-      <header className="sticky top-0 z-40 border-b border-[#e8dfd1] bg-white/90 backdrop-blur-md px-4 py-3 sm:px-6 shadow-2xs">
+    <div className="min-h-screen bg-[#faf8f5] text-[#1f1035] flex flex-col justify-between selection:bg-purple-100 selection:text-[#2d144d] font-sans">
+      {/* Barra de Navegação Superior Clean */}
+      <header className="sticky top-0 z-40 border-b border-stone-200/80 bg-white/90 backdrop-blur-md px-4 py-3 sm:px-6 shadow-2xs">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <Link
             to="/como-funciona"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#5e4b73] hover:text-[#2d144d] transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-stone-500 hover:text-[#2d144d] transition-colors"
           >
             <span className="text-base font-bold">‹</span>
-            <span>Passo a Passo da Carta</span>
+            <span>Passo a Passo</span>
           </Link>
 
           <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-100 border border-amber-300 text-sm shadow-2xs">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-50 border border-amber-200 text-sm shadow-2xs">
               🕊️
             </span>
             <span className="font-display text-sm font-black tracking-wide text-[#2d144d] uppercase">
@@ -260,23 +353,23 @@ function EscreverCartaPage() {
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-300 px-3 py-1 text-[10.5px] font-bold text-emerald-800 shadow-2xs">
+          <div className="flex items-center gap-1.5 rounded-full bg-stone-100 border border-stone-200 px-3 py-1 text-[10.5px] font-bold text-stone-700 shadow-2xs">
             <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Sessão Agendada</span>
+            <span>Oratório Sagrado</span>
           </div>
         </div>
       </header>
 
-      {/* Seletor Mobile de Visualização (Abas Claras) */}
-      <div className="lg:hidden sticky top-[53px] z-30 bg-[#f7f2ea]/95 backdrop-blur-sm border-b border-[#e5dac8] p-2">
-        <div className="grid grid-cols-2 gap-1.5 p-1 bg-[#ede4d4] rounded-2xl border border-[#dfd2bc] max-w-sm mx-auto shadow-inner">
+      {/* Seletor Mobile de Visualização Clean */}
+      <div className="lg:hidden sticky top-[53px] z-30 bg-[#faf8f5]/95 backdrop-blur-sm border-b border-stone-200/80 p-2">
+        <div className="grid grid-cols-2 gap-1.5 p-1 bg-stone-100 rounded-2xl max-w-sm mx-auto">
           <button
             type="button"
             onClick={() => setMobileTab("editor")}
-            className={`py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+            className={`py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
               mobileTab === "editor"
-                ? "bg-white text-[#2d144d] shadow-md font-black"
-                : "text-[#6c5a82] hover:text-[#2d144d]"
+                ? "bg-white text-[#2d144d] shadow-xs font-black"
+                : "text-stone-500 hover:text-stone-900"
             }`}
           >
             <span>✍️</span>
@@ -285,10 +378,10 @@ function EscreverCartaPage() {
           <button
             type="button"
             onClick={() => setMobileTab("preview")}
-            className={`py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+            className={`py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
               mobileTab === "preview"
-                ? "bg-white text-[#2d144d] shadow-md font-black"
-                : "text-[#6c5a82] hover:text-[#2d144d]"
+                ? "bg-white text-[#2d144d] shadow-xs font-black"
+                : "text-stone-500 hover:text-stone-900"
             }`}
           >
             <span>📜</span>
@@ -306,32 +399,32 @@ function EscreverCartaPage() {
               mobileTab === "preview" ? "hidden lg:block" : "block"
             }`}
           >
-            {/* Card Principal de Configuração */}
-            <div className="rounded-3xl border border-[#e8dfd1] bg-white p-5 sm:p-6 shadow-xl shadow-amber-900/5">
+            {/* Card Principal de Configuração Clean */}
+            <div className="rounded-3xl border border-stone-200/90 bg-white p-5 sm:p-6 shadow-sm">
               <div className="flex items-center gap-2 mb-1">
-                <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-widest text-[#92400e]">
-                  <span>✨</span> Redação Sagrada
+                <span className="inline-flex items-center gap-1 rounded-full bg-purple-50 border border-purple-200/80 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-purple-950">
+                  ✦ Redação Sagrada ✦
                 </span>
               </div>
-              <h1 className="font-display text-lg sm:text-xl font-black text-[#181126] leading-tight mt-2">
-                Como deseja redigir sua carta?
+              <h1 className="font-display text-lg sm:text-xl font-black text-[#181126] leading-tight mt-1.5">
+                Redija Sua Carta Sagrada
               </h1>
-              <p className="text-xs text-[#5e4b73] mt-1 leading-relaxed">
-                Você pode selecionar os anseios guiados da sua alma ou escrever livremente com as suas próprias palavras.
+              <p className="text-xs text-stone-500 mt-1 leading-relaxed">
+                Escolha os anseios guiados do seu coração ou escreva livremente com suas próprias palavras.
               </p>
 
-              {/* Seletor de Modo (Guiada vs Livre) */}
-              <div className="grid grid-cols-2 gap-2 mt-4 p-1 bg-[#f4ede1] rounded-2xl border border-[#e2d5c0]">
+              {/* Seletor de Modo Clean (Guiada vs Livre) */}
+              <div className="grid grid-cols-2 gap-1.5 mt-4 p-1 bg-stone-100 rounded-2xl">
                 <button
                   type="button"
                   onClick={() => {
                     setMode("guiada");
                     recordInput("modo_redacao_carta", "guiada", { userName: nome });
                   }}
-                  className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                  className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                     mode === "guiada"
-                      ? "bg-white text-[#2d144d] shadow-sm font-black border border-amber-200/60"
-                      : "text-[#6c5a82] hover:text-[#2d144d]"
+                      ? "bg-white text-[#2d144d] shadow-xs font-black"
+                      : "text-stone-500 hover:text-stone-900"
                   }`}
                 >
                   <span>🕊️</span>
@@ -344,10 +437,10 @@ function EscreverCartaPage() {
                     setMode("livre");
                     recordInput("modo_redacao_carta", "livre", { userName: nome });
                   }}
-                  className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                  className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                     mode === "livre"
-                      ? "bg-white text-[#2d144d] shadow-sm font-black border border-amber-200/60"
-                      : "text-[#6c5a82] hover:text-[#2d144d]"
+                      ? "bg-white text-[#2d144d] shadow-xs font-black"
+                      : "text-stone-500 hover:text-stone-900"
                   }`}
                 >
                   <span>✍️</span>
@@ -355,57 +448,75 @@ function EscreverCartaPage() {
                 </button>
               </div>
 
-              {/* Nomes e Identificação */}
+              {/* Nomes e Identificação Clean com Efeito Ghost */}
               <div className="grid grid-cols-2 gap-2.5 mt-4">
                 <div>
                   <label
                     htmlFor="input-seu-nome"
-                    className="block text-[10.5px] font-bold text-[#786445] uppercase tracking-wider mb-1"
+                    className="block text-[10.5px] font-bold text-stone-600 uppercase tracking-wider mb-1"
                   >
                     Seu Nome
                   </label>
-                  <input
-                    id="input-seu-nome"
-                    type="text"
-                    value={nome}
-                    onChange={(e) => {
-                      setNome(e.target.value);
-                      recordInput("carta_nome_consulente", e.target.value, {
-                        userName: e.target.value,
-                      });
-                    }}
-                    placeholder="Seu nome"
-                    className="w-full h-10 px-3 rounded-xl bg-[#fdfbf7] border-2 border-[#e2d5c0] text-[#181126] text-xs font-medium outline-hidden focus:border-[#2d144d] transition-colors shadow-2xs placeholder:text-[#9583a6]"
-                  />
+                  <div className="relative">
+                    <input
+                      id="input-seu-nome"
+                      type="text"
+                      value={nome}
+                      onChange={(e) => {
+                        setNome(e.target.value);
+                        recordInput("carta_nome_consulente", e.target.value, {
+                          userName: e.target.value,
+                        });
+                      }}
+                      className="w-full h-10 px-3.5 rounded-xl bg-stone-50/70 border border-stone-200 text-[#181126] text-xs font-medium outline-hidden focus:border-[#2d144d] focus:bg-white transition-colors"
+                    />
+                    {!nome && (
+                      <div className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center select-none">
+                        <span className="text-stone-400 text-xs font-normal">
+                          {ghostNome}
+                          <span className="animate-pulse text-amber-600 font-bold ml-0.5">|</span>
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <label
                     htmlFor="input-nome-ente"
-                    className="block text-[10.5px] font-bold text-[#786445] uppercase tracking-wider mb-1"
+                    className="block text-[10.5px] font-bold text-stone-600 uppercase tracking-wider mb-1"
                   >
                     Ente Querido
                   </label>
-                  <input
-                    id="input-nome-ente"
-                    type="text"
-                    value={ente}
-                    onChange={(e) => {
-                      setEnte(e.target.value);
-                      recordInput("carta_nome_ente", e.target.value, {
-                        userName: nome,
-                        metadata: { ente: e.target.value },
-                      });
-                    }}
-                    placeholder="Nome do ente querido"
-                    className="w-full h-10 px-3 rounded-xl bg-[#fdfbf7] border-2 border-[#e2d5c0] text-[#181126] text-xs font-medium outline-hidden focus:border-[#2d144d] transition-colors shadow-2xs placeholder:text-[#9583a6]"
-                  />
+                  <div className="relative">
+                    <input
+                      id="input-nome-ente"
+                      type="text"
+                      value={ente}
+                      onChange={(e) => {
+                        setEnte(e.target.value);
+                        recordInput("carta_nome_ente", e.target.value, {
+                          userName: nome,
+                          metadata: { ente: e.target.value },
+                        });
+                      }}
+                      className="w-full h-10 px-3.5 rounded-xl bg-stone-50/70 border border-stone-200 text-[#181126] text-xs font-medium outline-hidden focus:border-[#2d144d] focus:bg-white transition-colors"
+                    />
+                    {!ente && (
+                      <div className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center select-none">
+                        <span className="text-stone-400 text-xs font-normal">
+                          {ghostEnte}
+                          <span className="animate-pulse text-amber-600 font-bold ml-0.5">|</span>
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* MODO 1: TEMAS GUIADOS */}
+              {/* MODO 1: TEMAS GUIADOS CLEAN */}
               {mode === "guiada" && (
                 <div className="space-y-2.5 mt-5">
-                  <span className="block text-[11px] font-bold text-[#78350f] uppercase tracking-wider">
+                  <span className="block text-[10.5px] font-bold text-stone-500 uppercase tracking-wider">
                     Selecione as intenções do seu coração:
                   </span>
                   {TEMAS_GUIADOS.map((tema) => {
@@ -415,26 +526,26 @@ function EscreverCartaPage() {
                         key={tema.id}
                         type="button"
                         onClick={() => toggleTema(tema.id)}
-                        className={`w-full p-3.5 rounded-2xl border-2 text-left transition-all cursor-pointer flex items-start gap-3 ${
+                        className={`w-full p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex items-start gap-3.5 ${
                           isChecked
-                            ? "bg-[#fffef9] border-amber-400 text-[#181126] shadow-sm"
-                            : "bg-[#fcfaf6] border-[#e8dfd1] text-[#4d3a63] hover:border-amber-300 hover:bg-white"
+                            ? "bg-amber-50/40 border-amber-300 text-stone-900 shadow-2xs"
+                            : "bg-stone-50/60 border-stone-200/80 text-stone-700 hover:border-stone-300 hover:bg-white"
                         }`}
                       >
                         <span className="text-xl shrink-0 mt-0.5">{tema.icon}</span>
                         <div className="flex-1 min-w-0">
-                          <strong className="block text-xs font-bold text-[#181126] leading-tight">
+                          <strong className="block text-xs font-bold text-stone-900 leading-tight">
                             {tema.label}
                           </strong>
-                          <p className="text-[11px] text-[#5e4b73] mt-1 leading-relaxed">
+                          <p className="text-[11px] text-stone-500 mt-1 leading-relaxed">
                             {tema.desc}
                           </p>
                         </div>
                         <span
-                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5 transition-colors ${
+                          className={`w-5 h-5 rounded-full border flex items-center justify-center text-[11px] font-black shrink-0 mt-0.5 transition-colors ${
                             isChecked
-                              ? "bg-amber-400 border-amber-400 text-[#2d144d]"
-                              : "border-[#d0c2b0] text-transparent"
+                              ? "bg-amber-500 border-amber-500 text-white"
+                              : "border-stone-300 text-transparent"
                           }`}
                         >
                           ✓
@@ -445,62 +556,71 @@ function EscreverCartaPage() {
                 </div>
               )}
 
-              {/* MODO 2: ESCRITA LIVRE */}
+              {/* MODO 2: ESCRITA LIVRE CLEAN */}
               {mode === "livre" && (
-                <div className="space-y-3.5 mt-5">
+                <div className="space-y-4 mt-5">
                   <div>
-                    <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center justify-between mb-2">
                       <label
                         htmlFor="textarea-mensagem-livre"
-                        className="block text-[11px] font-bold text-[#78350f] uppercase tracking-wider"
+                        className="block text-[10.5px] font-bold text-stone-500 uppercase tracking-wider"
                       >
                         Sua Mensagem do Coração
                       </label>
-                      <div className="flex items-center gap-1 bg-[#f0e7d8] p-0.5 rounded-lg border border-[#dfd2bc]">
+                      <div className="flex items-center gap-1 bg-stone-100 p-0.5 rounded-lg border border-stone-200">
                         <button
                           type="button"
                           onClick={() => setFontStyle("handwriting")}
-                          className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
+                          className={`px-2.5 py-0.5 rounded-md text-[10px] font-bold transition-all cursor-pointer ${
                             fontStyle === "handwriting"
-                              ? "bg-white text-[#2d144d] font-black shadow-2xs"
-                              : "text-[#6c5a82] hover:text-[#2d144d]"
+                              ? "bg-white text-stone-900 shadow-2xs font-extrabold"
+                              : "text-stone-500 hover:text-stone-900"
                           }`}
                         >
-                          Letra 1
+                          Caligrafia 1
                         </button>
                         <button
                           type="button"
                           onClick={() => setFontStyle("cursive")}
-                          className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
+                          className={`px-2.5 py-0.5 rounded-md text-[10px] font-bold transition-all cursor-pointer ${
                             fontStyle === "cursive"
-                              ? "bg-white text-[#2d144d] font-black shadow-2xs"
-                              : "text-[#6c5a82] hover:text-[#2d144d]"
+                              ? "bg-white text-stone-900 shadow-2xs font-extrabold"
+                              : "text-stone-500 hover:text-stone-900"
                           }`}
                         >
-                          Letra 2
+                          Caligrafia 2
                         </button>
                       </div>
                     </div>
-                    <textarea
-                      id="textarea-mensagem-livre"
-                      rows={5}
-                      value={mensagemLivre}
-                      onChange={(e) => {
-                        setMensagemLivre(e.target.value);
-                        recordInput("carta_mensagem_livre", e.target.value, {
-                          userName: nome,
-                          metadata: { ente, msg: e.target.value },
-                        });
-                      }}
-                      placeholder="Escreva livremente como se estivesse conversando com seu ente querido..."
-                      className="w-full p-3.5 rounded-xl bg-[#fdfbf7] border-2 border-[#e2d5c0] text-[#181126] text-xs leading-relaxed outline-hidden focus:border-[#2d144d] resize-y min-h-[120px] shadow-2xs placeholder:text-[#9583a6]"
-                    />
+                    <div className="relative">
+                      <textarea
+                        id="textarea-mensagem-livre"
+                        rows={5}
+                        value={mensagemLivre}
+                        onChange={(e) => {
+                          setMensagemLivre(e.target.value);
+                          recordInput("carta_mensagem_livre", e.target.value, {
+                            userName: nome,
+                            metadata: { ente, msg: e.target.value },
+                          });
+                        }}
+                        className="w-full p-3.5 rounded-2xl bg-stone-50/60 border border-stone-200 text-stone-900 text-xs leading-relaxed outline-hidden focus:border-[#2d144d] focus:bg-white resize-y min-h-[130px] transition-colors"
+                      />
+                      {!mensagemLivre && (
+                        <div className="pointer-events-none absolute top-3.5 left-3.5 right-3.5 select-none">
+                          <p className="text-stone-400 text-xs leading-relaxed font-normal italic">
+                            {ghostMensagemLivre}
+                            <span className="animate-pulse text-amber-600 font-bold ml-0.5">|</span>
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Frases de Inspiração Rápidas */}
+                  {/* Frases de Inspiração Rápidas Clean */}
                   <div>
-                    <span className="block text-[10.5px] font-bold uppercase text-[#786445] mb-1.5">
-                      💡 Toque para adicionar frases de carinho:
+                    <span className="block text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-1.5">
+                      Inspirações para incluir com 1 clique:
                     </span>
                     <div className="flex flex-wrap gap-1.5">
                       {SUGGESTIONS.map((sug, i) => (
@@ -515,7 +635,7 @@ function EscreverCartaPage() {
                               metadata: { ente, msg: newMsg },
                             });
                           }}
-                          className="text-left text-[11px] bg-[#f7f2ea] hover:bg-amber-50 border border-[#dfd2bc] hover:border-amber-300 rounded-xl px-2.5 py-1.5 text-[#4d3a63] hover:text-[#2d144d] transition-all cursor-pointer shadow-2xs"
+                          className="text-left text-[11px] bg-stone-50 hover:bg-amber-50/60 border border-stone-200/80 hover:border-amber-300/80 rounded-xl px-2.5 py-1 text-stone-600 hover:text-amber-950 transition-all cursor-pointer"
                         >
                           + "{sug.slice(0, 36)}..."
                         </button>
@@ -525,31 +645,41 @@ function EscreverCartaPage() {
                 </div>
               )}
 
-              {/* Botões de Ação no Painel */}
-              <div className="pt-4 border-t border-[#e8dfd1] mt-5 space-y-2">
+              {/* Botões de Ação no Painel Clean */}
+              <div className="pt-4 border-t border-stone-200/80 mt-6 space-y-2.5">
                 <button
                   type="button"
                   onClick={handleSendWhatsApp}
-                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold text-xs uppercase tracking-wider py-3.5 px-4 rounded-2xl shadow-lg shadow-emerald-700/25 transition-transform active:scale-[0.99] cursor-pointer"
+                  className="w-full flex items-center justify-center gap-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs uppercase tracking-wider py-3.5 px-4 rounded-2xl shadow-md shadow-emerald-700/20 hover:shadow-lg hover:shadow-emerald-700/30 transition-all active:scale-[0.99] cursor-pointer"
                 >
-                  <span>💌</span>
-                  <span>Enviar Carta para a Médium no WhatsApp</span>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="w-4 h-4 shrink-0"
+                    aria-hidden="true"
+                  >
+                    <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 14.99 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z" />
+                  </svg>
+                  <span>Enviar Carta para a Médium</span>
                 </button>
+                <p className="text-[10.5px] text-stone-400 text-center font-medium">
+                  ✦ Encaminhamento sagrado sob proteção fraterna do oratório.
+                </p>
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2 pt-1">
                   <button
                     type="button"
                     onClick={handleCopy}
-                    className="py-2.5 rounded-xl border-2 border-[#d8caea] bg-white hover:bg-[#f6f0fc] text-[#2d144d] text-xs font-bold transition-colors cursor-pointer text-center shadow-2xs"
+                    className="py-2.5 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-700 text-xs font-semibold transition-colors cursor-pointer text-center"
                   >
-                    {copied ? "✓ Texto Copiado!" : "📋 Copiar Texto"}
+                    {copied ? "✓ Copiado!" : "Copiar Carta"}
                   </button>
                   <button
                     type="button"
                     onClick={handlePrint}
-                    className="py-2.5 rounded-xl border-2 border-[#d8caea] bg-white hover:bg-[#f6f0fc] text-[#2d144d] text-xs font-bold transition-colors cursor-pointer text-center shadow-2xs"
+                    className="py-2.5 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-700 text-xs font-semibold transition-colors cursor-pointer text-center"
                   >
-                    🖨️ Salvar / Imprimir
+                    Salvar / Imprimir
                   </button>
                 </div>
               </div>
@@ -562,27 +692,27 @@ function EscreverCartaPage() {
               mobileTab === "editor" ? "hidden lg:flex" : "flex"
             }`}
           >
-            {/* Header do Pergaminho */}
-            <div className="w-full flex items-center justify-between text-xs text-[#5e4b73] mb-2.5 px-2">
-              <span className="flex items-center gap-1.5 font-bold text-[#92400e]">
-                <span>📜</span> Prévia Fiel do Pergaminho
+            {/* Header do Pergaminho Clean */}
+            <div className="w-full flex items-center justify-between text-xs text-stone-500 mb-2.5 px-2">
+              <span className="flex items-center gap-1.5 font-bold text-stone-700">
+                <span>📜</span> Visualização do Pergaminho
               </span>
-              <span className="text-[11px] font-semibold text-[#786445]">
-                100% Manuscrita no Oratório
+              <span className="text-[11px] font-medium text-stone-400">
+                Manuscrito no Oratório Sagrado
               </span>
             </div>
 
             {/* FOLHA DE PERGAMINHO DE ALTA RESOLUÇÃO */}
-            <div className="w-full letter-parchment rounded-3xl p-6 sm:p-9 text-[#1c2742] relative overflow-hidden shadow-2xl shadow-amber-950/15 border border-[#d4af37]/50 min-h-[520px] flex flex-col justify-between">
+            <div className="w-full letter-parchment rounded-3xl p-6 sm:p-9 text-[#1c2742] relative overflow-hidden shadow-xl shadow-stone-900/5 border border-[#d4af37]/40 min-h-[520px] flex flex-col justify-between">
               {/* Vinco Suave Central */}
-              <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-16 letter-crease pointer-events-none opacity-30" />
+              <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-16 letter-crease pointer-events-none opacity-20" />
 
               {/* Selo Sagrado de Cera no Canto Superior */}
               <div className="absolute top-5 right-5 flex flex-col items-center pointer-events-none select-none opacity-90">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-[#8a1c14] via-[#b82e23] to-[#69110a] border-2 border-[#e6b800] flex items-center justify-center shadow-md rotate-12">
-                  <span className="text-base sm:text-lg">🕯️</span>
+                <div className="w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-gradient-to-br from-[#8a1c14] via-[#b82e23] to-[#69110a] border border-[#e6b800] flex items-center justify-center shadow-sm rotate-12">
+                  <span className="text-base">🕯️</span>
                 </div>
-                <span className="text-[7.5px] sm:text-[8.5px] font-extrabold uppercase tracking-widest text-[#8a1c14] mt-1 rotate-12">
+                <span className="text-[7.5px] font-bold uppercase tracking-widest text-[#8a1c14] mt-1 rotate-12">
                   Selo Sagrado
                 </span>
               </div>
@@ -655,28 +785,47 @@ function EscreverCartaPage() {
             </div>
 
             {/* Botão de Envio Extra Visível no modo Preview do Mobile */}
-            <div className="w-full mt-4 lg:hidden">
+            <div className="w-full mt-4 lg:hidden space-y-1.5">
               <button
                 type="button"
                 onClick={handleSendWhatsApp}
-                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 text-white font-extrabold text-xs uppercase tracking-wider py-4 px-4 rounded-2xl shadow-xl cursor-pointer"
+                className="w-full flex items-center justify-center gap-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs uppercase tracking-wider py-3.5 px-4 rounded-2xl shadow-lg cursor-pointer"
               >
-                <span>💌</span>
-                <span>Enviar Carta para a Médium no WhatsApp</span>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-4 h-4 shrink-0"
+                  aria-hidden="true"
+                >
+                  <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 14.99 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z" />
+                </svg>
+                <span>Enviar Carta para a Médium</span>
               </button>
+              <p className="text-[10.5px] text-stone-400 text-center font-medium">
+                ✦ Encaminhamento sagrado sob proteção fraterna do oratório.
+              </p>
             </div>
 
-            <p className="text-[11.5px] text-[#786445] text-center mt-3 max-w-md">
-              ✨ No momento do recolhimento sagrado, a médium verte as palavras à mão na folha de algodão puro consagrada diante do altar.
+            <p className="text-[11.5px] text-stone-400 text-center mt-3 max-w-md">
+              ✨ Diante do altar sagrado, a médium verte suas intenções à mão na folha pura de algodão.
             </p>
           </div>
         </div>
       </main>
 
-      {/* Rodapé Claro & Acolhedor */}
-      <footer className="border-t border-[#e8dfd1] bg-[#ede4d4]/60 py-4 px-4 text-center text-[11.5px] text-[#786445]">
+      {/* Rodapé Clean */}
+      <footer className="border-t border-stone-200/80 bg-white/70 py-4 px-4 text-center text-[11px] text-stone-500">
         <p>Templo de Luz · Obras de Caridade e Consolo Espiritual · Desde 1977</p>
       </footer>
+
+      {/* Pop-up Solidário com a História da Catarata da Médium Milena */}
+      <MilenaCataractModal
+        isOpen={isCataractModalOpen}
+        onClose={() => setIsCataractModalOpen(false)}
+        onProceedToWhatsApp={() => executeWhatsAppRedirect()}
+        consulenteNome={nome}
+        enteQuerido={ente}
+      />
     </div>
   );
 }

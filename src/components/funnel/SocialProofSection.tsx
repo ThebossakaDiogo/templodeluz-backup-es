@@ -77,6 +77,7 @@ export function SocialProofSection() {
                   src={feedback.src}
                   alt={feedback.alt}
                   loading="lazy"
+                  decoding="async"
                   className="h-auto w-full block object-contain"
                 />
               </div>

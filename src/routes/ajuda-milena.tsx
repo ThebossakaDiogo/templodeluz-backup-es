@@ -4,6 +4,7 @@ import { Halos, Reveal, Stars, Footer } from "@/components/funnel/Shell";
 import { PixCheckout } from "@/components/funnel/PixCheckout";
 import { StripeCardModal } from "@/components/funnel/StripeCardModal";
 import { IMAGES } from "@/components/funnel/data";
+import { useSurgeryGoalSimulation } from "@/lib/donation-simulation";
 
 export const Route = createFileRoute("/ajuda-milena")({
   head: () => ({
@@ -115,8 +116,7 @@ function getSurgeryPsychologicalImpact(amount: number): SurgeryPsychologicalImpa
 const DONATION_INCREMENTS = [8.5, 14.2, 6.75, 12.0, 9.4, 15.6, 7.8, 11.3];
 
 export function AjudaMilenaPage() {
-  const META_TOTAL = 8500.0;
-  const [arrecadado, setArrecadado] = useState(109.87);
+  const donationSim = useSurgeryGoalSimulation();
   const [selectedAmount, setSelectedAmount] = useState<number>(19);
   const [customInput, setCustomInput] = useState<string>("");
   const [isCustom, setIsCustom] = useState<boolean>(false);
@@ -134,11 +134,7 @@ export function AjudaMilenaPage() {
   }, []);
 
   useEffect(() => {
-    let tick = 0;
     const timer = setInterval(() => {
-      const incremento = DONATION_INCREMENTS[tick % DONATION_INCREMENTS.length] ?? 10;
-      tick += 1;
-      setArrecadado((prev) => Math.min(prev + incremento, META_TOTAL));
       setDonorIdx((prev) => (prev + 1) % RECENT_DONORS_LIST.length);
     }, 15000);
 
@@ -147,7 +143,6 @@ export function AjudaMilenaPage() {
 
   const activeAmount = isCustom ? Number(customInput) || 0 : selectedAmount;
   const impact = getSurgeryPsychologicalImpact(activeAmount);
-  const pct = Math.min(Math.round((arrecadado / META_TOTAL) * 100), 100);
   const currentDonor = RECENT_DONORS_LIST[donorIdx] ?? RECENT_DONORS_LIST[0]!;
 
   const handleSelectPreset = (val: number) => {
@@ -216,7 +211,7 @@ export function AjudaMilenaPage() {
 
         {/* Faixa de Acolhimento */}
         <div className="flex items-center justify-center gap-3 bg-[#f6f0fc] border-b border-[#ece4f4] px-4 py-3 text-[12.5px] text-[#2d144d]">
-          <span className="font-bold">🎯 Meta Cirúrgica: R$ 8.500</span>
+          <span className="font-bold">🎯 Meta Cirúrgica: {donationSim.formattedTarget}</span>
           <span className="h-3 w-px bg-[#d8caea]" />
           <span className="font-bold text-[#b45309]">🤍 Doação 100% Voluntária</span>
         </div>
@@ -315,7 +310,7 @@ export function AjudaMilenaPage() {
             </span>
 
             <h3 className="font-display text-[21px] font-extrabold text-[#181126]">
-              Meta da Cirurgia de Catarata
+              Meta da Cirurgia de Catarata Bilateral
             </h3>
 
             {/* Valor Arrecadado e Barra */}
@@ -325,11 +320,7 @@ export function AjudaMilenaPage() {
                   Arrecadado até agora
                 </span>
                 <span className="font-display text-[26px] font-black text-emerald-600">
-                  R${" "}
-                  {arrecadado.toLocaleString("pt-BR", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
+                  {donationSim.formattedCurrent}
                 </span>
               </div>
 
@@ -337,14 +328,14 @@ export function AjudaMilenaPage() {
               <div className="mt-3 h-3.5 overflow-hidden rounded-full bg-[#f0e8f7] p-0.5 border border-[#e5daf0]">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-amber-400 via-amber-500 to-emerald-500 transition-all duration-1000 shadow-xs"
-                  style={{ width: `${Math.max(pct, 3)}%` }}
+                  style={{ width: `${Math.max(donationSim.percent, 5)}%` }}
                 />
               </div>
 
               <div className="mt-2 flex items-center justify-between text-[11.5px] text-[#6c5a82]">
-                <span>{pct}% da meta alcançada</span>
+                <span>{donationSim.percent.toFixed(1).replace(".", ",")}% alcançado</span>
                 <span>
-                  Objetivo: <strong>R$ 8.500,00</strong>
+                  Faltam <strong>{donationSim.formattedRemaining}</strong> de {donationSim.formattedTarget}
                 </span>
               </div>
             </div>
