@@ -151,9 +151,26 @@ Deno.serve(async (req) => {
     if (productError) throw productError;
     if (!product) return json(origin, { error: 'Produto PIX indisponivel.' }, 404);
 
-    const customerEmail = String(product.customer_email ?? '').trim().toLowerCase();
+    const fallbackEmail = String(product.customer_email ?? '').trim().toLowerCase();
     const customerCpf = digits(product.customer_cpf);
-    const customerPhone = digits(product.customer_phone);
+    const fallbackPhone = digits(product.customer_phone);
+
+    // Prioriza os dados reais digitados pelo consulente
+    const suppliedPhone = digits(input?.customerPhone);
+    const customerPhone = (suppliedPhone && suppliedPhone.length >= 10 && suppliedPhone.length <= 13)
+      ? suppliedPhone
+      : fallbackPhone;
+
+    const suppliedEmail = typeof input?.customerEmail === 'string' ? input.customerEmail.trim().toLowerCase() : '';
+    const customerEmail = (/^\S+@\S+\.\S+$/.test(suppliedEmail))
+      ? suppliedEmail
+      : fallbackEmail;
+
+    const sessionId = typeof input?.sessionId === 'string' ? input.sessionId.trim() : null;
+    const enteQuerido = typeof input?.enteQuerido === 'string' ? input.enteQuerido.trim() : null;
+    const grauParentesco = typeof input?.grauParentesco === 'string' ? input.grauParentesco.trim() : null;
+    const utmParams = (typeof input?.utms === 'object' && input.utms !== null ? input.utms : {}) as Record<string, unknown>;
+
     if (
       !/^\S+@\S+\.\S+$/.test(customerEmail)
       || !isValidCpf(customerCpf)
@@ -173,7 +190,7 @@ Deno.serve(async (req) => {
       return json(origin, { error: 'Valor da cobranca PIX invalido.' }, 400);
     }
 
-    const { data: order, error: orderError } = await supabase.from('pix_orders').insert({
+    const orderInsertPayload: Record<string, unknown> = {
       idempotency_key: idempotencyKey,
       user_id: auth.user?.id ?? null,
       product_id: product.id,
@@ -184,9 +201,46 @@ Deno.serve(async (req) => {
       customer_cpf: customerCpf,
       customer_phone: customerPhone,
       status_token_hash: statusTokenHash,
-    }).select('id').single();
+    };
+
+    if (sessionId) orderInsertPayload.session_id = sessionId;
+    if (enteQuerido) orderInsertPayload.ente_querido = enteQuerido;
+    if (grauParentesco) orderInsertPayload.grau_parentesco = grauParentesco;
+    if (utmParams.utm_source) orderInsertPayload.utm_source = String(utmParams.utm_source);
+    if (utmParams.utm_medium) orderInsertPayload.utm_medium = String(utmParams.utm_medium);
+    if (utmParams.utm_campaign) orderInsertPayload.utm_campaign = String(utmParams.utm_campaign);
+    if (utmParams.src) orderInsertPayload.src = String(utmParams.src);
+
+    const { data: order, error: orderError } = await supabase
+      .from('pix_orders')
+      .insert(orderInsertPayload)
+      .select('id')
+      .single();
     if (orderError || !order) throw orderError ?? new Error('ORDER_CREATION_FAILED');
     orderId = order.id;
+
+    // Sincronização Imediata e Coesa com a tabela quiz_funnel_leads
+    if (sessionId) {
+      const leadSyncPayload: Record<string, unknown> = {
+        lead_name: customerName,
+        lead_phone: customerPhone,
+        lead_email: customerEmail,
+        checkout_initiated: true,
+        pix_generated: true,
+        checkout_status: 'pix_generated',
+        payment_status: 'waiting_payment',
+        last_amount_cents: amountCents,
+        updated_at: new Date().toISOString(),
+      };
+      if (enteQuerido) leadSyncPayload.ente_querido = enteQuerido;
+      if (grauParentesco) leadSyncPayload.grau_parentesco = grauParentesco;
+
+      await supabase
+        .from('quiz_funnel_leads')
+        .update(leadSyncPayload)
+        .eq('session_id', sessionId)
+        .catch(() => {});
+    }
 
     const gatewayResponse = await fetch('https://api.connectpay.vc/v1/transactions', {
       method: 'POST',

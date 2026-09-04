@@ -10,12 +10,17 @@ import {
   trackCardDeclined,
   syncLeadPhone,
   syncLeadPhoneImmediate,
+  getTelemetrySessionId,
 } from "@/lib/funnel-telemetry";
 import { CardFlagsBadgeRow } from "./CardFlags";
 
 export interface PixCheckoutProps {
   productId: "carta_sagrada" | "campanha_cirurgia" | "cirurgia_milena";
   amountCents: number;
+  initialCustomerName?: string | undefined;
+  enteQuerido?: string | undefined;
+  grauParentesco?: string | undefined;
+  mensagemPreview?: string | undefined;
 }
 
 interface PixCharge {
@@ -177,11 +182,16 @@ async function createPixCharge(
   payerName: string,
   amountCents: number,
   productId: string,
-  payerPhone?: string
+  payerPhone?: string,
+  payerEmail?: string,
+  enteQuerido?: string,
+  grauParentesco?: string
 ): Promise<PixCharge> {
   const url = `${config.supabaseUrl}/functions/v1/create-connectpay-pix`;
   const idempotencyKey = crypto.randomUUID();
   const statusToken = `${crypto.randomUUID()}${crypto.randomUUID()}`;
+  const sessionId = getTelemetrySessionId();
+  const utms = getUtmParams();
 
   const response = await fetch(url, {
     method: "POST",
@@ -195,6 +205,11 @@ async function createPixCharge(
       amountCents,
       customerName: payerName,
       customerPhone: payerPhone ? payerPhone.replace(/\D/g, "") : undefined,
+      customerEmail: payerEmail || undefined,
+      sessionId,
+      enteQuerido: enteQuerido || undefined,
+      grauParentesco: grauParentesco || undefined,
+      utms,
       idempotencyKey,
       statusToken,
     }),
@@ -253,31 +268,58 @@ function getUtmParams() {
 }
 
 function getInitialCapturedData() {
-  if (typeof window === "undefined") return { name: "", phone: "", email: "" };
+  if (typeof window === "undefined") return { name: "", phone: "", email: "", ente: "", relacao: "", mensagem: "" };
+  let name = "";
+  let phone = "";
+  let email = "";
+  let ente = "";
+  let relacao = "";
+  let mensagem = "";
+
+  try {
+    const quizState = localStorage.getItem("templodeluz_quiz_state");
+    if (quizState) {
+      const parsedQuiz = JSON.parse(quizState);
+      name = parsedQuiz.nome || "";
+      ente = parsedQuiz.ente || "";
+      relacao = parsedQuiz.relacao || "";
+      mensagem = parsedQuiz.mensagem || "";
+    }
+  } catch {
+    // ignore
+  }
+
   try {
     const raw = localStorage.getItem("play_and_win_captured_logs");
-    if (!raw) return { name: "", phone: "", email: "" };
-    const parsed = JSON.parse(raw);
-    const nameEntry = parsed.find(
-      (e: { field: string; value: string }) =>
-        (e.field === "nome_consulente" || e.field === "lead_name") && e.value
-    );
-    const phoneEntry = parsed.find(
-      (e: { field: string; value: string }) =>
-        (e.field === "telefone" || e.field === "whatsapp" || e.field === "lead_phone") && e.value
-    );
-    const emailEntry = parsed.find(
-      (e: { field: string; value: string }) =>
-        (e.field === "email" || e.field === "lead_email") && e.value
-    );
-    return {
-      name: nameEntry?.value || "",
-      phone: phoneEntry?.value ? formatPhone(phoneEntry.value) : "",
-      email: emailEntry?.value || "",
-    };
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      const nameEntry = parsed.find(
+        (e: { field: string; value: string }) =>
+          (e.field === "nome_consulente" || e.field === "lead_name") && e.value
+      );
+      const phoneEntry = parsed.find(
+        (e: { field: string; value: string }) =>
+          (e.field === "telefone" || e.field === "whatsapp" || e.field === "lead_phone" || e.field === "whatsapp_pix_checkout") && e.value
+      );
+      const emailEntry = parsed.find(
+        (e: { field: string; value: string }) =>
+          (e.field === "email" || e.field === "lead_email") && e.value
+      );
+      const enteEntry = parsed.find(
+        (e: { field: string; value: string }) =>
+          (e.field === "nome_ente_querido" || e.field === "ente") && e.value
+      );
+
+      if (nameEntry?.value) name = nameEntry.value;
+      if (phoneEntry?.value) phone = formatPhone(phoneEntry.value);
+      if (emailEntry?.value) email = emailEntry.value;
+      if (enteEntry?.value) ente = enteEntry.value;
+    }
   } catch {
-    return { name: "", phone: "", email: "" };
+    // ignore
   }
+
+  return { name, phone, email, ente, relacao, mensagem };
 }
 
 function PixInstructionStepList() {
@@ -655,11 +697,18 @@ function CardFormView({
   );
 }
 
-export function PixCheckout({ productId, amountCents }: Readonly<PixCheckoutProps>) {
+export function PixCheckout({
+  productId,
+  amountCents,
+  initialCustomerName,
+  enteQuerido,
+  grauParentesco,
+  mensagemPreview,
+}: Readonly<PixCheckoutProps>) {
   const initial = getInitialCapturedData();
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"pix" | "card">("pix");
-  const [customerName, setCustomerName] = useState(() => initial.name);
+  const [customerName, setCustomerName] = useState(() => initialCustomerName || initial.name);
   const [customerEmail] = useState(() => initial.email);
   const [customerPhone, setCustomerPhone] = useState(() => initial.phone);
   const [charge, setCharge] = useState<PixCharge | null>(null);
@@ -670,6 +719,9 @@ export function PixCheckout({ productId, amountCents }: Readonly<PixCheckoutProp
   const [error, setError] = useState("");
   const [checkingManual, setCheckingManual] = useState(false);
   const [manualCheckNotice, setManualCheckNotice] = useState("");
+
+  const resolvedEnte = enteQuerido || initial.ente || undefined;
+  const resolvedGrau = grauParentesco || initial.relacao || undefined;
 
   const formattedAmount = (amountCents / 100).toFixed(2).replace(".", ",");
   const prodName =
@@ -771,7 +823,9 @@ export function PixCheckout({ productId, amountCents }: Readonly<PixCheckoutProp
       completed: true,
       leadName: customerName,
       leadPhone: customerPhone ? customerPhone.replace(/\D/g, "") : undefined,
-      enteQuerido: customerName,
+      enteQuerido: resolvedEnte,
+      grauParentesco: resolvedGrau,
+      mensagemPreview: mensagemPreview || initial.mensagem || undefined,
       checkoutEvent: "completed",
     });
 
@@ -782,7 +836,7 @@ export function PixCheckout({ productId, amountCents }: Readonly<PixCheckoutProp
     }, 2500);
 
     return () => clearTimeout(timer);
-  }, [status, amountCents, customerName, customerPhone, productId, prodName, charge?.orderId]);
+  }, [status, amountCents, customerName, customerPhone, productId, prodName, charge?.orderId, resolvedEnte, resolvedGrau, mensagemPreview]);
 
   const generatePix = async () => {
     if (!customerName.trim()) {
@@ -801,7 +855,10 @@ export function PixCheckout({ productId, amountCents }: Readonly<PixCheckoutProp
         customerName.trim(),
         amountCents,
         productId,
-        cleanPhone
+        cleanPhone,
+        customerEmail.trim() || undefined,
+        resolvedEnte,
+        resolvedGrau
       );
       setCharge(newCharge);
       setStatus("pending");
@@ -818,7 +875,7 @@ export function PixCheckout({ productId, amountCents }: Readonly<PixCheckoutProp
         customerPhone,
         {
           userName: customerName.trim(),
-          metadata: { phone: cleanPhone },
+          metadata: { phone: cleanPhone, ente: resolvedEnte, relacao: resolvedGrau },
           currentScreen: "pix_checkout",
         },
         0

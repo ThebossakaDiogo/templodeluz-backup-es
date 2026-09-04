@@ -470,9 +470,17 @@ function PixIcon({
 function PixInstantBox({
   primeiroNome = "Você",
   primeiroEnte = "seu ente querido",
+  nomeCompleto,
+  enteCompleto,
+  relacao,
+  mensagem,
 }: {
   readonly primeiroNome?: string;
   readonly primeiroEnte?: string;
+  readonly nomeCompleto?: string;
+  readonly enteCompleto?: string;
+  readonly relacao?: string;
+  readonly mensagem?: string;
 }) {
   const [selectedAmount, setSelectedAmount] = useState<number>(20);
   const [customInput, setCustomInput] = useState<string>("");
@@ -627,7 +635,14 @@ function PixInstantBox({
       </div>
 
       {impact.isValid ? (
-        <PixCheckout productId="carta_sagrada" amountCents={Math.round(activeAmount * 100)} />
+        <PixCheckout
+          productId="carta_sagrada"
+          amountCents={Math.round(activeAmount * 100)}
+          initialCustomerName={nomeCompleto || primeiroNome}
+          enteQuerido={enteCompleto || primeiroEnte}
+          grauParentesco={relacao}
+          mensagemPreview={mensagem}
+        />
       ) : (
         <div className="mt-5 p-4 rounded-2xl bg-zinc-100 border border-zinc-200 text-zinc-600 text-xs font-semibold">
           Por favor, selecione ou digite um valor a partir de R$ 10 para gerar o código PIX.
@@ -1189,12 +1204,14 @@ function Result({
   relacao = "",
   dorPrincipal = "",
   horario = "",
+  mensagem = "",
 }: {
   readonly nome?: string;
   readonly ente?: string;
   readonly relacao?: string;
   readonly dorPrincipal?: string;
   readonly horario?: string;
+  readonly mensagem?: string;
 }) {
   const go = () => redirectWithParams(CHECKOUT_URL);
   const primeiro: string = (nome?.trim() ? nome.trim().split(" ")[0] : "Você") || "Você";
@@ -1434,7 +1451,14 @@ function Result({
           </p>
 
           {/* Integração do Seletor de Doação Livre & PIX Instantâneo */}
-          <PixInstantBox primeiroNome={primeiro} primeiroEnte={primeiroEnte} />
+          <PixInstantBox
+            primeiroNome={primeiro}
+            primeiroEnte={primeiroEnte}
+            nomeCompleto={nome}
+            enteCompleto={ente}
+            relacao={relacao}
+            mensagem={mensagem}
+          />
 
           {/* Selo de Garantia Sagrada e Segurança Premium */}
           <SecurityGuaranteeSeal />
@@ -2190,6 +2214,7 @@ export function QuizFunnel() {
           relacao={relacao}
           dorPrincipal={dorPrincipal}
           horario={horario}
+          mensagem={mensagem}
         />
       )}
 

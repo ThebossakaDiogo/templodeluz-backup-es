@@ -38,7 +38,17 @@ async function readJson<T>(response: Response): Promise<T> {
 
 export async function createPixCharge(
   config: PixClientConfig,
-  input: { productId: string; amountCents: number; customer: PixCustomer },
+  input: {
+    productId: string;
+    amountCents: number;
+    customer: PixCustomer;
+    customerPhone?: string | undefined;
+    customerEmail?: string | undefined;
+    sessionId?: string | undefined;
+    enteQuerido?: string | undefined;
+    grauParentesco?: string | undefined;
+    utms?: Record<string, string | null> | undefined;
+  },
 ): Promise<PixCharge> {
   const statusToken = `${crypto.randomUUID()}${crypto.randomUUID()}`;
   const response = await fetch(functionUrl(config, "create-connectpay-pix"), {
@@ -52,6 +62,12 @@ export async function createPixCharge(
       productId: input.productId,
       amountCents: input.amountCents,
       customerName: input.customer.name,
+      customerPhone: input.customerPhone,
+      customerEmail: input.customerEmail,
+      sessionId: input.sessionId,
+      enteQuerido: input.enteQuerido,
+      grauParentesco: input.grauParentesco,
+      utms: input.utms,
       idempotencyKey: crypto.randomUUID(),
       statusToken,
     }),

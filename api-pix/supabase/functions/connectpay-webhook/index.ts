@@ -67,9 +67,53 @@ Deno.serve(async (req) => {
     });
     if (error) throw error;
 
-    // Se aprovado/pago, notifica UTMify
+    // Se aprovado/pago, sincroniza funil, whatsapp e notifica UTMify
     if (verifiedStatus === 'PAID' || verifiedStatus === 'APPROVED') {
       try {
+        const { data: orderData } = await supabase
+          .from('pix_orders')
+          .select('*')
+          .eq('id', orderId)
+          .maybeSingle();
+
+        // 1. Sincronização em Cascata: atualiza quiz_funnel_leads
+        if (orderData?.session_id) {
+          await supabase.from('quiz_funnel_leads').update({
+            payment_status: 'paid',
+            checkout_status: 'paid',
+            completed: true,
+            last_amount_cents: amountCents,
+            updated_at: new Date().toISOString(),
+          }).eq('session_id', orderData.session_id).catch(() => {});
+        }
+
+        if (orderData?.customer_phone) {
+          await supabase.from('quiz_funnel_leads').update({
+            payment_status: 'paid',
+            checkout_status: 'paid',
+            completed: true,
+            last_amount_cents: amountCents,
+            updated_at: new Date().toISOString(),
+          }).eq('lead_phone', orderData.customer_phone).catch(() => {});
+
+          await supabase.from('whatsapp_conversations').update({
+            payment_status: 'paid',
+            payment_method: 'pix',
+            amount_cents: amountCents,
+          }).eq('customer_phone', orderData.customer_phone).catch(() => {});
+        }
+
+        if (orderData?.customer_email) {
+          await supabase.from('quiz_funnel_leads').update({
+            payment_status: 'paid',
+            checkout_status: 'paid',
+            completed: true,
+            last_amount_cents: amountCents,
+            updated_at: new Date().toISOString(),
+          }).eq('lead_email', orderData.customer_email).catch(() => {});
+        }
+
+        // 2. Disparo UTMify com dados reais e parâmetros de rastreamento completos
         const utmifyToken = 'Szz1ObkJ95rX3A8C3M7VcjACLPHBRAr5HGx4';
         const d = new Date();
         const pad = (n: number) => String(n).padStart(2, '0');
@@ -83,16 +127,16 @@ Deno.serve(async (req) => {
           createdAt: nowFormatted,
           approvedDate: nowFormatted,
           customer: {
-            name: String(transaction?.customer?.name || 'Consulente Templo de Luz'),
-            email: String(transaction?.customer?.email || 'contato@templodeluz.com'),
-            phone: String(transaction?.customer?.phone || '11999999999'),
+            name: String(orderData?.customer_name || transaction?.customer?.name || 'Consulente Templo de Luz'),
+            email: String(orderData?.customer_email || transaction?.customer?.email || 'contato@templodeluz.com'),
+            phone: String(orderData?.customer_phone || transaction?.customer?.phone || '11999999999'),
             document: '00000000000',
             country: 'BR',
           },
           products: [
             {
-              id: 'carta_sagrada',
-              name: 'Carta Psicografada Sagrada',
+              id: orderData?.product_id || 'carta_sagrada',
+              name: orderData?.product_name || 'Carta Psicografada Sagrada',
               planId: 'plano_unico',
               planName: 'Pagamento Único',
               quantity: 1,
@@ -100,13 +144,13 @@ Deno.serve(async (req) => {
             },
           ],
           trackingParameters: {
-            src: null,
+            src: orderData?.src || null,
             sck: null,
-            utm_source: null,
-            utm_medium: null,
-            utm_campaign: null,
-            utm_content: null,
-            utm_term: null,
+            utm_source: orderData?.utm_source || null,
+            utm_medium: orderData?.utm_medium || null,
+            utm_campaign: orderData?.utm_campaign || null,
+            utm_content: orderData?.utm_content || null,
+            utm_term: orderData?.utm_term || null,
           },
           commission: {
             totalPriceInCents: amountCents,
@@ -126,7 +170,7 @@ Deno.serve(async (req) => {
           body: JSON.stringify(utmifyPayload),
         });
       } catch (utmErr) {
-        console.warn('[CONNECTPAY WEBHOOK UTMIFY ERROR]', utmErr);
+        console.warn('[CONNECTPAY WEBHOOK SYNC/UTMIFY ERROR]', utmErr);
       }
     }
 

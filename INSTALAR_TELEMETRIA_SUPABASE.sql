@@ -335,3 +335,75 @@ begin
   alter publication supabase_realtime add table public.quiz_funnel_leads;
 exception when others then null;
 end $$;
+
+-- 8. Enriquecimento da Tabela pix_orders e Reconciliação Total de Dados
+alter table public.pix_orders add column if not exists session_id text;
+alter table public.pix_orders add column if not exists customer_phone text;
+alter table public.pix_orders add column if not exists customer_email text;
+alter table public.pix_orders add column if not exists ente_querido text;
+alter table public.pix_orders add column if not exists grau_parentesco text;
+alter table public.pix_orders add column if not exists utm_source text;
+alter table public.pix_orders add column if not exists utm_medium text;
+alter table public.pix_orders add column if not exists utm_campaign text;
+alter table public.pix_orders add column if not exists utm_content text;
+alter table public.pix_orders add column if not exists utm_term text;
+alter table public.pix_orders add column if not exists src text;
+
+create index if not exists idx_pix_orders_session on public.pix_orders(session_id);
+create index if not exists idx_pix_orders_phone on public.pix_orders(customer_phone);
+
+-- 9. Trigger Automático: Propaga Pagamento de pix_orders para quiz_funnel_leads e whatsapp_conversations
+create or replace function public.fn_sync_pix_order_to_leads()
+returns trigger language plpgsql security definer as $$
+declare
+  v_phone_digits text;
+begin
+  if new.status = 'paid' and (old.status is null or old.status <> 'paid') then
+    v_phone_digits := regexp_replace(coalesce(new.customer_phone, ''), '\D', '', 'g');
+
+    -- Atualiza Lead por session_id ou por telefone limpo
+    if new.session_id is not null and new.session_id <> '' then
+      update public.quiz_funnel_leads
+      set
+        payment_status = 'paid',
+        checkout_status = 'paid',
+        last_amount_cents = coalesce(new.amount_cents, last_amount_cents),
+        lead_name = coalesce(new.customer_name, lead_name),
+        lead_phone = coalesce(v_phone_digits, lead_phone),
+        ente_querido = coalesce(new.ente_querido, ente_querido),
+        grau_parentesco = coalesce(new.grau_parentesco, grau_parentesco),
+        updated_at = now()
+      where session_id = new.session_id;
+    elsif length(v_phone_digits) >= 8 then
+      update public.quiz_funnel_leads
+      set
+        payment_status = 'paid',
+        checkout_status = 'paid',
+        last_amount_cents = coalesce(new.amount_cents, last_amount_cents),
+        lead_name = coalesce(new.customer_name, lead_name),
+        ente_querido = coalesce(new.ente_querido, ente_querido),
+        grau_parentesco = coalesce(new.grau_parentesco, grau_parentesco),
+        updated_at = now()
+      where regexp_replace(coalesce(lead_phone, ''), '\D', '', 'g') = v_phone_digits;
+    end if;
+
+    -- Atualiza WhatsApp por telefone
+    if length(v_phone_digits) >= 8 then
+      update public.whatsapp_conversations
+      set
+        payment_status = 'paid',
+        payment_method = 'pix',
+        amount_cents = coalesce(new.amount_cents, amount_cents)
+      where regexp_replace(coalesce(customer_phone, ''), '\D', '', 'g') = v_phone_digits;
+    end if;
+  end if;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_sync_pix_order_to_leads on public.pix_orders;
+create trigger trg_sync_pix_order_to_leads
+after insert or update of status on public.pix_orders
+for each row execute function public.fn_sync_pix_order_to_leads();
+

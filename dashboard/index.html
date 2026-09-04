@@ -5,6 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>OD METRICS · Plataforma de Inteligência & Conversão</title>
 
+    <!-- Limpeza Proativa e Imediata de Service Workers Obsoletos (Previne Tela Preta) -->
+    <script>
+      (function() {
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(function(regs) {
+            for (var r of regs) {
+              r.unregister();
+            }
+          });
+        }
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          if ('caches' in window) {
+            caches.keys().then(function(names) {
+              for (var n of names) {
+                caches.delete(n);
+              }
+            });
+          }
+        }
+      })();
+    </script>
+
     <!-- PWA Web Manifest -->
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="theme-color" content="#03060d" />
@@ -28,35 +50,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700;800;900&display=swap" rel="stylesheet">
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div id="initial-loading-fallback" style="height: 100vh; width: 100vw; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #07080f; color: #f5f5fa; font-family: -apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', sans-serif; gap: 16px;">
+        <div style="width: 48px; height: 48px; border-radius: 14px; background: linear-gradient(135deg, #7C5CFF 0%, #5E46D8 100%); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 19px; color: #ffffff; box-shadow: 0 4px 24px rgba(124, 92, 255, 0.35);">
+          OD
+        </div>
+        <div style="font-size: 13.5px; font-weight: 600; color: #9DA0B5; letter-spacing: -0.01em;">
+          Carregando plataforma OD METRICS...
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
-    <script>
-      // Service Worker: Apenas em produção (evita cache de arquivos de desenvolvimento no Vite)
-      if ('serviceWorker' in navigator) {
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-          navigator.serviceWorker.getRegistrations().then(function(registrations) {
-            for (let registration of registrations) {
-              registration.unregister();
-            }
-          });
-          if ('caches' in window) {
-            caches.keys().then(function(names) {
-              for (let name of names) {
-                caches.delete(name);
-              }
-            });
-          }
-        } else {
-          window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/sw.js')
-              .then((reg) => {
-                console.log('[PWA] Service Worker ativo:', reg.scope);
-                reg.update();
-              })
-              .catch((err) => console.warn('[PWA] Erro ao registrar SW:', err));
-          });
-        }
-      }
-    </script>
   </body>
 </html>

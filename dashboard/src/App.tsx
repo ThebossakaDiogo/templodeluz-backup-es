@@ -48,78 +48,73 @@ function toDateString(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
-// Construtor do Gráfico de Receita discriminando PIX e Cartão
-function buildRevenueChartRange(
-  orders: PaymentOrder[],
-  start: Date,
-  end: Date,
-  isSingleDay: boolean
-): ChartDataPoint[] {
-  if (isSingleDay) {
-    const hours = ["00h", "04h", "08h", "12h", "16h", "20h"];
-    const buckets: Record<
-      string,
-      { revenue: number; pix: number; card: number; sales: number; salesPix: number; salesCard: number }
-    > = {};
-    hours.forEach((h) => {
-      buckets[h] = { revenue: 0, pix: 0, card: 0, sales: 0, salesPix: 0, salesCard: 0 };
-    });
+function getHourSlot(hour: number): string {
+  if (hour < 4) return "00h";
+  if (hour < 8) return "04h";
+  if (hour < 12) return "08h";
+  if (hour < 16) return "12h";
+  if (hour < 20) return "16h";
+  return "20h";
+}
 
-    for (const o of orders) {
-      if (o.status !== "paid") continue;
-      const d = new Date(o.created_at);
-      if (d < start || d > end) continue;
-      const hour = d.getHours();
-      let slot = "20h";
-      if (hour < 4) slot = "00h";
-      else if (hour < 8) slot = "04h";
-      else if (hour < 12) slot = "08h";
-      else if (hour < 16) slot = "12h";
-      else if (hour < 20) slot = "16h";
+interface RevBucket {
+  revenue: number;
+  pix: number;
+  card: number;
+  sales: number;
+  salesPix: number;
+  salesCard: number;
+}
 
-      const val = o.amount_cents / 100;
-      buckets[slot].revenue += val;
-      buckets[slot].sales += 1;
-      if (o.payment_method === "credit_card") {
-        buckets[slot].card += val;
-        buckets[slot].salesCard += 1;
-      } else {
-        buckets[slot].pix += val;
-        buckets[slot].salesPix += 1;
-      }
+function createEmptyRevBucket(): RevBucket {
+  return { revenue: 0, pix: 0, card: 0, sales: 0, salesPix: 0, salesCard: 0 };
+}
+
+function buildSingleDayRevenue(orders: PaymentOrder[], start: Date, end: Date): ChartDataPoint[] {
+  const hours = ["00h", "04h", "08h", "12h", "16h", "20h"];
+  const buckets: Record<string, RevBucket> = {};
+  for (const h of hours) buckets[h] = createEmptyRevBucket();
+
+  for (const o of orders) {
+    if (o.status !== "paid") continue;
+    const d = new Date(o.created_at);
+    if (d < start || d > end) continue;
+    const slot = getHourSlot(d.getHours());
+    const val = o.amount_cents / 100;
+    const b = buckets[slot];
+    b.revenue += val;
+    b.sales += 1;
+    if (o.payment_method === "credit_card") {
+      b.card += val;
+      b.salesCard += 1;
+    } else {
+      b.pix += val;
+      b.salesPix += 1;
     }
-
-    return Object.entries(buckets).map(([dia, v]) => ({
-      dia,
-      receita: Math.round(v.revenue * 100) / 100,
-      receitaPix: Math.round(v.pix * 100) / 100,
-      receitaCartao: Math.round(v.card * 100) / 100,
-      vendas: v.sales,
-      vendasPix: v.salesPix,
-      vendasCartao: v.salesCard,
-    }));
   }
 
+  return Object.entries(buckets).map(([dia, v]) => ({
+    dia,
+    receita: Math.round(v.revenue * 100) / 100,
+    receitaPix: Math.round(v.pix * 100) / 100,
+    receitaCartao: Math.round(v.card * 100) / 100,
+    vendas: v.sales,
+    vendasPix: v.salesPix,
+    vendasCartao: v.salesCard,
+  }));
+}
+
+function buildMultiDayRevenue(orders: PaymentOrder[], start: Date, end: Date): ChartDataPoint[] {
   const diffDays = Math.min(
     60,
     Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 3600 * 24)))
   );
-  const buckets: Record<
-    string,
-    { revenue: number; pix: number; card: number; sales: number; salesPix: number; salesCard: number }
-  > = {};
+  const buckets: Record<string, RevBucket> = {};
   for (let i = 0; i <= diffDays; i++) {
     const d = new Date(start);
     d.setDate(d.getDate() + i);
     if (d > end) break;
-    buckets[dateLabel(d.toISOString())] = {
-      revenue: 0,
-      pix: 0,
-      card: 0,
-      sales: 0,
-      salesPix: 0,
-      salesCard: 0,
-    };
+    buckets[dateLabel(d.toISOString())] = createEmptyRevBucket();
   }
 
   for (const o of orders) {
@@ -127,16 +122,17 @@ function buildRevenueChartRange(
     const d = new Date(o.created_at);
     if (d < start || d > end) continue;
     const key = dateLabel(o.created_at);
-    if (buckets[key]) {
+    const b = buckets[key];
+    if (b) {
       const val = o.amount_cents / 100;
-      buckets[key].revenue += val;
-      buckets[key].sales += 1;
+      b.revenue += val;
+      b.sales += 1;
       if (o.payment_method === "credit_card") {
-        buckets[key].card += val;
-        buckets[key].salesCard += 1;
+        b.card += val;
+        b.salesCard += 1;
       } else {
-        buckets[key].pix += val;
-        buckets[key].salesPix += 1;
+        b.pix += val;
+        b.salesPix += 1;
       }
     }
   }
@@ -152,36 +148,34 @@ function buildRevenueChartRange(
   }));
 }
 
-// Construtor do Gráfico de Leads
-function buildLeadsChartRange(
-  leads: Lead[],
+// Construtor do Gráfico de Receita discriminando PIX e Cartão
+function buildRevenueChartRange(
+  orders: PaymentOrder[],
   start: Date,
   end: Date,
   isSingleDay: boolean
 ): ChartDataPoint[] {
-  if (isSingleDay) {
-    const hours = ["00h", "04h", "08h", "12h", "16h", "20h"];
-    const buckets: Record<string, number> = {};
-    hours.forEach((h) => {
-      buckets[h] = 0;
-    });
+  return isSingleDay
+    ? buildSingleDayRevenue(orders, start, end)
+    : buildMultiDayRevenue(orders, start, end);
+}
 
-    for (const l of leads) {
-      const d = new Date(l.created_at);
-      if (d < start || d > end) continue;
-      const hour = d.getHours();
-      let slot = "20h";
-      if (hour < 4) slot = "00h";
-      else if (hour < 8) slot = "04h";
-      else if (hour < 12) slot = "08h";
-      else if (hour < 16) slot = "12h";
-      else if (hour < 20) slot = "16h";
-      buckets[slot]++;
-    }
+function buildSingleDayLeads(leads: Lead[], start: Date, end: Date): ChartDataPoint[] {
+  const hours = ["00h", "04h", "08h", "12h", "16h", "20h"];
+  const buckets: Record<string, number> = {};
+  for (const h of hours) buckets[h] = 0;
 
-    return Object.entries(buckets).map(([dia, leadsCount]) => ({ dia, leads: leadsCount }));
+  for (const l of leads) {
+    const d = new Date(l.created_at);
+    if (d < start || d > end) continue;
+    const slot = getHourSlot(d.getHours());
+    buckets[slot]++;
   }
 
+  return Object.entries(buckets).map(([dia, leadsCount]) => ({ dia, leads: leadsCount }));
+}
+
+function buildMultiDayLeads(leads: Lead[], start: Date, end: Date): ChartDataPoint[] {
   const diffDays = Math.min(
     60,
     Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 3600 * 24)))
@@ -202,6 +196,131 @@ function buildLeadsChartRange(
   }
 
   return Object.entries(buckets).map(([dia, leadsCount]) => ({ dia, leads: leadsCount }));
+}
+
+// Construtor do Gráfico de Leads
+function buildLeadsChartRange(
+  leads: Lead[],
+  start: Date,
+  end: Date,
+  isSingleDay: boolean
+): ChartDataPoint[] {
+  return isSingleDay
+    ? buildSingleDayLeads(leads, start, end)
+    : buildMultiDayLeads(leads, start, end);
+}
+
+function cleanDigits(val: string | null | undefined): string {
+  return val ? val.replace(/\D/g, "") : "";
+}
+
+// Reconciliação e Unificação Total dos Dados: cruza Pedidos, Leads e WhatsApp
+function reconcileDashboardData(
+  orders: PaymentOrder[],
+  leads: Lead[],
+  whatsApp: WhatsAppMessage[]
+): {
+  reconciledOrders: PaymentOrder[];
+  reconciledLeads: Lead[];
+  reconciledWhatsApp: WhatsAppMessage[];
+} {
+  const paidPhones = new Map<string, PaymentOrder>();
+  const paidEmails = new Map<string, PaymentOrder>();
+
+  for (const order of orders) {
+    if (order.status === "paid") {
+      const phoneDigits = cleanDigits(order.customer_phone);
+      if (phoneDigits.length >= 8) paidPhones.set(phoneDigits, order);
+      const email = order.customer_email?.trim().toLowerCase();
+      if (email && email.includes("@")) paidEmails.set(email, order);
+    }
+  }
+
+  const leadsByPhone = new Map<string, Lead>();
+  const leadsByEmail = new Map<string, Lead>();
+  for (const lead of leads) {
+    const phone = cleanDigits(lead.lead_phone);
+    if (phone.length >= 8 && !leadsByPhone.has(phone)) leadsByPhone.set(phone, lead);
+    const email = lead.lead_email?.trim().toLowerCase();
+    if (email && email.includes("@") && !leadsByEmail.has(email)) leadsByEmail.set(email, lead);
+  }
+
+  const reconciledLeads = leads.map((lead) => {
+    const phone = cleanDigits(lead.lead_phone);
+    const email = lead.lead_email?.trim().toLowerCase();
+    const matchingOrder =
+      (phone && paidPhones.get(phone)) ||
+      (email && paidEmails.get(email)) ||
+      null;
+
+    if (matchingOrder) {
+      return {
+        ...lead,
+        payment_status: "paid" as const,
+        checkout_status: "paid",
+        completed: true,
+        last_amount_cents:
+          lead.last_amount_cents && lead.last_amount_cents > 0
+            ? lead.last_amount_cents
+            : matchingOrder.amount_cents,
+      };
+    }
+    return lead;
+  });
+
+  const reconciledWhatsApp = whatsApp.map((wa) => {
+    const phone = cleanDigits(wa.customer_phone);
+    const email = wa.customer_email?.trim().toLowerCase();
+    const matchingOrder =
+      (phone && paidPhones.get(phone)) ||
+      (email && paidEmails.get(email)) ||
+      null;
+
+    const matchingLead =
+      (phone && leadsByPhone.get(phone)) ||
+      (email && leadsByEmail.get(email)) ||
+      null;
+
+    const updated = { ...wa };
+    if (matchingOrder) {
+      updated.payment_status = "paid";
+      updated.payment_method = matchingOrder.payment_method;
+      if (!updated.amount_cents || updated.amount_cents === 0) {
+        updated.amount_cents = matchingOrder.amount_cents;
+      }
+    }
+    if (matchingLead) {
+      if (!updated.ente_querido && matchingLead.ente_querido) {
+        updated.ente_querido = matchingLead.ente_querido;
+      }
+      if (!updated.grau_parentesco && matchingLead.grau_parentesco) {
+        updated.grau_parentesco = matchingLead.grau_parentesco;
+      }
+      if (!updated.customer_email && matchingLead.lead_email) {
+        updated.customer_email = matchingLead.lead_email;
+      }
+    }
+    return updated;
+  });
+
+  const reconciledOrders = orders.map((order) => {
+    const phone = cleanDigits(order.customer_phone);
+    const email = order.customer_email?.trim().toLowerCase();
+    const matchingLead =
+      (phone && leadsByPhone.get(phone)) ||
+      (email && leadsByEmail.get(email)) ||
+      null;
+
+    if (matchingLead?.ente_querido && order.product_name && !order.product_name.includes("—")) {
+      return {
+        ...order,
+        product_name: `${order.product_name} — ${matchingLead.ente_querido}`,
+      };
+    }
+    return order;
+  });
+
+  return { reconciledOrders, reconciledLeads, reconciledWhatsApp };
 }
 
 // ─── Secções & Slugs do painel ───────────────────────────────────────────────
@@ -235,7 +354,7 @@ const SECTION_TO_SLUG: Record<Section, string> = {
 function getSectionFromPath(): Section {
   if (typeof window === "undefined") return "visao-geral";
   const rawPath = window.location.pathname.toLowerCase().replace(/\/$/, "") || "/";
-  const normalized = rawPath.replace(/_/g, "-");
+  const normalized = rawPath.replaceAll("_", "-");
   return SLUG_TO_SECTION[rawPath] || SLUG_TO_SECTION[normalized] || "visao-geral";
 }
 
@@ -334,13 +453,12 @@ export function App() {
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
-    document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("tl-theme", theme);
   }, [theme]);
 
   const toggleTheme = () => setTheme((t) => (t === "light" ? "dark" : "light"));
 
-  // Busca de dados no Supabase
+  // Busca de dados no Supabase e Reconciliação Coesa
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
@@ -374,17 +492,24 @@ export function App() {
         gateway: o.gateway || (o.payment_method === "credit_card" ? "stripe" : "connectpay"),
         created_at: o.created_at,
       }));
-      setAllOrders(parsedOrders);
 
       const parsedLeads: Lead[] = (leadsData ?? []) as Lead[];
-      setAllLeads(parsedLeads);
-
       const parsedWhatsApp: WhatsAppMessage[] = (waData ?? []) as WhatsAppMessage[];
-      setAllWhatsApp(parsedWhatsApp);
+
+      // Reconciliação cruzada: unifica status de pagamento, telefone e ente querido
+      const { reconciledOrders, reconciledLeads, reconciledWhatsApp } = reconcileDashboardData(
+        parsedOrders,
+        parsedLeads,
+        parsedWhatsApp
+      );
+
+      setAllOrders(reconciledOrders);
+      setAllLeads(reconciledLeads);
+      setAllWhatsApp(reconciledWhatsApp);
 
       // Pessoas ao vivo (últimos 15 minutos)
       const fifteenMinAgo = Date.now() - 15 * 60 * 1000;
-      const activeRecent = parsedLeads.filter(
+      const activeRecent = reconciledLeads.filter(
         (l) => new Date(l.updated_at || l.created_at).getTime() >= fifteenMinAgo
       );
       setOnlineCount(activeRecent.length);

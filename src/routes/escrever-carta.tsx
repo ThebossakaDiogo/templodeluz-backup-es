@@ -74,13 +74,24 @@ function parseStoredLogs(logs: string | null) {
           (e.field === "nome_consulente" || e.field === "lead_name") && e.value,
       )?.value,
       ente: parsed.find(
-        (e: { field: string; value: string }) => e.field === "nome_ente_querido" && e.value,
+        (e: { field: string; value: string }) =>
+          (e.field === "nome_ente_querido" || e.field === "ente") && e.value,
       )?.value,
       relacao: parsed.find(
-        (e: { field: string; value: string }) => e.field === "grau_parentesco" && e.value,
+        (e: { field: string; value: string }) =>
+          (e.field === "grau_parentesco" || e.field === "relacao") && e.value,
       )?.value,
       mensagem: parsed.find(
-        (e: { field: string; value: string }) => e.field === "mensagem_para_ente" && e.value,
+        (e: { field: string; value: string }) =>
+          (e.field === "mensagem_para_ente" || e.field === "mensagem") && e.value,
+      )?.value,
+      phone: parsed.find(
+        (e: { field: string; value: string }) =>
+          (e.field === "telefone" || e.field === "whatsapp" || e.field === "lead_phone" || e.field === "whatsapp_pix_checkout") && e.value,
+      )?.value,
+      email: parsed.find(
+        (e: { field: string; value: string }) =>
+          (e.field === "email" || e.field === "lead_email") && e.value,
       )?.value,
     };
   } catch {
@@ -161,6 +172,8 @@ function EscreverCartaPage() {
   const [nome, setNome] = useState("");
   const [ente, setEnte] = useState("");
   const [relacao, setRelacao] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [selectedTemas, setSelectedTemas] = useState<string[]>(["paz", "sinal"]);
   const [mensagemLivre, setMensagemLivre] = useState("");
   const [copied, setCopied] = useState(false);
@@ -181,6 +194,8 @@ function EscreverCartaPage() {
       if (quiz.nome && quiz.nome !== "Maria Clara") setNome(quiz.nome);
       if (quiz.ente && quiz.ente !== "Dona Helena") setEnte(quiz.ente);
       if (quiz.relacao) setRelacao(quiz.relacao);
+      if (quiz.phone) setPhone(quiz.phone);
+      if (quiz.email) setEmail(quiz.email);
       if (quiz.modoMensagem === "livre" && quiz.mensagem) {
         setMensagemLivre(quiz.mensagem);
         setMode("livre");
@@ -201,6 +216,12 @@ function EscreverCartaPage() {
       }
       if (logData.relacao) {
         setRelacao((prev) => (!prev ? logData.relacao : prev));
+      }
+      if (logData.phone) {
+        setPhone((prev) => (!prev ? logData.phone : prev));
+      }
+      if (logData.email) {
+        setEmail((prev) => (!prev ? logData.email : prev));
       }
       if (logData.mensagem) {
         setMensagemLivre(logData.mensagem);
@@ -271,6 +292,8 @@ function EscreverCartaPage() {
 
     void trackWhatsAppEvent({
       customerName: nome || "Consulente",
+      customerPhone: phone ? phone.replace(/\D/g, "") : undefined,
+      customerEmail: email || undefined,
       enteQuerido: ente || "Ente Querido",
       grauParentesco: relacao || "Familiar",
       paymentMethod,
