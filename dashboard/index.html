@@ -31,13 +31,31 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script>
-      // Registro do Service Worker PWA
+      // Service Worker: Apenas em produção (evita cache de arquivos de desenvolvimento no Vite)
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
-            .then((reg) => console.log('[PWA] Service Worker registrado com sucesso:', reg.scope))
-            .catch((err) => console.warn('[PWA] Erro ao registrar Service Worker:', err));
-        });
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for (let registration of registrations) {
+              registration.unregister();
+            }
+          });
+          if ('caches' in window) {
+            caches.keys().then(function(names) {
+              for (let name of names) {
+                caches.delete(name);
+              }
+            });
+          }
+        } else {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js')
+              .then((reg) => {
+                console.log('[PWA] Service Worker ativo:', reg.scope);
+                reg.update();
+              })
+              .catch((err) => console.warn('[PWA] Erro ao registrar SW:', err));
+          });
+        }
       }
     </script>
   </body>

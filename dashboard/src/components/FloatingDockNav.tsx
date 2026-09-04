@@ -9,6 +9,8 @@ import {
   Sun,
   Moon,
   LogOut,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import type { Section } from "../App";
 
@@ -38,6 +40,7 @@ export function FloatingDockNav({
   onSignOut,
 }: FloatingDockNavProps) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [isMinimized, setIsMinimized] = useState(false);
 
   const navItems: DockItem[] = [
     { id: "visao-geral",  label: "Visão Geral", icon: LayoutGrid },
@@ -47,6 +50,65 @@ export function FloatingDockNav({
     { id: "whatsapp",     label: "WhatsApp Tracker", icon: MessageSquare },
     { id: "perfil",       label: "Meu Perfil", icon: User },
   ];
+
+  if (isMinimized) {
+    const activeItem = navItems.find((item) => item.id === section) || navItems[0];
+    const ActiveIcon = activeItem.icon;
+
+    return (
+      <aside className="floating-dock-container" aria-label="Menu de Navegação Principal">
+        <button
+          type="button"
+          onClick={() => setIsMinimized(false)}
+          className="floating-dock-bar"
+          title="Expandir menu de navegação (liberar abas)"
+          aria-label="Expandir menu de navegação"
+          style={{
+            cursor: "pointer",
+            padding: "8px 16px",
+            display: "flex",
+            alignItems: "center",
+            gap: "9px",
+            borderRadius: "999px",
+            border: "1px solid var(--accent-border)",
+            background: "var(--dock-bg)",
+          }}
+        >
+          <div
+            className="dock-icon-tile"
+            style={{
+              width: "26px",
+              height: "26px",
+              borderRadius: "50%",
+              background: "var(--accent-strong)",
+              color: "#FFFFFF",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <ActiveIcon size={14} strokeWidth={2.2} />
+          </div>
+          <span style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-primary)" }}>
+            {activeItem.label}
+          </span>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+              paddingLeft: "4px",
+              color: "var(--text-muted)",
+              fontSize: "11px",
+            }}
+          >
+            <span>Expandir</span>
+            <ChevronUp size={14} />
+          </div>
+        </button>
+      </aside>
+    );
+  }
 
   return (
     <aside
@@ -124,6 +186,18 @@ export function FloatingDockNav({
             aria-label="Sair"
           >
             <LogOut className="dock-action-icon" strokeWidth={1.7} />
+          </button>
+
+          {/* Botão para Minimizar Dock e Liberar Tela */}
+          <button
+            type="button"
+            onClick={() => setIsMinimized(true)}
+            className="dock-action-btn"
+            title="Minimizar menu para liberar espaço de visualização"
+            aria-label="Minimizar menu"
+            style={{ marginLeft: "2px" }}
+          >
+            <ChevronDown className="dock-action-icon" strokeWidth={1.7} />
           </button>
         </div>
       </div>

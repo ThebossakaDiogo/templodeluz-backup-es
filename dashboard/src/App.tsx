@@ -1,6 +1,15 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
+import {
+  LayoutGrid,
+  Activity,
+  CreditCard,
+  BarChart3,
+  MessageSquare,
+  User,
+} from "lucide-react";
 import { Topbar } from "@/components/Topbar";
 import { FloatingDockNav } from "@/components/FloatingDockNav";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { MetricCards } from "@/components/MetricCards";
 import { RevenueChart } from "@/components/RevenueChart";
 import { LeadsChart } from "@/components/LeadsChart";
@@ -652,6 +661,15 @@ export function App() {
     );
   }
 
+  const NAV_TABS = useMemo(() => [
+    { id: "visao-geral" as Section, label: "Visão Geral", icon: LayoutGrid },
+    { id: "rastreamento" as Section, label: "Funil & Telemetria", icon: Activity, badge: onlineCount > 0 ? `${onlineCount}` : undefined },
+    { id: "pedidos" as Section, label: "Pedidos & Vendas", icon: CreditCard },
+    { id: "relatorios" as Section, label: "Relatórios & UTMs", icon: BarChart3 },
+    { id: "whatsapp" as Section, label: "WhatsApp Tracker", icon: MessageSquare, badge: allWhatsApp.filter((w) => w.payment_status !== "paid").length || undefined },
+    { id: "perfil" as Section, label: "Meu Perfil", icon: User },
+  ], [onlineCount, allWhatsApp]);
+
   return (
     <div className="dashboard-root" style={{ flexDirection: "column", height: "100vh", overflow: "hidden" }}>
       {/* Barra Superior de Alta Precisão */}
@@ -671,6 +689,30 @@ export function App() {
         leads={allLeads}
       />
 
+      {/* Barra de Subnavegação Executiva Estilo Vercel/Stripe (Desktop) */}
+      <nav className="dashboard-subnav" aria-label="Navegação Principal">
+        <div className="dashboard-subnav-inner">
+          {NAV_TABS.map((tab) => {
+            const active = section === tab.id;
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => handleNavigate(tab.id)}
+                className={`subnav-tab-btn ${active ? "active" : ""}`}
+                type="button"
+              >
+                <Icon size={14} strokeWidth={active ? 2.2 : 1.8} />
+                <span>{tab.label}</span>
+                {tab.badge !== undefined && (
+                  <span className="subnav-tab-badge">{tab.badge}</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+
       {/* Área Principal de Conteúdo em Largura Total */}
       <main
         className="dashboard-main"
@@ -678,7 +720,7 @@ export function App() {
           flex: 1,
           overflowY: "auto",
           overflowX: "hidden",
-          padding: "32px 36px 130px",
+          padding: "28px 36px 180px",
           display: "flex",
           flexDirection: "column",
           gap: "26px",
@@ -786,7 +828,7 @@ export function App() {
           )}
         </main>
 
-      {/* Menu de Rodapé Flutuante Ultra-Premium (Floating Dock) */}
+      {/* Menu de Rodapé Flutuante Ultra-Premium (Floating Dock no Desktop com botão Minimizar) */}
       <FloatingDockNav
         section={section}
         onSelect={handleNavigate}
@@ -795,6 +837,14 @@ export function App() {
         onToggleTheme={toggleTheme}
         currentUserEmail={session.user.email}
         onSignOut={handleSignOut}
+      />
+
+      {/* Menu Mobile Fixo no Rodapé (Mobile-First) */}
+      <MobileBottomNav
+        currentSection={section}
+        onSelect={handleNavigate}
+        onOpenMenu={() => handleNavigate("perfil")}
+        unreadWhatsAppCount={allWhatsApp.filter((w) => w.payment_status !== "paid").length}
       />
     </div>
   );

@@ -15,6 +15,15 @@ dist-ssr
 .tanstack/**
 .nitro
 *.local
+.env
+.env.*
+!.env.example
+acesso-*.txt
+*.pem
+*.key
+*.dump
+*.sql
+*.bak
 
 # Wrangler / Cloudflare
 .wrangler/

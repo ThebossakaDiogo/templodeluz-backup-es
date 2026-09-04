@@ -13,4 +13,15 @@ export default defineConfig({
   server: {
     port: 3001,
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          charts: ["recharts"],
+          supabase: ["@supabase/supabase-js"],
+          icons: ["lucide-react"],
+        },
+      },
+    },
+  },
 });
