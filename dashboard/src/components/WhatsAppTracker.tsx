@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MessageCircle, Search, ExternalLink, QrCode, CreditCard, Clock, RefreshCw } from "lucide-react";
+import { MessageCircle, Search, ExternalLink, QrCode, CreditCard, Clock, RefreshCw, X } from "lucide-react";
 import type { WhatsAppMessage } from "@/types";
 
 interface WhatsAppTrackerProps {
@@ -554,9 +554,10 @@ export function WhatsAppTracker({ messages, loading, onRefresh }: WhatsAppTracke
               <button
                 onClick={() => setSelectedMessage(null)}
                 className="btn"
-                style={{ padding: "4px 8px" }}
+                style={{ padding: "4px 8px", display: "flex", alignItems: "center", justifyContent: "center" }}
+                aria-label="Fechar"
               >
-                ✕
+                <X style={{ width: "13px", height: "13px" }} />
               </button>
             </div>
 

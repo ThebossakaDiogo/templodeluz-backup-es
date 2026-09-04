@@ -196,7 +196,7 @@ export function trackCheckoutInitiated(params: {
     leadPhone: params.leadPhone,
     amountCents: params.amountCents,
     checkoutEvent: "checkout_initiated",
-    paymentStatus: "waiting_payment",
+    paymentStatus: "none",
   });
 }
 
@@ -289,6 +289,11 @@ export function syncLeadPhoneImmediate(phone: string, leadName?: string): void {
   if (cleanPhone.length < 9) return;
 
   try {
+    localStorage.setItem("templodeluz_lead_phone", cleanPhone);
+    if (leadName && leadName.trim() && leadName !== "Consulente") {
+      localStorage.setItem("templodeluz_lead_name", leadName.trim());
+    }
+
     const sessionId = getTelemetrySessionId();
     const payload: Record<string, unknown> = {
       session_id: sessionId,

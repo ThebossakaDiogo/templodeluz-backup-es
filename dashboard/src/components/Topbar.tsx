@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Sun,
   Moon,
@@ -8,32 +8,35 @@ import {
   Search,
   ShieldCheck,
   ChevronDown,
+  Smartphone,
 } from "lucide-react";
 import { DateRangeSelector, type DateRangeValue } from "./DateRangeSelector";
 import { NotificationCenter } from "./NotificationCenter";
+import { EvolutionQRModal } from "./EvolutionQRModal";
+import { testEvolutionConnection } from "@/services/evolution";
 import type { Section } from "../App";
-
 import type { PaymentOrder, Lead } from "@/types";
 
 interface TopbarProps {
-  theme: "light" | "dark";
-  onToggleTheme: () => void;
-  onRefresh: () => void;
-  loading: boolean;
-  lastUpdate: Date | null;
-  section: Section;
-  onNavigate?: (section: Section) => void;
-  onExportCsv: () => void;
-  dateRange: DateRangeValue;
-  onDateRangeChange: (val: DateRangeValue) => void;
-  onlineCount: number;
-  orders?: PaymentOrder[];
-  leads?: Lead[];
+  readonly theme: "light" | "dark";
+  readonly onToggleTheme: () => void;
+  readonly onRefresh: () => void;
+  readonly loading: boolean;
+  readonly lastUpdate: Date | null;
+  readonly section: Section;
+  readonly onNavigate?: (section: Section) => void;
+  readonly onExportCsv: () => void;
+  readonly dateRange: DateRangeValue;
+  readonly onDateRangeChange: (val: DateRangeValue) => void;
+  readonly onlineCount: number;
+  readonly orders?: readonly PaymentOrder[];
+  readonly leads?: readonly Lead[];
 }
 
 const SECTION_LABELS: Record<Section, string> = {
   "visao-geral":  "Visão Geral",
   "rastreamento": "Funil & Telemetria",
+  "abandonos":    "Métricas de Abandono",
   "pedidos":      "Auditoria de Pedidos",
   "relatorios":   "Relatórios & UTMs",
   "whatsapp":     "WhatsApp Tracker",
@@ -57,22 +60,31 @@ export function Topbar({
   leads = [],
 }: TopbarProps) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [isQRModalOpen, setIsQRModalOpen] = useState(false);
+  const [isWhatsAppConnected, setIsWhatsAppConnected] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    testEvolutionConnection().then((res) => {
+      setIsWhatsAppConnected(res.success && res.state === "open");
+    });
+  }, []);
 
   return (
-    <header
-      className="dashboard-topbar"
+    <>
+      <header
+        className="dashboard-topbar"
       style={{
-        height: "68px",
-        minHeight: "68px",
-        background: "var(--topbar-bg, rgba(13, 15, 21, 0.88))",
+        height: "60px",
+        minHeight: "60px",
+        background: "var(--topbar-bg)",
         backdropFilter: "blur(24px) saturate(190%)",
         WebkitBackdropFilter: "blur(24px) saturate(190%)",
-        borderBottom: "1px solid var(--border-subtle, #1E202B)",
-        padding: "0 32px",
+        borderBottom: "1px solid var(--border-subtle)",
+        padding: "0 28px",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        gap: "18px",
+        gap: "14px",
         zIndex: 100,
         position: "sticky",
         top: 0,
@@ -80,33 +92,38 @@ export function Topbar({
         boxSizing: "border-box",
       }}
     >
-      {/* ─── LADO ESQUERDO: Marca OD METRICS + Seletor de Modo + Status Ao Vivo ─── */}
-      <div style={{ display: "flex", alignItems: "center", gap: "14px", minWidth: 0 }}>
-        {/* Logo OD METRICS Minimalista */}
-        <div
-          onClick={() => onNavigate && onNavigate("visao-geral")}
+      {/* ─── LADO ESQUERDO: Marca OD METRICS + Status Ao Vivo ─── */}
+      <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0 }}>
+        {/* Logo OD METRICS Acessível */}
+        <button
+          type="button"
+          onClick={() => onNavigate?.("visao-geral")}
           style={{
             display: "flex",
             alignItems: "center",
             gap: "8px",
+            background: "none",
+            border: "none",
+            padding: 0,
             cursor: "pointer",
-            userSelect: "none",
+            textAlign: "left",
+            fontFamily: "inherit",
           }}
+          aria-label="Ir para a Visão Geral"
         >
           <div
             style={{
               width: "28px",
               height: "28px",
-              borderRadius: "8px",
-              background: "var(--surface-3, #161722)",
-              border: "1px solid var(--accent-border, rgba(189, 180, 239, 0.35))",
+              borderRadius: "7px",
+              background: "var(--surface-2)",
+              border: "1px solid var(--border-strong)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "var(--accent-primary, #BDB4EF)",
+              color: "var(--accent-primary)",
               fontWeight: 700,
               fontSize: "12px",
-              boxShadow: "0 2px 8px rgba(124, 92, 255, 0.18)",
             }}
           >
             OD
@@ -116,10 +133,21 @@ export function Topbar({
               <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.01em" }}>
                 OD Metrics
               </span>
-              <span style={{ fontSize: "9px", color: "var(--accent-strong)", fontWeight: 600 }}>PRO</span>
+              <span
+                style={{
+                  fontSize: "9px",
+                  color: "#10B981",
+                  fontWeight: 700,
+                  background: "rgba(16, 185, 129, 0.1)",
+                  padding: "1px 5px",
+                  borderRadius: "4px",
+                }}
+              >
+                PRO
+              </span>
             </div>
           </div>
-        </div>
+        </button>
 
         <div style={{ width: "1px", height: "18px", background: "var(--border-subtle)" }} className="desktop-only-control" />
 
@@ -140,7 +168,7 @@ export function Topbar({
           }}
         >
           <div className="pulse-emerald" />
-          <ShieldCheck style={{ width: "12px", height: "12px", color: "#2EDB6F" }} />
+          <ShieldCheck style={{ width: "12px", height: "12px", color: "#10B981" }} />
           <span>Telemetria Ao Vivo</span>
           <span
             style={{
@@ -160,6 +188,40 @@ export function Topbar({
           </span>
         </div>
 
+        {/* Pílula de Status WhatsApp Evolution API */}
+        <button
+          type="button"
+          onClick={() => setIsQRModalOpen(true)}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            background: isWhatsAppConnected ? "rgba(16, 185, 129, 0.12)" : "rgba(245, 158, 11, 0.12)",
+            border: isWhatsAppConnected ? "1px solid rgba(16, 185, 129, 0.3)" : "1px solid rgba(245, 158, 11, 0.3)",
+            borderRadius: "999px",
+            padding: "4px 10px",
+            fontSize: "11px",
+            fontWeight: 600,
+            color: isWhatsAppConnected ? "#10B981" : "#F59E0B",
+            cursor: "pointer",
+            fontFamily: "inherit",
+          }}
+          title={isWhatsAppConnected ? "WhatsApp Conectado na Evolution API. Clique para gerenciar ou testar." : "WhatsApp Não Conectado. Clique para escanear QR Code."}
+        >
+          <Smartphone style={{ width: "12px", height: "12px" }} />
+          <span>{isWhatsAppConnected ? "WhatsApp Ativo" : "Conectar WhatsApp"}</span>
+          <span
+            style={{
+              width: "6px",
+              height: "6px",
+              borderRadius: "50%",
+              background: isWhatsAppConnected ? "#10B981" : "#F59E0B",
+              boxShadow: isWhatsAppConnected ? "0 0 6px rgba(16, 185, 129, 0.7)" : "none",
+              display: "inline-block",
+            }}
+          />
+        </button>
+
         {/* Badge da Seção Atual */}
         <span
           className="desktop-only-control"
@@ -177,9 +239,9 @@ export function Topbar({
         </span>
       </div>
 
-      {/* ─── LADO DIREITO: Busca, Notificações Funcionais, Filtro de Data e Ações ─── */}
-      <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
-        {/* Input de Busca Compacto */}
+      {/* ─── LADO DIREITO: Busca, Datas, Notificações e Ações (Linha única no mobile e desktop) ─── */}
+      <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
+        {/* Input de Busca Compacto (Desktop) */}
         <div className="desktop-only-control" style={{ position: "relative" }}>
           <Search
             style={{
@@ -220,39 +282,40 @@ export function Topbar({
           />
         </div>
 
-        {/* Central de Notificações com Dropdown Popover (Dados Reais) */}
+        {/* Seletor de Período / Datas (Desktop e Mobile integrados) */}
+        {section === "visao-geral" && (
+          <DateRangeSelector value={dateRange} onChange={onDateRangeChange} />
+        )}
+
+        {/* Central de Notificações com Dropdown Popover */}
         <NotificationCenter
           onNavigate={onNavigate}
           onlineCount={onlineCount}
-          orders={orders}
-          leads={leads}
+          orders={orders as PaymentOrder[]}
+          leads={leads as Lead[]}
         />
 
-        {/* Seletor de Período / Datas no Desktop */}
-        {section === "visao-geral" && (
-          <div className="desktop-date-selector">
-            <DateRangeSelector value={dateRange} onChange={onDateRangeChange} />
-          </div>
-        )}
-
-        {/* Botão Exportar CSV */}
+        {/* Botão Exportar CSV (Desktop) */}
         <button
+          type="button"
           onClick={onExportCsv}
           className="btn desktop-only-control"
-          style={{ height: "34px", padding: "0 11px", fontSize: "11.5px", gap: "5px" }}
+          style={{ height: "32px", padding: "0 10px", fontSize: "11.5px", gap: "5px" }}
           title="Exportar dados do período em CSV"
         >
           <Download style={{ width: "12px", height: "12px", color: "var(--text-secondary)" }} />
           Exportar
         </button>
 
-        {/* Botão Refresh / Sync com Tooltip Informativo */}
+        {/* Botão Refresh / Sync */}
         <button
+          type="button"
           onClick={onRefresh}
           disabled={loading}
           className="btn"
           title={lastUpdate ? `Última sincronização: ${lastUpdate.toLocaleTimeString("pt-BR")}. Clique para atualizar.` : "Atualizar dados agora"}
-          style={{ width: "34px", height: "34px", padding: 0, borderRadius: "9px" }}
+          style={{ width: "32px", height: "32px", padding: 0, borderRadius: "8px" }}
+          aria-label="Atualizar dados"
         >
           <RefreshCw
             style={{
@@ -266,10 +329,12 @@ export function Topbar({
 
         {/* Alternador de Tema Claro / Escuro */}
         <button
+          type="button"
           onClick={onToggleTheme}
           className="btn"
           title={`Alternar para modo ${theme === "light" ? "escuro" : "claro"}`}
-          style={{ width: "34px", height: "34px", padding: 0, borderRadius: "9px" }}
+          style={{ width: "32px", height: "32px", padding: 0, borderRadius: "8px" }}
+          aria-label="Alternar tema"
         >
           {theme === "light" ? (
             <Moon style={{ width: "13px", height: "13px", color: "var(--text-secondary)" }} />
@@ -278,9 +343,10 @@ export function Topbar({
           )}
         </button>
 
-        {/* Pill de Usuário Administrador */}
-        <div
-          onClick={() => onNavigate && onNavigate("perfil")}
+        {/* Pílula de Usuário Administrador (Desktop) */}
+        <button
+          type="button"
+          onClick={() => onNavigate?.("perfil")}
           className="desktop-only-control"
           style={{
             display: "flex",
@@ -291,15 +357,18 @@ export function Topbar({
             borderRadius: "999px",
             padding: "4px 10px 4px 4px",
             cursor: "pointer",
+            fontFamily: "inherit",
           }}
+          aria-label="Abrir Meu Perfil"
         >
           <div
             style={{
               width: "24px",
               height: "24px",
               borderRadius: "50%",
-              background: "var(--accent-strong)",
-              color: "#FFFFFF",
+              background: "var(--surface-3)",
+              color: "var(--text-primary)",
+              border: "1px solid var(--border-subtle)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -313,15 +382,16 @@ export function Topbar({
             Diogo
           </span>
           <ChevronDown style={{ width: "11px", height: "11px", color: "var(--text-muted)" }} />
-        </div>
+        </button>
       </div>
-
-      {/* Barra de Datas no Mobile */}
-      {section === "visao-geral" && (
-        <div className="mobile-date-subbar">
-          <DateRangeSelector value={dateRange} onChange={onDateRangeChange} />
-        </div>
-      )}
     </header>
+
+    {/* Modal Interativo de Conexão WhatsApp / QR Code */}
+    <EvolutionQRModal
+      isOpen={isQRModalOpen}
+      onClose={() => setIsQRModalOpen(false)}
+      onConnectionChange={(connected) => setIsWhatsAppConnected(connected)}
+    />
+  </>
   );
 }

@@ -923,7 +923,7 @@ export function PixCheckout({
       trackQuizStep({
         stepIndex: 8,
         stepName: "checkout_cartao_iniciado",
-        paymentStatus: "waiting_payment",
+        paymentStatus: "none",
         amountCents,
         completed: false,
         leadName: payerName,

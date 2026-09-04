@@ -6,9 +6,9 @@ import {
   BarChart3,
   MessageSquare,
   User,
+  AlertOctagon,
 } from "lucide-react";
 import { Topbar } from "@/components/Topbar";
-import { FloatingDockNav } from "@/components/FloatingDockNav";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { MetricCards } from "@/components/MetricCards";
 import { RevenueChart } from "@/components/RevenueChart";
@@ -23,6 +23,7 @@ import { ConversionOverview } from "@/components/ConversionOverview";
 import { ConsulentesTelemetryTable } from "@/components/ConsulentesTelemetryTable";
 import { TodayHeroMetric } from "@/components/TodayHeroMetric";
 import { WhatsAppTracker } from "@/components/WhatsAppTracker";
+import { AbandonmentTracker } from "@/components/AbandonmentTracker";
 import { ProfileView } from "@/components/ProfileView";
 import { LoginPage } from "@/components/LoginPage";
 import { supabase } from "@/lib/supabase";
@@ -328,7 +329,7 @@ function reconcileDashboardData(
 }
 
 // ─── Secções & Slugs do painel ───────────────────────────────────────────────
-export type Section = "visao-geral" | "rastreamento" | "pedidos" | "relatorios" | "whatsapp" | "perfil" | "login";
+export type Section = "visao-geral" | "rastreamento" | "abandonos" | "pedidos" | "relatorios" | "whatsapp" | "perfil" | "login";
 
 const SLUG_TO_SECTION: Record<string, Section> = {
   "/": "visao-geral",
@@ -338,6 +339,7 @@ const SLUG_TO_SECTION: Record<string, Section> = {
   "/painel": "visao-geral",
   "/admin": "visao-geral",
   "/rastreamento": "rastreamento",
+  "/abandonos": "abandonos",
   "/pedidos": "pedidos",
   "/relatorios": "relatorios",
   "/whatsapp": "whatsapp",
@@ -348,6 +350,7 @@ const SLUG_TO_SECTION: Record<string, Section> = {
 const SECTION_TO_SLUG: Record<Section, string> = {
   "visao-geral": "/visao-geral",
   "rastreamento": "/rastreamento",
+  "abandonos": "/abandonos",
   "pedidos": "/pedidos",
   "relatorios": "/relatorios",
   "whatsapp": "/whatsapp",
@@ -715,15 +718,30 @@ export function App() {
     };
   }, [allOrders, allLeads, dateRange]);
 
+  // Cálculo de leads com PIX emitido há mais de 1 hora sem pagamento (para o badge da aba)
+  const pixUnpaidOver1hCount = useMemo(() => {
+    const now = Date.now();
+    return allLeads.filter((l) => {
+      if (l.payment_status === "paid") return false;
+      const isPix = l.pix_generated === true || l.payment_status === "waiting_payment";
+      if (!isPix) return false;
+      const dateStr = l.pix_generated_at || l.updated_at || l.created_at;
+      if (!dateStr) return false;
+      const diffHours = (now - new Date(dateStr).getTime()) / (1000 * 60 * 60);
+      return diffHours >= 1;
+    }).length;
+  }, [allLeads]);
+
   // Hook incondicional executado em toda renderização (respeitando as Rules of Hooks)
   const NAV_TABS = useMemo(() => [
     { id: "visao-geral" as Section, label: "Visão Geral", icon: LayoutGrid },
     { id: "rastreamento" as Section, label: "Funil & Telemetria", icon: Activity, badge: onlineCount > 0 ? `${onlineCount}` : undefined },
+    { id: "abandonos" as Section, label: "Abandono & Recuperação", icon: AlertOctagon, badge: pixUnpaidOver1hCount > 0 ? `${pixUnpaidOver1hCount}` : undefined },
     { id: "pedidos" as Section, label: "Pedidos & Vendas", icon: CreditCard },
     { id: "relatorios" as Section, label: "Relatórios & UTMs", icon: BarChart3 },
     { id: "whatsapp" as Section, label: "WhatsApp Tracker", icon: MessageSquare, badge: allWhatsApp.filter((w) => w.payment_status !== "paid").length || undefined },
     { id: "perfil" as Section, label: "Meu Perfil", icon: User },
-  ], [onlineCount, allWhatsApp]);
+  ], [onlineCount, pixUnpaidOver1hCount, allWhatsApp]);
 
   const exportCsv = () => {
     const rows = [
@@ -854,10 +872,10 @@ export function App() {
           flex: 1,
           overflowY: "auto",
           overflowX: "hidden",
-          padding: "28px 36px 180px",
+          padding: "24px 32px 56px",
           display: "flex",
           flexDirection: "column",
-          gap: "26px",
+          gap: "24px",
           width: "100%",
           maxWidth: "1440px",
           margin: "0 auto",
@@ -911,7 +929,12 @@ export function App() {
               />
 
               {/* Tabela de Pedidos com Badges e Filtro por PIX / Cartão */}
-              <OrdersTable orders={filteredOrders.slice(0, 10)} loading={loading} compact />
+              <OrdersTable
+                orders={filteredOrders.slice(0, 10)}
+                loading={loading}
+                compact
+                leads={allLeads}
+              />
             </>
           )}
 
@@ -928,9 +951,21 @@ export function App() {
             </div>
           )}
 
+          {/* SLUG: /abandonos */}
+          {section === "abandonos" && (
+            <AbandonmentTracker
+              leads={filteredLeads.length > 0 ? filteredLeads : allLeads}
+              loading={loading}
+            />
+          )}
+
           {/* SLUG: /pedidos */}
           {section === "pedidos" && (
-            <OrdersTable orders={filteredOrders.length > 0 ? filteredOrders : allOrders} loading={loading} />
+            <OrdersTable
+              orders={filteredOrders.length > 0 ? filteredOrders : allOrders}
+              loading={loading}
+              leads={allLeads}
+            />
           )}
 
           {/* SLUG: /relatorios */}
@@ -961,17 +996,6 @@ export function App() {
             />
           )}
         </main>
-
-      {/* Menu de Rodapé Flutuante Ultra-Premium (Floating Dock no Desktop com botão Minimizar) */}
-      <FloatingDockNav
-        section={section}
-        onSelect={handleNavigate}
-        onlineCount={onlineCount}
-        theme={theme}
-        onToggleTheme={toggleTheme}
-        currentUserEmail={session.user.email}
-        onSignOut={handleSignOut}
-      />
 
       {/* Menu Mobile Fixo no Rodapé (Mobile-First) */}
       <MobileBottomNav

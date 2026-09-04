@@ -2,9 +2,9 @@ import { Target, TrendingUp, ShieldCheck, QrCode, CreditCard } from "lucide-reac
 import type { Lead, PaymentOrder } from "@/types";
 
 interface ConversionOverviewProps {
-  leads: Lead[];
-  orders: PaymentOrder[];
-  loading?: boolean;
+  readonly leads: readonly Lead[];
+  readonly orders: readonly PaymentOrder[];
+  readonly loading?: boolean;
 }
 
 export function ConversionOverview({ leads, orders, loading }: ConversionOverviewProps) {
@@ -37,7 +37,7 @@ export function ConversionOverview({ leads, orders, loading }: ConversionOvervie
         padding: "18px 22px",
         background: "var(--surface-card)",
         border: "1px solid var(--border-subtle)",
-        borderRadius: "16px",
+        borderRadius: "14px",
       }}
     >
       {/* Item 1: Conclusão do Quiz */}
@@ -53,7 +53,7 @@ export function ConversionOverview({ leads, orders, loading }: ConversionOvervie
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "var(--accent-strong)",
+              color: "#0EA5E9",
             }}
           >
             <Target style={{ width: "14px", height: "14px" }} strokeWidth={1.8} />
@@ -77,7 +77,7 @@ export function ConversionOverview({ leads, orders, loading }: ConversionOvervie
             style={{
               width: `${quizCompletionRate}%`,
               height: "100%",
-              background: "var(--accent-strong)",
+              background: "#0EA5E9",
               borderRadius: "99px",
               transition: "width 0.6s ease",
             }}
@@ -98,7 +98,7 @@ export function ConversionOverview({ leads, orders, loading }: ConversionOvervie
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "var(--success)",
+              color: "#10B981",
             }}
           >
             <QrCode style={{ width: "14px", height: "14px" }} strokeWidth={1.8} />
@@ -109,7 +109,7 @@ export function ConversionOverview({ leads, orders, loading }: ConversionOvervie
         </div>
 
         <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
-          <span className="font-numeric" style={{ fontSize: "19px", fontWeight: 600, color: "var(--success)" }}>
+          <span className="font-numeric" style={{ fontSize: "19px", fontWeight: 600, color: "#10B981" }}>
             {loading ? "—" : `${pixSuccessRate}%`}
           </span>
           <span style={{ fontSize: "11px", color: "var(--text-muted)", fontWeight: 400 }}>
@@ -122,7 +122,7 @@ export function ConversionOverview({ leads, orders, loading }: ConversionOvervie
             style={{
               width: `${pixSuccessRate}%`,
               height: "100%",
-              background: "var(--success)",
+              background: "#10B981",
               borderRadius: "99px",
               transition: "width 0.6s ease",
             }}
@@ -143,7 +143,7 @@ export function ConversionOverview({ leads, orders, loading }: ConversionOvervie
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "var(--accent-strong)",
+              color: "#6366F1",
             }}
           >
             <CreditCard style={{ width: "14px", height: "14px" }} strokeWidth={1.8} />
@@ -154,7 +154,7 @@ export function ConversionOverview({ leads, orders, loading }: ConversionOvervie
         </div>
 
         <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
-          <span className="font-numeric" style={{ fontSize: "19px", fontWeight: 600, color: "var(--accent-strong)" }}>
+          <span className="font-numeric" style={{ fontSize: "19px", fontWeight: 600, color: "var(--text-primary)" }}>
             {loading ? "—" : `${cardSuccessRate}%`}
           </span>
           <span style={{ fontSize: "11px", color: "var(--text-muted)", fontWeight: 400 }}>
@@ -167,7 +167,7 @@ export function ConversionOverview({ leads, orders, loading }: ConversionOvervie
             style={{
               width: `${cardSuccessRate}%`,
               height: "100%",
-              background: "var(--accent-strong)",
+              background: "#6366F1",
               borderRadius: "99px",
               transition: "width 0.6s ease",
             }}
@@ -188,7 +188,7 @@ export function ConversionOverview({ leads, orders, loading }: ConversionOvervie
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "var(--accent-strong)",
+              color: "#10B981",
             }}
           >
             <TrendingUp style={{ width: "14px", height: "14px" }} strokeWidth={1.8} />
@@ -212,7 +212,7 @@ export function ConversionOverview({ leads, orders, loading }: ConversionOvervie
             style={{
               width: `${Math.min(100, Number(globalLeadToSaleRate) * 5)}%`,
               height: "100%",
-              background: "var(--accent-strong)",
+              background: "#10B981",
               borderRadius: "99px",
               transition: "width 0.6s ease",
             }}
@@ -233,7 +233,7 @@ export function ConversionOverview({ leads, orders, loading }: ConversionOvervie
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "var(--success)",
+              color: "#10B981",
             }}
           >
             <ShieldCheck style={{ width: "14px", height: "14px" }} strokeWidth={1.8} />
@@ -244,9 +244,9 @@ export function ConversionOverview({ leads, orders, loading }: ConversionOvervie
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "3px", marginTop: "2px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", fontWeight: 600, color: "var(--success)" }}>
-            <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--success)" }} />
-            PIX Oficial & Stripe Ativos
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", fontWeight: 600, color: "#10B981" }}>
+            <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#10B981" }} />
+            <span>PIX Oficial & Stripe Ativos</span>
           </div>
           <span style={{ fontSize: "11px", color: "var(--text-muted)", fontWeight: 400 }}>
             Meta Pixel + UTMify integrados

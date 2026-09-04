@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { Search, Download, CreditCard, QrCode } from "lucide-react";
-import type { PaymentOrder } from "@/types";
+import { Search, Download, CreditCard, QrCode, Smartphone, Sparkles, CheckCircle } from "lucide-react";
+import type { PaymentOrder, Lead } from "@/types";
+import { ProductDeliveryModal, getDeliveredOrders } from "./ProductDeliveryModal";
+import { EvolutionQRModal } from "./EvolutionQRModal";
 
 interface OrdersTableProps {
   orders: PaymentOrder[];
   loading?: boolean;
   compact?: boolean;
+  leads?: readonly Lead[];
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -46,10 +49,13 @@ function formatDate(dateStr: string): string {
   });
 }
 
-export function OrdersTable({ orders, loading, compact = false }: OrdersTableProps) {
+export function OrdersTable({ orders, loading, compact = false, leads = [] }: OrdersTableProps) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "paid" | "pending">("all");
   const [methodFilter, setMethodFilter] = useState<"all" | "pix" | "credit_card">("all");
+  const [deliveryOrder, setDeliveryOrder] = useState<PaymentOrder | null>(null);
+  const [isQRModalOpen, setIsQRModalOpen] = useState(false);
+  const [deliveredMap, setDeliveredMap] = useState<Record<string, string>>(getDeliveredOrders);
 
   const filteredOrders = orders.filter((o) => {
     // Filtro por status
@@ -91,8 +97,8 @@ export function OrdersTable({ orders, loading, compact = false }: OrdersTablePro
   };
 
   const COLS = compact
-    ? ["Nome do Consulente", "Produto", "Valor", "Método / Gateway", "Status", "Data"]
-    : ["Nome do Consulente", "E-mail", "Produto", "Valor", "Método / Gateway", "Status", "Data"];
+    ? ["Nome do Consulente", "Produto", "Valor", "Método / Gateway", "Status", "Data", "Ações"]
+    : ["Nome do Consulente", "E-mail", "Produto", "Valor", "Método / Gateway", "Status", "Data", "Entrega WhatsApp"];
 
   return (
     <div className="card" style={{ overflow: "hidden" }}>
@@ -253,6 +259,26 @@ export function OrdersTable({ orders, loading, compact = false }: OrdersTablePro
               }}
             />
           </div>
+
+          {/* Botão Conectar WhatsApp */}
+          <button
+            type="button"
+            onClick={() => setIsQRModalOpen(true)}
+            className="btn"
+            style={{
+              fontSize: "11.5px",
+              padding: "6px 12px",
+              gap: "6px",
+              background: "rgba(16, 185, 129, 0.12)",
+              border: "1px solid rgba(16, 185, 129, 0.3)",
+              color: "#10B981",
+              cursor: "pointer",
+            }}
+            title="Conectar WhatsApp na Evolution API via QR Code"
+          >
+            <Smartphone style={{ width: "13px", height: "13px" }} />
+            WhatsApp QR Code
+          </button>
 
           {/* Botão Exportar CSV */}
           {!compact && (
@@ -461,12 +487,91 @@ export function OrdersTable({ orders, loading, compact = false }: OrdersTablePro
                     >
                       {formatDate(order.created_at)}
                     </td>
+
+                    {/* Ação: Entrega da Carta no WhatsApp */}
+                    <td
+                      style={{
+                        padding: "10px 18px",
+                        borderBottom: "1px solid var(--border-subtle)",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {order.status === "paid" ? (
+                        deliveredMap[order.id] ? (
+                          <button
+                            type="button"
+                            onClick={() => setDeliveryOrder(order)}
+                            className="btn"
+                            style={{
+                              fontSize: "10.5px",
+                              fontWeight: 700,
+                              padding: "4px 9px",
+                              borderRadius: "6px",
+                              background: "rgba(16, 185, 129, 0.12)",
+                              border: "1px solid rgba(16, 185, 129, 0.3)",
+                              color: "#10B981",
+                              cursor: "pointer",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "5px",
+                            }}
+                            title={`Entregue em ${new Date(deliveredMap[order.id]).toLocaleDateString("pt-BR")}. Clique para reenviar.`}
+                          >
+                            <CheckCircle style={{ width: "11px", height: "11px" }} />
+                            Consagrada
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setDeliveryOrder(order)}
+                            className="btn"
+                            style={{
+                              fontSize: "10.5px",
+                              fontWeight: 700,
+                              padding: "4px 10px",
+                              borderRadius: "6px",
+                              background: "linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2))",
+                              border: "1px solid rgba(16, 185, 129, 0.4)",
+                              color: "#10B981",
+                              cursor: "pointer",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "5px",
+                            }}
+                            title="Consagrar pedido e entregar carta no WhatsApp do consulente"
+                          >
+                            <Sparkles style={{ width: "11px", height: "11px" }} />
+                            Entregar Carta
+                          </button>
+                        )
+                      ) : (
+                        <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>—</span>
+                      )}
+                    </td>
                   </tr>
                 );
               })}
           </tbody>
         </table>
       </div>
+
+      {/* Modal de Consagração e Entrega do Produto */}
+      <ProductDeliveryModal
+        isOpen={Boolean(deliveryOrder)}
+        onClose={() => setDeliveryOrder(null)}
+        order={deliveryOrder}
+        leads={leads}
+        onOpenQRModal={() => setIsQRModalOpen(true)}
+        onDeliverySuccess={() => {
+          setDeliveredMap(getDeliveredOrders());
+        }}
+      />
+
+      {/* Modal de Conexão WhatsApp / QR Code Evolution API */}
+      <EvolutionQRModal
+        isOpen={isQRModalOpen}
+        onClose={() => setIsQRModalOpen(false)}
+      />
     </div>
   );
 }
