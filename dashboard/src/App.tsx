@@ -456,6 +456,7 @@ export function App() {
   });
 
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [onlineCount, setOnlineCount] = useState<number>(0);
 
@@ -487,8 +488,8 @@ export function App() {
   const toggleTheme = () => setTheme((t) => (t === "light" ? "dark" : "light"));
 
   // Busca de dados no Supabase e Reconciliação Coesa
-  const fetchData = useCallback(async () => {
-    setLoading(true);
+  const fetchData = useCallback(async (opts?: { showSpinner?: boolean }) => {
+    if (opts?.showSpinner) setRefreshing(true);
     try {
       const [{ data: ordersData }, { data: leadsData }, { data: waData }] = await Promise.all([
         supabase
@@ -546,6 +547,7 @@ export function App() {
       console.warn("Erro ao buscar dados:", err);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, []);
 
@@ -783,19 +785,18 @@ export function App() {
     URL.revokeObjectURL(url);
   };
 
-  // 1. Tela de Carregamento de Auth
+  // 1. Tela de Carregamento de Auth (loader único)
   if (authLoading) {
     return (
       <div
+        className="dashboard-root"
         style={{
-          height: "100vh",
+          height: "100dvh",
           width: "100vw",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          background: "#05060F",
-          color: "#F5F4FA",
           gap: "16px",
         }}
       >
@@ -806,7 +807,7 @@ export function App() {
           height={56}
           style={{ borderRadius: "16px", boxShadow: "4px 4px 0 #FF3377" }}
         />
-        <span style={{ fontSize: "13px", fontWeight: 500, color: "#A2A3AE" }}>
+        <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-muted)" }}>
           Validando credenciais administrativas...
         </span>
       </div>
@@ -825,9 +826,41 @@ export function App() {
             window.history.replaceState(null, "", "/visao-geral");
           }
           setSection("visao-geral");
-          void fetchData();
+          void fetchData({ showSpinner: true });
         }}
       />
+    );
+  }
+
+  // 3. Carregamento inicial de dados (loader único, sem múltiplos skeletons)
+  if (loading) {
+    return (
+      <div
+        className="dashboard-root"
+        style={{
+          height: "100dvh",
+          width: "100vw",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "16px",
+        }}
+      >
+        <div
+          style={{
+            width: 44,
+            height: 44,
+            border: "3px solid var(--surface-2)",
+            borderTopColor: "var(--accent-primary)",
+            borderRadius: "50%",
+            animation: "spin 0.8s linear infinite",
+          }}
+        />
+        <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-muted)" }}>
+          Sincronizando telemetria em tempo real...
+        </span>
+      </div>
     );
   }
 
@@ -837,8 +870,8 @@ export function App() {
       <Topbar
         theme={theme}
         onToggleTheme={toggleTheme}
-        onRefresh={fetchData}
-        loading={loading}
+        onRefresh={() => { void fetchData({ showSpinner: true }); }}
+        loading={refreshing}
         lastUpdate={lastUpdate}
         section={section}
         onNavigate={handleNavigate}

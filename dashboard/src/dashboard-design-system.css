@@ -2735,3 +2735,7 @@
   .dashboard-root .guide-item-body { padding: 4px 16px 16px 20px; }
   .dashboard-root .guide-table { display: block; overflow-x: auto; }
 }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

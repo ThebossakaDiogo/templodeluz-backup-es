@@ -5,5 +5,9 @@ interface LoginPageProps {
 }
 
 export function LoginPage({ onLoginSuccess }: LoginPageProps) {
-  return <SignInCard onLoginSuccess={onLoginSuccess} />;
+  return (
+    <div className="dashboard-root" style={{ minHeight: "100dvh", width: "100vw" }}>
+      <SignInCard onLoginSuccess={onLoginSuccess} />
+    </div>
+  );
 }
