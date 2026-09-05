@@ -335,33 +335,13 @@ export function SignInCard({ onLoginSuccess }: SignInCardProps) {
             >
               {/* Cabeçalho Centralizado com Logo OD */}
               <div style={{ textAlign: "center", marginBottom: "26px" }}>
-                <div
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: "48px",
-                    height: "48px",
-                    borderRadius: "14px",
-                    background: "linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(6, 182, 212, 0.1) 100%)",
-                    border: "1px solid rgba(16, 185, 129, 0.45)",
-                    boxShadow: "0 0 20px rgba(16, 185, 129, 0.25)",
-                    marginBottom: "12px",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: "'Space Grotesk', sans-serif",
-                      fontWeight: 900,
-                      fontSize: "19px",
-                      background: "linear-gradient(135deg, #10b981 0%, #38bdf8 100%)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                    }}
-                  >
-                    OD
-                  </span>
-                </div>
+                <img
+                  src="/icons/icon-192.png"
+                  alt="OD Metrics"
+                  width={68}
+                  height={68}
+                  style={{ borderRadius: "19px", marginBottom: "14px", boxShadow: "0 12px 34px rgba(255, 51, 119, 0.3)" }}
+                />
 
                 <h1
                   style={{

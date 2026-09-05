@@ -5,36 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>OD METRICS · Plataforma de Inteligência & Conversão</title>
 
-    <!-- Limpeza Proativa e Imediata de Service Workers Obsoletos (Previne Tela Preta) -->
-    <script>
-      (function() {
-        if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.getRegistrations().then(function(regs) {
-            for (var r of regs) {
-              r.unregister();
-            }
-          });
-        }
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-          if ('caches' in window) {
-            caches.keys().then(function(names) {
-              for (var n of names) {
-                caches.delete(n);
-              }
-            });
-          }
-        }
-      })();
-    </script>
-
     <!-- PWA Web Manifest -->
     <link rel="manifest" href="/manifest.webmanifest" />
-    <meta name="theme-color" content="#03060d" />
-    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#F7F5F0" />
+    <meta name="color-scheme" content="light dark" />
 
     <!-- Favicon & Ícones -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="shortcut icon" href="/favicon-32.png" />
 
     <!-- Suporte Específico para iPhone & iPad (iOS Safari PWA) -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -47,7 +26,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
   </head>
   <body>
     <div id="root">

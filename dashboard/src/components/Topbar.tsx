@@ -5,7 +5,6 @@ import {
   RefreshCw,
   Download,
   Users,
-  Search,
   ShieldCheck,
   ChevronDown,
   Smartphone,
@@ -59,7 +58,6 @@ export function Topbar({
   orders = [],
   leads = [],
 }: TopbarProps) {
-  const [searchTerm, setSearchTerm] = useState("");
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
   const [isWhatsAppConnected, setIsWhatsAppConnected] = useState<boolean | null>(null);
 
@@ -69,121 +67,42 @@ export function Topbar({
     });
   }, []);
 
+  const showDateRange = section === "visao-geral" || section === "pedidos" || section === "relatorios";
+
   return (
     <>
-      <header
-        className="dashboard-topbar"
-      style={{
-        height: "60px",
-        minHeight: "60px",
-        background: "var(--topbar-bg)",
-        backdropFilter: "blur(24px) saturate(190%)",
-        WebkitBackdropFilter: "blur(24px) saturate(190%)",
-        borderBottom: "1px solid var(--border-subtle)",
-        padding: "0 28px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: "14px",
-        zIndex: 100,
-        position: "sticky",
-        top: 0,
-        width: "100%",
-        boxSizing: "border-box",
-      }}
-    >
+      <header className="dashboard-topbar">
       {/* ─── LADO ESQUERDO: Marca OD METRICS + Status Ao Vivo ─── */}
-      <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0 }}>
+      <div className="topbar-main-row">
         {/* Logo OD METRICS Acessível */}
         <button
           type="button"
           onClick={() => onNavigate?.("visao-geral")}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            background: "none",
-            border: "none",
-            padding: 0,
-            cursor: "pointer",
-            textAlign: "left",
-            fontFamily: "inherit",
-          }}
+          className="topbar-brand-button"
           aria-label="Ir para a Visão Geral"
         >
-          <div
-            style={{
-              width: "28px",
-              height: "28px",
-              borderRadius: "7px",
-              background: "var(--surface-2)",
-              border: "1px solid var(--border-strong)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "var(--accent-primary)",
-              fontWeight: 700,
-              fontSize: "12px",
-            }}
-          >
-            OD
-          </div>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-              <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.01em" }}>
-                OD Metrics
-              </span>
-              <span
-                style={{
-                  fontSize: "9px",
-                  color: "#10B981",
-                  fontWeight: 700,
-                  background: "rgba(16, 185, 129, 0.1)",
-                  padding: "1px 5px",
-                  borderRadius: "4px",
-                }}
-              >
-                PRO
-              </span>
-            </div>
-          </div>
+          <img
+            src="/icons/icon-192.png"
+            alt=""
+            className="topbar-brand-logo"
+            width={34}
+            height={34}
+          />
+          <div className="topbar-brand-text">OD Metrics</div>
+          <span className="topbar-pro-badge">
+            PRO
+          </span>
         </button>
 
-        <div style={{ width: "1px", height: "18px", background: "var(--border-subtle)" }} className="desktop-only-control" />
+        <div className="topbar-divider desktop-only-control" />
 
         {/* Pílula de Status Operacional Ao Vivo */}
-        <div
-          className="desktop-only-control"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-            background: "var(--surface-1)",
-            border: "1px solid var(--border-subtle)",
-            borderRadius: "999px",
-            padding: "4px 11px",
-            fontSize: "11px",
-            fontWeight: 500,
-            color: "var(--text-primary)",
-          }}
-        >
+        <div className="topbar-live-pill desktop-only-control">
           <div className="pulse-emerald" />
-          <ShieldCheck style={{ width: "12px", height: "12px", color: "#10B981" }} />
+          <ShieldCheck className="topbar-icon" />
           <span>Telemetria Ao Vivo</span>
-          <span
-            style={{
-              fontSize: "10px",
-              color: "var(--accent-primary)",
-              background: "var(--accent-soft-bg)",
-              padding: "1px 6px",
-              borderRadius: "99px",
-              marginLeft: "2px",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "3px",
-            }}
-          >
-            <Users style={{ width: "9px", height: "9px" }} />
+          <span className="topbar-online-count">
+            <Users className="topbar-icon icon-xs" />
             {onlineCount}
           </span>
         </div>
@@ -192,99 +111,28 @@ export function Topbar({
         <button
           type="button"
           onClick={() => setIsQRModalOpen(true)}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-            background: isWhatsAppConnected ? "rgba(16, 185, 129, 0.12)" : "rgba(245, 158, 11, 0.12)",
-            border: isWhatsAppConnected ? "1px solid rgba(16, 185, 129, 0.3)" : "1px solid rgba(245, 158, 11, 0.3)",
-            borderRadius: "999px",
-            padding: "4px 10px",
-            fontSize: "11px",
-            fontWeight: 600,
-            color: isWhatsAppConnected ? "#10B981" : "#F59E0B",
-            cursor: "pointer",
-            fontFamily: "inherit",
-          }}
+          className="topbar-whatsapp-control"
           title={isWhatsAppConnected ? "WhatsApp Conectado na Evolution API. Clique para gerenciar ou testar." : "WhatsApp Não Conectado. Clique para escanear QR Code."}
         >
-          <Smartphone style={{ width: "12px", height: "12px" }} />
+          <Smartphone className="topbar-icon" />
           <span>{isWhatsAppConnected ? "WhatsApp Ativo" : "Conectar WhatsApp"}</span>
-          <span
-            style={{
-              width: "6px",
-              height: "6px",
-              borderRadius: "50%",
-              background: isWhatsAppConnected ? "#10B981" : "#F59E0B",
-              boxShadow: isWhatsAppConnected ? "0 0 6px rgba(16, 185, 129, 0.7)" : "none",
-              display: "inline-block",
-            }}
-          />
+          <span className={`topbar-whatsapp-dot ${isWhatsAppConnected ? "online" : "offline"}`} />
         </button>
 
         {/* Badge da Seção Atual */}
-        <span
-          className="desktop-only-control"
-          style={{
-            fontSize: "11px",
-            fontWeight: 500,
-            color: "var(--text-muted)",
-            background: "var(--surface-1)",
-            border: "1px solid var(--border-subtle)",
-            padding: "3px 9px",
-            borderRadius: "999px",
-          }}
-        >
+        <span className="topbar-section-badge desktop-only-control">
           {SECTION_LABELS[section]}
         </span>
       </div>
 
       {/* ─── LADO DIREITO: Busca, Datas, Notificações e Ações (Linha única no mobile e desktop) ─── */}
-      <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
-        {/* Input de Busca Compacto (Desktop) */}
-        <div className="desktop-only-control" style={{ position: "relative" }}>
-          <Search
-            style={{
-              position: "absolute",
-              left: "9px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              width: "12px",
-              height: "12px",
-              color: "var(--text-muted)",
-              pointerEvents: "none",
-            }}
-          />
-          <input
-            type="text"
-            placeholder="Buscar consulente, UTM, pedido..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              fontSize: "11.5px",
-              padding: "5px 10px 5px 27px",
-              borderRadius: "8px",
-              border: "1px solid var(--border-subtle)",
-              background: "var(--surface-1)",
-              color: "var(--text-primary)",
-              width: "150px",
-              outline: "none",
-              transition: "width 0.2s ease, border-color 0.2s ease",
-            }}
-            onFocus={(e) => {
-              e.currentTarget.style.width = "210px";
-              e.currentTarget.style.borderColor = "var(--accent-strong)";
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.width = "150px";
-              e.currentTarget.style.borderColor = "var(--border-subtle)";
-            }}
-          />
-        </div>
+      <div className="topbar-action-group">
 
         {/* Seletor de Período / Datas (Desktop e Mobile integrados) */}
-        {section === "visao-geral" && (
-          <DateRangeSelector value={dateRange} onChange={onDateRangeChange} />
+        {showDateRange && (
+          <div className="desktop-date-selector">
+            <DateRangeSelector value={dateRange} onChange={onDateRangeChange} />
+          </div>
         )}
 
         {/* Central de Notificações com Dropdown Popover */}
@@ -299,11 +147,10 @@ export function Topbar({
         <button
           type="button"
           onClick={onExportCsv}
-          className="btn desktop-only-control"
-          style={{ height: "32px", padding: "0 10px", fontSize: "11.5px", gap: "5px" }}
+          className="btn desktop-only-control topbar-export"
           title="Exportar dados do período em CSV"
         >
-          <Download style={{ width: "12px", height: "12px", color: "var(--text-secondary)" }} />
+          <Download className="topbar-icon" />
           Exportar
         </button>
 
@@ -312,18 +159,12 @@ export function Topbar({
           type="button"
           onClick={onRefresh}
           disabled={loading}
-          className="btn"
+          className="btn topbar-icon-btn"
           title={lastUpdate ? `Última sincronização: ${lastUpdate.toLocaleTimeString("pt-BR")}. Clique para atualizar.` : "Atualizar dados agora"}
-          style={{ width: "32px", height: "32px", padding: 0, borderRadius: "8px" }}
           aria-label="Atualizar dados"
         >
           <RefreshCw
-            style={{
-              width: "12px",
-              height: "12px",
-              color: "var(--text-secondary)",
-              animation: loading ? "spin 1s linear infinite" : "none",
-            }}
+            className={`topbar-icon ${loading ? "spinning" : ""}`}
           />
         </button>
 
@@ -331,15 +172,14 @@ export function Topbar({
         <button
           type="button"
           onClick={onToggleTheme}
-          className="btn"
+          className="btn topbar-icon-btn"
           title={`Alternar para modo ${theme === "light" ? "escuro" : "claro"}`}
-          style={{ width: "32px", height: "32px", padding: 0, borderRadius: "8px" }}
           aria-label="Alternar tema"
         >
           {theme === "light" ? (
-            <Moon style={{ width: "13px", height: "13px", color: "var(--text-secondary)" }} />
+            <Moon className="topbar-icon" />
           ) : (
-            <Sun style={{ width: "13px", height: "13px", color: "var(--text-secondary)" }} />
+            <Sun className="topbar-icon" />
           )}
         </button>
 
@@ -347,44 +187,22 @@ export function Topbar({
         <button
           type="button"
           onClick={() => onNavigate?.("perfil")}
-          className="desktop-only-control"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "7px",
-            background: "var(--surface-1)",
-            border: "1px solid var(--border-subtle)",
-            borderRadius: "999px",
-            padding: "4px 10px 4px 4px",
-            cursor: "pointer",
-            fontFamily: "inherit",
-          }}
+          className="topbar-user-pill desktop-only-control"
           aria-label="Abrir Meu Perfil"
         >
-          <div
-            style={{
-              width: "24px",
-              height: "24px",
-              borderRadius: "50%",
-              background: "var(--surface-3)",
-              color: "var(--text-primary)",
-              border: "1px solid var(--border-subtle)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "11px",
-              fontWeight: 600,
-            }}
-          >
+          <div className="topbar-user-avatar">
             D
           </div>
-          <span style={{ fontSize: "11.5px", fontWeight: 500, color: "var(--text-primary)" }}>
-            Diogo
-          </span>
-          <ChevronDown style={{ width: "11px", height: "11px", color: "var(--text-muted)" }} />
+          <span className="topbar-user-name">Diogo</span>
+          <ChevronDown className="topbar-icon" />
         </button>
       </div>
-    </header>
+        {showDateRange && (
+          <div className="mobile-date-subbar">
+            <DateRangeSelector value={dateRange} onChange={onDateRangeChange} />
+          </div>
+        )}
+      </header>
 
     {/* Modal Interativo de Conexão WhatsApp / QR Code */}
     <EvolutionQRModal

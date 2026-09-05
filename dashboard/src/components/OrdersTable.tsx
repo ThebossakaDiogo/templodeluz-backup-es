@@ -101,38 +101,14 @@ export function OrdersTable({ orders, loading, compact = false, leads = [] }: Or
     : ["Nome do Consulente", "E-mail", "Produto", "Valor", "Método / Gateway", "Status", "Data", "Entrega WhatsApp"];
 
   return (
-    <div className="card" style={{ overflow: "hidden" }}>
+    <div className="card orders-panel">
       {/* Barra de Título e Filtros */}
-      <div
-        style={{
-          padding: "18px 24px",
-          borderBottom: "1px solid var(--border)",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: "14px",
-        }}
-      >
+      <div className="orders-toolbar">
         <div>
-          <h3
-            style={{
-              fontSize: "14px",
-              fontWeight: 800,
-              color: "var(--text-primary)",
-              margin: 0,
-            }}
-          >
+          <h3>
             {compact ? "Últimos Pedidos Registrados" : "Auditoria de Pedidos do Gateway"}
           </h3>
-          <p
-            style={{
-              fontSize: "11px",
-              color: "var(--text-muted)",
-              margin: "2px 0 0",
-              fontWeight: 500,
-            }}
-          >
+          <p>
             {loading
               ? "Carregando transações..."
               : `${filteredOrders.length} de ${orders.length} pedidos · Telemetria em tempo real`}
@@ -140,19 +116,9 @@ export function OrdersTable({ orders, loading, compact = false, leads = [] }: Or
         </div>
 
         {/* Filtros e Busca */}
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+        <div className="orders-controls">
           {/* Filtro por Método de Pagamento (PIX vs Cartão) */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              background: "#0D0E16",
-              border: "1px solid #252733",
-              borderRadius: "10px",
-              padding: "3px",
-              gap: "2px",
-            }}
-          >
+          <div className="orders-segmented">
             {[
               { id: "all", label: "Todos Métodos" },
               { id: "pix", label: "PIX", icon: QrCode },
@@ -162,24 +128,10 @@ export function OrdersTable({ orders, loading, compact = false, leads = [] }: Or
               return (
                 <button
                   key={f.id}
+                  className={`${active ? "active" : ""} orders-seg-${f.id}`}
                   onClick={() => setMethodFilter(f.id as any)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "4px",
-                    fontSize: "11px",
-                    fontWeight: active ? 600 : 400,
-                    padding: "4px 8px",
-                    borderRadius: "7px",
-                    border: "none",
-                    cursor: "pointer",
-                    background: active ? "#292A35" : "transparent",
-                    color: active ? "#F5F4FA" : "#707281",
-                    boxShadow: active ? "inset 0 1px 0 rgba(255,255,255,0.06)" : "none",
-                    transition: "all 0.14s ease",
-                  }}
                 >
-                  {f.icon && <f.icon style={{ width: "11px", height: "11px" }} />}
+                  {f.icon && <f.icon className="orders-seg-icon" />}
                   <span>{f.label}</span>
                 </button>
               );
@@ -187,17 +139,7 @@ export function OrdersTable({ orders, loading, compact = false, leads = [] }: Or
           </div>
 
           {/* Abas de Status */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              background: "#0D0E16",
-              border: "1px solid #252733",
-              borderRadius: "10px",
-              padding: "3px",
-              gap: "2px",
-            }}
-          >
+          <div className="orders-segmented">
             {[
               { id: "all", label: "Todos" },
               { id: "paid", label: "Pagos" },
@@ -207,19 +149,8 @@ export function OrdersTable({ orders, loading, compact = false, leads = [] }: Or
               return (
                 <button
                   key={f.id}
+                  className={`${active ? "active" : ""} ${f.id === "paid" && active ? "orders-paid" : ""}`}
                   onClick={() => setStatusFilter(f.id as any)}
-                  style={{
-                    fontSize: "11px",
-                    fontWeight: active ? 600 : 400,
-                    padding: "4px 9px",
-                    borderRadius: "7px",
-                    border: "none",
-                    cursor: "pointer",
-                    background: active ? "#292A35" : "transparent",
-                    color: active ? (f.id === "paid" ? "#2EDB6F" : "#F5F4FA") : "#707281",
-                    boxShadow: active ? "inset 0 1px 0 rgba(255,255,255,0.06)" : "none",
-                    transition: "all 0.14s ease",
-                  }}
                 >
                   {f.label}
                 </button>
@@ -228,35 +159,13 @@ export function OrdersTable({ orders, loading, compact = false, leads = [] }: Or
           </div>
 
           {/* Campo de Busca */}
-          <div style={{ position: "relative" }}>
-            <Search
-              style={{
-                position: "absolute",
-                left: "10px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                width: "13px",
-                height: "13px",
-                color: "#707281",
-                pointerEvents: "none",
-              }}
-            />
+          <div className="orders-search">
+            <Search className="orders-search-icon" />
             <input
               type="text"
               placeholder="Buscar por nome, e-mail..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              style={{
-                fontSize: "12px",
-                padding: "6px 12px 6px 30px",
-                borderRadius: "8px",
-                border: "1px solid var(--border-subtle)",
-                background: "var(--surface-1)",
-                color: "var(--text-primary)",
-                width: "200px",
-                outline: "none",
-                fontFamily: "inherit",
-              }}
             />
           </div>
 
@@ -264,19 +173,10 @@ export function OrdersTable({ orders, loading, compact = false, leads = [] }: Or
           <button
             type="button"
             onClick={() => setIsQRModalOpen(true)}
-            className="btn"
-            style={{
-              fontSize: "11.5px",
-              padding: "6px 12px",
-              gap: "6px",
-              background: "rgba(16, 185, 129, 0.12)",
-              border: "1px solid rgba(16, 185, 129, 0.3)",
-              color: "#10B981",
-              cursor: "pointer",
-            }}
+            className="btn orders-btn-whatsapp"
             title="Conectar WhatsApp na Evolution API via QR Code"
           >
-            <Smartphone style={{ width: "13px", height: "13px" }} />
+            <Smartphone className="orders-method-icon" />
             WhatsApp QR Code
           </button>
 
@@ -284,11 +184,10 @@ export function OrdersTable({ orders, loading, compact = false, leads = [] }: Or
           {!compact && (
             <button
               onClick={exportFiltered}
-              className="btn"
-              style={{ fontSize: "11.5px", padding: "6px 12px", gap: "6px" }}
+              className="btn orders-btn-export"
               title="Exportar pedidos visíveis em CSV"
             >
-              <Download style={{ width: "12px", height: "12px" }} />
+              <Download className="orders-action-icon" />
               Exportar CSV
             </button>
           )}
@@ -296,26 +195,12 @@ export function OrdersTable({ orders, loading, compact = false, leads = [] }: Or
       </div>
 
       {/* Tabela de Pedidos */}
-      <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
+      <div className="orders-table-scroll">
+        <table className={`orders-table${compact ? " compact" : ""}`}>
           <thead>
             <tr>
               {COLS.map((col) => (
-                <th
-                  key={col}
-                  style={{
-                    padding: "10px 18px",
-                    textAlign: "left",
-                    fontSize: "10px",
-                    fontWeight: 500,
-                    color: "var(--text-muted)",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.05em",
-                    background: "var(--surface-1)",
-                    borderBottom: "1px solid var(--border-subtle)",
-                    whiteSpace: "nowrap",
-                  }}
-                >
+                <th key={col}>
                   {col}
                 </th>
               ))}
@@ -324,10 +209,10 @@ export function OrdersTable({ orders, loading, compact = false, leads = [] }: Or
           <tbody>
             {loading &&
               Array.from({ length: compact ? 4 : 8 }).map((_, i) => (
-                <tr key={i}>
+                <tr key={i} className="orders-row">
                   {COLS.map((col) => (
-                    <td key={col} style={{ padding: "12px 18px", borderBottom: "1px solid #1D1F2B" }}>
-                      <div className="skeleton" style={{ height: "14px", width: "80%" }} />
+                    <td key={col}>
+                      <div className="skeleton" />
                     </td>
                   ))}
                 </tr>
@@ -335,15 +220,7 @@ export function OrdersTable({ orders, loading, compact = false, leads = [] }: Or
 
             {!loading && filteredOrders.length === 0 && (
               <tr>
-                <td
-                  colSpan={COLS.length}
-                  style={{
-                    padding: "44px 20px",
-                    textAlign: "center",
-                    color: "#707281",
-                    fontSize: "12px",
-                  }}
-                >
+                <td className="orders-empty" colSpan={COLS.length}>
                   Nenhum pedido encontrado com os filtros selecionados.
                 </td>
               </tr>
@@ -353,199 +230,84 @@ export function OrdersTable({ orders, loading, compact = false, leads = [] }: Or
               filteredOrders.map((order, idx) => {
                 const isCard = order.payment_method === "credit_card";
                 return (
-                  <tr
-                    key={order.id}
-                    style={{
-                      background: idx % 2 === 0 ? "transparent" : "var(--surface-hover)",
-                      transition: "background 0.12s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLTableRowElement).style.background = "var(--surface-selected)";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLTableRowElement).style.background =
-                        idx % 2 === 0 ? "transparent" : "var(--surface-hover)";
-                    }}
-                  >
+                  <tr key={order.id} className={`orders-row ${idx % 2 === 0 ? "" : "odd"}`}>
                     {/* Nome */}
-                    <td
-                      style={{
-                        padding: "12px 18px",
-                        borderBottom: "1px solid var(--border-subtle)",
-                        fontWeight: 500,
-                        color: "var(--text-primary)",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
+                    <td className="orders-cell orders-cell-primary orders-cell-nowrap">
                       {order.customer_name}
                     </td>
 
                     {/* E-mail (somente completo) */}
                     {!compact && (
-                      <td
-                        style={{
-                          padding: "12px 18px",
-                          borderBottom: "1px solid var(--border-subtle)",
-                          color: "var(--text-secondary)",
-                          maxWidth: "180px",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
+                      <td className="orders-cell orders-cell-secondary orders-cell-truncate">
                         {order.customer_email || "—"}
                       </td>
                     )}
 
                     {/* Produto */}
-                    <td
-                      style={{
-                        padding: "12px 18px",
-                        borderBottom: "1px solid var(--border-subtle)",
-                        color: "var(--text-secondary)",
-                        maxWidth: "220px",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                        fontWeight: 400,
-                      }}
-                    >
+                    <td className="orders-cell orders-cell-primary orders-cell-truncate">
                       {order.product_name}
                     </td>
 
                     {/* Valor */}
                     <td
-                      className="font-numeric"
-                      style={{
-                        padding: "12px 18px",
-                        borderBottom: "1px solid var(--border-subtle)",
-                        fontWeight: 600,
-                        color: order.status === "paid" ? "var(--success)" : "var(--text-primary)",
-                        whiteSpace: "nowrap",
-                      }}
+                      className={`font-numeric orders-cell ${order.status === "paid" ? "orders-cell-success" : "orders-cell-primary-bold"}`}
                     >
                       {formatBRL(order.amount_cents)}
                     </td>
 
                     {/* Método / Gateway (DESTAQUE PIX vs CARTÃO STRIPE) */}
-                    <td style={{ padding: "12px 18px", borderBottom: "1px solid var(--border-subtle)", whiteSpace: "nowrap" }}>
+                    <td className="orders-cell orders-cell-nowrap">
                       {isCard ? (
-                        <span
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "5px",
-                            fontSize: "11px",
-                            fontWeight: 500,
-                            padding: "2px 8px",
-                            borderRadius: "999px",
-                            background: "var(--accent-soft-bg)",
-                            color: "var(--accent-strong)",
-                            border: "1px solid var(--accent-border)",
-                          }}
-                        >
-                          <CreditCard style={{ width: "12px", height: "12px" }} strokeWidth={1.8} />
+                        <span className="orders-badge orders-badge-accent">
+                          <CreditCard className="orders-method-icon" strokeWidth={1.8} />
                           Cartão (Stripe)
                         </span>
                       ) : (
-                        <span
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "5px",
-                            fontSize: "11px",
-                            fontWeight: 500,
-                            padding: "2px 8px",
-                            borderRadius: "999px",
-                            background: "var(--success-soft)",
-                            color: "var(--success)",
-                            border: "1px solid rgba(46, 219, 111, 0.25)",
-                          }}
-                        >
-                          <QrCode style={{ width: "12px", height: "12px" }} strokeWidth={1.8} />
+                        <span className="orders-badge paid">
+                          <QrCode className="orders-method-icon" strokeWidth={1.8} />
                           PIX Oficial
                         </span>
                       )}
                     </td>
 
                     {/* Status */}
-                    <td style={{ padding: "12px 18px", borderBottom: "1px solid var(--border-subtle)", whiteSpace: "nowrap" }}>
+                    <td className="orders-cell orders-cell-nowrap">
                       <span className={STATUS_CLASS[order.status] ?? "badge badge-expired"}>
                         {STATUS_LABELS[order.status] ?? order.status}
                       </span>
                     </td>
 
                     {/* Data */}
-                    <td
-                      style={{
-                        padding: "13px 20px",
-                        borderBottom: "1px solid var(--border-subtle)",
-                        color: "var(--text-muted)",
-                        fontSize: "11px",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
+                    <td className="orders-cell orders-cell-muted">
                       {formatDate(order.created_at)}
                     </td>
 
                     {/* Ação: Entrega da Carta no WhatsApp */}
-                    <td
-                      style={{
-                        padding: "10px 18px",
-                        borderBottom: "1px solid var(--border-subtle)",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
+                    <td className="orders-cell orders-cell-nowrap">
                       {order.status === "paid" ? (
                         deliveredMap[order.id] ? (
                           <button
                             type="button"
                             onClick={() => setDeliveryOrder(order)}
-                            className="btn"
-                            style={{
-                              fontSize: "10.5px",
-                              fontWeight: 700,
-                              padding: "4px 9px",
-                              borderRadius: "6px",
-                              background: "rgba(16, 185, 129, 0.12)",
-                              border: "1px solid rgba(16, 185, 129, 0.3)",
-                              color: "#10B981",
-                              cursor: "pointer",
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: "5px",
-                            }}
+                            className="btn orders-btn-success"
                             title={`Entregue em ${new Date(deliveredMap[order.id]).toLocaleDateString("pt-BR")}. Clique para reenviar.`}
                           >
-                            <CheckCircle style={{ width: "11px", height: "11px" }} />
+                            <CheckCircle className="orders-action-icon" />
                             Consagrada
                           </button>
                         ) : (
                           <button
                             type="button"
                             onClick={() => setDeliveryOrder(order)}
-                            className="btn"
-                            style={{
-                              fontSize: "10.5px",
-                              fontWeight: 700,
-                              padding: "4px 10px",
-                              borderRadius: "6px",
-                              background: "linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2))",
-                              border: "1px solid rgba(16, 185, 129, 0.4)",
-                              color: "#10B981",
-                              cursor: "pointer",
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: "5px",
-                            }}
+                            className="btn orders-btn-gradient"
                             title="Consagrar pedido e entregar carta no WhatsApp do consulente"
                           >
-                            <Sparkles style={{ width: "11px", height: "11px" }} />
+                            <Sparkles className="orders-action-icon" />
                             Entregar Carta
                           </button>
                         )
                       ) : (
-                        <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>—</span>
+                        <span className="orders-cell-secondary">—</span>
                       )}
                     </td>
                   </tr>

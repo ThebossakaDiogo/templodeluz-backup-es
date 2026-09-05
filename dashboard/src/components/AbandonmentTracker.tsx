@@ -10,7 +10,6 @@ import {
   Copy,
   Check,
   Send,
-  Settings,
   Radio,
   CheckCircle,
   RefreshCw,
@@ -33,12 +32,10 @@ import {
 } from "@/utils/lead-abandonment";
 import {
   getEvolutionConfig,
-  saveEvolutionConfig,
   testEvolutionConnection,
   sendEvolutionTextMessage,
   getMessagedLeadsMap,
   formatPhoneForEvolution,
-  type EvolutionConfig,
 } from "@/services/evolution";
 import { EvolutionQRModal } from "./EvolutionQRModal";
 
@@ -73,12 +70,10 @@ export function AbandonmentTracker({ leads }: AbandonmentTrackerProps) {
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
 
   // Estados de Integração com a Evolution API
-  const [evoConfig, setEvoConfig] = useState<EvolutionConfig>(getEvolutionConfig);
+  const evoConfig = getEvolutionConfig();
   const [connectionStatus, setConnectionStatus] = useState<"idle" | "checking" | "connected" | "disconnected">("idle");
   const [connectionMsg, setConnectionMsg] = useState<string>("");
-  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
-  const [tempConfig, setTempConfig] = useState<EvolutionConfig>(evoConfig);
 
   // Estados de Envio de Mensagem Individual
   const [activeLeadToSend, setActiveLeadToSend] = useState<Lead | null>(null);
@@ -104,7 +99,7 @@ export function AbandonmentTracker({ leads }: AbandonmentTrackerProps) {
     return () => {
       isMounted = false;
     };
-  }, [evoConfig]);
+  }, []);
 
   const handleManualTest = async () => {
     setConnectionStatus("checking");
@@ -116,12 +111,6 @@ export function AbandonmentTracker({ leads }: AbandonmentTrackerProps) {
       setConnectionStatus("disconnected");
       setConnectionMsg(res.message);
     }
-  };
-
-  const handleSaveConfig = () => {
-    saveEvolutionConfig(tempConfig);
-    setEvoConfig(tempConfig);
-    setIsConfigModalOpen(false);
   };
 
   // Diagnóstico de todos os leads
@@ -380,7 +369,7 @@ export function AbandonmentTracker({ leads }: AbandonmentTrackerProps) {
               </span>
             </div>
             <p style={{ fontSize: "11.5px", color: "var(--text-muted)", margin: "3px 0 0" }}>
-              {connectionMsg || "Disparo direto de mensagens WhatsApp sem precisar abrir abas manuais."}
+              {connectionMsg || "Status consultado com segurança pelo Evolution Local Bridge."}
             </p>
           </div>
         </div>
@@ -403,10 +392,10 @@ export function AbandonmentTracker({ leads }: AbandonmentTrackerProps) {
               alignItems: "center",
               gap: "6px",
             }}
-            title="Escanear QR Code no celular para conectar WhatsApp"
+            title="Abrir controle local da Evolution API"
           >
             <QrCode style={{ width: "13px", height: "13px" }} />
-            {connectionStatus === "connected" ? "WhatsApp Conectado (QR)" : "Conectar WhatsApp (QR Code)"}
+            {connectionStatus === "connected" ? "Evolution conectada" : "Controlar Evolution"}
           </button>
 
           <button
@@ -431,29 +420,6 @@ export function AbandonmentTracker({ leads }: AbandonmentTrackerProps) {
             Testar Conexão
           </button>
 
-          <button
-            type="button"
-            onClick={() => {
-              setTempConfig(evoConfig);
-              setIsConfigModalOpen(true);
-            }}
-            className="btn"
-            style={{
-              fontSize: "11px",
-              padding: "6px 12px",
-              borderRadius: "8px",
-              background: "var(--surface-1)",
-              border: "1px solid var(--border-subtle)",
-              color: "var(--text-primary)",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-            }}
-          >
-            <Settings style={{ width: "12px", height: "12px" }} />
-            Configurar API
-          </button>
         </div>
       </div>
 
@@ -1734,159 +1700,6 @@ export function AbandonmentTracker({ leads }: AbandonmentTrackerProps) {
                     Disparar Mensagem Agora
                   </>
                 )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ─── MODAL DE CONFIGURAÇÃO DA EVOLUTION API ─── */}
-      {isConfigModalOpen && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0, 0, 0, 0.75)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 9999,
-            padding: "20px",
-            backdropFilter: "blur(4px)",
-          }}
-        >
-          <div
-            className="card"
-            style={{
-              width: "100%",
-              maxWidth: "480px",
-              background: "var(--surface-card)",
-              border: "1px solid var(--border-strong)",
-              borderRadius: "18px",
-              padding: "24px",
-              display: "flex",
-              flexDirection: "column",
-              gap: "16px",
-            }}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <Settings style={{ width: "20px", height: "20px", color: "var(--accent-strong)" }} />
-                <h3 style={{ fontSize: "16px", fontWeight: 800, color: "var(--text-primary)", margin: 0 }}>
-                  Configuração da Evolution API
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsConfigModalOpen(false)}
-                style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer" }}
-              >
-                <X style={{ width: "18px", height: "18px" }} />
-              </button>
-            </div>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              <div>
-                <label style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-primary)", display: "block", marginBottom: "4px" }}>
-                  URL da Evolution API:
-                </label>
-                <input
-                  type="text"
-                  value={tempConfig.apiUrl}
-                  onChange={(e) => setTempConfig({ ...tempConfig, apiUrl: e.target.value })}
-                  placeholder="http://212.85.14.56:8080"
-                  style={{
-                    width: "100%",
-                    fontSize: "12px",
-                    padding: "8px 10px",
-                    borderRadius: "8px",
-                    border: "1px solid var(--border-subtle)",
-                    background: "var(--surface-1)",
-                    color: "var(--text-primary)",
-                    boxSizing: "border-box",
-                  }}
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-primary)", display: "block", marginBottom: "4px" }}>
-                  Nome da Instância:
-                </label>
-                <input
-                  type="text"
-                  value={tempConfig.instanceName}
-                  onChange={(e) => setTempConfig({ ...tempConfig, instanceName: e.target.value })}
-                  placeholder="dipefy-drop"
-                  style={{
-                    width: "100%",
-                    fontSize: "12px",
-                    padding: "8px 10px",
-                    borderRadius: "8px",
-                    border: "1px solid var(--border-subtle)",
-                    background: "var(--surface-1)",
-                    color: "var(--text-primary)",
-                    boxSizing: "border-box",
-                  }}
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-primary)", display: "block", marginBottom: "4px" }}>
-                  Chave de Autenticação (apikey):
-                </label>
-                <input
-                  type="password"
-                  value={tempConfig.apiKey}
-                  onChange={(e) => setTempConfig({ ...tempConfig, apiKey: e.target.value })}
-                  placeholder="Sua AUTHENTICATION_API_KEY"
-                  style={{
-                    width: "100%",
-                    fontSize: "12px",
-                    padding: "8px 10px",
-                    borderRadius: "8px",
-                    border: "1px solid var(--border-subtle)",
-                    background: "var(--surface-1)",
-                    color: "var(--text-primary)",
-                    boxSizing: "border-box",
-                  }}
-                />
-              </div>
-            </div>
-
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "8px" }}>
-              <button
-                type="button"
-                onClick={() => setIsConfigModalOpen(false)}
-                className="btn"
-                style={{
-                  fontSize: "12px",
-                  padding: "8px 14px",
-                  borderRadius: "8px",
-                  background: "var(--surface-1)",
-                  border: "1px solid var(--border-subtle)",
-                  color: "var(--text-secondary)",
-                  cursor: "pointer",
-                }}
-              >
-                Cancelar
-              </button>
-
-              <button
-                type="button"
-                onClick={handleSaveConfig}
-                className="btn"
-                style={{
-                  fontSize: "12px",
-                  padding: "8px 18px",
-                  borderRadius: "8px",
-                  background: "var(--accent-strong)",
-                  border: "none",
-                  color: "#FFFFFF",
-                  fontWeight: 800,
-                  cursor: "pointer",
-                }}
-              >
-                Salvar Configurações
               </button>
             </div>
           </div>

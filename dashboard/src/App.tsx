@@ -22,6 +22,7 @@ import { PaymentMethodsPieChart } from "@/components/PaymentMethodsPieChart";
 import { ConversionOverview } from "@/components/ConversionOverview";
 import { ConsulentesTelemetryTable } from "@/components/ConsulentesTelemetryTable";
 import { TodayHeroMetric } from "@/components/TodayHeroMetric";
+import { EvolutionLocalControl } from "@/components/EvolutionLocalControl";
 import { WhatsAppTracker } from "@/components/WhatsAppTracker";
 import { AbandonmentTracker } from "@/components/AbandonmentTracker";
 import { ProfileView } from "@/components/ProfileView";
@@ -387,13 +388,15 @@ const ALLOWED_ADMIN_EMAILS = new Set([
   "otaviov.quinalia@gmail.com",
 ]);
 
+const THEME_STORAGE_KEY = "od-neo-theme";
+
 // ─── Componente Principal ────────────────────────────────────────────────────
 export function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
 
   const [theme, setTheme] = useState<"light" | "dark">(() => {
-    return (localStorage.getItem("tl-theme") as "light" | "dark") || "dark";
+    return (localStorage.getItem(THEME_STORAGE_KEY) as "light" | "dark") || "light";
   });
 
   const [section, setSection] = useState<Section>(getSectionFromPath);
@@ -477,7 +480,7 @@ export function App() {
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
-    localStorage.setItem("tl-theme", theme);
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
   }, [theme]);
 
   const toggleTheme = () => setTheme((t) => (t === "light" ? "dark" : "light"));
@@ -795,25 +798,13 @@ export function App() {
           gap: "16px",
         }}
       >
-        <div
-          style={{
-            width: "44px",
-            height: "44px",
-            borderRadius: "12px",
-            background: "linear-gradient(180deg, #1D1E2C 0%, #12131F 100%)",
-            border: "1px solid rgba(189, 180, 239, 0.35)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontFamily: "inherit",
-            fontWeight: 700,
-            fontSize: "18px",
-            color: "#BDB4EF",
-            boxShadow: "0 4px 20px rgba(124, 92, 255, 0.25)",
-          }}
-        >
-          OD
-        </div>
+        <img
+          src="/icons/icon-192.png"
+          alt="OD Metrics"
+          width={56}
+          height={56}
+          style={{ borderRadius: "16px", boxShadow: "4px 4px 0 #FF3377" }}
+        />
         <span style={{ fontSize: "13px", fontWeight: 500, color: "#A2A3AE" }}>
           Validando credenciais administrativas...
         </span>
@@ -840,7 +831,7 @@ export function App() {
   }
 
   return (
-    <div className="dashboard-root" style={{ flexDirection: "column", height: "100vh", overflow: "hidden" }}>
+    <div className="dashboard-root" style={{ flexDirection: "column", height: "100dvh", overflow: "hidden" }}>
       {/* Barra Superior de Alta Precisão */}
       <Topbar
         theme={theme}
@@ -911,6 +902,8 @@ export function App() {
                 loading={loading}
               />
 
+              <EvolutionLocalControl />
+
               {/* Cards de Métricas Principais (Faturamento, Conversões PIX, Conversões Cartão Stripe, Leads) */}
               <MetricCards stats={stats} loading={loading} />
 
@@ -922,10 +915,10 @@ export function App() {
               />
 
               {/* Tabela Nominal de Telemetria de Consulentes, Tempos e Checkouts */}
-              <ConsulentesTelemetryTable leads={filteredLeads.length > 0 ? filteredLeads : allLeads} />
+              <ConsulentesTelemetryTable leads={filteredLeads} />
 
               {/* FUNIL DE CONVERSÃO 3D EM LARGURA TOTAL (PAINEL PRINCIPAL ESTILO STAKENT) */}
-              <FunnelViz leads={filteredLeads.length > 0 ? filteredLeads : allLeads} loading={loading} />
+              <FunnelViz leads={filteredLeads} loading={loading} />
 
               {/* Gráfico de Receita Full Width com Curvas PIX vs Cartão */}
               <RevenueChart data={revenueChart} loading={loading} />
@@ -1018,7 +1011,6 @@ export function App() {
       <MobileBottomNav
         currentSection={section}
         onSelect={handleNavigate}
-        onOpenMenu={() => handleNavigate("perfil")}
         unreadWhatsAppCount={allWhatsApp.filter((w) => w.payment_status !== "paid").length}
       />
     </div>

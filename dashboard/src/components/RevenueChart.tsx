@@ -96,7 +96,7 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
         </div>
 
         {/* Resumo e Legenda */}
-        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+        <div className="revenue-summary" style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           {/* Legenda PIX */}
           <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11.5px" }}>
             <span style={{ width: "8px", height: "8px", borderRadius: "2px", background: "#8A79FF" }} />
@@ -140,20 +140,20 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
       </div>
 
       {/* Gráfico Recharts */}
-      <div style={{ height: "260px", width: "100%", minWidth: 0, overflow: "hidden" }}>
+      <div className="revenue-chart-wrap" style={{ height: "260px", width: "100%", minWidth: 0, overflow: "hidden" }}>
         {loading ? (
           <div className="skeleton" style={{ height: "100%", width: "100%", borderRadius: "12px" }} />
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <defs>
-                <linearGradient id="colorPix" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#8A79FF" stopOpacity={0.35} />
-                  <stop offset="95%" stopColor="#8A79FF" stopOpacity={0.0} />
+                <linearGradient id="pixGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="var(--success)" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="var(--success)" stopOpacity={0.0} />
                 </linearGradient>
-                <linearGradient id="colorCartao" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#C4BAFF" stopOpacity={0.25} />
-                  <stop offset="95%" stopColor="#C4BAFF" stopOpacity={0.0} />
+                <linearGradient id="cardGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="var(--info)" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="var(--info)" stopOpacity={0.0} />
                 </linearGradient>
               </defs>
 
@@ -241,7 +241,7 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
                 type="monotone"
                 dataKey="receitaCartao"
                 name="Cartão Stripe"
-                stroke="#6366f1"
+                stroke="var(--info)"
                 strokeWidth={2.5}
                 fillOpacity={1}
                 fill="url(#cardGradient)"
@@ -252,7 +252,7 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
                 type="monotone"
                 dataKey="receitaPix"
                 name="PIX"
-                stroke="#10b981"
+                stroke="var(--success)"
                 strokeWidth={2.5}
                 fillOpacity={1}
                 fill="url(#pixGradient)"

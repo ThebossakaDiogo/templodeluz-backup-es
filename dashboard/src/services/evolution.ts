@@ -1,7 +1,4 @@
-/**
- * Serviço de Integração com a Evolution API (WhatsApp Baileys v2)
- * Permite envio direto de mensagens de recuperação para leads a partir do Dashboard.
- */
+import { EVOLUTION_MANAGER_URL, getEvolutionLocalStatus } from "./evolution-local-bridge";
 
 export interface EvolutionConfig {
   apiUrl: string;
@@ -9,46 +6,25 @@ export interface EvolutionConfig {
   instanceName: string;
 }
 
-const DEFAULT_CONFIG: EvolutionConfig = {
-  apiUrl: (import.meta.env.VITE_EVOLUTION_API_URL as string) || "http://212.85.14.56:8080",
-  apiKey: (import.meta.env.VITE_EVOLUTION_API_KEY as string) || "",
-  instanceName: (import.meta.env.VITE_EVOLUTION_INSTANCE_NAME as string) || "dipefy-drop",
+const LOCAL_CONFIG: EvolutionConfig = {
+  apiUrl: EVOLUTION_MANAGER_URL.replace(/\/manager$/, ""),
+  apiKey: "",
+  instanceName: "dipefy-drop",
 };
 
-const STORAGE_KEY = "templodeluz:evolution-config";
-
 export function getEvolutionConfig(): EvolutionConfig {
-  if (typeof window === "undefined") return DEFAULT_CONFIG;
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return DEFAULT_CONFIG;
-    const parsed = JSON.parse(raw);
-    return {
-      apiUrl: parsed.apiUrl?.trim() || DEFAULT_CONFIG.apiUrl,
-      apiKey: parsed.apiKey?.trim() || DEFAULT_CONFIG.apiKey,
-      instanceName: parsed.instanceName?.trim() || DEFAULT_CONFIG.instanceName,
-    };
-  } catch {
-    return DEFAULT_CONFIG;
-  }
+  return LOCAL_CONFIG;
 }
 
-export function saveEvolutionConfig(config: EvolutionConfig): void {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+/** Credentials are managed exclusively by C:\evolution-local\.env. */
+export function saveEvolutionConfig(_config: EvolutionConfig): void {
+  // Kept as a compatibility no-op while older dashboard panels are migrated.
 }
 
-/**
- * Sanitiza e formata o número de telefone para o padrão exigido pela Evolution API (ex: 5511999999999)
- */
 export function formatPhoneForEvolution(phone: string): string {
   const digits = phone.replace(/\D/g, "");
   if (!digits) return "";
-  // Se tiver 10 ou 11 dígitos, adiciona o DDI do Brasil (55)
-  if (digits.length === 10 || digits.length === 11) {
-    return `55${digits}`;
-  }
-  return digits;
+  return digits.length === 10 || digits.length === 11 ? `55${digits}` : digits;
 }
 
 export interface ConnectionStateResponse {
@@ -57,73 +33,31 @@ export interface ConnectionStateResponse {
   message: string;
 }
 
-/**
- * Testa o status de conexão da instância na Evolution API
- */
 export async function testEvolutionConnection(): Promise<ConnectionStateResponse> {
-  const cfg = getEvolutionConfig();
-  const cleanUrl = cfg.apiUrl.replace(/\/$/, "");
-
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 7000);
-
-    const res = await fetch(`${cleanUrl}/instance/connectionState/${encodeURIComponent(cfg.instanceName)}`, {
-      method: "GET",
-      headers: {
-        apikey: cfg.apiKey,
-      },
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeout);
-
-    if (!res.ok) {
-      if (res.status === 404) {
-        return {
-          success: false,
-          state: "not_found",
-          message: `Instância "${cfg.instanceName}" não foi encontrada no servidor da Evolution API.`,
-        };
-      }
-      if (res.status === 401 || res.status === 403) {
-        return {
-          success: false,
-          state: "unauthorized",
-          message: "Chave de API (apikey) inválida ou não autorizada.",
-        };
-      }
+    const status = await getEvolutionLocalStatus();
+    if (status.whatsapp.connected) {
+      return { success: true, state: "open", message: "WhatsApp conectado na instância dipefy-drop." };
+    }
+    if (status.evolution.online) {
       return {
         success: false,
-        state: "error",
-        message: `Servidor retornou erro HTTP ${res.status}.`,
+        state: status.whatsapp.state || "close",
+        message: "Evolution online. Abra o Manager para conectar o WhatsApp.",
       };
     }
-
-    const data = await res.json().catch(() => ({}));
-    const state = data?.instance?.state || data?.state || "open";
-
-    if (state === "open") {
-      return {
-        success: true,
-        state: "open",
-        message: "Instância WhatsApp conectada e pronta para envio!",
-      };
-    }
-
     return {
       success: false,
-      state,
-      message: `Instância está no estado "${state}". Escaneie o QR Code para conectar.`,
+      state: status.status.toLowerCase(),
+      message: status.docker.available
+        ? "Evolution API está offline. Use o controle local para iniciar."
+        : "Docker Desktop não está disponível neste computador.",
     };
-  } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : String(err);
+  } catch {
     return {
       success: false,
       state: "network_error",
-      message: errorMsg.includes("abort")
-        ? "Tempo limite esgotado ao conectar ao servidor da Evolution API (Verifique se a porta 8080 está acessível ou se requer HTTPS)."
-        : `Erro ao conectar com a Evolution API: ${errorMsg}`,
+      message: "Serviço local da Evolution não encontrado.",
     };
   }
 }
@@ -138,156 +72,25 @@ export interface EvolutionQRCodeData {
   state?: "open" | "connecting" | "close" | "not_found" | "error";
 }
 
-/**
- * Busca o QR Code para conectar o WhatsApp na Evolution API
- */
+const managerOnlyResult = (): EvolutionQRCodeData => ({
+  success: false,
+  state: "close",
+  message: `Por segurança, conecte a instância diretamente no Evolution Manager: ${EVOLUTION_MANAGER_URL}`,
+});
+
 export async function getEvolutionQRCode(): Promise<EvolutionQRCodeData> {
-  const cfg = getEvolutionConfig();
-  const cleanUrl = cfg.apiUrl.replace(/\/$/, "");
-
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
-
-    const res = await fetch(`${cleanUrl}/instance/connect/${encodeURIComponent(cfg.instanceName)}`, {
-      method: "GET",
-      headers: {
-        apikey: cfg.apiKey,
-      },
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeout);
-
-    // Se não encontrou a instância (404), tenta criá-la automaticamente
-    if (res.status === 404) {
-      return await createEvolutionInstance();
-    }
-
-    if (!res.ok) {
-      return {
-        success: false,
-        message: `Servidor retornou status HTTP ${res.status}. Verifique se a instância "${cfg.instanceName}" existe.`,
-        state: "error",
-      };
-    }
-
-    const data = await res.json().catch(() => ({}));
-
-    // Extrai o base64 do QR Code da resposta
-    let base64 = data?.base64 || data?.qrcode?.base64;
-    if (base64 && !base64.startsWith("data:image")) {
-      base64 = `data:image/png;base64,${base64}`;
-    }
-
-    const pairingCode = data?.pairingCode || data?.qrcode?.pairingCode;
-    const code = data?.code || data?.qrcode?.code;
-
-    return {
-      success: Boolean(base64 || code || pairingCode),
-      base64,
-      code,
-      pairingCode,
-      count: data?.count || 1,
-      message: base64
-        ? "QR Code pronto! Aponte o WhatsApp do seu celular."
-        : "Instância aguardando conexão.",
-    };
-  } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : String(err);
-    return {
-      success: false,
-      message: errorMsg.includes("abort")
-        ? "Tempo limite esgotado ao buscar QR Code da Evolution API."
-        : `Erro ao conectar: ${errorMsg}`,
-      state: "error",
-    };
-  }
+  return managerOnlyResult();
 }
 
-/**
- * Cria a instância na Evolution API caso não exista
- */
 export async function createEvolutionInstance(): Promise<EvolutionQRCodeData> {
-  const cfg = getEvolutionConfig();
-  const cleanUrl = cfg.apiUrl.replace(/\/$/, "");
-
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
-
-    const res = await fetch(`${cleanUrl}/instance/create`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: cfg.apiKey,
-      },
-      body: JSON.stringify({
-        instanceName: cfg.instanceName,
-        integration: "WHATSAPP-BAILEYS",
-        qrcode: true,
-      }),
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeout);
-
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      const msg = errData?.message || `Erro HTTP ${res.status} ao criar instância.`;
-      return {
-        success: false,
-        message: msg,
-        state: "error",
-      };
-    }
-
-    const data = await res.json().catch(() => ({}));
-    let base64 = data?.qrcode?.base64 || data?.base64;
-    if (base64 && !base64.startsWith("data:image")) {
-      base64 = `data:image/png;base64,${base64}`;
-    }
-
-    return {
-      success: true,
-      base64,
-      pairingCode: data?.qrcode?.pairingCode || data?.pairingCode,
-      code: data?.qrcode?.code || data?.code,
-      message: "Instância criada com sucesso! Escaneie o QR Code no seu WhatsApp.",
-    };
-  } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : String(err);
-    return {
-      success: false,
-      message: `Falha ao criar instância: ${errorMsg}`,
-      state: "error",
-    };
-  }
+  return managerOnlyResult();
 }
 
-/**
- * Desconecta a instância (logout) para ler outro QR Code
- */
 export async function logoutEvolutionInstance(): Promise<{ success: boolean; message: string }> {
-  const cfg = getEvolutionConfig();
-  const cleanUrl = cfg.apiUrl.replace(/\/$/, "");
-
-  try {
-    const res = await fetch(`${cleanUrl}/instance/logout/${encodeURIComponent(cfg.instanceName)}`, {
-      method: "DELETE",
-      headers: {
-        apikey: cfg.apiKey,
-      },
-    });
-
-    if (res.ok) {
-      return { success: true, message: "Aparelho desconectado com sucesso." };
-    }
-    return { success: false, message: `Erro HTTP ${res.status} ao desconectar.` };
-  } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : String(err);
-    return { success: false, message: `Falha ao desconectar: ${errorMsg}` };
-  }
+  return {
+    success: false,
+    message: "A desconexão deve ser feita diretamente no Evolution Manager local.",
+  };
 }
 
 export interface ProductDeliveryParams {
@@ -297,104 +100,27 @@ export interface ProductDeliveryParams {
   productName?: string;
 }
 
-/**
- * Dispara automaticamente a mensagem de entrega da carta psicografada / consagração do pedido
- */
-export async function sendProductDeliveryMessage(
-  params: ProductDeliveryParams
-): Promise<SendMessageResult> {
-  const name = params.customerName.trim().split(" ")[0] || "Consulente";
-  const ente = params.enteQuerido ? ` em homenagem a seu ente querido(a) ${params.enteQuerido}` : "";
-  const product = params.productName ? ` (${params.productName})` : "";
-
-  const text = `Olá, ${name}!
-
-Aqui é da equipe do Templo de Luz da médium Milena Medeiros.
-
-Passando para confirmar com muita gratidão que sua doação${product}${ente} foi consagrada com sucesso em nosso oratório sagrado.
-
-A médium Milena já iniciou as preces e a consagração espiritual da sua carta. Que as energias de luz, acolhimento e renovação envolvam você e seu lar neste momento sagrado.
-
-Qualquer dúvida ou intenção de oração adicional, estamos sempre à sua disposição aqui no WhatsApp.
-
-Muita paz, saúde e bênçãos de luz!`;
-
-  return await sendEvolutionTextMessage(params.customerPhone, text);
-}
-
 export interface SendMessageResult {
   success: boolean;
   messageId?: string;
   error?: string;
 }
 
-/**
- * Envia mensagem de texto para o WhatsApp do consulente via Evolution API
- */
-export async function sendEvolutionTextMessage(
-  phone: string,
-  text: string
-): Promise<SendMessageResult> {
-  const cfg = getEvolutionConfig();
-  const cleanUrl = cfg.apiUrl.replace(/\/$/, "");
-  const formattedNumber = formatPhoneForEvolution(phone);
+export async function sendProductDeliveryMessage(_params: ProductDeliveryParams): Promise<SendMessageResult> {
+  return {
+    success: false,
+    error: "Envio direto desativado para proteger a API key. Use o Evolution Manager ou WhatsApp Web.",
+  };
+}
 
-  if (!formattedNumber || formattedNumber.length < 10) {
-    return {
-      success: false,
-      error: "Número de telefone inválido para envio.",
-    };
+export async function sendEvolutionTextMessage(phone: string, _text: string): Promise<SendMessageResult> {
+  if (formatPhoneForEvolution(phone).length < 10) {
+    return { success: false, error: "Número de telefone inválido para envio." };
   }
-
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 12000);
-
-    const res = await fetch(`${cleanUrl}/message/sendText/${encodeURIComponent(cfg.instanceName)}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: cfg.apiKey,
-      },
-      body: JSON.stringify({
-        number: formattedNumber,
-        text,
-        delay: 1200,
-        linkPreview: true,
-      }),
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeout);
-
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      const detailed = errData?.response?.message || errData?.message || `Erro HTTP ${res.status}`;
-      return {
-        success: false,
-        error: detailed,
-      };
-    }
-
-    const data = await res.json().catch(() => ({}));
-    const messageId = data?.key?.id || data?.id || "sent";
-
-    // Registra no histórico de envios local para o dashboard
-    markLeadAsMessaged(phone);
-
-    return {
-      success: true,
-      messageId,
-    };
-  } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : String(err);
-    return {
-      success: false,
-      error: errorMsg.includes("abort")
-        ? "Tempo limite esgotado no envio da mensagem."
-        : `Falha na requisição: ${errorMsg}`,
-    };
-  }
+  return {
+    success: false,
+    error: "Envio direto desativado para proteger a API key. Use o Evolution Manager ou WhatsApp Web.",
+  };
 }
 
 const MESSAGED_KEY = "templodeluz:messaged-leads";

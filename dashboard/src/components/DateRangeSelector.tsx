@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Calendar, ChevronDown, X } from "lucide-react";
 
@@ -7,401 +7,207 @@ export type DateRangePreset = "today" | "yesterday" | "7d" | "14d" | "30d" | "th
 export interface DateRangeValue {
   preset: DateRangePreset;
   label: string;
-  startDate: string; // YYYY-MM-DD
-  endDate: string;   // YYYY-MM-DD
+  startDate: string;
+  endDate: string;
 }
 
 interface DateRangeSelectorProps {
   value: DateRangeValue;
-  onChange: (val: DateRangeValue) => void;
+  onChange: (value: DateRangeValue) => void;
 }
 
-// Helpers para datas locais YYYY-MM-DD
-function toDateString(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
+const PRESETS: Array<{ key: Exclude<DateRangePreset, "custom">; label: string; shortLabel: string }> = [
+  { key: "today", label: "Hoje", shortLabel: "Hoje" },
+  { key: "yesterday", label: "Ontem", shortLabel: "Ontem" },
+  { key: "7d", label: "Últimos 7 dias", shortLabel: "7D" },
+  { key: "14d", label: "Últimos 14 dias", shortLabel: "14D" },
+  { key: "this_month", label: "Este mês", shortLabel: "Mês" },
+  { key: "30d", label: "Últimos 30 dias", shortLabel: "30D" },
+];
+
+function toDateString(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
-function formatDateBR(dateStr: string): string {
-  const [y, m, d] = dateStr.split("-");
-  return `${d}/${m}/${y}`;
+function formatDateBR(date: string): string {
+  const [year, month, day] = date.split("-");
+  return `${day}/${month}/${year}`;
+}
+
+function rangeForPreset(preset: Exclude<DateRangePreset, "custom">) {
+  const today = new Date();
+  const start = new Date(today);
+  const end = new Date(today);
+
+  if (preset === "yesterday") {
+    start.setDate(today.getDate() - 1);
+    end.setDate(today.getDate() - 1);
+  } else if (preset === "7d") {
+    start.setDate(today.getDate() - 6);
+  } else if (preset === "14d") {
+    start.setDate(today.getDate() - 13);
+  } else if (preset === "30d") {
+    start.setDate(today.getDate() - 29);
+  } else if (preset === "this_month") {
+    start.setDate(1);
+  }
+
+  return { startDate: toDateString(start), endDate: toDateString(end) };
 }
 
 export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [tempStart, setTempStart] = useState(value.startDate);
   const [tempEnd, setTempEnd] = useState(value.endDate);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [error, setError] = useState("");
 
-  // Fecha ao clicar fora
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOpen]);
+    if (!isOpen) return;
+    setTempStart(value.startDate);
+    setTempEnd(value.endDate);
+    setError("");
 
-  const selectPreset = (preset: DateRangePreset) => {
-    const today = new Date();
-    let start = new Date();
-    let end = new Date();
-    let label = "Hoje";
+    const originalOverflow = document.body.style.overflow;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsOpen(false);
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [isOpen, value.endDate, value.startDate]);
 
-    if (preset === "today") {
-      start = new Date();
-      end = new Date();
-      label = "Hoje";
-    } else if (preset === "yesterday") {
-      start = new Date();
-      start.setDate(today.getDate() - 1);
-      end = new Date(start);
-      label = "Ontem";
-    } else if (preset === "7d") {
-      start = new Date();
-      start.setDate(today.getDate() - 6);
-      end = new Date();
-      label = "7 Dias";
-    } else if (preset === "14d") {
-      start = new Date();
-      start.setDate(today.getDate() - 13);
-      end = new Date();
-      label = "14 Dias";
-    } else if (preset === "30d") {
-      start = new Date();
-      start.setDate(today.getDate() - 29);
-      end = new Date();
-      label = "30 Dias";
-    } else if (preset === "this_month") {
-      start = new Date(today.getFullYear(), today.getMonth(), 1);
-      end = new Date();
-      label = "Este Mês";
-    }
-
-    const startStr = toDateString(start);
-    const endStr = toDateString(end);
-    setTempStart(startStr);
-    setTempEnd(endStr);
-
-    onChange({
-      preset,
-      label,
-      startDate: startStr,
-      endDate: endStr,
-    });
+  const selectPreset = (preset: Exclude<DateRangePreset, "custom">) => {
+    const range = rangeForPreset(preset);
+    const presetMeta = PRESETS.find((item) => item.key === preset);
+    onChange({ preset, label: presetMeta?.label ?? "Período", ...range });
     setIsOpen(false);
   };
 
   const applyCustom = () => {
-    if (!tempStart || !tempEnd) return;
-    const startObj = new Date(tempStart + "T00:00:00");
-    const endObj = new Date(tempEnd + "T23:59:59");
-    if (startObj > endObj) {
-      alert("A data inicial não pode ser posterior à data final.");
+    if (!tempStart || !tempEnd) {
+      setError("Selecione as duas datas.");
+      return;
+    }
+    if (new Date(`${tempStart}T00:00:00`) > new Date(`${tempEnd}T23:59:59`)) {
+      setError("A data inicial deve ser anterior à data final.");
       return;
     }
 
-    const label =
-      tempStart === tempEnd
-        ? formatDateBR(tempStart)
-        : `${formatDateBR(tempStart)} a ${formatDateBR(tempEnd)}`;
-
     onChange({
       preset: "custom",
-      label,
+      label: tempStart === tempEnd ? formatDateBR(tempStart) : `${formatDateBR(tempStart)} a ${formatDateBR(tempEnd)}`,
       startDate: tempStart,
       endDate: tempEnd,
     });
     setIsOpen(false);
   };
 
-  const isCustomActive = value.preset === "custom";
+  const popup = isOpen && typeof document !== "undefined" ? createPortal(
+    <div
+      className="date-dialog-backdrop"
+      role="presentation"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) setIsOpen(false);
+      }}
+    >
+      <section
+        className="date-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="date-dialog-title"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <header className="date-dialog-header">
+          <div>
+            <span className="date-dialog-icon"><Calendar size={18} /></span>
+            <div>
+              <h2 id="date-dialog-title">Filtrar por período</h2>
+              <p>Escolha um atalho ou defina um intervalo.</p>
+            </div>
+          </div>
+          <button type="button" onClick={() => setIsOpen(false)} aria-label="Fechar filtro de período">
+            <X size={18} />
+          </button>
+        </header>
+
+        <div className="date-dialog-content">
+          <fieldset className="date-preset-fieldset">
+            <legend>Atalhos rápidos</legend>
+            <div className="date-preset-grid">
+              {PRESETS.map((preset) => (
+                <button
+                  key={preset.key}
+                  type="button"
+                  className={value.preset === preset.key ? "active" : ""}
+                  onClick={() => selectPreset(preset.key)}
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset className="date-custom-fieldset">
+            <legend>Intervalo específico</legend>
+            <div className="date-input-grid">
+              <label>
+                <span>Data inicial</span>
+                <input type="date" value={tempStart} onChange={(event) => setTempStart(event.target.value)} />
+              </label>
+              <label>
+                <span>Data final</span>
+                <input type="date" value={tempEnd} onChange={(event) => setTempEnd(event.target.value)} />
+              </label>
+            </div>
+            {error && <p className="date-dialog-error" role="alert">{error}</p>}
+          </fieldset>
+        </div>
+
+        <footer className="date-dialog-actions">
+          <button type="button" className="date-secondary-action" onClick={() => setIsOpen(false)}>Cancelar</button>
+          <button type="button" className="date-primary-action" onClick={applyCustom}>Aplicar filtro</button>
+        </footer>
+      </section>
+    </div>,
+    document.body,
+  ) : null;
 
   return (
-    <div ref={containerRef} style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
-      {/* Presets Rápidos no Desktop */}
-      <div
-        className="date-range-desktop-container"
-        style={{
-          alignItems: "center",
-          background: "var(--surface-1)",
-          border: "1px solid var(--border-subtle)",
-          borderRadius: "11px",
-          padding: "3px",
-          gap: "2px",
-        }}
-      >
-        {/* Presets Rápidos */}
-        {[
-          { key: "today", label: "Hoje" },
-          { key: "7d",    label: "7D" },
-          { key: "14d",   label: "14D" },
-          { key: "30d",   label: "30D" },
-        ].map((item) => {
-          const active = value.preset === item.key;
-          return (
-            <button
-              key={item.key}
-              onClick={() => selectPreset(item.key as DateRangePreset)}
-              style={{
-                fontSize: "11.5px",
-                fontWeight: active ? 600 : 400,
-                padding: "4px 10px",
-                borderRadius: "8px",
-                border: active ? "1px solid var(--border-strong)" : "1px solid transparent",
-                cursor: "pointer",
-                background: active ? "var(--surface-selected)" : "transparent",
-                color: active ? "var(--text-primary)" : "var(--text-muted)",
-                boxShadow: active ? "0 1px 3px rgba(0,0,0,0.06)" : "none",
-                transition: "all 0.14s ease",
-              }}
-            >
-              {item.label}
-            </button>
-          );
-        })}
-
-        {/* Divisor */}
-        <div style={{ width: "1px", height: "14px", background: "var(--border-subtle)", margin: "0 2px" }} />
-
-        {/* Botão de Calendário / Personalizado */}
+    <div className="date-range-selector">
+      <div className="date-range-desktop-container">
+        {PRESETS.filter((preset) => ["today", "7d", "14d", "30d"].includes(preset.key)).map((preset) => (
+          <button
+            key={preset.key}
+            type="button"
+            className={value.preset === preset.key ? "active" : ""}
+            onClick={() => selectPreset(preset.key)}
+          >
+            {preset.shortLabel}
+          </button>
+        ))}
         <button
-          onClick={() => setIsOpen(!isOpen)}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "5px",
-            fontSize: "11.5px",
-            fontWeight: isCustomActive ? 600 : 400,
-            padding: "4px 9px",
-            borderRadius: "8px",
-            border: isCustomActive ? "1px solid var(--accent-border)" : "1px solid transparent",
-            cursor: "pointer",
-            background: isCustomActive ? "var(--accent-soft-bg)" : "transparent",
-            color: isCustomActive ? "var(--accent-strong)" : "var(--text-muted)",
-            boxShadow: isCustomActive ? "0 1px 3px rgba(0,0,0,0.06)" : "none",
-            transition: "all 0.14s ease",
-          }}
-          title="Selecionar período personalizado"
+          type="button"
+          className={`date-custom-trigger ${value.preset === "custom" ? "active" : ""}`}
+          onClick={() => setIsOpen(true)}
         >
-          <Calendar style={{ width: "12px", height: "12px" }} strokeWidth={1.8} />
-          <span>{isCustomActive ? value.label : "Personalizar"}</span>
-          <ChevronDown
-            style={{
-              width: "11px",
-              height: "11px",
-              transform: isOpen ? "rotate(180deg)" : "rotate(0)",
-              transition: "transform 0.15s ease",
-            }}
-          />
+          <Calendar size={15} />
+          <span>{value.preset === "custom" ? value.label : "Personalizar"}</span>
+          <ChevronDown size={14} />
         </button>
       </div>
 
-      {/* Gatilho Mobile: Pílula Única Compacta de Alta Resolução */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="date-range-mobile-btn"
-        title="Filtrar por período"
-        aria-label="Filtrar data"
-      >
-        <Calendar style={{ width: "12px", height: "12px", color: "var(--accent-strong)" }} strokeWidth={1.8} />
-        <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-primary)" }}>
-          {value.label}
-        </span>
-        <ChevronDown
-          style={{
-            width: "10px",
-            height: "10px",
-            color: "var(--text-muted)",
-            transform: isOpen ? "rotate(180deg)" : "rotate(0)",
-            transition: "transform 0.15s ease",
-          }}
-        />
+      <button type="button" className="date-range-mobile-btn" onClick={() => setIsOpen(true)}>
+        <Calendar size={17} />
+        <span>{value.label}</span>
+        <ChevronDown size={15} />
       </button>
-
-      {/* MODAL / BOTTOM SHEET DE CALENDÁRIO PERSONALIZADO (PORTALIZADO NO BODY - NUNCA CORTADO POR OVERFLOW OU HEAD) */}
-      {isOpen && typeof document !== "undefined" && createPortal(
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 999999,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "20px",
-            background: "rgba(0, 0, 0, 0.65)",
-            backdropFilter: "blur(12px)",
-            WebkitBackdropFilter: "blur(12px)",
-            animation: "fadeIn 0.15s ease-out",
-          }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setIsOpen(false);
-          }}
-        >
-          <div
-            className="card"
-            style={{
-              width: "100%",
-              maxWidth: "370px",
-              background: "var(--surface-card)",
-              border: "1px solid var(--border-strong)",
-              borderRadius: "20px",
-              padding: "22px",
-              boxShadow: "var(--shadow-dock, 0 20px 60px rgba(0, 0, 0, 0.5))",
-              position: "relative",
-            }}
-          >
-            {/* Cabeçalho do Popover */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "16px",
-                paddingBottom: "12px",
-                borderBottom: "1px solid var(--border-subtle)",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <Calendar style={{ width: "15px", height: "15px", color: "var(--accent-strong)" }} />
-                <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--text-primary)" }}>
-                  Filtrar por Período
-                </span>
-              </div>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="btn"
-                style={{
-                  width: "28px",
-                  height: "28px",
-                  padding: 0,
-                  borderRadius: "7px",
-                }}
-              >
-                <X style={{ width: "13px", height: "13px" }} />
-              </button>
-            </div>
-
-            {/* Atalhos Rápidos */}
-            <div style={{ marginBottom: "16px" }}>
-              <span style={{ fontSize: "10.5px", fontWeight: 500, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: "8px" }}>
-                Atalhos Rápidos
-              </span>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
-                {[
-                  { key: "today", label: "Hoje" },
-                  { key: "yesterday", label: "Ontem" },
-                  { key: "7d", label: "Últimos 7 dias" },
-                  { key: "14d", label: "Últimos 14 dias" },
-                  { key: "this_month", label: "Este Mês" },
-                  { key: "30d", label: "Últimos 30 dias" },
-                ].map((p) => {
-                  const active = value.preset === p.key;
-                  return (
-                    <button
-                      key={p.key}
-                      onClick={() => selectPreset(p.key as DateRangePreset)}
-                      style={{
-                        fontSize: "11.5px",
-                        fontWeight: active ? 600 : 400,
-                        padding: "8px 11px",
-                        borderRadius: "8px",
-                        border: active ? "1px solid var(--accent-border)" : "1px solid var(--border-subtle)",
-                        background: active ? "var(--accent-soft-bg)" : "var(--surface-1)",
-                        color: active ? "var(--accent-strong)" : "var(--text-secondary)",
-                        cursor: "pointer",
-                        textAlign: "left",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        transition: "all 0.14s ease",
-                      }}
-                    >
-                      <span>{p.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Intervalo Customizado */}
-            <div style={{ marginBottom: "18px" }}>
-              <span style={{ fontSize: "10.5px", fontWeight: 500, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: "8px" }}>
-                Intervalo Específico
-              </span>
-              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                <div>
-                  <label style={{ fontSize: "11.5px", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>
-                    Data Inicial:
-                  </label>
-                  <input
-                    type="date"
-                    value={tempStart}
-                    onChange={(e) => setTempStart(e.target.value)}
-                    style={{
-                      width: "100%",
-                      fontSize: "12px",
-                      padding: "8px 11px",
-                      borderRadius: "8px",
-                      border: "1px solid var(--border-subtle)",
-                      background: "var(--surface-1)",
-                      color: "var(--text-primary)",
-                      outline: "none",
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ fontSize: "11.5px", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>
-                    Data Final:
-                  </label>
-                  <input
-                    type="date"
-                    value={tempEnd}
-                    onChange={(e) => setTempEnd(e.target.value)}
-                    style={{
-                      width: "100%",
-                      fontSize: "12px",
-                      padding: "8px 11px",
-                      borderRadius: "8px",
-                      border: "1px solid var(--border-subtle)",
-                      background: "var(--surface-1)",
-                      color: "var(--text-primary)",
-                      outline: "none",
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Botões de Ação */}
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="btn"
-                style={{ fontSize: "12px", height: "36px", padding: "0 13px" }}
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={applyCustom}
-                className="btn btn-primary"
-                style={{ fontSize: "12px", height: "36px", padding: "0 16px" }}
-              >
-                Aplicar Filtro
-              </button>
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
+      {popup}
     </div>
   );
 }

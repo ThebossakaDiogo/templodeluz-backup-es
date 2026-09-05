@@ -20,6 +20,7 @@ export default defineConfig({
           charts: ["recharts"],
           supabase: ["@supabase/supabase-js"],
           icons: ["lucide-react"],
+          motion: ["framer-motion"],
         },
       },
     },

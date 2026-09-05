@@ -1,165 +1,126 @@
-import { LayoutGrid, MessageCircle, Activity, CreditCard, Menu } from "lucide-react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import {
+  Activity,
+  AlertOctagon,
+  BarChart3,
+  CreditCard,
+  LayoutGrid,
+  Menu,
+  MessageCircle,
+  User,
+  X,
+} from "lucide-react";
 import type { Section } from "@/App";
 
 interface MobileBottomNavProps {
-  readonly currentSection: Section;
-  readonly onSelect: (section: Section) => void;
-  readonly onOpenMenu: () => void;
-  readonly unreadWhatsAppCount?: number;
+  currentSection: Section;
+  onSelect: (section: Section) => void;
+  unreadWhatsAppCount?: number;
 }
+
+const PRIMARY_ITEMS = [
+  { id: "visao-geral" as Section, label: "Visão geral", Icon: LayoutGrid },
+  { id: "whatsapp" as Section, label: "WhatsApp", Icon: MessageCircle },
+  { id: "rastreamento" as Section, label: "Funil", Icon: Activity },
+  { id: "pedidos" as Section, label: "Pedidos", Icon: CreditCard },
+];
+
+const MORE_ITEMS = [
+  { id: "abandonos" as Section, label: "Abandono e recuperação", detail: "PIX e checkouts pendentes", Icon: AlertOctagon },
+  { id: "relatorios" as Section, label: "Relatórios", detail: "Canais, UTMs e exportação", Icon: BarChart3 },
+  { id: "perfil" as Section, label: "Meu perfil", detail: "Conta e preferências", Icon: User },
+];
 
 export function MobileBottomNav({
   currentSection,
   onSelect,
-  onOpenMenu,
   unreadWhatsAppCount = 0,
 }: MobileBottomNavProps) {
-  const navItems = [
-    {
-      id: "visao-geral" as Section,
-      label: "Visão Geral",
-      Icon: LayoutGrid,
-    },
-    {
-      id: "whatsapp" as Section,
-      label: "WhatsApp",
-      Icon: MessageCircle,
-      badge: unreadWhatsAppCount > 0 ? unreadWhatsAppCount : undefined,
-    },
-    {
-      id: "rastreamento" as Section,
-      label: "Funil Vivo",
-      Icon: Activity,
-    },
-    {
-      id: "pedidos" as Section,
-      label: "Pedidos",
-      Icon: CreditCard,
-    },
-  ];
+  const [showMore, setShowMore] = useState(false);
 
-  return (
-    <nav
-      className="mobile-bottom-nav"
-      style={{
-        position: "fixed",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: "auto",
-        minHeight: "56px",
-        paddingTop: "4px",
-        paddingBottom: "max(10px, env(safe-area-inset-bottom, 14px))",
-        background: "rgba(13, 15, 21, 0.92)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        borderTop: "1px solid rgba(255, 255, 255, 0.075)",
-        boxShadow: "0 -4px 20px rgba(0, 0, 0, 0.35)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-around",
-        zIndex: 99999,
-        paddingLeft: "8px",
-        paddingRight: "8px",
+  useEffect(() => {
+    if (!showMore) return;
+    const originalOverflow = document.body.style.overflow;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setShowMore(false);
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [showMore]);
+
+  const navigate = (section: Section) => {
+    setShowMore(false);
+    onSelect(section);
+  };
+
+  const moreIsActive = MORE_ITEMS.some((item) => item.id === currentSection);
+  const moreSheet = showMore && typeof document !== "undefined" ? createPortal(
+    <div
+      className="mobile-more-backdrop"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) setShowMore(false);
       }}
     >
-      {navItems.map((item) => {
-        const active = currentSection === item.id;
-        const Icon = item.Icon;
-
-        return (
-          <button
-            key={item.id}
-            onClick={() => onSelect(item.id)}
-            style={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "2px",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: "6px 2px",
-              minHeight: "48px",
-              position: "relative",
-              color: active ? "#BDB4EF" : "#707281",
-              transition: "all 0.16s ease",
-            }}
-          >
-            {/* Ícone com Pill Suave no Ativo */}
-            <div
-              style={{
-                position: "relative",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "3px 12px",
-                borderRadius: "10px",
-                background: active ? "rgba(189, 180, 239, 0.12)" : "transparent",
-                transition: "all 0.16s ease",
-              }}
-            >
-              <Icon style={{ width: "19px", height: "19px" }} strokeWidth={active ? 2.2 : 1.7} />
-              {item.badge !== undefined && (
-                <span
-                  style={{
-                    position: "absolute",
-                    top: "-2px",
-                    right: "2px",
-                    background: "#7C5CFF",
-                    color: "#F5F4FA",
-                    fontSize: "9px",
-                    fontWeight: 700,
-                    borderRadius: "99px",
-                    padding: "1px 5px",
-                    boxShadow: "0 2px 6px rgba(124, 92, 255, 0.4)",
-                  }}
-                >
-                  {item.badge}
-                </span>
-              )}
-            </div>
-
-            <span
-              style={{
-                fontSize: "10px",
-                fontWeight: active ? 600 : 400,
-                letterSpacing: "-0.01em",
-                marginTop: "1px",
-              }}
-            >
-              {item.label}
-            </span>
+      <section className="mobile-more-sheet" role="dialog" aria-modal="true" aria-labelledby="mobile-more-title">
+        <header>
+          <div>
+            <h2 id="mobile-more-title">Mais opções</h2>
+            <p>Acesse as demais áreas administrativas.</p>
+          </div>
+          <button type="button" onClick={() => setShowMore(false)} aria-label="Fechar menu">
+            <X size={19} />
           </button>
-        );
-      })}
+        </header>
+        <div className="mobile-more-list">
+          {MORE_ITEMS.map(({ id, label, detail, Icon }) => (
+            <button
+              key={id}
+              type="button"
+              className={currentSection === id ? "active" : ""}
+              onClick={() => navigate(id)}
+            >
+              <span><Icon size={20} /></span>
+              <span><strong>{label}</strong><small>{detail}</small></span>
+            </button>
+          ))}
+        </div>
+      </section>
+    </div>,
+    document.body,
+  ) : null;
 
-      {/* Botão Menu Mais (Abre Drawer Lateral) */}
-      <button
-        onClick={onOpenMenu}
-        style={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "4px",
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          padding: "8px 4px",
-          minHeight: "48px",
-          color: "#8292a8",
-          transition: "all 0.2s ease",
-        }}
-      >
-        <Menu style={{ width: "20px", height: "20px" }} />
-        <span style={{ fontSize: "10.5px", fontWeight: 600, letterSpacing: "-0.01em" }}>
-          Mais
-        </span>
-      </button>
-    </nav>
+  return (
+    <>
+      <nav className="mobile-bottom-nav" aria-label="Navegação principal">
+        {PRIMARY_ITEMS.map(({ id, label, Icon }) => {
+          const active = currentSection === id;
+          return (
+            <button
+              key={id}
+              type="button"
+              className={active ? "active" : ""}
+              onClick={() => navigate(id)}
+              aria-current={active ? "page" : undefined}
+            >
+              <span className="mobile-nav-icon">
+                <Icon size={21} strokeWidth={active ? 2.2 : 1.7} />
+                {id === "whatsapp" && unreadWhatsAppCount > 0 && <i>{Math.min(unreadWhatsAppCount, 99)}</i>}
+              </span>
+              <strong>{label}</strong>
+            </button>
+          );
+        })}
+        <button type="button" className={moreIsActive ? "active" : ""} onClick={() => setShowMore(true)}>
+          <span className="mobile-nav-icon"><Menu size={21} /></span>
+          <strong>Mais</strong>
+        </button>
+      </nav>
+      {moreSheet}
+    </>
   );
 }

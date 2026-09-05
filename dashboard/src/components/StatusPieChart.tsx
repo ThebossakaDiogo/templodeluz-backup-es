@@ -139,7 +139,7 @@ export function StatusPieChart({ orders, loading }: StatusPieChartProps) {
           )}
         </div>
       ) : (
-        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+        <div className="pie-content-layout" style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           {/* Donut Chart */}
           <div style={{ width: "140px", height: "140px", flexShrink: 0 }}>
             <ResponsiveContainer width="100%" height="100%">

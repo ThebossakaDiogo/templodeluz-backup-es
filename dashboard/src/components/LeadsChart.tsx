@@ -140,8 +140,8 @@ export function LeadsChart({ data, total, diff, loading }: LeadsChartProps) {
               />
               <Tooltip
                 contentStyle={{
-                  background: "#0c1527",
-                  border: "1px solid rgba(16,185,129,0.4)",
+                  background: "var(--surface-card)",
+                  border: "1px solid var(--border-strong)",
                   borderRadius: "8px",
                   boxShadow: "0 10px 30px rgba(0,0,0,0.8)",
                   fontSize: "11px",

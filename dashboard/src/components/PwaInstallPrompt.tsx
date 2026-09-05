@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Download, Smartphone, Share, PlusSquare, X } from "lucide-react";
+import { Share, PlusSquare, X } from "lucide-react";
 
 export function PwaInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -87,24 +87,13 @@ export function PwaInstallPrompt() {
           (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(16, 185, 129, 0.35)";
         }}
       >
-        <div
-          style={{
-            width: "24px",
-            height: "24px",
-            borderRadius: "6px",
-            background: "rgba(16, 185, 129, 0.25)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-          }}
-        >
-          {isIos ? (
-            <Smartphone style={{ width: "14px", height: "14px" }} />
-          ) : (
-            <Download style={{ width: "14px", height: "14px" }} />
-          )}
-        </div>
+        <img
+          src="/icons/icon-192.png"
+          alt=""
+          width={28}
+          height={28}
+          style={{ borderRadius: "8px", flexShrink: 0 }}
+        />
         <div style={{ textAlign: "left", lineHeight: 1.2 }}>
           <div style={{ fontSize: "11.5px", fontWeight: 800, color: "#ffffff" }}>
             {isIos ? "Instalar no iPhone" : "Instalar Aplicativo"}
@@ -170,22 +159,13 @@ export function PwaInstallPrompt() {
 
             {/* Cabeçalho */}
             <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "18px" }}>
-              <div
-                style={{
-                  width: "44px",
-                  height: "44px",
-                  borderRadius: "12px",
-                  background: "linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(6, 182, 212, 0.15) 100%)",
-                  border: "1px solid rgba(16, 185, 129, 0.4)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#10b981",
-                  flexShrink: 0,
-                }}
-              >
-                <Smartphone style={{ width: "22px", height: "22px" }} />
-              </div>
+              <img
+                src="/icons/apple-touch-icon.png"
+                alt="Ícone do OD Metrics"
+                width={52}
+                height={52}
+                style={{ borderRadius: "14px", flexShrink: 0 }}
+              />
               <div>
                 <h3 style={{ fontSize: "16px", fontWeight: 900, margin: 0, color: "#ffffff" }}>
                   Instalar no iPhone (iOS)

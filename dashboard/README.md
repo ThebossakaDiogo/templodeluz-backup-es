@@ -37,3 +37,29 @@ Acesse em: `http://localhost:3001`
    - Conecte o repositório.
    - Configure as variáveis de ambiente (conforme `.env.example`).
    - Aponte seu domínio personalizado (ex: `dashboard.seudominio.com`).
+
+## Evolution API local
+
+A dashboard controla a instalação local exclusivamente pelo **Evolution Local Bridge**:
+
+```text
+Dashboard Web
+  -> http://127.0.0.1:3210
+  -> Docker Desktop
+  -> http://127.0.0.1:8080
+  -> PostgreSQL + Redis
+```
+
+Arquivos locais:
+
+- Bridge e Compose: `C:\evolution-local`
+- Compose: `C:\evolution-local\docker-compose.yml`
+- Segredo local: `C:\evolution-local\.env`
+
+O navegador nunca executa PowerShell, CMD ou Docker e não recebe a `AUTHENTICATION_API_KEY`. Os únicos endpoints do Bridge são `GET /health`, `GET /evolution/status`, `POST /evolution/start`, `POST /evolution/stop` e `POST /evolution/restart`.
+
+Antes do primeiro uso, instale o Docker Desktop. O Bridge inicia automaticamente no login pela pasta Startup do Windows.
+
+## PWA e ícones
+
+Os assets de instalação ficam em `public/icons`, incluindo ícones de 192px, 512px, Apple Touch e uma versão maskable com margem segura. O Service Worker armazena apenas o shell local e assets estáticos; chamadas Supabase e Evolution não entram no cache.

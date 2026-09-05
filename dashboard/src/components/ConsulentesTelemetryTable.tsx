@@ -369,7 +369,9 @@ export function ConsulentesTelemetryTable({ leads }: Readonly<ConsulentesTelemet
   const [search, setSearch] = useState("");
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [viewMode, setViewMode] = useState<"table" | "cards">("table");
+  const [viewMode, setViewMode] = useState<"table" | "cards">(() =>
+    typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches ? "cards" : "table",
+  );
 
   const metrics = useMemo(() => calculateTelemetryMetrics(leads), [leads]);
 
@@ -382,6 +384,15 @@ export function ConsulentesTelemetryTable({ leads }: Readonly<ConsulentesTelemet
   useEffect(() => {
     setCurrentPage(1);
   }, [filter, search, pageSize]);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 768px)");
+    const syncViewMode = (event: MediaQueryListEvent | MediaQueryList) => {
+      setViewMode(event.matches ? "cards" : "table");
+    };
+    media.addEventListener("change", syncViewMode);
+    return () => media.removeEventListener("change", syncViewMode);
+  }, []);
 
   // Cálculo da Paginação
   const totalPages = Math.max(1, Math.ceil(filteredLeads.length / pageSize));
@@ -734,7 +745,7 @@ export function ConsulentesTelemetryTable({ leads }: Readonly<ConsulentesTelemet
               color: "var(--accent-strong)",
             }}
           >
-            Coluna {currentPage} de {totalPages}
+            Página {currentPage} de {totalPages}
           </span>
           <span>
             Exibindo <strong style={{ color: "var(--text-primary)" }}>{filteredLeads.length > 0 ? startIndex + 1 : 0}–{endIndex}</strong> de{" "}
@@ -742,7 +753,7 @@ export function ConsulentesTelemetryTable({ leads }: Readonly<ConsulentesTelemet
           </span>
         </div>
 
-        {/* Botões de Navegação por Colunas (Coluna 1, Coluna 2, Coluna 3...) */}
+        {/* Navegação paginada */}
         <div
           style={{
             display: "flex",
@@ -758,7 +769,7 @@ export function ConsulentesTelemetryTable({ leads }: Readonly<ConsulentesTelemet
             type="button"
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={currentPage === 1}
-            title="Coluna anterior"
+            title="Página anterior"
             style={{
               padding: "5px 9px",
               fontSize: "11px",
@@ -803,7 +814,7 @@ export function ConsulentesTelemetryTable({ leads }: Readonly<ConsulentesTelemet
                   gap: "4px",
                 }}
               >
-                <span>Coluna {p}</span>
+                <span>{p}</span>
               </button>
             );
           })}
@@ -812,7 +823,7 @@ export function ConsulentesTelemetryTable({ leads }: Readonly<ConsulentesTelemet
             type="button"
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
-            title="Próxima coluna"
+            title="Próxima página"
             style={{
               padding: "5px 9px",
               fontSize: "11px",
@@ -916,7 +927,7 @@ export function ConsulentesTelemetryTable({ leads }: Readonly<ConsulentesTelemet
           <strong style={{ color: "var(--text-primary)" }}>{filteredLeads.length}</strong> consulentes
         </div>
 
-        {/* Botões de Navegação de Colunas */}
+        {/* Navegação paginada */}
         <div
           style={{
             display: "flex",
@@ -976,7 +987,7 @@ export function ConsulentesTelemetryTable({ leads }: Readonly<ConsulentesTelemet
                   gap: "4px",
                 }}
               >
-                <span>Coluna {p}</span>
+                <span>{p}</span>
               </button>
             );
           })}
