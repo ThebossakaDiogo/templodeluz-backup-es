@@ -99,7 +99,7 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
         <div className="revenue-summary" style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           {/* Legenda PIX */}
           <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11.5px" }}>
-            <span style={{ width: "8px", height: "8px", borderRadius: "2px", background: "#8A79FF" }} />
+            <span style={{ width: "8px", height: "8px", borderRadius: "2px", background: "#9D1CBB" }} />
             <span style={{ color: "var(--text-secondary)", fontWeight: 400 }}>PIX:</span>
             <strong style={{ color: "var(--text-primary)", fontWeight: 600 }}>{formatBRL(totalPix)}</strong>
           </div>
@@ -205,7 +205,7 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
 
                         <div style={{ display: "flex", flexDirection: "column", gap: "4px", fontSize: "11px" }}>
                           <div style={{ display: "flex", justifyContent: "space-between", gap: "16px" }}>
-                            <span style={{ color: "#8A79FF", fontWeight: 500, display: "flex", alignItems: "center", gap: "4px" }}>
+                            <span style={{ color: "#9D1CBB", fontWeight: 500, display: "flex", alignItems: "center", gap: "4px" }}>
                               <QrCode style={{ width: "12px", height: "12px" }} /> PIX:
                             </span>
                             <strong style={{ color: "var(--text-primary)" }}>

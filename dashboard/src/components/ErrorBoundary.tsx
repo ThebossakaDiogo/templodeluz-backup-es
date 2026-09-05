@@ -66,7 +66,7 @@ export class ErrorBoundary extends Component<Props, State> {
               width: "56px",
               height: "56px",
               borderRadius: "16px",
-              background: "linear-gradient(135deg, #7C5CFF 0%, #4F38C4 100%)",
+              background: "linear-gradient(135deg, #FF3377 0%, #D81B60 100%)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -74,7 +74,7 @@ export class ErrorBoundary extends Component<Props, State> {
               fontWeight: 900,
               color: "#FFFFFF",
               marginBottom: "20px",
-              boxShadow: "0 8px 30px rgba(124, 92, 255, 0.4)",
+              boxShadow: "0 8px 30px rgba(255, 51, 119, 0.4)",
             }}
           >
             OD
@@ -131,7 +131,7 @@ export class ErrorBoundary extends Component<Props, State> {
               type="button"
               onClick={this.handleReload}
               style={{
-                background: "linear-gradient(135deg, #7C5CFF 0%, #5E46D8 100%)",
+                background: "linear-gradient(135deg, #FF3377 0%, #D81B60 100%)",
                 border: "1px solid rgba(189, 180, 239, 0.4)",
                 color: "#FFFFFF",
                 fontWeight: 700,
@@ -139,7 +139,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 padding: "12px 24px",
                 borderRadius: "12px",
                 cursor: "pointer",
-                boxShadow: "0 4px 16px rgba(124, 92, 255, 0.3)",
+                boxShadow: "0 4px 16px rgba(255, 51, 119, 0.3)",
               }}
             >
               Recarregar Painel

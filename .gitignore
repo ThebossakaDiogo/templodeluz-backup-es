@@ -51,3 +51,7 @@ findings.md
 progress.md
 task_plan.md
 backredirect/
+
+# Segredos locais (nao versionar)
+APIKEY-CONNECT.txt
+CONNECTPAY-E-SECRETS.txt

@@ -162,7 +162,7 @@ function TelemetryTableRow({ lead }: { readonly lead: Lead }) {
               borderRadius: "50%",
               background: isPaid
                 ? "linear-gradient(135deg, #2EDB6F 0%, #17A04B 100%)"
-                : "linear-gradient(135deg, #7C5CFF 0%, #5235C8 100%)",
+                : "linear-gradient(135deg, #FF3377 0%, #D81B60 100%)",
               color: "#FFFFFF",
               display: "flex",
               alignItems: "center",
@@ -294,7 +294,7 @@ function TelemetryCard({ lead }: { readonly lead: Lead }) {
               borderRadius: "50%",
               background: isPaid
                 ? "linear-gradient(135deg, #2EDB6F 0%, #17A04B 100%)"
-                : "linear-gradient(135deg, #7C5CFF 0%, #5235C8 100%)",
+                : "linear-gradient(135deg, #FF3377 0%, #D81B60 100%)",
               color: "#FFFFFF",
               display: "flex",
               alignItems: "center",

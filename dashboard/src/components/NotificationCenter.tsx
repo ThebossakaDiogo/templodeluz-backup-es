@@ -289,7 +289,7 @@ export function NotificationCenter({
           justifyContent: "center",
           background: "var(--surface-1)",
           border: unreadCount > 0 ? "1px solid var(--accent-border)" : "1px solid var(--border-subtle)",
-          boxShadow: unreadCount > 0 ? "0 0 14px -2px rgba(124, 92, 255, 0.45)" : "none",
+          boxShadow: unreadCount > 0 ? "0 0 14px -2px rgba(255, 51, 119, 0.45)" : "none",
           transition: "all 0.18s ease",
         }}
       >
@@ -311,7 +311,7 @@ export function NotificationCenter({
               height: "16px",
               padding: "0 4px",
               borderRadius: "999px",
-              background: "var(--accent-strong, #7C5CFF)",
+              background: "var(--accent-strong, #FF3377)",
               color: "#FFFFFF",
               fontSize: "9.5px",
               fontWeight: 700,
@@ -319,7 +319,7 @@ export function NotificationCenter({
               alignItems: "center",
               justifyContent: "center",
               border: "2px solid var(--topbar-bg, #0D0F15)",
-              boxShadow: "0 2px 8px rgba(124, 92, 255, 0.5)",
+              boxShadow: "0 2px 8px rgba(255, 51, 119, 0.5)",
             }}
           >
             {unreadCount > 9 ? "9+" : unreadCount}
@@ -431,15 +431,15 @@ export function NotificationCenter({
 
                 const getIcon = () => {
                   if (notif.title.includes("PIX")) {
-                    return <QrCode style={{ width: "14px", height: "14px", color: "#2EDB6F" }} />;
+                    return <QrCode style={{ width: "14px", height: "14px", color: "var(--success)" }} />;
                   }
                   if (notif.title.includes("Cartão")) {
-                    return <CreditCard style={{ width: "14px", height: "14px", color: "#8A79FF" }} />;
+                    return <CreditCard style={{ width: "14px", height: "14px", color: "var(--brand-indigo)" }} />;
                   }
                   if (notif.type === "lead") {
-                    return <UserPlus style={{ width: "14px", height: "14px", color: "#8A79FF" }} />;
+                    return <UserPlus style={{ width: "14px", height: "14px", color: "var(--brand-indigo)" }} />;
                   }
-                  return <ShieldCheck style={{ width: "14px", height: "14px", color: "#BDB4EF" }} />;
+                  return <ShieldCheck style={{ width: "14px", height: "14px", color: "var(--brand-indigo)" }} />;
                 };
 
                 return (
@@ -514,7 +514,7 @@ export function NotificationCenter({
                           background: "var(--accent-strong)",
                           flexShrink: 0,
                           marginTop: "6px",
-                          boxShadow: "0 0 6px rgba(124, 92, 255, 0.6)",
+                          boxShadow: "0 0 6px rgba(255, 51, 119, 0.6)",
                         }}
                       />
                     )}
@@ -537,7 +537,7 @@ export function NotificationCenter({
             }}
           >
             <span style={{ color: "var(--text-muted)", display: "flex", alignItems: "center", gap: "4px" }}>
-              <span className="pulse-emerald" style={{ display: "inline-block", width: "6px", height: "6px", borderRadius: "50%", background: "#2EDB6F" }} />
+              <span className="pulse-emerald" style={{ display: "inline-block", width: "6px", height: "6px", borderRadius: "50%", background: "var(--success)" }} />
               OD Shield Telemetria Ao Vivo
             </span>
             <button

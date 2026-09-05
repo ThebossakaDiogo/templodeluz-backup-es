@@ -30,7 +30,7 @@ export function PaymentMethodsPieChart({ orders, loading }: PaymentMethodsPieCha
       name: "PIX (Banco Central)",
       value: pixAmountCents / 100,
       count: pixOrders.length,
-      color: "#8A79FF",
+      color: "#9D1CBB",
       icon: QrCode,
     },
     {

@@ -2739,3 +2739,96 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* -- Cabeçalhos de seção da Visão Geral --------------------------- */
+.dashboard-root .dashboard-section-head {
+  margin-top: 4px;
+}
+.dashboard-root .dashboard-section-head h2 {
+  margin: 2px 0 0;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+.dashboard-root .dashboard-section-head p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* -- Wizard de conexão do WhatsApp -------------------------------- */
+.dashboard-root .connect-wizard-steps {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.dashboard-root .connect-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-1);
+}
+.dashboard-root .connect-step-marker {
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 2px solid var(--border);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+.dashboard-root .connect-step.done {
+  background: var(--success-soft);
+  border-color: color-mix(in srgb, var(--success) 25%, transparent);
+}
+.dashboard-root .connect-step.done .connect-step-marker {
+  background: var(--success);
+  border-color: var(--success);
+  color: #fff;
+}
+.dashboard-root .connect-step.active {
+  border-color: var(--accent-border);
+  background: var(--accent-soft-bg);
+  box-shadow: 3px 3px 0 rgba(255, 51, 119, 0.12);
+}
+.dashboard-root .connect-step.active .connect-step-marker {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+.dashboard-root .connect-step-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.dashboard-root .connect-step-body strong {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.dashboard-root .connect-step-body small {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.dashboard-root .connect-wizard-done {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--success);
+}
+.dashboard-root .evolution-state-badge.success {
+  color: var(--success) !important;
+  background: var(--success-soft);
+  border-color: color-mix(in srgb, var(--success) 25%, transparent);
+}

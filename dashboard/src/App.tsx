@@ -926,7 +926,13 @@ export function App() {
           {/* SLUG: /visao-geral */}
           {section === "visao-geral" && (
             <>
-              {/* MÉTRICA DE MAIOR DESTAQUE NO DASHBOARD: ENTRADAS DO DIA & TELEMETRIA AO VIVO */}
+              {/* Seção 1 — Hoje (resumo essencial) */}
+              <div className="dashboard-section-head">
+                <span className="section-kicker">Resumo do dia</span>
+                <h2>Como está hoje?</h2>
+                <p>O essencial da operação em uma olhada.</p>
+              </div>
+
               <TodayHeroMetric
                 todayEntriesCount={todayEntriesCount}
                 onlineCount={onlineCount}
@@ -936,37 +942,44 @@ export function App() {
                 loading={loading}
               />
 
-              <EvolutionLocalControl />
-
-              <EvolutionGuide />
-
-              {/* Cards de Métricas Principais (Faturamento, Conversões PIX, Conversões Cartão Stripe, Leads) */}
               <MetricCards stats={stats} loading={loading} />
 
-              {/* Barra de Conversão & Saúde da Operação no Período */}
               <ConversionOverview
                 leads={filteredLeads}
                 orders={filteredOrders}
                 loading={loading}
               />
 
-              {/* Tabela Nominal de Telemetria de Consulentes, Tempos e Checkouts */}
+              {/* Seção 2 — Conexão do WhatsApp (setup guiado) */}
+              <div className="dashboard-section-head">
+                <span className="section-kicker">Configuração</span>
+                <h2>Conecte seu WhatsApp</h2>
+                <p>Siga os 3 passos para a médium enviar as cartas pelo WhatsApp.</p>
+              </div>
+
+              <EvolutionLocalControl />
+
+              <EvolutionGuide />
+
+              {/* Seção 3 — Detalhes do período (o que aconteceu) */}
+              <div className="dashboard-section-head">
+                <span className="section-kicker">Período selecionado</span>
+                <h2>O que aconteceu?</h2>
+                <p>Telemetria, funil e pedidos em detalhe.</p>
+              </div>
+
               <ConsulentesTelemetryTable leads={filteredLeads} />
 
-              {/* FUNIL DE CONVERSÃO 3D EM LARGURA TOTAL (PAINEL PRINCIPAL ESTILO STAKENT) */}
               <FunnelViz leads={filteredLeads} loading={loading} />
 
-              {/* Gráfico de Receita Full Width com Curvas PIX vs Cartão */}
               <RevenueChart data={revenueChart} loading={loading} />
 
-              {/* TRIO DE GRÁFICOS ANALÍTICOS: Métodos (PIX vs Cartão), Status e Origem UTM */}
               <div className="analytics-trio-grid">
                 <PaymentMethodsPieChart orders={filteredOrders} loading={loading} />
                 <StatusPieChart orders={filteredOrders} loading={loading} />
                 <TrafficPieChart leads={filteredLeads} loading={loading} />
               </div>
 
-              {/* Volume Diário de Leads */}
               <LeadsChart
                 data={leadsChart}
                 total={filteredLeads.length}
@@ -974,7 +987,6 @@ export function App() {
                 loading={loading}
               />
 
-              {/* Tabela de Pedidos com Badges e Filtro por PIX / Cartão */}
               <OrdersTable
                 orders={filteredOrders.slice(0, 10)}
                 loading={loading}
