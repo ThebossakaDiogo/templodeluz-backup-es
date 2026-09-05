@@ -31,4 +31,26 @@ export default defineConfig(({ command }) => ({
       "@tanstack/query-core",
     ],
   },
+  build: {
+    target: "es2022",
+    cssMinify: true,
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            if (/react(-dom)?\//.test(id) || id.includes("/react/")) return "vendor-react";
+            if (id.includes("@tanstack/")) return "vendor-router";
+            if (id.includes("framer-motion")) return "vendor-motion";
+            if (id.includes("qrcode.react")) return "vendor-qr";
+            if (id.includes("lucide-react") || id.includes("@radix-ui/") || id.includes("sonner")) {
+              return "vendor-ui";
+            }
+            return "vendor";
+          }
+          return undefined;
+        },
+      },
+    },
+  },
 }));

@@ -161,6 +161,11 @@ function Progress({
           style={{ width: `${pct}%` }}
         />
       </div>
+      <p className="mt-2 text-center text-[11px] font-semibold italic text-[#b45309]">
+        {step < total
+          ? "✨ O amor que une vocês está guiando o caminho — continue"
+          : "✨ A sua carta já está sendo preparada no plano espiritual"}
+      </p>
     </div>
   );
 }
@@ -185,6 +190,41 @@ function QuestionHead({
       {subtitle && (
         <p className="mt-2 text-[14.5px] text-[#5e4b73] leading-relaxed font-normal">{subtitle}</p>
       )}
+    </div>
+  );
+}
+
+/* Frases de acolhimento exibidas a cada etapa para confortar o coração. */
+const COMFORT_PHRASES: Record<string, { icon: string; text: string }> = {
+  ente: {
+    icon: "🕊️",
+    text: "Que lindo poder honrar a memória de quem você ama. Respire fundo: este é um espaço seguro, cheio de amor e respeito.",
+  },
+  relacao: {
+    icon: "💞",
+    text: "Todo laço de amor é eterno. O que vocês viveram continua vivo dentro do seu coração.",
+  },
+  tempo: {
+    icon: "🌿",
+    text: "A saudade é a prova de que o amor nunca partiu. Estamos aqui com você, segurando a sua mão.",
+  },
+  mensagem: {
+    icon: "💌",
+    text: "Falar com o coração alivia a alma. Escreva com calma, sem pressa — cada palavra é ouvida no plano espiritual.",
+  },
+  confirma: {
+    icon: "✨",
+    text: "A sua fé trouxe você até aqui. Falta muito pouco para o reencontro de palavras que o seu coração espera.",
+  },
+};
+
+function ComfortNote({ step }: { readonly step: string }) {
+  const note = COMFORT_PHRASES[step];
+  if (!note) return null;
+  return (
+    <div className="animate-rise-in mx-4 mb-4 flex items-center gap-3 rounded-2xl border border-[#ece4f4] bg-[#f6f0fc] px-4 py-3 shadow-2xs sm:mx-6">
+      <span className="text-2xl shrink-0">{note.icon}</span>
+      <p className="text-[13px] font-medium italic leading-relaxed text-[#5e4b73]">{note.text}</p>
     </div>
   );
 }
@@ -813,10 +853,9 @@ function Intro({
 
   return (
     <div className="animate-rise-in bg-[#fbf9f5]">
-      {/* Top Hero com Imagem Totalmente Visível e Texto Posicionado Abaixo */}
+      {/* Hero compacto: imagem + headline acima da dobra */}
       <header className="relative bg-[#180829] text-white overflow-hidden">
-        {/* Bloco da Imagem: Ampla, Nítida e Sem Nenhuma Letra Cobrindo */}
-        <div className="relative w-full h-[310px] sm:h-[350px] overflow-hidden bg-black">
+        <div className="relative w-full h-[380px] sm:h-[460px] overflow-hidden bg-black">
           <img
             src={IMAGES.heroBg}
             alt="Mãe acolhida com a presença de seu ente querido"
@@ -824,34 +863,29 @@ function Intro({
             fetchPriority="high"
             decoding="async"
           />
-          {/* Badge no topo sobre a foto */}
           <div className="absolute top-4 inset-x-0 flex justify-center z-10 px-4">
             <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/80 bg-black/65 backdrop-blur-md px-4 py-1.5 text-[11px] font-bold tracking-[0.2em] text-amber-300 uppercase shadow-2xl">
               <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping shadow-xs shadow-amber-400" />
               {" "}🕊️ Templo de Luz · Desde 1977
             </span>
           </div>
-          {/* Transição suave na base da foto */}
-          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#180829] to-transparent pointer-events-none" />
+          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#180829] to-transparent pointer-events-none" />
         </div>
 
         <Halos />
 
-        {/* Card do Texto Posicionado Abaixo da Foto (não tampa os rostos) */}
-        <div className="relative z-10 px-4 pb-7 -mt-4">
-          <div className="mx-auto max-w-[420px] rounded-3xl border border-amber-400/35 bg-[#1a082e] p-5 sm:p-6 shadow-2xl text-center">
+        <div className="relative z-10 px-4 pb-6 -mt-10">
+          <div className="mx-auto max-w-[430px] rounded-3xl border border-amber-400/35 bg-[#1a082e]/90 p-5 sm:p-6 shadow-2xl text-center backdrop-blur-sm">
             <Stars className="mb-2" />
-            <h1 className="font-display text-[23px] sm:text-[25px] leading-[1.25] font-black text-white tracking-tight">
-              Receba hoje uma{" "}
-              <span className="text-[#fde68a] not-italic underline decoration-amber-400 decoration-2 underline-offset-4">
-                carta psicografada
-              </span>{" "}
-              de quem você ama e partiu para a luz
+            <h1 className="font-display text-[22px] sm:text-[25px] leading-[1.2] font-black text-white tracking-tight">
+              Receba hoje a carta de quem você ama,{" "}
+              <span className="text-[#fde68a] underline decoration-amber-400 decoration-2 underline-offset-4">
+                escrita à mão pela médium Milena
+              </span>
             </h1>
-
-            <p className="mt-3 text-[13.5px] leading-relaxed text-zinc-200 font-normal">
-              Escrita à mão pela médium Milena Medeiros no santuário sagrado — revelando a letra, a
-              assinatura e as lembranças íntimas que provam que a vida continua.
+            <p className="mt-2.5 text-[13px] leading-relaxed text-zinc-200 font-normal">
+              Uma mensagem do seu ente querido — com a letra, a assinatura e lembranças que só vocês
+              dois conhecem.
             </p>
           </div>
         </div>
@@ -866,37 +900,59 @@ function Intro({
         <span className="text-[#b45309] font-extrabold">★★★★★ 4,9/5</span>
       </div>
 
-      <div className="flex flex-col items-center px-4 pt-7 pb-10 sm:px-6">
-        {/* Foto do Santuário Templo de Luz em Destaque Central Majestoso */}
-        <Reveal className="w-full mb-6">
-          <div className="relative overflow-hidden rounded-3xl border-2 border-[#f59e0b]/40 shadow-xl bg-white">
-            <img
-              src={IMAGES.hero}
-              alt="Santuário Templo de Luz"
-              className="w-full h-[220px] object-cover object-center shadow-inner"
-              loading="lazy"
-              decoding="async"
+      <div className="flex flex-col items-center px-4 pt-6 pb-10 sm:px-6">
+        {/* Formulário + CTA imediatamente (micro-compromisso acima da dobra) */}
+        <Reveal className="w-full">
+          <div className="rounded-3xl border border-[#ece4f4] bg-white p-6 shadow-xl">
+            <div className="text-center mb-5">
+              <span className="text-[11px] font-bold uppercase tracking-widest text-[#b45309]">
+                Sua Conexão Espiritual
+              </span>
+              <h2 className="mt-1.5 font-display text-[17px] font-black text-[#181126] leading-snug">
+                Descubra a mensagem que seu ente querido guarda para você
+              </h2>
+              <p className="mt-1.5 text-[13px] leading-relaxed text-[#5e4b73] font-normal">
+                Responda a poucas perguntas para a médium sintonizar a frequência certa.{" "}
+                <strong className="text-[#181126] font-bold">Leva menos de 1 minuto.</strong>
+              </p>
+            </div>
+
+            <Field
+              label="Como podemos chamar você? (Seu nome)"
+              value={nome}
+              onChange={setNome}
+              placeholder="Digite seu nome completo"
+              error={error}
+              onEnter={next}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent p-4 flex items-end">
-              <div>
-                <span className="text-[11px] font-bold uppercase tracking-widest text-[#fde68a] flex items-center gap-1.5 mb-0.5">
-                  <span>✦</span> Santuário Sagrado Templo de Luz
-                </span>
-                <p className="text-[13px] text-white font-medium leading-snug">
-                  O local sagrado onde a médium Milena Medeiros realiza as sessões de psicografia
-                </p>
-              </div>
+
+            <div className="mt-5">
+              <Cta onClick={next}>💫 Revelar Minha Carta</Cta>
+            </div>
+
+            <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-[11.5px] font-medium text-[#786445]">
+              <span>🔒 Sigilo sagrado absoluto</span>
+              <span>✍️ Sem computadores</span>
+              <span>🛡️ Garantia de 7 dias</span>
             </div>
           </div>
         </Reveal>
 
-        {/* Exemplo de Carta com Borda Sagrada & Zoom em Tela Cheia */}
-        <Reveal className="w-full">
+        {/* Depoimento curto */}
+        <Reveal delay={80} className="mt-6 w-full">
+          <p className="font-display mx-auto max-w-[310px] text-center text-[14px] italic text-[#4a365f] leading-relaxed font-medium">
+            🥹 “Quando abri o envelope e li a primeira linha, reconheci a letra exata da minha
+            mãe... Chorei de pura paz.”
+          </p>
+        </Reveal>
+
+        {/* Exemplo de carta (prova visual com zoom) */}
+        <Reveal delay={80} className="mt-6 w-full">
           <button
             type="button"
             onClick={() => setLetterModalOpen(true)}
             aria-label="Toque para ampliar exemplo de carta psicografada"
-            className="group relative block w-full mx-auto max-w-[325px] rounded-2xl p-1 bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 shadow-xl cursor-zoom-in transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl text-left"
+            className="group relative block w-full mx-auto max-w-[300px] rounded-2xl p-1 bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 shadow-xl cursor-zoom-in transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl text-left"
           >
             <div className="relative overflow-hidden rounded-xl">
               <img
@@ -906,61 +962,20 @@ function Intro({
                 loading="lazy"
                 decoding="async"
               />
-              {/* Overlay interativo com lupa e instrução */}
               <div className="absolute inset-0 bg-black/25 group-hover:bg-black/10 transition-colors flex flex-col items-center justify-center p-3">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3.5 py-1.5 text-[11.5px] font-black text-[#2d144d] shadow-xl backdrop-blur-xs border border-amber-300/80 transition-transform group-hover:scale-105">
-                  <span>🔍</span> Toque para Ampliar em Tela Cheia
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3.5 py-1.5 text-[11.5px] font-black text-[#2d144d] shadow-xl backdrop-blur-xs border border-amber-300/80">
+                  <span>🔍</span> Ver exemplo real
                 </span>
               </div>
             </div>
           </button>
-          <p className="font-display mx-auto mt-4 max-w-[310px] text-center text-[14px] italic text-[#4a365f] leading-relaxed font-medium">
-            🥹 “Quando abri o envelope e li a primeira linha, reconheci a letra exata da minha
-            mãe... Chorei de pura paz.”
-          </p>
         </Reveal>
 
-        {/* Modal de Tela Cheia com Zoom */}
         <LetterZoomModal
           isOpen={letterModalOpen}
           onClose={() => setLetterModalOpen(false)}
           onCtaClick={next}
         />
-
-        {/* Card Formulário com Design Claro, Acolhedor & Alto Contraste */}
-        <Reveal
-          delay={80}
-          className="mt-8 w-full rounded-3xl border border-[#ece4f4] bg-white p-6 shadow-xl"
-        >
-          <div className="text-center mb-5">
-            <span className="text-[11px] font-bold uppercase tracking-widest text-[#b45309]">
-              Sua Conexão Espiritual
-            </span>
-            <p className="mt-1.5 text-[14.5px] leading-relaxed text-[#5e4b73] font-normal">
-              Responda a poucas perguntas para a médium sintonizar a frequência do seu ente querido.{" "}
-              <strong className="text-[#181126] font-bold">Leva menos de 1 minuto.</strong>
-            </p>
-          </div>
-
-          <Field
-            label="1. Como podemos chamar você? (Seu nome)"
-            value={nome}
-            onChange={setNome}
-            placeholder="Digite seu nome completo"
-            error={error}
-            onEnter={next}
-          />
-
-          <div className="mt-5">
-            <Cta onClick={next}>💫 Abrir Conexão Espiritual</Cta>
-          </div>
-
-          <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-[11.5px] font-medium text-[#786445]">
-            <span>🔒 Sigilo sagrado absoluto</span>
-            <span>✍️ Sem computadores</span>
-            <span>🛡️ Garantia de 7 dias</span>
-          </div>
-        </Reveal>
 
         {/* Como funciona */}
         <Reveal className="mt-10 w-full">
@@ -984,18 +999,6 @@ function Intro({
                 </div>
               </div>
             ))}
-          </div>
-        </Reveal>
-
-        {/* Exemplo de Caligrafia */}
-        <Reveal delay={80} className="mt-10 w-full">
-          <SectionLabel>Evidências da vida eterna</SectionLabel>
-          <div className="rounded-3xl border border-[#ece4f4] bg-white p-5 shadow-sm text-center">
-            <p className="text-[14px] leading-relaxed text-[#5e4b73]">
-              A psicografia não traz apenas palavras de amor: ela manifesta os{" "}
-              <strong className="text-[#181126]">traços da caligrafia original</strong>, os apelidos
-              de família e as memórias que só você e seu ente querido conhecem.
-            </p>
           </div>
         </Reveal>
 
@@ -1710,6 +1713,7 @@ export function QuizFunnel() {
               title={`${primeiroNome}, quem é a pessoa amada que já partiu e você deseja reencontrar através da carta?`}
               subtitle="O nome é o elo vibracional usado pela médium para sintonizar a frequência certa no plano espiritual."
             />
+            <ComfortNote step="ente" />
             <div className="px-6 pb-16">
               <Field
                 label="Nome completo de quem partiu"
@@ -1769,6 +1773,7 @@ export function QuizFunnel() {
               title={`Qual é o vínculo de alma que une você e ${primeiroEnte}?`}
               subtitle="Cada laço possui uma frequência única. Isso ajuda a médium a reconhecer as memórias e formas de tratamento do espírito."
             />
+            <ComfortNote step="relacao" />
             <div className="flex flex-col gap-3 px-6 pb-6">
               {[
                 { e: "👩", l: "Mãe ou Pai", h: "O laço sagrado de quem nos deu a vida e a bênção" },
@@ -1841,6 +1846,7 @@ export function QuizFunnel() {
               title={`Há quanto tempo ${primeiroEnte} fez a passagem para o plano espiritual?`}
               subtitle="Não existe tempo mínimo para a oração e para receber o conforto de um recado espiritual."
             />
+            <ComfortNote step="tempo" />
             <div className="flex flex-col gap-3 px-6 pb-6">
               {[
                 {
@@ -1907,6 +1913,7 @@ export function QuizFunnel() {
               title={`Como você deseja orientar a médium Milena para a carta de ${primeiroEnte}?`}
               subtitle="Você pode escolher os temas sagrados para a canalização ou redigir uma mensagem com suas próprias palavras."
             />
+            <ComfortNote step="mensagem" />
 
             <div className="px-6 pb-16">
               {/* 2 Abas Modernas Luminous & Intuitive */}
@@ -2141,6 +2148,7 @@ export function QuizFunnel() {
               title={`Você está pronto(a) para a médium Milena realizar o recolhimento para ${primeiroEnte} ainda hoje?`}
               subtitle="Reservaremos uma vaga no oratório para que a psicografia seja realizada com dedicação exclusiva."
             />
+            <ComfortNote step="confirma" />
             <div className="flex flex-col gap-3 px-6 pb-6">
               <Option
                 emoji="💌"

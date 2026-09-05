@@ -1,6 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { QuizFunnel } from "@/components/funnel/QuizFunnel";
+import { ExitIntentBackRedirect } from "@/components/funnel/ExitIntentBackRedirect";
+
+function QuizPage() {
+  return (
+    <>
+      <QuizFunnel />
+      <ExitIntentBackRedirect enabled />
+    </>
+  );
+}
 
 const stepSchema = z
   .enum(["intro", "ente", "relacao", "tempo", "mensagem", "confirma", "loading", "result"])
@@ -40,6 +50,10 @@ export const Route = createFileRoute("/")({
           "Receba uma carta psicografada manuscrita pela médium Milena Medeiros. +12.400 acolhidos desde 1977.",
       },
     ],
+    links: [
+      { rel: "preconnect", href: "https://opftmzegcvfyoinjfmcj.supabase.co" },
+      { rel: "dns-prefetch", href: "https://opftmzegcvfyoinjfmcj.supabase.co" },
+    ],
   }),
-  component: QuizFunnel,
+  component: QuizPage,
 });

@@ -23,6 +23,7 @@ import { ConversionOverview } from "@/components/ConversionOverview";
 import { ConsulentesTelemetryTable } from "@/components/ConsulentesTelemetryTable";
 import { TodayHeroMetric } from "@/components/TodayHeroMetric";
 import { EvolutionLocalControl } from "@/components/EvolutionLocalControl";
+import { EvolutionGuide } from "@/components/EvolutionGuide";
 import { WhatsAppTracker } from "@/components/WhatsAppTracker";
 import { AbandonmentTracker } from "@/components/AbandonmentTracker";
 import { ProfileView } from "@/components/ProfileView";
@@ -903,6 +904,8 @@ export function App() {
               />
 
               <EvolutionLocalControl />
+
+              <EvolutionGuide />
 
               {/* Cards de Métricas Principais (Faturamento, Conversões PIX, Conversões Cartão Stripe, Leads) */}
               <MetricCards stats={stats} loading={loading} />

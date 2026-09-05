@@ -230,7 +230,10 @@ async function createPixCharge(
   };
 }
 
-async function getPixStatus(charge: PixCharge): Promise<{ status: PixPaymentStatus }> {
+async function getPixStatus(
+  charge: PixCharge,
+  waitMs = 0,
+): Promise<{ status: PixPaymentStatus }> {
   const url = `${config.supabaseUrl}/functions/v1/get-connectpay-pix-status`;
   const response = await fetch(url, {
     method: "POST",
@@ -242,6 +245,7 @@ async function getPixStatus(charge: PixCharge): Promise<{ status: PixPaymentStat
     body: JSON.stringify({
       orderId: charge.orderId,
       statusToken: charge.statusToken,
+      waitMs,
     }),
   });
 
@@ -490,6 +494,20 @@ function PixFormView({
   );
 }
 
+function secondsUntil(expiresAt: string): number {
+  const target = new Date(expiresAt).getTime();
+  if (Number.isFinite(target) && target > 0) {
+    return Math.max(0, Math.floor((target - Date.now()) / 1000));
+  }
+  return 15 * 60;
+}
+
+function formatCountdown(totalSeconds: number): string {
+  const mins = Math.floor(totalSeconds / 60);
+  const secs = totalSeconds % 60;
+  return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+}
+
 interface PixPendingViewProps {
   readonly charge: PixCharge;
   readonly status: PixPaymentStatus;
@@ -509,6 +527,16 @@ function PixPendingView({
   onCopyPix,
   onManualCheck,
 }: Readonly<PixPendingViewProps>) {
+  const [remaining, setRemaining] = useState(() => Math.max(0, secondsUntil(charge.expiresAt)));
+
+  useEffect(() => {
+    setRemaining(Math.max(0, secondsUntil(charge.expiresAt)));
+    const id = window.setInterval(() => {
+      setRemaining(Math.max(0, secondsUntil(charge.expiresAt)));
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, [charge.expiresAt]);
+
   if (status === "paid") {
     return (
       <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-center text-emerald-950">
@@ -523,6 +551,46 @@ function PixPendingView({
 
   return (
     <>
+      {/* Simulação: mensagem da médium aguardando no WhatsApp */}
+      <div className="mt-1 mb-3 w-full rounded-2xl border border-emerald-200 bg-[#e7f7ee] p-3 text-left shadow-sm">
+        <div className="flex items-start gap-3">
+          <div className="relative shrink-0">
+            <img
+              src="/zap-image.jpeg"
+              alt="Médium Milena Medeiros"
+              className="h-11 w-11 rounded-full border-2 border-emerald-500 object-cover"
+            />
+            <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full border border-white bg-[#25D366]">
+              <svg viewBox="0 0 24 24" className="h-2.5 w-2.5 fill-white" aria-hidden="true">
+                <path d="M12 2a10 10 0 0 0-8.66 15L2 22l5.15-1.35A10 10 0 1 0 12 2Zm5.4 13.6c-.23.65-1.13 1.19-1.56 1.23-.42.05-.95.07-1.53-.1a12 12 0 0 1-1.4-.52c-2.44-1.05-4.03-3.5-4.15-3.66-.12-.16-1-1.32-1-2.52 0-1.2.63-1.79.85-2.03.22-.24.49-.3.65-.3l.47.01c.15.01.35-.06.55.42.2.49.69 1.69.75 1.81.06.12.1.27.02.43-.08.16-.12.26-.24.4-.12.14-.26.32-.37.43-.12.12-.25.25-.11.49.14.24.63 1.04 1.35 1.68.93.83 1.71 1.09 1.95 1.21.24.12.38.1.52-.06.14-.16.6-.7.76-.94.16-.24.32-.2.54-.12.22.08 1.4.66 1.64.78.24.12.4.18.46.28.06.1.06.58-.16 1.15Z" />
+              </svg>
+            </span>
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[12px] font-black text-[#181126]">Médium Milena</span>
+              <span className="text-[10px] font-medium text-[#667781]">agora</span>
+            </div>
+            <div className="mt-1 rounded-xl rounded-tl-sm bg-white px-3 py-2 text-[12.5px] leading-relaxed text-[#181126] shadow-sm">
+              💚 Olá! Já recebi a sua solicitação aqui no WhatsApp e estou aguardando para começar a
+              sua carta. Assim que o PIX for confirmado, eu já inicio a psicografia. Estou esperando!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Cronômetro de urgência */}
+      <div className="mb-3 flex items-center justify-center gap-2 rounded-xl border border-amber-300 bg-[#fff8e6] px-4 py-2.5">
+        <svg viewBox="0 0 24 24" className="h-4 w-4 text-amber-600" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 7v5l3 3" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        <span className="text-[12px] font-bold text-amber-800">
+          Sua vaga está reservada por{" "}
+          <span className="font-black tabular-nums">{formatCountdown(remaining)}</span>
+        </span>
+      </div>
+
       <div className="inline-block rounded-2xl border-2 border-emerald-500/30 bg-white p-3 shadow-md">
         {charge.qrCodeBase64 ? (
           <img
@@ -761,24 +829,44 @@ export function PixCheckout({
     };
   }, [isOpen, customerName, customerEmail, customerPhone, amountCents]);
 
-  // Polling de status do PIX
+  // Confirmação instantânea do PIX (long-polling + re-cheque ao voltar para a aba)
   useEffect(() => {
     if (!charge || terminalStatuses.has(status)) return;
 
     let active = true;
-    const checkStatus = async () => {
+
+    const checkOnce = async (waitMs: number) => {
       try {
-        const result = await getPixStatus(charge);
+        const result = await getPixStatus(charge, waitMs);
         if (active) setStatus(result.status);
       } catch {
         // tenta novamente no próximo ciclo
       }
     };
-    void checkStatus();
-    const timer = window.setInterval(() => void checkStatus(), 4000);
+
+    // Long-polling: a Edge Function segura a requisição até o status mudar.
+    // Assim a confirmação chega em milissegundos, sem intervalo fixo.
+    const loop = async () => {
+      while (active) {
+        await checkOnce(25_000);
+        if (!active) return;
+        await new Promise((resolve) => setTimeout(resolve, 350));
+      }
+    };
+    void loop();
+
+    // O consulente paga no app do banco e volta para a aba: verifica na hora.
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") void checkOnce(0);
+    };
+    const onFocus = () => void checkOnce(0);
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("focus", onFocus);
+
     return () => {
       active = false;
-      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("focus", onFocus);
     };
   }, [charge, status]);
 

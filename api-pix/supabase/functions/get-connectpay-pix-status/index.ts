@@ -63,26 +63,51 @@ Deno.serve(async (req) => {
     const input = await req.json().catch(() => null) as Record<string, unknown> | null;
     const orderId = input?.orderId;
     const statusToken = typeof input?.statusToken === 'string' ? input.statusToken : '';
+    const requestedWaitMs = typeof input?.waitMs === 'number' && Number.isFinite(input.waitMs)
+      ? Math.max(0, Math.min(25_000, Math.floor(input.waitMs)))
+      : 0;
     if (!isUuid(orderId) || statusToken.length < 32 || statusToken.length > 200) {
       return json(origin, { error: 'Consulta PIX invalida.' }, 400);
     }
-
-    const { data: order, error } = await supabase
-      .from('pix_orders')
-      .select('id, user_id, status, status_token_hash, expires_at, updated_at')
-      .eq('id', orderId)
-      .maybeSingle();
-    if (error) throw error;
-    if (!order) return json(origin, { error: 'Cobranca PIX nao encontrada.' }, 404);
 
     const authorization = req.headers.get('authorization') ?? '';
     const accessToken = authorization.replace(/^Bearer\s+/i, '');
     const { data: auth } = accessToken
       ? await supabase.auth.getUser(accessToken)
       : { data: { user: null } };
-    const ownsOrder = Boolean(auth.user && order.user_id === auth.user.id);
-    const hasStatusToken = order.status_token_hash === await sha256(statusToken);
-    if (!ownsOrder && !hasStatusToken) return json(origin, { error: 'Cobranca PIX nao encontrada.' }, 404);
+
+    const readStatus = async () => {
+      const { data: order, error } = await supabase
+        .from('pix_orders')
+        .select('id, user_id, status, status_token_hash, expires_at, updated_at')
+        .eq('id', orderId)
+        .maybeSingle();
+      if (error) throw error;
+      if (!order) return null;
+      const ownsOrder = Boolean(auth.user && order.user_id === auth.user.id);
+      const hasStatusToken = order.status_token_hash === await sha256(statusToken);
+      if (!ownsOrder && !hasStatusToken) return null;
+      return order;
+    };
+
+    const first = await readStatus();
+    if (!first) return json(origin, { error: 'Cobranca PIX nao encontrada.' }, 404);
+
+    const terminalStatuses = new Set(['paid', 'failed', 'expired', 'in_dispute', 'chargeback']);
+
+    // Long-polling: segura a resposta até o status mudar (ou atingir o teto de tempo),
+    // eliminando o intervalo fixo de polling no cliente e garantindo confirmação
+    // praticamente instantânea após o webhook gravar o pagamento.
+    let order = first;
+    if (requestedWaitMs > 0 && !terminalStatuses.has(order.status)) {
+      const deadline = Date.now() + requestedWaitMs;
+      while (Date.now() < deadline && !terminalStatuses.has(order.status)) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        const next = await readStatus();
+        if (!next) break;
+        order = next;
+      }
+    }
 
     return json(origin, {
       status: order.status,
