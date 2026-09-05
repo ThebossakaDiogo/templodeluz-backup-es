@@ -9,9 +9,9 @@ import { trackQuizStep, syncLeadPhone, syncLeadPhoneImmediate } from "@/lib/funn
 import { useSurgeryGoalSimulation } from "@/lib/donation-simulation";
 
 const config = {
-  supabaseUrl: "https://opftmzegcvfyoinjfmcj.supabase.co",
+  supabaseUrl: "https://yfpiqfytonuhigwkssio.supabase.co",
   supabaseAnonKey:
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZnRtemVnY3ZmeW9pbmpmbWNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNzgyMDksImV4cCI6MjEwMzg1NDIwOX0.VpQitxh7x5v_0k5q35hhMz3eAATUHGERubdmA_TnR24",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmcGlxZnl0b251aGlnd2tzc2lvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg2MzU1MzYsImV4cCI6MjEwNDIxMTUzNn0.tcfCDn257Rdd9gqKoic3eMTpucI53uiuk3lbG1fbERA",
 };
 
 export interface MilenaCataractModalProps {

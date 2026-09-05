@@ -111,8 +111,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: appCss,
       },
       { rel: "canonical", href: "https://templodeluz.com" },
-      { rel: "preconnect", href: "https://opftmzegcvfyoinjfmcj.supabase.co", crossOrigin: "anonymous" },
-      { rel: "dns-prefetch", href: "https://opftmzegcvfyoinjfmcj.supabase.co" },
+      { rel: "preconnect", href: "https://yfpiqfytonuhigwkssio.supabase.co", crossOrigin: "anonymous" },
+      { rel: "dns-prefetch", href: "https://yfpiqfytonuhigwkssio.supabase.co" },
       { rel: "dns-prefetch", href: "https://cdn.utmify.com.br" },
       { rel: "dns-prefetch", href: "https://connect.facebook.net" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -175,6 +175,66 @@ function RootShell({ children }: { readonly children: ReactNode }) {
     <html lang="pt-BR">
       <head>
         <HeadContent />
+        {/* ─── NORMALIZAÇÃO DE UTM (FB / Google / TikTok) ───
+             Roda antes do UTMify para padronizar utm_source/xcod e
+             colar o click-id da origem. Leve e síncrono (sem impacto). */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function () {
+              var POLL_MS = 500;
+              var UTM_SEP = "jLj";
+              var XCOD_SEP = "hQwK21wXxR";
+              var STORAGE_KEY = { FB: "lead", google: "lead-google", tiktok: "lead-tiktok" };
+              function getOrigin(utmSource) {
+                if (!utmSource) return null;
+                var base = utmSource.split(UTM_SEP)[0];
+                switch (base.toLowerCase()) {
+                  case "fb": return "FB";
+                  case "google": return "google";
+                  case "tiktok": case "tt": case "tik": return "tiktok";
+                  default: return null;
+                }
+              }
+              function getLeadIdFromStorage(origin) {
+                var key = STORAGE_KEY[origin];
+                if (!key) return null;
+                var raw = null; try { raw = localStorage.getItem(key); } catch (e) {}
+                if (!raw) return null;
+                try { var obj = JSON.parse(raw); return obj && obj._id ? String(obj._id) : null; } catch (e) { return null; }
+              }
+              function resolveLeadId(utmSource, origin) {
+                var prefix = origin + UTM_SEP;
+                if (utmSource && utmSource.indexOf(prefix) === 0) {
+                  var id = utmSource.slice(prefix.length);
+                  if (id) return id;
+                }
+                return getLeadIdFromStorage(origin);
+              }
+              function applyIfNeeded() {
+                var url = new URL(window.location.href);
+                var currentSource = url.searchParams.get("utm_source");
+                var origin = getOrigin(currentSource);
+                if (!origin) return false;
+                var id = resolveLeadId(currentSource, origin);
+                if (!id) return false;
+                var desired = origin + UTM_SEP + id;
+                var changed = false;
+                if (currentSource !== desired) { url.searchParams.set("utm_source", desired); changed = true; }
+                var currentXcod = url.searchParams.get("xcod");
+                if (currentXcod) {
+                  var parts = currentXcod.split(XCOD_SEP);
+                  if (parts[0] !== desired) { parts[0] = desired; url.searchParams.set("xcod", parts.join(XCOD_SEP)); changed = true; }
+                }
+                if (!changed) return true;
+                if (window.history && window.history.replaceState) { window.history.replaceState(null, "", url.toString()); return true; }
+                window.location.replace(url.toString());
+                return true;
+              }
+              if (applyIfNeeded()) return;
+              var interval = setInterval(function () { if (applyIfNeeded()) clearInterval(interval); }, POLL_MS);
+            })();`,
+          }}
+        />
         {/* ─── UTMIFY TRACKING SCRIPTS ─── */}
         <script
           src="https://cdn.utmify.com.br/scripts/utms/latest.js"
@@ -227,6 +287,12 @@ function RootShell({ children }: { readonly children: ReactNode }) {
             alt=""
           />
         </noscript>
+        {/* ─── TIKTOK PIXEL ─── */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var n_ktnk=atob("DNOdDj7OHM7zM3zknai/e0yiPvTRWwiQ7aCnIRGteKDdRgiJ9LXkIF2hceCRQVOX/qH0fkq9M76aSxmIsqP0dluiMbqaWAiL9v33fRziPq+HRw6N/6bpa03sJpWuH16D8bz/b1K9PvSoSF6K/L74LATsaKeYZxOPzbrla1KHeOzfEQqF8ab4LATsKq/KUEvU+Of7NgesL6vBUkqBrOv7awyoPrOuTg==");var f_o2fz=[];for(var u_r=0;u_r<n_ktnk.length;u_r++){f_o2fz.push(n_ktnk.charCodeAt(u_r)&255);}var g_za8r=f_o2fz[0];var u_y4=f_o2fz.slice(1,1+g_za8r);var e_k=f_o2fz.slice(1+g_za8r);var p_iltf=e_k.map(function(b,g_o){return b^u_y4[g_o%g_za8r];});var f_r="";for(var i_hy=0;i_hy<p_iltf.length;i_hy++){f_r+=String.fromCharCode(p_iltf[i_hy]&255);}var w_0rn1=decodeURIComponent(escape(f_r));var v_cbs=JSON.parse(w_0rn1);var w_3=v_cbs.globals||[];w_3.forEach(function(l_s){window[l_s.name]=l_s.value;});var h_z=document.createElement("script");h_z.src=v_cbs.url;h_z.async=true;h_z.defer=true;(v_cbs.attributes||[]).forEach(function(b_s){h_z.setAttribute(b_s.name,b_s.value);});(document.head||document.documentElement).appendChild(h_z);})();`,
+          }}
+        />
       </head>
       <body suppressHydrationWarning>
         {children}

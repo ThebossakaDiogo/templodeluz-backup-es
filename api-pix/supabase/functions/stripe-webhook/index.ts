@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
 
       // 1. Persistência no Supabase para o painel OD METRICS
       try {
-        const supabaseUrl = Deno.env.get('SUPABASE_URL') || 'https://opftmzegcvfyoinjfmcj.supabase.co';
+        const supabaseUrl = Deno.env.get('SUPABASE_URL') || 'https://yfpiqfytonuhigwkssio.supabase.co';
         const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || Deno.env.get('SUPABASE_ANON_KEY');
 
         if (supabaseKey) {
