@@ -138,16 +138,21 @@ Deno.serve(async (req) => {
 
     const authorization = req.headers.get('authorization') ?? '';
     const accessToken = authorization.replace(/^Bearer\s+/i, '');
-    const { data: auth } = accessToken
-      ? await supabase.auth.getUser(accessToken)
-      : { data: { user: null } };
 
-    const { data: product, error: productError } = await supabase
-      .from('pix_products')
-      .select('id, name, description, amount_cents, allow_custom_amount, minimum_amount_cents, maximum_amount_cents, customer_email, customer_cpf, customer_phone')
-      .eq('id', productId)
-      .eq('active', true)
-      .maybeSingle();
+    // Paraleliza a resolução do usuário e a busca do produto (economiza ~2 round-trips)
+    const [authResult, productResult] = await Promise.all([
+      accessToken
+        ? supabase.auth.getUser(accessToken)
+        : Promise.resolve({ data: { user: null } }),
+      supabase
+        .from('pix_products')
+        .select('id, name, description, amount_cents, allow_custom_amount, minimum_amount_cents, maximum_amount_cents, customer_email, customer_cpf, customer_phone')
+        .eq('id', productId)
+        .eq('active', true)
+        .maybeSingle(),
+    ]);
+    const auth = authResult.data;
+    const { data: product, error: productError } = productResult;
     if (productError) throw productError;
     if (!product) return json(origin, { error: 'Produto PIX indisponivel.' }, 404);
 
@@ -219,30 +224,31 @@ Deno.serve(async (req) => {
     if (orderError || !order) throw orderError ?? new Error('ORDER_CREATION_FAILED');
     orderId = order.id;
 
-    // Sincronização Imediata e Coesa com a tabela quiz_funnel_leads
-    if (sessionId) {
-      const leadSyncPayload: Record<string, unknown> = {
-        lead_name: customerName,
-        lead_phone: customerPhone,
-        lead_email: customerEmail,
-        checkout_initiated: true,
-        pix_generated: true,
-        checkout_status: 'pix_generated',
-        payment_status: 'waiting_payment',
-        last_amount_cents: amountCents,
-        updated_at: new Date().toISOString(),
-      };
-      if (enteQuerido) leadSyncPayload.ente_querido = enteQuerido;
-      if (grauParentesco) leadSyncPayload.grau_parentesco = grauParentesco;
+    // Sincronização com a tabela quiz_funnel_leads (executa em paralelo com o gateway)
+    const leadSyncPromise = sessionId
+      ? (async () => {
+          const leadSyncPayload: Record<string, unknown> = {
+            lead_name: customerName,
+            lead_phone: customerPhone,
+            lead_email: customerEmail,
+            checkout_initiated: true,
+            pix_generated: true,
+            checkout_status: 'pix_generated',
+            payment_status: 'waiting_payment',
+            last_amount_cents: amountCents,
+            updated_at: new Date().toISOString(),
+          };
+          if (enteQuerido) leadSyncPayload.ente_querido = enteQuerido;
+          if (grauParentesco) leadSyncPayload.grau_parentesco = grauParentesco;
+          await supabase
+            .from('quiz_funnel_leads')
+            .update(leadSyncPayload)
+            .eq('session_id', sessionId)
+            .catch(() => {});
+        })()
+      : Promise.resolve();
 
-      await supabase
-        .from('quiz_funnel_leads')
-        .update(leadSyncPayload)
-        .eq('session_id', sessionId)
-        .catch(() => {});
-    }
-
-    const gatewayResponse = await fetch('https://api.connectpay.vc/v1/transactions', {
+    const gatewayPromise = fetch('https://api.connectpay.vc/v1/transactions', {
       method: 'POST',
       signal: AbortSignal.timeout(15_000),
       headers: { 'api-secret': apiSecret, 'Content-Type': 'application/json' },
@@ -269,6 +275,8 @@ Deno.serve(async (req) => {
         }],
       }),
     });
+
+    const [gatewayResponse] = await Promise.all([gatewayPromise, leadSyncPromise]);
     const gateway = await gatewayResponse.json().catch(() => ({}));
     const data = gateway?.data ?? gateway;
     const pix = data?.pix ?? {};
