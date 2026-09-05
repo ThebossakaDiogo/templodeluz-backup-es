@@ -56,7 +56,7 @@ export function EvolutionQRModal({
   const [testSending, setTestSending] = useState<boolean>(false);
   const [testResult, setTestResult] = useState<{ success: boolean; text: string } | null>(null);
 
-  const pollTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Busca QR Code e status
   const fetchQRCode = useCallback(async () => {
