@@ -1254,7 +1254,10 @@ function Result({
               <em className="text-[#fde68a] not-italic underline decoration-amber-400 decoration-2 underline-offset-4">
                 {nomeEnteCompleto}
               </em>{" "}
-              foi agendada para <span className="text-shimmer">{horarioExibicao}</span>
+              foi agendada para{" "}
+              <span className="inline-block whitespace-nowrap text-[#fde68a] underline decoration-amber-400 decoration-2 underline-offset-4 drop-shadow-sm">
+                {horarioExibicao}
+              </span>
             </h1>
             <p className="mx-auto mt-3 text-[13.5px] leading-relaxed text-zinc-200 font-normal">
               Guarde este momento em prece no coração: é quando a médium Milena Medeiros entra em recolhimento
