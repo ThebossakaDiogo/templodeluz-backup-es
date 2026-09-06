@@ -191,7 +191,7 @@ export function ProfileView({ currentUserEmail, onSignOut }: ProfileViewProps) {
       </div>
 
       {/* ── Grid Principal de Configurações ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "24px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(320px, 100%), 1fr))", gap: "24px" }}>
         {/* CARD 1: FORMULÁRIO DE ALTERAÇÃO DE SENHA */}
         <div className="card" style={{ padding: "26px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "18px" }}>

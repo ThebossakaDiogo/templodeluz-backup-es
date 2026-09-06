@@ -202,8 +202,8 @@ export function WhatsAppTracker({ messages, loading, onRefresh }: WhatsAppTracke
         </div>
 
         {/* Lista / Tabela */}
-        <div className="whatsapp-table-scroll">
-          <table className="whatsapp-table">
+        <div className="whatsapp-table-scroll" style={{ maxWidth: "100%", overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+          <table className="whatsapp-table" style={{ minWidth: "920px" }}>
             <thead>
               <tr>
                 {["Nome do Consulente", "Ente Querido & Vínculo", "Forma de Pagamento", "Valor", "Origem", "Horário", "Ação"].map((col) => (

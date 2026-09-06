@@ -173,7 +173,7 @@ export function ProductDeliveryModal({
         className="modal-glass-card"
         style={{
           width: "100%",
-          maxWidth: "540px",
+          maxWidth: "min(540px, 100%)",
           margin: "auto",
           background: "linear-gradient(135deg, rgba(20, 24, 35, 0.92) 0%, rgba(10, 13, 20, 0.96) 100%)",
           backdropFilter: "blur(28px) saturate(200%)",
@@ -291,7 +291,7 @@ export function ProductDeliveryModal({
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "1fr 1fr",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(220px, 100%), 1fr))",
             gap: "10px",
             background: "var(--surface-1, #171926)",
             padding: "12px",
@@ -310,7 +310,7 @@ export function ProductDeliveryModal({
               placeholder="(DDD) 99999-9999"
               style={{
                 width: "100%",
-                fontSize: "12px",
+                fontSize: "16px",
                 padding: "6px 8px",
                 marginTop: "3px",
                 borderRadius: "6px",
@@ -333,7 +333,7 @@ export function ProductDeliveryModal({
               placeholder="Ex: Mãe Maria, Pai João..."
               style={{
                 width: "100%",
-                fontSize: "12px",
+                fontSize: "16px",
                 padding: "6px 8px",
                 marginTop: "3px",
                 borderRadius: "6px",

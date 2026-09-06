@@ -602,7 +602,7 @@ export function ConsulentesTelemetryTable({ leads }: Readonly<ConsulentesTelemet
         </div>
 
         {/* Controles da Direita: Busca, Limite por Página e Alternador de Colunas */}
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", flex: 1, justifyContent: "flex-end" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", flex: 1, minWidth: 0, justifyContent: "flex-end" }}>
           {/* Alternador Tabela vs Colunas/Cards */}
           <div
             style={{
@@ -683,7 +683,7 @@ export function ConsulentesTelemetryTable({ leads }: Readonly<ConsulentesTelemet
           </div>
 
           {/* Input de Busca */}
-          <div style={{ position: "relative", minWidth: "160px", maxWidth: "240px", flex: 1 }}>
+          <div style={{ position: "relative", minWidth: "min(160px, 100%)", maxWidth: "240px", flex: 1, width: "100%" }}>
             <Search
               style={{
                 position: "absolute",
@@ -703,7 +703,7 @@ export function ConsulentesTelemetryTable({ leads }: Readonly<ConsulentesTelemet
               onChange={(e) => setSearch(e.target.value)}
               style={{
                 width: "100%",
-                fontSize: "11px",
+                fontSize: "16px",
                 padding: "5px 10px 5px 28px",
                 borderRadius: "8px",
                 border: "1px solid var(--border-subtle)",
@@ -848,8 +848,8 @@ export function ConsulentesTelemetryTable({ leads }: Readonly<ConsulentesTelemet
 
       {/* ─── CORPO: TABELA OU GRADE DE COLUNAS/CARDS ─── */}
       {viewMode === "table" ? (
-        <div style={{ overflowX: "auto", margin: "0 -4px" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px", textAlign: "left" }}>
+        <div style={{ overflowX: "auto", margin: "0 -4px", maxWidth: "100%", WebkitOverflowScrolling: "touch" }}>
+          <table style={{ width: "100%", minWidth: "860px", borderCollapse: "collapse", fontSize: "12px", textAlign: "left" }}>
             <thead>
               <tr
                 style={{
@@ -891,7 +891,7 @@ export function ConsulentesTelemetryTable({ leads }: Readonly<ConsulentesTelemet
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fill, minmax(min(280px, 100%), 1fr))",
             gap: "12px",
           }}
         >

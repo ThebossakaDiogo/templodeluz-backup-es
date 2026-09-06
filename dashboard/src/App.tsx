@@ -1218,8 +1218,9 @@ function ReportsView({
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
       {/* Resumo */}
-      <div className="card" style={{ padding: "26px" }}>
+      <div className="card reports-summary-card" style={{ padding: "26px" }}>
         <div
+          className="reports-summary-header"
           style={{
             display: "flex",
             justifyContent: "space-between",
@@ -1254,9 +1255,10 @@ function ReportsView({
         </div>
 
         <div
+          className="reports-metrics-grid"
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
+            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
             gap: "16px",
           }}
         >
@@ -1306,9 +1308,10 @@ function ReportsView({
 
       {/* Distribuição Dupla */}
       <div
+        className="reports-distribution-grid"
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
+          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
           gap: "20px",
         }}
       >

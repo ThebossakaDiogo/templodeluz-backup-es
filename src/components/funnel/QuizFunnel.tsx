@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearch, useNavigate } from "@tanstack/react-router";
 import { CHECKOUT_URL, FAQ, IMAGES, STEPS_HOW } from "./data";
 import { Footer, Halos, Reveal, SectionLabel, Stars } from "./Shell";
@@ -1515,6 +1515,8 @@ export function QuizFunnel() {
   const search = useSearch({ from: "/" });
   const navigate = useNavigate({ from: "/" });
   const [step, setStep] = useState<Step>((search.step as Step) || "intro");
+  const trackedStepsRef = useRef(new Set<Step>());
+  const telemetrySnapshotRef = useRef<Record<string, unknown>>({});
 
   const [nome, setNome] = useState<string>(() => {
     if (typeof window === "undefined") return "";
@@ -1639,14 +1641,29 @@ export function QuizFunnel() {
     }
   }, [nome, ente, relacao, tempo, dorPrincipal, mensagem, modoMensagem, temasEscolhidos, horario]);
 
-  // Rastreia no Meta Pixel e na Telemetria do Supabase cada etapa do Quiz
+  telemetrySnapshotRef.current = {
+    nome,
+    ente,
+    relacao,
+    tempo,
+    dorPrincipal,
+    mensagem,
+    temasEscolhidos,
+  };
+
+  // Cada etapa é registrada uma vez por sessão. Antes, cada tecla digitada
+  // repetia eventos de pixel e inserções de telemetria para a mesma etapa.
   useEffect(() => {
+    if (trackedStepsRef.current.has(step)) return;
+    trackedStepsRef.current.add(step);
+
+    const snapshot = telemetrySnapshotRef.current;
     trackQuizStep(step, {
-      nome_consulente: nome || undefined,
-      nome_ente: ente || undefined,
-      relacao: relacao || undefined,
-      tempo: tempo || undefined,
-      dor: dorPrincipal || undefined,
+      nome_consulente: snapshot.nome || undefined,
+      nome_ente: snapshot.ente || undefined,
+      relacao: snapshot.relacao || undefined,
+      tempo: snapshot.tempo || undefined,
+      dor: snapshot.dorPrincipal || undefined,
     });
 
     const stepOrderMap: Record<Step, number> = {
@@ -1663,14 +1680,16 @@ export function QuizFunnel() {
     trackQuizTelemetry({
       stepIndex: stepOrderMap[step] || 1,
       stepName: step,
-      leadName: nome || undefined,
-      enteQuerido: ente || undefined,
-      grauParentesco: relacao || undefined,
-      mensagemPreview: mensagem || undefined,
-      temas: temasEscolhidos.length > 0 ? temasEscolhidos : undefined,
+      leadName: (snapshot.nome as string) || undefined,
+      enteQuerido: (snapshot.ente as string) || undefined,
+      grauParentesco: (snapshot.relacao as string) || undefined,
+      mensagemPreview: (snapshot.mensagem as string) || undefined,
+      temas: Array.isArray(snapshot.temasEscolhidos) && snapshot.temasEscolhidos.length > 0
+        ? snapshot.temasEscolhidos as string[]
+        : undefined,
       completed: step === "result",
     });
-  }, [step, nome, ente, relacao, tempo, dorPrincipal, mensagem, temasEscolhidos]);
+  }, [step]);
 
   const goto = (s: Step) => {
     setStep(s);

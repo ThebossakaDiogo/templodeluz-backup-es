@@ -67,7 +67,12 @@ export function AbandonmentTracker({ leads }: AbandonmentTrackerProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [viewMode, setViewMode] = useState<"table" | "cards">("table");
+  const [viewMode, setViewMode] = useState<"table" | "cards">(() =>
+    typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches ? "cards" : "table",
+  );
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches,
+  );
 
   // Estados de Integração com a Evolution API
   const evoConfig = getEvolutionConfig();
@@ -99,6 +104,17 @@ export function AbandonmentTracker({ leads }: AbandonmentTrackerProps) {
     return () => {
       isMounted = false;
     };
+  }, []);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 768px)");
+    const syncMobileLayout = (event: MediaQueryListEvent | MediaQueryList) => {
+      setIsMobile(event.matches);
+      setViewMode(event.matches ? "cards" : "table");
+    };
+    syncMobileLayout(media);
+    media.addEventListener("change", syncMobileLayout);
+    return () => media.removeEventListener("change", syncMobileLayout);
   }, []);
 
   const handleManualTest = async () => {
@@ -427,7 +443,7 @@ export function AbandonmentTracker({ leads }: AbandonmentTrackerProps) {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fit, minmax(min(210px, 100%), 1fr))",
           gap: "16px",
         }}
       >
@@ -657,20 +673,21 @@ export function AbandonmentTracker({ leads }: AbandonmentTrackerProps) {
                 key={step.stepIndex}
                 style={{
                   display: "flex",
-                  alignItems: "center",
+                  alignItems: isMobile ? "stretch" : "center",
                   gap: "14px",
                   fontSize: "12px",
+                  flexDirection: isMobile ? "column" : "row",
                 }}
               >
                 <div style={{ width: "24px", height: "24px", borderRadius: "6px", background: "var(--surface-3)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: "11px", color: "var(--text-primary)", flexShrink: 0 }}>
                   {step.stepIndex}
                 </div>
 
-                <div style={{ width: "190px", flexShrink: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                <div style={{ width: isMobile ? "auto" : "190px", minWidth: 0, flexShrink: 0, whiteSpace: isMobile ? "normal" : "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                   <span style={{ fontWeight: 600, color: "var(--text-primary)" }}>{step.stepLabel}</span>
                 </div>
 
-                <div style={{ flex: 1, height: "10px", background: "var(--surface-3)", borderRadius: "99px", overflow: "hidden", position: "relative" }}>
+                <div style={{ flex: 1, minWidth: 0, width: isMobile ? "100%" : undefined, height: "10px", background: "var(--surface-3)", borderRadius: "99px", overflow: "hidden", position: "relative" }}>
                   <div
                     style={{
                       width: `${step.relWidth}%`,
@@ -682,7 +699,7 @@ export function AbandonmentTracker({ leads }: AbandonmentTrackerProps) {
                   />
                 </div>
 
-                <div style={{ width: "120px", textAlign: "right", flexShrink: 0 }}>
+                <div style={{ width: isMobile ? "auto" : "120px", textAlign: isMobile ? "left" : "right", flexShrink: 0 }}>
                   <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>{step.count} saíram</span>
                   <span style={{ fontSize: "11px", color: "var(--text-muted)", marginLeft: "6px" }}>({step.pctOfTotal}%)</span>
                 </div>
@@ -739,7 +756,7 @@ export function AbandonmentTracker({ leads }: AbandonmentTrackerProps) {
           }}
         >
           {/* Campo de Busca */}
-          <div style={{ position: "relative", minWidth: "220px", flex: 1, maxWidth: "340px" }}>
+          <div style={{ position: "relative", minWidth: "min(220px, 100%)", flex: 1, maxWidth: "340px", width: "100%" }}>
             <Search
               style={{
                 position: "absolute",
@@ -758,7 +775,7 @@ export function AbandonmentTracker({ leads }: AbandonmentTrackerProps) {
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{
                 width: "100%",
-                fontSize: "12px",
+                fontSize: "16px",
                 padding: "6px 10px 6px 30px",
                 borderRadius: "8px",
                 border: "1px solid var(--border-subtle)",
@@ -1026,8 +1043,8 @@ export function AbandonmentTracker({ leads }: AbandonmentTrackerProps) {
 
         {/* ─── CORPO: TABELA OU CARDS ─── */}
         {viewMode === "table" ? (
-          <div style={{ overflowX: "auto", margin: "0 -4px", WebkitOverflowScrolling: "touch" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+          <div style={{ overflowX: "auto", margin: "0 -4px", maxWidth: "100%", WebkitOverflowScrolling: "touch" }}>
+            <table style={{ width: "100%", minWidth: "1000px", borderCollapse: "collapse", textAlign: "left" }}>
               <thead>
                 <tr style={{ borderBottom: "1px solid var(--border-subtle)" }}>
                   <th style={{ padding: "10px 12px", fontSize: "11px", color: "var(--text-muted)", fontWeight: 600 }}>
@@ -1256,7 +1273,7 @@ export function AbandonmentTracker({ leads }: AbandonmentTrackerProps) {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fill, minmax(min(280px, 100%), 1fr))",
               gap: "12px",
             }}
           >
@@ -1525,13 +1542,17 @@ export function AbandonmentTracker({ leads }: AbandonmentTrackerProps) {
             zIndex: 9999,
             padding: "20px",
             backdropFilter: "blur(4px)",
+            overflowY: "auto",
+            boxSizing: "border-box",
           }}
         >
           <div
             className="card"
             style={{
               width: "100%",
-              maxWidth: "520px",
+              maxWidth: "min(520px, 100%)",
+              maxHeight: "92dvh",
+              overflowY: "auto",
               background: "var(--surface-card)",
               border: "1px solid var(--border-strong)",
               borderRadius: "18px",
@@ -1540,9 +1561,10 @@ export function AbandonmentTracker({ leads }: AbandonmentTrackerProps) {
               flexDirection: "column",
               gap: "18px",
               boxShadow: "0 20px 40px rgba(0,0,0,0.5)",
+              boxSizing: "border-box",
             }}
           >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                 <div
                   style={{
@@ -1590,15 +1612,15 @@ export function AbandonmentTracker({ leads }: AbandonmentTrackerProps) {
                 gap: "4px",
               }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
                 <span style={{ color: "var(--text-muted)" }}>Consulente:</span>
                 <strong style={{ color: "var(--text-primary)" }}>{activeLeadToSend.lead_name || "Sem Nome"}</strong>
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
                 <span style={{ color: "var(--text-muted)" }}>Ente Querido:</span>
                 <strong style={{ color: "var(--accent-strong)" }}>{activeLeadToSend.ente_querido || "Não informado"}</strong>
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
                 <span style={{ color: "var(--text-muted)" }}>WhatsApp:</span>
                 <strong style={{ color: "#10B981" }}>{activeLeadToSend.lead_phone} ({formatPhoneForEvolution(activeLeadToSend.lead_phone || "")})</strong>
               </div>
@@ -1651,7 +1673,7 @@ export function AbandonmentTracker({ leads }: AbandonmentTrackerProps) {
             )}
 
             {/* Ações */}
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "4px" }}>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "4px", flexWrap: "wrap" }}>
               <button
                 type="button"
                 onClick={() => setActiveLeadToSend(null)}

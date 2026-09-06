@@ -2485,7 +2485,7 @@
   .date-range-mobile-btn { display: flex !important; gap: 7px; align-items: center; justify-content: center; width: 100%; min-height: 46px; padding: 0 13px; color: var(--text-secondary); font: 650 14px var(--font-body); cursor: pointer; background: var(--surface-card); border: 1px solid var(--border); border-radius: 10px; }
 
   .dashboard-root .dashboard-profile-bar { align-items: stretch; flex-direction: column; padding: 10px 14px; }
-  .dashboard-root .dashboard-profile-summary { justify-content: space-between; width: 100%; }
+  .dashboard-root .dashboard-profile-summary { justify-content: space-between; width: 100%; gap: 6px; flex-wrap: wrap; }
   .dashboard-root .dashboard-profile-summary span:last-child { display: none; }
   .dashboard-root .dashboard-profile-switcher { display: grid; grid-template-columns: 1fr 1fr; width: 100%; border-radius: 14px; }
   .dashboard-root .dashboard-profile-switcher button { justify-content: center; min-height: 42px; border-radius: 10px; }
@@ -2503,6 +2503,12 @@
   .dashboard-root .metric-section-header p { font-size: 12.5px; }
   .dashboard-root .metric-card-heading h3 { font-size: 15px !important; }
   .dashboard-root .metric-card-footer { font-size: 11.5px; }
+
+  .dashboard-root .reports-summary-card { padding: 18px 14px !important; }
+  .dashboard-root .reports-summary-header { align-items: flex-start !important; flex-direction: column; gap: 14px; }
+  .dashboard-root .reports-summary-header .btn { width: 100%; min-height: 46px; justify-content: center; }
+  .dashboard-root .reports-metrics-grid,
+  .dashboard-root .reports-distribution-grid { grid-template-columns: 1fr !important; gap: 14px !important; }
 
   .dashboard-root .mobile-bottom-nav {
     position: fixed !important;
@@ -2569,9 +2575,16 @@
   .modal-glass-card img[alt*="QR Code"] { width: min(230px, 68vw) !important; height: auto !important; max-width: 100%; }
 }
 
-@media (max-width: 420px) {
+@media (max-width: 480px) {
   .dashboard-root .pie-content-layout { align-items: stretch !important; flex-direction: column; }
   .dashboard-root .pie-content-layout > div:first-child { width: 176px !important; height: 176px !important; margin-inline: auto; }
+
+  .dashboard-root .dashboard-profile-summary { align-items: flex-start; flex-direction: column; }
+  .dashboard-root .dashboard-profile-switcher button { min-width: 0; padding-inline: 8px; }
+  .dashboard-root .dashboard-profile-switcher small { display: none; }
+  .dashboard-root .today-metric { min-height: 0; }
+  .dashboard-root .metric-card { min-height: 0; }
+  .dashboard-root .mobile-bottom-nav strong { font-size: 10px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

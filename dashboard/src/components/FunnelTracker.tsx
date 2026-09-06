@@ -94,7 +94,7 @@ export function FunnelTracker({ leads, loading, onRefresh, onlineCount }: Funnel
           overflow: "hidden",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "18px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "18px", minWidth: 0, flexWrap: "wrap" }}>
           <div
             style={{
               width: "50px",
@@ -134,7 +134,7 @@ export function FunnelTracker({ leads, loading, onRefresh, onlineCount }: Funnel
         </div>
 
         {/* Controles do Banner */}
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
           <div
             style={{
               display: "flex",
@@ -208,7 +208,7 @@ export function FunnelTracker({ leads, loading, onRefresh, onlineCount }: Funnel
       {/* RENDERIZAÇÃO: LISTA DE ETAPAS (ALTO CONTRASTE CLARO/ESCURO) */}
       {viewMode === "list" && (
         <div className="card" style={{ padding: "24px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", gap: "12px", flexWrap: "wrap" }}>
             <div>
               <h3 style={{ fontSize: "14px", fontWeight: 800, color: "var(--text-primary)", textTransform: "uppercase", letterSpacing: "0.06em", margin: 0 }}>
                 Distribuição por Etapa do Quiz
@@ -249,6 +249,7 @@ export function FunnelTracker({ leads, loading, onRefresh, onlineCount }: Funnel
                     display: "flex",
                     alignItems: "center",
                     gap: "14px",
+                    flexWrap: "wrap",
                     padding: "8px 10px",
                     borderRadius: "8px",
                     background: "var(--bg-surface-alt)",
@@ -279,8 +280,8 @@ export function FunnelTracker({ leads, loading, onRefresh, onlineCount }: Funnel
                     style={{
                       fontSize: "13px",
                       color: "var(--text-primary)",
-                      width: "210px",
-                      flexShrink: 0,
+                      width: "min(210px, 100%)",
+                      minWidth: 0,
                       fontWeight: hasLeads ? 800 : 600,
                     }}
                   >
@@ -291,6 +292,7 @@ export function FunnelTracker({ leads, loading, onRefresh, onlineCount }: Funnel
                   <div
                     style={{
                       flex: 1,
+                      minWidth: "120px",
                       height: "10px",
                       background: "var(--border)",
                       borderRadius: "99px",
@@ -362,6 +364,7 @@ export function FunnelTracker({ leads, loading, onRefresh, onlineCount }: Funnel
             justifyContent: "space-between",
             alignItems: "center",
             gap: "14px",
+            flexWrap: "wrap",
           }}
         >
           <div>
@@ -374,7 +377,7 @@ export function FunnelTracker({ leads, loading, onRefresh, onlineCount }: Funnel
           </div>
 
           {/* Campo de Busca */}
-          <div style={{ position: "relative" }}>
+          <div style={{ position: "relative", width: "min(260px, 100%)", maxWidth: "100%" }}>
             <Search
               style={{
                 position: "absolute",
@@ -392,14 +395,16 @@ export function FunnelTracker({ leads, loading, onRefresh, onlineCount }: Funnel
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               style={{
-                fontSize: "12px",
+                fontSize: "16px",
                 padding: "7px 12px 7px 32px",
                 border: "1px solid var(--border)",
                 borderRadius: "8px",
                 background: "var(--bg-surface-alt)",
                 color: "var(--text-primary)",
                 outline: "none",
-                width: "260px",
+                width: "100%",
+                maxWidth: "100%",
+                boxSizing: "border-box",
                 transition: "all 0.15s ease",
               }}
               onFocus={(e) => {
@@ -415,8 +420,8 @@ export function FunnelTracker({ leads, loading, onRefresh, onlineCount }: Funnel
         </div>
 
         {/* Tabela de Leads */}
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
+        <div style={{ overflowX: "auto", maxWidth: "100%", WebkitOverflowScrolling: "touch" }}>
+          <table style={{ width: "100%", minWidth: "820px", borderCollapse: "collapse", fontSize: "12px" }}>
             <thead>
               <tr>
                 {["Nome do Consulente", "Ente Querido", "Etapa Atual", "Status do Pagamento", "Origem UTM", "Última Atividade"].map((col) => (
@@ -530,21 +535,26 @@ export function FunnelTracker({ leads, loading, onRefresh, onlineCount }: Funnel
             display: "flex", alignItems: "center", justifyContent: "center",
             zIndex: 999,
             backdropFilter: "blur(6px)",
+            padding: "16px",
+            overflowY: "auto",
+            boxSizing: "border-box",
           }}
         >
           <div
             className="card"
             onClick={(e) => e.stopPropagation()}
             style={{
-              width: "500px",
-              maxHeight: "85vh",
+              width: "min(500px, 100%)",
+              maxWidth: "100%",
+              maxHeight: "92dvh",
               overflowY: "auto",
               padding: "26px",
+              boxSizing: "border-box",
               border: "1px solid rgba(16, 185, 129, 0.4)",
               boxShadow: "0 20px 50px rgba(0,0,0,0.5), 0 0 25px rgba(16, 185, 129, 0.2)",
             }}
           >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "22px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", marginBottom: "22px" }}>
               <div>
                 <h3 style={{ fontSize: "15px", fontWeight: 800, color: "var(--text-primary)", margin: 0 }}>
                   Ficha do Consulente
@@ -582,6 +592,8 @@ export function FunnelTracker({ leads, loading, onRefresh, onlineCount }: Funnel
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
+                  gap: "12px",
+                  flexWrap: "wrap",
                   padding: "10px 0",
                   borderBottom: "1px solid var(--border-subtle)",
                 }}
@@ -589,7 +601,7 @@ export function FunnelTracker({ leads, loading, onRefresh, onlineCount }: Funnel
                 <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                   {label}
                 </span>
-                <span style={{ fontSize: "12.5px", fontWeight: 800, color: "var(--text-primary)", textAlign: "right", maxWidth: "65%" }}>
+                <span style={{ fontSize: "12.5px", fontWeight: 800, color: "var(--text-primary)", textAlign: "right", maxWidth: "65%", overflowWrap: "anywhere" }}>
                   {value}
                 </span>
               </div>
