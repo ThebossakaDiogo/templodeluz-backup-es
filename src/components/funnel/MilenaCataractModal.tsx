@@ -1,18 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { QRCodeSVG } from "qrcode.react";
 import { IMAGES } from "./data";
 import { CardFlagsBadgeRow } from "./CardFlags";
 import { StripeCardModal } from "./StripeCardModal";
-import { sendUtmifyOrder } from "@/lib/utmify";
-import { trackQuizStep, syncLeadPhone, syncLeadPhoneImmediate } from "@/lib/funnel-telemetry";
+import { getStoredUtms } from "@/lib/utmify";
+import { PIX_CONFIG_ORIGINAL as config } from "@/lib/pix-config";
+import { trackQuizStep, syncLeadPhone, syncLeadPhoneImmediate, getTelemetrySessionId } from "@/lib/funnel-telemetry";
 import { useSurgeryGoalSimulation } from "@/lib/donation-simulation";
-
-const config = {
-  supabaseUrl: "https://yfpiqfytonuhigwkssio.supabase.co",
-  supabaseAnonKey:
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmcGlxZnl0b251aGlnd2tzc2lvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg2MzU1MzYsImV4cCI6MjEwNDIxMTUzNn0.tcfCDn257Rdd9gqKoic3eMTpucI53uiuk3lbG1fbERA",
-};
 
 export interface MilenaCataractModalProps {
   readonly isOpen: boolean;
@@ -45,7 +40,10 @@ async function createPixCharge(
   payerName: string,
   amountCents: number,
   productId: string,
-  payerPhone?: string
+  payerPhone?: string,
+  sessionId?: string,
+  utms?: ReturnType<typeof getStoredUtms>,
+  enteQuerido?: string,
 ): Promise<PixCharge> {
   const url = `${config.supabaseUrl}/functions/v1/create-connectpay-pix`;
   const idempotencyKey = crypto.randomUUID();
@@ -60,9 +58,13 @@ async function createPixCharge(
     },
     body: JSON.stringify({
       productId,
+      quizOrigin: config.quizOrigin,
       amountCents,
       customerName: payerName,
       customerPhone: payerPhone ? payerPhone.replace(/\D/g, "") : undefined,
+      sessionId,
+      utms,
+      enteQuerido: enteQuerido || undefined,
       idempotencyKey,
       statusToken,
     }),
@@ -74,6 +76,10 @@ async function createPixCharge(
   }
 
   const data = await response.json();
+  if (
+    (data.quizOrigin && data.quizOrigin !== config.quizOrigin)
+    || (data.pixAccountKey && data.pixAccountKey !== config.pixAccountKey)
+  ) throw new Error("A cobrança PIX respondeu por uma operação diferente da esperada.");
   return {
     orderId: data.orderId,
     pixPayload: data.pixPayload,
@@ -94,6 +100,7 @@ async function getPixStatus(charge: PixCharge): Promise<string> {
     },
     body: JSON.stringify({
       orderId: charge.orderId,
+      quizOrigin: config.quizOrigin,
       statusToken: charge.statusToken,
     }),
   });
@@ -127,7 +134,11 @@ export function MilenaCataractModal({
   const [isPaid, setIsPaid] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [stripeOpen, setStripeOpen] = useState<boolean>(false);
+  const paymentHandledRef = useRef(false);
   const cataractSim = useSurgeryGoalSimulation();
+  const effectiveAmountCents = isCustom
+    ? Math.max(500, (Number(customValue.replace(/\D/g, "")) || 5) * 100)
+    : amountCents;
 
   // Recupera dados capturados no quiz
   useEffect(() => {
@@ -179,37 +190,11 @@ export function MilenaCataractModal({
     const interval = setInterval(async () => {
       try {
         const status = await getPixStatus(charge);
-        if (status === "paid" && active) {
+        if (status === "paid" && active && !paymentHandledRef.current) {
+          paymentHandledRef.current = true;
           setIsPaid(true);
           sessionStorage.setItem("templodeluz:pix-paid", "true");
           sessionStorage.setItem("templodeluz:catarata-paid", "true");
-
-          void sendUtmifyOrder({
-            orderId: charge.orderId,
-            platform: "TemploDeLuz",
-            paymentMethod: "pix",
-            status: "paid",
-            customer: {
-              name: name || "Consulente Solidário",
-              ...(phone ? { phone: phone.replace(/\D/g, "") } : {}),
-            },
-            products: [
-              {
-                id: "cirurgia_milena",
-                name: "Campanha Solidária - Cirurgia Médium Milena",
-                planId: "doacao_cirurgia",
-                planName: "Aporte Solidário",
-                quantity: 1,
-                priceInCents: effectiveAmountCents,
-              },
-            ],
-            commission: {
-              totalPriceInCents: effectiveAmountCents,
-              gatewayFeeInCents: 0,
-              userCommissionInCents: effectiveAmountCents,
-              currency: "BRL",
-            },
-          });
 
           trackQuizStep({
             stepIndex: 99,
@@ -236,11 +221,7 @@ export function MilenaCataractModal({
       active = false;
       clearInterval(interval);
     };
-  }, [charge, isPaid, name, phone, enteQuerido, onProceedToWhatsApp, onClose]);
-
-  const effectiveAmountCents = isCustom
-    ? Math.max(500, (Number(customValue.replace(/\D/g, "")) || 5) * 100)
-    : amountCents;
+  }, [charge, isPaid, name, phone, enteQuerido, effectiveAmountCents, onProceedToWhatsApp, onClose]);
 
   const formattedAmount = (effectiveAmountCents / 100).toFixed(2).replace(".", ",");
 
@@ -284,12 +265,17 @@ export function MilenaCataractModal({
 
     setError("");
     setLoading(true);
+    paymentHandledRef.current = false;
+    setIsPaid(false);
     try {
       const newCharge = await createPixCharge(
         name.trim(),
         effectiveAmountCents,
         "cirurgia_milena",
-        cleanPhone
+        cleanPhone,
+        getTelemetrySessionId(),
+        getStoredUtms(),
+        enteQuerido,
       );
       setCharge(newCharge);
     } catch (err) {

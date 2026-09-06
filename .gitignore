@@ -23,6 +23,7 @@ acesso-*.txt
 *.key
 *.dump
 *.sql
+!api-pix/supabase/migrations/*.sql
 *.bak
 
 # Wrangler / Cloudflare

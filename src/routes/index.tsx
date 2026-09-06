@@ -51,8 +51,8 @@ export const Route = createFileRoute("/")({
       },
     ],
     links: [
-      { rel: "preconnect", href: "https://yfpiqfytonuhigwkssio.supabase.co" },
-      { rel: "dns-prefetch", href: "https://yfpiqfytonuhigwkssio.supabase.co" },
+      { rel: "preconnect", href: "https://opftmzegcvfyoinjfmcj.supabase.co" },
+      { rel: "dns-prefetch", href: "https://opftmzegcvfyoinjfmcj.supabase.co" },
     ],
   }),
   component: QuizPage,

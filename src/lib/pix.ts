@@ -1,4 +1,6 @@
 export interface PixClientConfig {
+  quizOrigin: "original" | "mirrored";
+  pixAccountKey: "connectpay_original" | "connectpay_mirrored";
   supabaseUrl: string;
   supabaseAnonKey: string;
 }
@@ -60,6 +62,7 @@ export async function createPixCharge(
     },
     body: JSON.stringify({
       productId: input.productId,
+      quizOrigin: config.quizOrigin,
       amountCents: input.amountCents,
       customerName: input.customer.name,
       customerPhone: input.customerPhone,
@@ -84,7 +87,11 @@ export async function getPixStatus(config: PixClientConfig, charge: PixCharge) {
       apikey: config.supabaseAnonKey,
       Authorization: `Bearer ${config.supabaseAnonKey}`,
     },
-    body: JSON.stringify({ orderId: charge.orderId, statusToken: charge.statusToken }),
+    body: JSON.stringify({
+      orderId: charge.orderId,
+      quizOrigin: config.quizOrigin,
+      statusToken: charge.statusToken,
+    }),
   });
   return readJson<{
     status: PixPaymentStatus;

@@ -2,20 +2,16 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { digits, isUuid, isValidCpf, resolveChargeAmount } from '../_shared/pix.ts';
 
+const QUIZ_ORIGIN = 'original';
+const PIX_ACCOUNT_KEY = 'connectpay_original';
 const defaultAllowedOrigins = [
-  'https://quiz-templodeluz.vercel.app',
   'https://templodeluz-milenamedeiros.vercel.app',
   'https://templodeluz.com',
   'http://localhost:5173',
   'http://127.0.0.1:5173',
 ];
 
-const configuredOrigins = (Deno.env.get('CORS_ALLOWED_ORIGINS') ?? '')
-  .split(',')
-  .map((value) => value.trim())
-  .filter(Boolean);
-
-const allowedOrigins = [...new Set([...defaultAllowedOrigins, ...configuredOrigins])];
+const allowedOrigins = defaultAllowedOrigins;
 
 const localDevelopmentOrigins = new Set([
   'http://localhost:5173',
@@ -73,6 +69,9 @@ function chargeResponse(order: Record<string, unknown>, statusToken: string) {
     pixPayload: order.pix_payload,
     qrCodeBase64: order.qr_code_base64 ?? null,
     expiresAt: order.expires_at ?? null,
+    quizOrigin: order.quiz_origin,
+    pixAccountKey: order.pix_account_key,
+    accountFingerprint: order.pix_account_fingerprint,
   };
 }
 
@@ -103,6 +102,7 @@ Deno.serve(async (req) => {
     });
 
     const input = await req.json().catch(() => null) as Record<string, unknown> | null;
+    const requestedQuizOrigin = typeof input?.quizOrigin === 'string' ? input.quizOrigin.trim() : '';
     const productId = typeof input?.productId === 'string' ? input.productId.trim().toLowerCase() : '';
     const requestedAmountCents = input?.amountCents;
     const customerName = typeof input?.customerName === 'string'
@@ -113,7 +113,8 @@ Deno.serve(async (req) => {
     const statusToken = suppliedStatusToken || `${crypto.randomUUID()}${crypto.randomUUID()}`;
 
     if (
-      !/^[a-z0-9][a-z0-9_-]{1,63}$/.test(productId)
+      requestedQuizOrigin !== QUIZ_ORIGIN
+      || !/^[a-z0-9][a-z0-9_-]{1,63}$/.test(productId)
       || customerName.length < 3
       || !isUuid(idempotencyKey)
       || statusToken.length < 32
@@ -132,13 +133,19 @@ Deno.serve(async (req) => {
     if (!allowed) return json(origin, { error: 'Muitas tentativas. Aguarde antes de gerar outro PIX.' }, 429);
 
     const statusTokenHash = await sha256(statusToken);
+    const accountFingerprint = (await sha256(apiSecret)).slice(0, 24);
     const { data: existing, error: existingError } = await supabase
       .from('pix_orders')
-      .select('id, status, status_token_hash, pix_payload, qr_code_base64, expires_at')
+      .select('id, status, status_token_hash, pix_payload, qr_code_base64, expires_at, quiz_origin, pix_account_key, pix_account_fingerprint')
       .eq('idempotency_key', idempotencyKey)
       .maybeSingle();
     if (existingError) throw existingError;
     if (existing) {
+      if (
+        existing.quiz_origin !== QUIZ_ORIGIN
+        || existing.pix_account_key !== PIX_ACCOUNT_KEY
+        || existing.pix_account_fingerprint !== accountFingerprint
+      ) return json(origin, { error: 'Chave de idempotencia vinculada a outra operacao.' }, 409);
       if (existing.status_token_hash !== statusTokenHash) {
         return json(origin, { error: 'Chave de idempotencia ja utilizada.' }, 409);
       }
@@ -216,6 +223,9 @@ Deno.serve(async (req) => {
       customer_cpf: customerCpf,
       customer_phone: customerPhone,
       status_token_hash: statusTokenHash,
+      quiz_origin: QUIZ_ORIGIN,
+      pix_account_key: PIX_ACCOUNT_KEY,
+      pix_account_fingerprint: accountFingerprint,
     };
 
     if (sessionId) orderInsertPayload.session_id = sessionId;
@@ -224,7 +234,11 @@ Deno.serve(async (req) => {
     if (utmParams.utm_source) orderInsertPayload.utm_source = String(utmParams.utm_source);
     if (utmParams.utm_medium) orderInsertPayload.utm_medium = String(utmParams.utm_medium);
     if (utmParams.utm_campaign) orderInsertPayload.utm_campaign = String(utmParams.utm_campaign);
+    if (utmParams.utm_content) orderInsertPayload.utm_content = String(utmParams.utm_content);
+    if (utmParams.utm_term) orderInsertPayload.utm_term = String(utmParams.utm_term);
     if (utmParams.src) orderInsertPayload.src = String(utmParams.src);
+    if (utmParams.sck) orderInsertPayload.sck = String(utmParams.sck);
+    if (utmParams.ttclid) orderInsertPayload.ttclid = String(utmParams.ttclid);
 
     const { data: order, error: orderError } = await supabase
       .from('pix_orders')
@@ -251,10 +265,11 @@ Deno.serve(async (req) => {
             };
             if (enteQuerido) leadSyncPayload.ente_querido = enteQuerido;
             if (grauParentesco) leadSyncPayload.grau_parentesco = grauParentesco;
-            await supabase
+            const { error: leadSyncError } = await supabase
               .from('quiz_funnel_leads')
               .update(leadSyncPayload)
               .eq('session_id', sessionId);
+            if (leadSyncError) throw leadSyncError;
           } catch (leadSyncError) {
             console.warn('lead sync failed (ignored)', leadSyncError instanceof Error ? leadSyncError.message : leadSyncError);
           }
@@ -321,7 +336,7 @@ Deno.serve(async (req) => {
       qr_code_base64: qrCodeBase64,
       expires_at: expiresAt,
       updated_at: new Date().toISOString(),
-    }).eq('id', order.id).select('id, pix_payload, qr_code_base64, expires_at').single();
+    }).eq('id', order.id).select('id, pix_payload, qr_code_base64, expires_at, quiz_origin, pix_account_key, pix_account_fingerprint').single();
     if (updateError || !completedOrder) throw updateError ?? new Error('ORDER_UPDATE_FAILED');
 
     return json(origin, chargeResponse(completedOrder, statusToken));

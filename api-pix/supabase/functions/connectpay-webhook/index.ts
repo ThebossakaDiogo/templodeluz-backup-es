@@ -1,6 +1,10 @@
 // @ts-nocheck
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { amountToCents, isUuid } from '../_shared/pix.ts';
+import { amountToCents, isUuid, normalizeConnectPayStatus } from '../_shared/pix.ts';
+import { deliverMetaUtmifyPaidOrder } from '../_shared/utmify.ts';
+
+const QUIZ_ORIGIN = 'original';
+const PIX_ACCOUNT_KEY = 'connectpay_original';
 
 function serviceRoleKey() {
   const legacy = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
@@ -10,6 +14,11 @@ function serviceRoleKey() {
   } catch {
     return null;
   }
+}
+
+async function sha256(value: string) {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
 Deno.serve(async (req) => {
@@ -33,6 +42,22 @@ Deno.serve(async (req) => {
     const apiSecret = Deno.env.get('CONNECTPAY_API_SECRET');
     if (!supabaseUrl || !secretKey || !apiSecret) throw new Error('CONFIGURATION_MISSING');
     const supabase = createClient(supabaseUrl, secretKey, { auth: { persistSession: false, autoRefreshToken: false } });
+    const accountFingerprint = (await sha256(apiSecret)).slice(0, 24);
+
+    const { data: expectedOrder, error: expectedOrderError } = await supabase
+      .from('pix_orders')
+      .select('*')
+      .eq('id', orderId)
+      .maybeSingle();
+    if (expectedOrderError) throw expectedOrderError;
+    if (
+      !expectedOrder
+      || expectedOrder.quiz_origin !== QUIZ_ORIGIN
+      || expectedOrder.pix_account_key !== PIX_ACCOUNT_KEY
+      || expectedOrder.pix_account_fingerprint !== accountFingerprint
+    ) {
+      throw new Error('PIX_ACCOUNT_MISMATCH');
+    }
 
     // O payload externo nao aprova pagamento sozinho. A transacao e relida no provedor.
     const verification = await fetch(
@@ -67,19 +92,27 @@ Deno.serve(async (req) => {
     });
     if (error) throw error;
 
+    await supabase.from('connectpay_webhook_events').update({
+      quiz_origin: QUIZ_ORIGIN,
+      pix_account_key: PIX_ACCOUNT_KEY,
+      pix_account_fingerprint: accountFingerprint,
+    }).eq('order_id', orderId).eq('connectpay_transaction_id', transactionId).eq('status', verifiedStatus);
+
     // Se aprovado/pago, sincroniza funil, whatsapp e notifica UTMify
-    if (verifiedStatus === 'PAID' || verifiedStatus === 'APPROVED') {
+    if (normalizeConnectPayStatus(verifiedStatus) === 'paid') {
       try {
-        const { data: orderData } = await supabase
+        const { data: orderData, error: orderDataError } = await supabase
           .from('pix_orders')
           .select('*')
           .eq('id', orderId)
           .maybeSingle();
+        if (orderDataError || !orderData) throw orderDataError ?? new Error('ORDER_NOT_FOUND');
 
         // 1. Sincronização em Cascata: atualiza quiz_funnel_leads
         const safeUpdate = async (label: string, promise: PromiseLike<unknown>) => {
           try {
-            await promise;
+            const result = await promise as { error?: unknown };
+            if (result?.error) throw result.error;
           } catch (err) {
             console.warn(`[CONNECTPAY WEBHOOK SYNC WARN] ${label}`, err instanceof Error ? err.message : err);
           }
@@ -121,64 +154,10 @@ Deno.serve(async (req) => {
           }).eq('lead_email', orderData.customer_email));
         }
 
-        // 2. Disparo UTMify com dados reais e parâmetros de rastreamento completos
-        const utmifyToken = 'Szz1ObkJ95rX3A8C3M7VcjACLPHBRAr5HGx4';
-        const d = new Date();
-        const pad = (n: number) => String(n).padStart(2, '0');
-        const nowFormatted = `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}`;
-
-        const utmifyPayload = {
-          orderId: orderId,
-          platform: 'TemploDeLuz',
-          paymentMethod: 'pix',
-          status: 'paid',
-          createdAt: nowFormatted,
-          approvedDate: nowFormatted,
-          customer: {
-            name: String(orderData?.customer_name || transaction?.customer?.name || 'Consulente Templo de Luz'),
-            email: String(orderData?.customer_email || transaction?.customer?.email || 'contato@templodeluz.com'),
-            phone: String(orderData?.customer_phone || transaction?.customer?.phone || '11999999999'),
-            document: '00000000000',
-            country: 'BR',
-          },
-          products: [
-            {
-              id: orderData?.product_id || 'carta_sagrada',
-              name: orderData?.product_name || 'Carta Psicografada Sagrada',
-              planId: 'plano_unico',
-              planName: 'Pagamento Único',
-              quantity: 1,
-              priceInCents: amountCents,
-            },
-          ],
-          trackingParameters: {
-            src: orderData?.src || null,
-            sck: null,
-            utm_source: orderData?.utm_source || null,
-            utm_medium: orderData?.utm_medium || null,
-            utm_campaign: orderData?.utm_campaign || null,
-            utm_content: orderData?.utm_content || null,
-            utm_term: orderData?.utm_term || null,
-          },
-          commission: {
-            totalPriceInCents: amountCents,
-            gatewayFeeInCents: 0,
-            userCommissionInCents: amountCents,
-            currency: 'BRL',
-          },
-          isTest: false,
-        };
-
-        await fetch('https://api.utmify.com.br/api-credentials/orders', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-token': utmifyToken,
-          },
-          body: JSON.stringify(utmifyPayload),
-        });
+        await deliverMetaUtmifyPaidOrder(supabase, orderData);
       } catch (utmErr) {
         console.warn('[CONNECTPAY WEBHOOK SYNC/UTMIFY ERROR]', utmErr);
+        throw utmErr;
       }
     }
 

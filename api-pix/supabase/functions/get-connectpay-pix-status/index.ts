@@ -1,21 +1,18 @@
 // @ts-nocheck
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { isUuid } from '../_shared/pix.ts';
+import { amountToCents, isUuid, normalizeConnectPayStatus } from '../_shared/pix.ts';
+import { deliverMetaUtmifyPaidOrder } from '../_shared/utmify.ts';
 
+const QUIZ_ORIGIN = 'original';
+const PIX_ACCOUNT_KEY = 'connectpay_original';
 const defaultAllowedOrigins = [
-  'https://quiz-templodeluz.vercel.app',
   'https://templodeluz-milenamedeiros.vercel.app',
   'https://templodeluz.com',
   'http://localhost:5173',
   'http://127.0.0.1:5173',
 ];
 
-const configuredOrigins = (Deno.env.get('CORS_ALLOWED_ORIGINS') ?? '')
-  .split(',')
-  .map((value) => value.trim())
-  .filter(Boolean);
-
-const allowedOrigins = [...new Set([...defaultAllowedOrigins, ...configuredOrigins])];
+const allowedOrigins = defaultAllowedOrigins;
 
 const localDevelopmentOrigins = new Set([
   'http://localhost:5173',
@@ -67,16 +64,19 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const secretKey = serviceRoleKey();
-    if (!supabaseUrl || !secretKey || allowedOrigins.length === 0) throw new Error('CONFIGURATION_MISSING');
+    const apiSecret = Deno.env.get('CONNECTPAY_API_SECRET');
+    if (!supabaseUrl || !secretKey || !apiSecret || allowedOrigins.length === 0) throw new Error('CONFIGURATION_MISSING');
     const supabase = createClient(supabaseUrl, secretKey, { auth: { persistSession: false, autoRefreshToken: false } });
+    const accountFingerprint = (await sha256(apiSecret)).slice(0, 24);
 
     const input = await req.json().catch(() => null) as Record<string, unknown> | null;
     const orderId = input?.orderId;
+    const requestedQuizOrigin = typeof input?.quizOrigin === 'string' ? input.quizOrigin.trim() : '';
     const statusToken = typeof input?.statusToken === 'string' ? input.statusToken : '';
     const requestedWaitMs = typeof input?.waitMs === 'number' && Number.isFinite(input.waitMs)
       ? Math.max(0, Math.min(25_000, Math.floor(input.waitMs)))
       : 0;
-    if (!isUuid(orderId) || statusToken.length < 32 || statusToken.length > 200) {
+    if (requestedQuizOrigin !== QUIZ_ORIGIN || !isUuid(orderId) || statusToken.length < 32 || statusToken.length > 200) {
       return json(origin, { error: 'Consulta PIX invalida.' }, 400);
     }
 
@@ -89,7 +89,7 @@ Deno.serve(async (req) => {
     const readStatus = async () => {
       const { data: order, error } = await supabase
         .from('pix_orders')
-        .select('id, user_id, status, status_token_hash, expires_at, updated_at')
+        .select('*')
         .eq('id', orderId)
         .maybeSingle();
       if (error) throw error;
@@ -97,6 +97,11 @@ Deno.serve(async (req) => {
       const ownsOrder = Boolean(auth.user && order.user_id === auth.user.id);
       const hasStatusToken = order.status_token_hash === await sha256(statusToken);
       if (!ownsOrder && !hasStatusToken) return null;
+      if (
+        order.quiz_origin !== QUIZ_ORIGIN
+        || order.pix_account_key !== PIX_ACCOUNT_KEY
+        || order.pix_account_fingerprint !== accountFingerprint
+      ) return null;
       return order;
     };
 
@@ -105,17 +110,72 @@ Deno.serve(async (req) => {
 
     const terminalStatuses = new Set(['paid', 'failed', 'expired', 'in_dispute', 'chargeback']);
 
+    const reconcileWithGateway = async (currentOrder: Record<string, any>) => {
+      if (terminalStatuses.has(currentOrder.status) || !currentOrder.connectpay_transaction_id) {
+        if (currentOrder.status === 'paid') {
+          await deliverMetaUtmifyPaidOrder(supabase, currentOrder).catch((error) => {
+            console.warn('UTMify delivery retry failed', error instanceof Error ? error.message : error);
+          });
+        }
+        return currentOrder;
+      }
+
+      const verification = await fetch(
+        `https://api.connectpay.vc/v1/transactions/${encodeURIComponent(currentOrder.connectpay_transaction_id)}`,
+        {
+          signal: AbortSignal.timeout(10_000),
+          headers: { 'api-secret': apiSecret, 'Content-Type': 'application/json' },
+        },
+      );
+      const verificationPayload = await verification.json().catch(() => ({}));
+      const transaction = verificationPayload?.data ?? verificationPayload;
+      const verifiedOrderId = String(transaction?.external_id ?? '').trim();
+      const verifiedTransactionId = String(transaction?.id ?? '').trim();
+      const verifiedStatus = String(transaction?.status ?? '').trim().toUpperCase();
+      const amountCents = amountToCents(transaction?.total_amount ?? transaction?.amount);
+      if (
+        !verification.ok
+        || verifiedOrderId !== currentOrder.id
+        || verifiedTransactionId !== currentOrder.connectpay_transaction_id
+        || amountCents !== currentOrder.amount_cents
+        || !verifiedStatus
+      ) return currentOrder;
+
+      const { error: processError } = await supabase.rpc('process_connectpay_webhook', {
+        p_order_id: currentOrder.id,
+        p_transaction_id: verifiedTransactionId,
+        p_status: verifiedStatus,
+        p_amount_cents: amountCents,
+        p_payload: verificationPayload,
+      });
+      if (processError) throw processError;
+
+      await supabase.from('connectpay_webhook_events').update({
+        quiz_origin: QUIZ_ORIGIN,
+        pix_account_key: PIX_ACCOUNT_KEY,
+        pix_account_fingerprint: accountFingerprint,
+      }).eq('order_id', currentOrder.id).eq('connectpay_transaction_id', verifiedTransactionId).eq('status', verifiedStatus);
+
+      const refreshed = await readStatus();
+      if (refreshed && normalizeConnectPayStatus(verifiedStatus) === 'paid') {
+        await deliverMetaUtmifyPaidOrder(supabase, refreshed).catch((error) => {
+          console.warn('UTMify delivery failed', error instanceof Error ? error.message : error);
+        });
+      }
+      return refreshed ?? currentOrder;
+    };
+
     // Long-polling: segura a resposta até o status mudar (ou atingir o teto de tempo),
     // eliminando o intervalo fixo de polling no cliente e garantindo confirmação
     // praticamente instantânea após o webhook gravar o pagamento.
-    let order = first;
+    let order = await reconcileWithGateway(first);
     if (requestedWaitMs > 0 && !terminalStatuses.has(order.status)) {
       const deadline = Date.now() + requestedWaitMs;
       while (Date.now() < deadline && !terminalStatuses.has(order.status)) {
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 2_000));
         const next = await readStatus();
         if (!next) break;
-        order = next;
+        order = await reconcileWithGateway(next);
       }
     }
 

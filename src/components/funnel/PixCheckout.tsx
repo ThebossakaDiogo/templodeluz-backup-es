@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { QRCodeSVG } from "qrcode.react";
-import { sendUtmifyOrder } from "@/lib/utmify";
+import { getStoredUtms } from "@/lib/utmify";
+import { trackPurchaseComplete } from "@/lib/metaPixel";
+import { PIX_CONFIG_ORIGINAL as config } from "@/lib/pix-config";
 import { recordInput } from "@/lib/auto-capture";
 import {
   trackQuizStep,
@@ -161,12 +163,6 @@ function InfoIcon({ className = "w-4 h-4" }: { readonly className?: string }) {
   );
 }
 
-const config = {
-  supabaseUrl: "https://yfpiqfytonuhigwkssio.supabase.co",
-  supabaseAnonKey:
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmcGlxZnl0b251aGlnd2tzc2lvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg2MzU1MzYsImV4cCI6MjEwNDIxMTUzNn0.tcfCDn257Rdd9gqKoic3eMTpucI53uiuk3lbG1fbERA",
-};
-
 function formatPhone(value: string): string {
   const digits = value.replace(/\D/g, "").slice(0, 11);
   if (!digits.length) return "";
@@ -202,6 +198,7 @@ async function createPixCharge(
     },
     body: JSON.stringify({
       productId,
+      quizOrigin: config.quizOrigin,
       amountCents,
       customerName: payerName,
       customerPhone: payerPhone ? payerPhone.replace(/\D/g, "") : undefined,
@@ -221,6 +218,10 @@ async function createPixCharge(
   }
 
   const data = await response.json();
+  if (
+    (data.quizOrigin && data.quizOrigin !== config.quizOrigin)
+    || (data.pixAccountKey && data.pixAccountKey !== config.pixAccountKey)
+  ) throw new Error("A cobrança PIX respondeu por uma operação diferente da esperada.");
   return {
     orderId: data.orderId,
     pixPayload: data.pixPayload,
@@ -244,6 +245,7 @@ async function getPixStatus(
     },
     body: JSON.stringify({
       orderId: charge.orderId,
+      quizOrigin: config.quizOrigin,
       statusToken: charge.statusToken,
       waitMs,
     }),
@@ -258,17 +260,7 @@ async function getPixStatus(
 }
 
 function getUtmParams() {
-  if (typeof window === "undefined") return {};
-  const params = new URLSearchParams(window.location.search);
-  return {
-    utm_source: params.get("utm_source") || null,
-    utm_medium: params.get("utm_medium") || null,
-    utm_campaign: params.get("utm_campaign") || null,
-    utm_content: params.get("utm_content") || null,
-    utm_term: params.get("utm_term") || null,
-    src: params.get("src") || null,
-    sck: params.get("sck") || null,
-  };
+  return getStoredUtms();
 }
 
 function getInitialCapturedData() {
@@ -818,6 +810,8 @@ export function PixCheckout({
   const [error, setError] = useState("");
   const [checkingManual, setCheckingManual] = useState(false);
   const [manualCheckNotice, setManualCheckNotice] = useState("");
+  const checkoutTrackedRef = useRef(false);
+  const paidCompletionRef = useRef(false);
 
   const resolvedEnte = enteQuerido || initial.ente || undefined;
   const resolvedGrau = grauParentesco || initial.relacao || undefined;
@@ -836,10 +830,17 @@ export function PixCheckout({
     setCheckingManual(false);
     setManualCheckNotice("");
     setIsOpen(false);
+    checkoutTrackedRef.current = false;
+    paidCompletionRef.current = false;
   }, [amountCents, productId]);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      checkoutTrackedRef.current = false;
+      return;
+    }
+    if (checkoutTrackedRef.current) return;
+    checkoutTrackedRef.current = true;
 
     trackCheckoutInitiated({
       leadName: customerName || undefined,
@@ -858,7 +859,7 @@ export function PixCheckout({
       document.body.style.overflow = originalOverflow;
       window.removeEventListener("keydown", closeOnEscape);
     };
-  }, [isOpen, customerName, customerEmail, customerPhone, amountCents]);
+  }, [isOpen, amountCents]);
 
   // Confirmação instantânea do PIX (long-polling + re-cheque ao voltar para a aba)
   useEffect(() => {
@@ -904,34 +905,19 @@ export function PixCheckout({
   // Confirmação de PIX pago
   useEffect(() => {
     if (status !== "paid") return;
+    if (paidCompletionRef.current) return;
+    paidCompletionRef.current = true;
 
     sessionStorage.setItem("templodeluz:pix-paid", "true");
 
-    void sendUtmifyOrder({
-      orderId: charge?.orderId || `pix_${Date.now()}`,
-      platform: "TemploDeLuz",
+    // A conversão para a UTMify é registrada pelo webhook confirmado do gateway.
+    // Isso evita duplicar uma compra entre cliente e servidor.
+    trackPurchaseComplete({
+      amountCents,
+      productName: prodName,
+      productId,
       paymentMethod: "pix",
-      status: "paid",
-      customer: {
-        name: customerName || "Consulente Templo de Luz",
-        ...(customerPhone ? { phone: customerPhone.replace(/\D/g, "") } : {}),
-      },
-      products: [
-        {
-          id: productId,
-          name: prodName,
-          planId: "plano_unico",
-          planName: "Pagamento Único",
-          quantity: 1,
-          priceInCents: amountCents,
-        },
-      ],
-      commission: {
-        totalPriceInCents: amountCents,
-        gatewayFeeInCents: 0,
-        userCommissionInCents: amountCents,
-        currency: "BRL",
-      },
+      orderId: charge?.orderId,
     });
 
     trackQuizStep({
@@ -969,6 +955,7 @@ export function PixCheckout({
     }
     setError("");
     setLoading(true);
+    paidCompletionRef.current = false;
     try {
       const newCharge = await createPixCharge(
         customerName.trim(),

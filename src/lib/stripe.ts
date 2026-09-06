@@ -1,3 +1,6 @@
+import { PIX_CONFIG_ORIGINAL } from "./pix-config";
+import { getStoredUtms } from "./utmify";
+
 export interface StripeCheckoutInput {
   amountCents: number;
   productId: "carta_sagrada" | "cirurgia_milena";
@@ -7,15 +10,9 @@ export interface StripeCheckoutInput {
   cancelUrl?: string;
 }
 
-const DEFAULT_SUPABASE_URL = "https://yfpiqfytonuhigwkssio.supabase.co";
-const DEFAULT_SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmcGlxZnl0b251aGlnd2tzc2lvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg2MzU1MzYsImV4cCI6MjEwNDIxMTUzNn0.tcfCDn257Rdd9gqKoic3eMTpucI53uiuk3lbG1fbERA";
-
-import { getStoredUtms } from "./utmify";
-
 export async function createStripeCheckoutSession(input: StripeCheckoutInput): Promise<{ url: string }> {
-  const supabaseUrl = (import.meta.env["VITE_SUPABASE_URL"] as string | undefined) || DEFAULT_SUPABASE_URL;
-  const anonKey = (import.meta.env["VITE_SUPABASE_ANON_KEY"] as string | undefined) || DEFAULT_SUPABASE_ANON_KEY;
+  const supabaseUrl = PIX_CONFIG_ORIGINAL.supabaseUrl;
+  const anonKey = PIX_CONFIG_ORIGINAL.supabaseAnonKey;
 
   const endpoint = `${supabaseUrl.replace(/\/$/, "")}/functions/v1/create-stripe-checkout`;
 

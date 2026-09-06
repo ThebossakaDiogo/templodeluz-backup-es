@@ -4,14 +4,11 @@
  * capturando nome, ente querido e a forma de pagamento que utilizou (PIX, Cartão Stripe ou Pendente).
  */
 
-const DEFAULT_SUPABASE_URL = "https://yfpiqfytonuhigwkssio.supabase.co";
-const DEFAULT_SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmcGlxZnl0b251aGlnd2tzc2lvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg2MzU1MzYsImV4cCI6MjEwNDIxMTUzNn0.tcfCDn257Rdd9gqKoic3eMTpucI53uiuk3lbG1fbERA";
+import { PIX_CONFIG_ORIGINAL } from "./pix-config";
+import { getStoredUtms } from "@/lib/utmify";
 
-const supabaseUrl =
-  (import.meta.env["VITE_SUPABASE_URL"] as string | undefined) || DEFAULT_SUPABASE_URL;
-const supabaseAnonKey =
-  (import.meta.env["VITE_SUPABASE_ANON_KEY"] as string | undefined) || DEFAULT_SUPABASE_ANON_KEY;
+const supabaseUrl = PIX_CONFIG_ORIGINAL.supabaseUrl;
+const supabaseAnonKey = PIX_CONFIG_ORIGINAL.supabaseAnonKey;
 
 export interface WhatsAppEventPayload {
   customerName: string;
@@ -28,10 +25,7 @@ export interface WhatsAppEventPayload {
 
 export async function trackWhatsAppEvent(payload: WhatsAppEventPayload): Promise<void> {
   try {
-    const urlParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
-    const utm_source = urlParams?.get("utm_source") || null;
-    const utm_medium = urlParams?.get("utm_medium") || null;
-    const utm_campaign = urlParams?.get("utm_campaign") || null;
+    const utms = getStoredUtms();
 
     // Dispara requisição REST para salvar na tabela whatsapp_conversations
     const res = await fetch(`${supabaseUrl}/rest/v1/whatsapp_conversations`, {
@@ -53,9 +47,9 @@ export async function trackWhatsAppEvent(payload: WhatsAppEventPayload): Promise
         amount_cents: payload.amountCents ?? 0,
         source_page: payload.sourcePage || "escrever_carta",
         message_preview: payload.messagePreview || null,
-        utm_source,
-        utm_medium,
-        utm_campaign,
+        utm_source: utms.utm_source,
+        utm_medium: utms.utm_medium,
+        utm_campaign: utms.utm_campaign,
       }),
     });
 

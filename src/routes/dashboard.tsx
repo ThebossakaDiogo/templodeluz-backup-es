@@ -33,9 +33,9 @@ export const Route = createFileRoute("/dashboard")({
   component: DashboardPage,
 });
 
-const DEFAULT_SUPABASE_URL = "https://yfpiqfytonuhigwkssio.supabase.co";
+const DEFAULT_SUPABASE_URL = "https://opftmzegcvfyoinjfmcj.supabase.co";
 const DEFAULT_SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmcGlxZnl0b251aGlnd2tzc2lvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg2MzU1MzYsImV4cCI6MjEwNDIxMTUzNn0.tcfCDn257Rdd9gqKoic3eMTpucI53uiuk3lbG1fbERA";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXAiLCJyZWYiOiJvcGZ0bXplZ2N2ZnlvaW5qZm1jaiIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzg4Mjc4MjA5LCJleHAiOjIxMDM4NTQyMDl9.VpQitxh7x5v_0k5q35hhMz3eAATUHGERubdmA_TnR24";
 
 type FilterQuickOption = "all" | "with_phone" | "paid" | "pending" | "quiz";
 type DashboardTab = "leads" | "orders" | "metrics";
@@ -698,10 +698,8 @@ export function DashboardPage() {
   const [lastSync, setLastSync] = useState<Date>(new Date());
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const supabaseUrl =
-    (import.meta.env["VITE_SUPABASE_URL"] as string | undefined) || DEFAULT_SUPABASE_URL;
-  const supabaseAnonKey =
-    (import.meta.env["VITE_SUPABASE_ANON_KEY"] as string | undefined) || DEFAULT_SUPABASE_ANON_KEY;
+  const supabaseUrl = DEFAULT_SUPABASE_URL;
+  const supabaseAnonKey = DEFAULT_SUPABASE_ANON_KEY;
 
   const fetchData = async (showLoadingState = false) => {
     if (showLoadingState) setIsRefreshing(true);

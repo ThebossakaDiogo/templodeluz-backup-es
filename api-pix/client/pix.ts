@@ -1,4 +1,6 @@
 export interface PixClientConfig {
+  quizOrigin: 'original' | 'mirrored';
+  pixAccountKey: 'connectpay_original' | 'connectpay_mirrored';
   supabaseUrl: string;
   supabaseAnonKey: string;
   accessToken?: string;
@@ -53,6 +55,7 @@ export async function createPixCharge(
     headers: headers(config),
     body: JSON.stringify({
       productId: input.productId,
+      quizOrigin: config.quizOrigin,
       amountCents: input.amountCents,
       customerName: input.customer.name,
       idempotencyKey,
@@ -71,7 +74,7 @@ export async function getPixStatus(
   const response = await fetch(functionUrl(config, 'get-connectpay-pix-status'), {
     method: 'POST',
     headers: headers(config),
-    body: JSON.stringify({ orderId, statusToken }),
+    body: JSON.stringify({ orderId, quizOrigin: config.quizOrigin, statusToken }),
   });
   return readJson(response);
 }
