@@ -26,8 +26,21 @@ Deno.serve(async (req) => {
 
   try {
     const expectedToken = Deno.env.get('CONNECTPAY_WEBHOOK_TOKEN');
+    const configuredWebhookUrl = Deno.env.get('CONNECTPAY_WEBHOOK_URL');
+    let configuredUrlToken: string | null = null;
+    try {
+      configuredUrlToken = configuredWebhookUrl
+        ? new URL(configuredWebhookUrl).searchParams.get('token')
+        : null;
+    } catch {
+      configuredUrlToken = null;
+    }
     const receivedToken = new URL(req.url).searchParams.get('token');
-    if (!expectedToken || !receivedToken || receivedToken !== expectedToken) {
+    const tokenMatches = Boolean(
+      receivedToken
+      && ((expectedToken && receivedToken === expectedToken) || (configuredUrlToken && receivedToken === configuredUrlToken)),
+    );
+    if (!tokenMatches) {
       return new Response('Not found', { status: 404 });
     }
 
