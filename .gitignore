@@ -56,3 +56,6 @@ backredirect/
 # Segredos locais (nao versionar)
 APIKEY-CONNECT.txt
 CONNECTPAY-E-SECRETS.txt
+
+# Arquivo morto local (entulho arquivado fora do git)
+.archive/
