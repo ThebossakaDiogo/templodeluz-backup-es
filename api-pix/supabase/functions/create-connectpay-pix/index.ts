@@ -237,24 +237,27 @@ Deno.serve(async (req) => {
     // Sincronização com a tabela quiz_funnel_leads (executa em paralelo com o gateway)
     const leadSyncPromise = sessionId
       ? (async () => {
-          const leadSyncPayload: Record<string, unknown> = {
-            lead_name: customerName,
-            lead_phone: customerPhone,
-            lead_email: customerEmail,
-            checkout_initiated: true,
-            pix_generated: true,
-            checkout_status: 'pix_generated',
-            payment_status: 'waiting_payment',
-            last_amount_cents: amountCents,
-            updated_at: new Date().toISOString(),
-          };
-          if (enteQuerido) leadSyncPayload.ente_querido = enteQuerido;
-          if (grauParentesco) leadSyncPayload.grau_parentesco = grauParentesco;
-          await supabase
-            .from('quiz_funnel_leads')
-            .update(leadSyncPayload)
-            .eq('session_id', sessionId)
-            .catch(() => {});
+          try {
+            const leadSyncPayload: Record<string, unknown> = {
+              lead_name: customerName,
+              lead_phone: customerPhone,
+              lead_email: customerEmail,
+              checkout_initiated: true,
+              pix_generated: true,
+              checkout_status: 'pix_generated',
+              payment_status: 'waiting_payment',
+              last_amount_cents: amountCents,
+              updated_at: new Date().toISOString(),
+            };
+            if (enteQuerido) leadSyncPayload.ente_querido = enteQuerido;
+            if (grauParentesco) leadSyncPayload.grau_parentesco = grauParentesco;
+            await supabase
+              .from('quiz_funnel_leads')
+              .update(leadSyncPayload)
+              .eq('session_id', sessionId);
+          } catch (leadSyncError) {
+            console.warn('lead sync failed (ignored)', leadSyncError instanceof Error ? leadSyncError.message : leadSyncError);
+          }
         })()
       : Promise.resolve();
 
@@ -298,7 +301,16 @@ Deno.serve(async (req) => {
     if (!gatewayResponse.ok || !transactionId || !pixPayload) {
       await supabase.from('pix_orders').update({ status: 'failed', updated_at: new Date().toISOString() }).eq('id', order.id);
       console.error('ConnectPay transaction creation failed', gatewayResponse.status, gateway?.message ?? gateway?.error);
-      return json(origin, { error: 'Nao foi possivel gerar o PIX agora.' }, 502);
+      const gatewayErrorMessage = String(gateway?.error ?? gateway?.message ?? '').trim();
+      const clientMessage = gatewayResponse.status === 403 || gatewayResponse.status === 401
+        ? 'A API PIX ainda nao foi configurada.'
+        : 'Nao foi possivel gerar o PIX agora.';
+      return json(origin, {
+        error: clientMessage,
+        code: 'GATEWAY_ERROR',
+        status: gatewayResponse.status,
+        detail: gatewayErrorMessage.slice(0, 200),
+      }, 502);
     }
 
     const { data: completedOrder, error: updateError } = await supabase.from('pix_orders').update({
@@ -319,9 +331,16 @@ Deno.serve(async (req) => {
     }
     const message = error instanceof Error ? error.message : String(error);
     console.error('create-connectpay-pix error', message);
+    if (error instanceof Error && error.stack) {
+      console.error('create-connectpay-pix stack', error.stack);
+    }
     return json(
       origin,
-      { error: message === 'CONFIGURATION_MISSING' ? 'A API PIX ainda nao foi configurada.' : 'Nao foi possivel gerar o PIX agora.' },
+      {
+        error: message === 'CONFIGURATION_MISSING' ? 'A API PIX ainda nao foi configurada.' : 'Nao foi possivel gerar o PIX agora.',
+        code: message === 'CONFIGURATION_MISSING' ? 'CONFIGURATION_MISSING' : 'INTERNAL_ERROR',
+        detail: message.slice(0, 200),
+      },
       500,
     );
   }

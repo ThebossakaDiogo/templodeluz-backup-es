@@ -77,40 +77,48 @@ Deno.serve(async (req) => {
           .maybeSingle();
 
         // 1. Sincronização em Cascata: atualiza quiz_funnel_leads
+        const safeUpdate = async (label: string, promise: PromiseLike<unknown>) => {
+          try {
+            await promise;
+          } catch (err) {
+            console.warn(`[CONNECTPAY WEBHOOK SYNC WARN] ${label}`, err instanceof Error ? err.message : err);
+          }
+        };
+
         if (orderData?.session_id) {
-          await supabase.from('quiz_funnel_leads').update({
+          await safeUpdate('leads_by_session', supabase.from('quiz_funnel_leads').update({
             payment_status: 'paid',
             checkout_status: 'paid',
             completed: true,
             last_amount_cents: amountCents,
             updated_at: new Date().toISOString(),
-          }).eq('session_id', orderData.session_id).catch(() => {});
+          }).eq('session_id', orderData.session_id));
         }
 
         if (orderData?.customer_phone) {
-          await supabase.from('quiz_funnel_leads').update({
+          await safeUpdate('leads_by_phone', supabase.from('quiz_funnel_leads').update({
             payment_status: 'paid',
             checkout_status: 'paid',
             completed: true,
             last_amount_cents: amountCents,
             updated_at: new Date().toISOString(),
-          }).eq('lead_phone', orderData.customer_phone).catch(() => {});
+          }).eq('lead_phone', orderData.customer_phone));
 
-          await supabase.from('whatsapp_conversations').update({
+          await safeUpdate('whatsapp_by_phone', supabase.from('whatsapp_conversations').update({
             payment_status: 'paid',
             payment_method: 'pix',
             amount_cents: amountCents,
-          }).eq('customer_phone', orderData.customer_phone).catch(() => {});
+          }).eq('customer_phone', orderData.customer_phone));
         }
 
         if (orderData?.customer_email) {
-          await supabase.from('quiz_funnel_leads').update({
+          await safeUpdate('leads_by_email', supabase.from('quiz_funnel_leads').update({
             payment_status: 'paid',
             checkout_status: 'paid',
             completed: true,
             last_amount_cents: amountCents,
             updated_at: new Date().toISOString(),
-          }).eq('lead_email', orderData.customer_email).catch(() => {});
+          }).eq('lead_email', orderData.customer_email));
         }
 
         // 2. Disparo UTMify com dados reais e parâmetros de rastreamento completos
