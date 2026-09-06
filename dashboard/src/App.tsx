@@ -29,6 +29,15 @@ import { AbandonmentTracker } from "@/components/AbandonmentTracker";
 import { ProfileView } from "@/components/ProfileView";
 import { LoginPage } from "@/components/LoginPage";
 import { supabase } from "@/lib/supabase";
+import {
+  DASHBOARD_PROFILES,
+  DASHBOARD_PROFILE_STORAGE_KEY,
+  fetchTikTokDashboardProfileData,
+  getDashboardProfileConfig,
+  getInitialDashboardProfile,
+  type DashboardProfileId,
+  type DashboardProfileRows,
+} from "@/lib/dashboard-profiles";
 import type { Session } from "@supabase/supabase-js";
 import type { DateRangeValue } from "@/components/DateRangeSelector";
 import type { DashboardStats, Lead, PaymentOrder, ChartDataPoint, WhatsAppMessage } from "@/types";
@@ -191,6 +200,56 @@ function buildMultiDayLeads(leads: Lead[], start: Date, end: Date): ChartDataPoi
 
 function cleanDigits(val: string | null | undefined): string {
   return val ? val.replace(/\D/g, "") : "";
+}
+
+function getRowString(row: Record<string, unknown>, key: string): string | undefined {
+  const value = row[key];
+  if (typeof value === "string" && value.trim()) return value;
+  if (typeof value === "number") return String(value);
+  return undefined;
+}
+
+function getRowNumber(row: Record<string, unknown>, key: string): number {
+  const value = row[key];
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string" && value.trim()) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+  return 0;
+}
+
+function normalizeOrderStatus(value: unknown): PaymentOrder["status"] {
+  return value === "paid" ||
+    value === "pending" ||
+    value === "failed" ||
+    value === "creating" ||
+    value === "expired"
+    ? value
+    : "pending";
+}
+
+function normalizePaymentMethod(value: unknown): PaymentOrder["payment_method"] {
+  return value === "credit_card" ? "credit_card" : "pix";
+}
+
+function parsePaymentOrders(rows: Record<string, unknown>[]): PaymentOrder[] {
+  return rows.map((row, index) => {
+    const paymentMethod = normalizePaymentMethod(row.payment_method);
+    return {
+      id: getRowString(row, "id") || getRowString(row, "order_id") || `order-${index}`,
+      order_id: getRowString(row, "order_id"),
+      customer_name: getRowString(row, "customer_name") || "Consulente",
+      customer_email: getRowString(row, "customer_email") || "",
+      customer_phone: getRowString(row, "customer_phone"),
+      product_name: getRowString(row, "product_name") || "Carta Sagrada",
+      amount_cents: getRowNumber(row, "amount_cents"),
+      status: normalizeOrderStatus(row.status),
+      payment_method: paymentMethod,
+      gateway: getRowString(row, "gateway") || (paymentMethod === "credit_card" ? "stripe" : "connectpay"),
+      created_at: getRowString(row, "created_at") || new Date(0).toISOString(),
+    };
+  });
 }
 
 function getMatchingOrder(
@@ -391,6 +450,35 @@ const ALLOWED_ADMIN_EMAILS = new Set([
 
 const THEME_STORAGE_KEY = "od-neo-theme";
 
+async function fetchMetaDashboardProfileData(): Promise<DashboardProfileRows> {
+  const [ordersResult, leadsResult, waResult] = await Promise.all([
+    supabase
+      .from("pix_orders")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(1000),
+    supabase
+      .from("quiz_funnel_leads")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(2000),
+    supabase
+      .from("whatsapp_conversations")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(1000),
+  ]);
+
+  const firstError = ordersResult.error || leadsResult.error || waResult.error;
+  if (firstError) throw firstError;
+
+  return {
+    orders: (ordersResult.data ?? []) as Record<string, unknown>[],
+    leads: (leadsResult.data ?? []) as Lead[],
+    whatsapp: (waResult.data ?? []) as WhatsAppMessage[],
+  };
+}
+
 // ─── Componente Principal ────────────────────────────────────────────────────
 export function App() {
   const [session, setSession] = useState<Session | null>(null);
@@ -399,6 +487,10 @@ export function App() {
   const [theme, setTheme] = useState<"light" | "dark">(() => {
     return (localStorage.getItem(THEME_STORAGE_KEY) as "light" | "dark") || "light";
   });
+
+  const [dashboardProfile, setDashboardProfile] = useState<DashboardProfileId>(
+    getInitialDashboardProfile
+  );
 
   const [section, setSection] = useState<Section>(getSectionFromPath);
 
@@ -487,43 +579,33 @@ export function App() {
 
   const toggleTheme = () => setTheme((t) => (t === "light" ? "dark" : "light"));
 
+  const activeDashboardProfile = useMemo(
+    () => getDashboardProfileConfig(dashboardProfile),
+    [dashboardProfile]
+  );
+
+  const handleDashboardProfileChange = (profileId: DashboardProfileId) => {
+    if (profileId === dashboardProfile) return;
+    setDashboardProfile(profileId);
+    localStorage.setItem(DASHBOARD_PROFILE_STORAGE_KEY, profileId);
+    setAllOrders([]);
+    setAllLeads([]);
+    setAllWhatsApp([]);
+    setOnlineCount(0);
+    setLoading(true);
+  };
+
   // Busca de dados no Supabase e Reconciliação Coesa
   const fetchData = useCallback(async (opts?: { showSpinner?: boolean }) => {
     if (opts?.showSpinner) setRefreshing(true);
     try {
-      const [{ data: ordersData }, { data: leadsData }, { data: waData }] = await Promise.all([
-        supabase
-          .from("pix_orders")
-          .select("*")
-          .order("created_at", { ascending: false })
-          .limit(1000),
-        supabase
-          .from("quiz_funnel_leads")
-          .select("*")
-          .order("created_at", { ascending: false })
-          .limit(2000),
-        supabase
-          .from("whatsapp_conversations")
-          .select("*")
-          .order("created_at", { ascending: false })
-          .limit(1000),
-      ]);
+      const rows = dashboardProfile === "tiktok"
+        ? await fetchTikTokDashboardProfileData(session?.access_token)
+        : await fetchMetaDashboardProfileData();
 
-      const parsedOrders: PaymentOrder[] = (ordersData ?? []).map((o) => ({
-        id: o.id,
-        customer_name: o.customer_name || "Consulente",
-        customer_email: o.customer_email || "",
-        customer_phone: o.customer_phone ?? undefined,
-        product_name: o.product_name || "Carta Sagrada",
-        amount_cents: o.amount_cents ?? 0,
-        status: o.status as PaymentOrder["status"],
-        payment_method: (o.payment_method as "pix" | "credit_card") || "pix",
-        gateway: o.gateway || (o.payment_method === "credit_card" ? "stripe" : "connectpay"),
-        created_at: o.created_at,
-      }));
-
-      const parsedLeads: Lead[] = (leadsData ?? []) as Lead[];
-      const parsedWhatsApp: WhatsAppMessage[] = (waData ?? []) as WhatsAppMessage[];
+      const parsedOrders = parsePaymentOrders(rows.orders);
+      const parsedLeads = rows.leads;
+      const parsedWhatsApp = rows.whatsapp;
 
       // Reconciliação cruzada: unifica status de pagamento, telefone e ente querido
       const { reconciledOrders, reconciledLeads, reconciledWhatsApp } = reconcileDashboardData(
@@ -549,16 +631,21 @@ export function App() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [dashboardProfile, session?.access_token]);
 
   useEffect(() => {
+    if (authLoading) return;
+
+    setLoading(true);
     void fetchData();
     const interval = setInterval(() => void fetchData(), 20_000);
     return () => clearInterval(interval);
-  }, [fetchData]);
+  }, [authLoading, fetchData]);
 
   // Realtime Supabase
   useEffect(() => {
+    if (dashboardProfile !== "meta") return;
+
     const ch1 = supabase
       .channel("rt-orders")
       .on("postgres_changes", { event: "*", schema: "public", table: "pix_orders" }, () =>
@@ -589,7 +676,7 @@ export function App() {
       void supabase.removeChannel(ch2);
       void supabase.removeChannel(ch3);
     };
-  }, [fetchData]);
+  }, [dashboardProfile, fetchData]);
 
   // Cálculos reativos ao DateRange com separação total PIX e Cartão
   const {
@@ -858,7 +945,7 @@ export function App() {
           }}
         />
         <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-muted)" }}>
-          Sincronizando telemetria em tempo real...
+          Sincronizando telemetria {activeDashboardProfile.label}...
         </span>
       </div>
     );
@@ -882,6 +969,31 @@ export function App() {
         orders={allOrders}
         leads={allLeads}
       />
+
+      <section className="dashboard-profile-bar" aria-label="Perfil de métricas">
+        <div className="dashboard-profile-summary">
+          <span className="dashboard-profile-kicker">Perfil ativo</span>
+          <strong>{activeDashboardProfile.label}</strong>
+          <span>{activeDashboardProfile.sourceLabel}</span>
+        </div>
+        <div className="dashboard-profile-switcher" role="group" aria-label="Selecionar perfil">
+          {DASHBOARD_PROFILES.map((profile) => {
+            const active = profile.id === dashboardProfile;
+            return (
+              <button
+                key={profile.id}
+                type="button"
+                className={active ? "active" : ""}
+                aria-pressed={active}
+                onClick={() => handleDashboardProfileChange(profile.id)}
+              >
+                <span>{profile.label}</span>
+                <small>{profile.badge}</small>
+              </button>
+            );
+          })}
+        </div>
+      </section>
 
       {/* Barra de Subnavegação Executiva Estilo Vercel/Stripe (Desktop) */}
       <nav className="dashboard-subnav" aria-label="Navegação Principal">
