@@ -65,6 +65,7 @@ function clientIp(req: Request) {
 function chargeResponse(order: Record<string, unknown>, statusToken: string) {
   return {
     orderId: order.id,
+    transactionId: order.connectpay_transaction_id ?? null,
     statusToken,
     pixPayload: order.pix_payload,
     qrCodeBase64: order.qr_code_base64 ?? null,
@@ -136,7 +137,7 @@ Deno.serve(async (req) => {
     const accountFingerprint = (await sha256(apiSecret)).slice(0, 24);
     const { data: existing, error: existingError } = await supabase
       .from('pix_orders')
-      .select('id, status, status_token_hash, pix_payload, qr_code_base64, expires_at, quiz_origin, pix_account_key, pix_account_fingerprint')
+      .select('id, status, status_token_hash, connectpay_transaction_id, pix_payload, qr_code_base64, expires_at, quiz_origin, pix_account_key, pix_account_fingerprint')
       .eq('idempotency_key', idempotencyKey)
       .maybeSingle();
     if (existingError) throw existingError;
@@ -336,7 +337,7 @@ Deno.serve(async (req) => {
       qr_code_base64: qrCodeBase64,
       expires_at: expiresAt,
       updated_at: new Date().toISOString(),
-    }).eq('id', order.id).select('id, pix_payload, qr_code_base64, expires_at, quiz_origin, pix_account_key, pix_account_fingerprint').single();
+    }).eq('id', order.id).select('id, connectpay_transaction_id, pix_payload, qr_code_base64, expires_at, quiz_origin, pix_account_key, pix_account_fingerprint').single();
     if (updateError || !completedOrder) throw updateError ?? new Error('ORDER_UPDATE_FAILED');
 
     return json(origin, chargeResponse(completedOrder, statusToken));

@@ -184,6 +184,8 @@ Deno.serve(async (req) => {
       paid: order.status === 'paid',
       expiresAt: order.expires_at,
       updatedAt: order.updated_at,
+      quizOrigin: order.quiz_origin,
+      pixAccountKey: order.pix_account_key,
     });
   } catch (error) {
     console.error('get-connectpay-pix-status error', error instanceof Error ? error.message : error);
