@@ -2,10 +2,20 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { isUuid } from '../_shared/pix.ts';
 
-const allowedOrigins = (Deno.env.get('CORS_ALLOWED_ORIGINS') ?? '')
+const defaultAllowedOrigins = [
+  'https://quiz-templodeluz.vercel.app',
+  'https://templodeluz-milenamedeiros.vercel.app',
+  'https://templodeluz.com',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+];
+
+const configuredOrigins = (Deno.env.get('CORS_ALLOWED_ORIGINS') ?? '')
   .split(',')
   .map((value) => value.trim())
   .filter(Boolean);
+
+const allowedOrigins = [...new Set([...defaultAllowedOrigins, ...configuredOrigins])];
 
 const localDevelopmentOrigins = new Set([
   'http://localhost:5173',
