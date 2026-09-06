@@ -35,7 +35,7 @@ export const Route = createFileRoute("/dashboard")({
 
 const DEFAULT_SUPABASE_URL = "https://opftmzegcvfyoinjfmcj.supabase.co";
 const DEFAULT_SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXAiLCJyZWYiOiJvcGZ0bXplZ2N2ZnlvaW5qZm1jaiIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzg4Mjc4MjA5LCJleHAiOjIxMDM4NTQyMDl9.VpQitxh7x5v_0k5q35hhMz3eAATUHGERubdmA_TnR24";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZnRtemVnY3ZmeW9pbmpmbWNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNzgyMDksImV4cCI6MjEwMzg1NDIwOX0.VpQitxh7x5v_0k5q35hhMz3eAATUHGERubdmA_TnR24";
 
 type FilterQuickOption = "all" | "with_phone" | "paid" | "pending" | "quiz";
 type DashboardTab = "leads" | "orders" | "metrics";

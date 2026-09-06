@@ -3,5 +3,5 @@ export const PIX_CONFIG_ORIGINAL = Object.freeze({
   pixAccountKey: "connectpay_original" as const,
   supabaseUrl: "https://opftmzegcvfyoinjfmcj.supabase.co",
   supabaseAnonKey:
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXAiLCJyZWYiOiJvcGZ0bXplZ2N2ZnlvaW5qZm1jaiIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzg4Mjc4MjA5LCJleHAiOjIxMDM4NTQyMDl9.VpQitxh7x5v_0k5q35hhMz3eAATUHGERubdmA_TnR24",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZnRtemVnY3ZmeW9pbmpmbWNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNzgyMDksImV4cCI6MjEwMzg1NDIwOX0.VpQitxh7x5v_0k5q35hhMz3eAATUHGERubdmA_TnR24",
 });
