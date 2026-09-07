@@ -41,10 +41,11 @@ export interface PaymentOrder {
   customer_phone?: string;
   product_name: string;
   amount_cents: number;
-  status: "paid" | "pending" | "failed" | "creating" | "expired";
+  status: "paid" | "pending" | "failed" | "creating" | "expired" | "in_dispute" | "chargeback";
   payment_method: "pix" | "credit_card";
   gateway?: "connectpay" | "pushinpay" | "stripe" | string;
   created_at: string;
+  fulfilled_at?: string;
 }
 
 export interface DashboardStats {

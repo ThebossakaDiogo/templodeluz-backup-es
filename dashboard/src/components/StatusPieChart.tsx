@@ -21,6 +21,8 @@ const STATUS_CONFIG: Record<
   creating: { label: "Gerando Cobrança",  color: "#06b6d4" },
   failed:   { label: "Falhou / Cancelado",color: "#ef4444" },
   expired:  { label: "PIX Expirado",      color: "#64748b" },
+  in_dispute: { label: "Em disputa",      color: "#f97316" },
+  chargeback: { label: "Estornado",       color: "#be123c" },
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

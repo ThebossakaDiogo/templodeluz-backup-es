@@ -30,6 +30,7 @@ interface TopbarProps {
   readonly onlineCount: number;
   readonly orders?: readonly PaymentOrder[];
   readonly leads?: readonly Lead[];
+  readonly realtimeEnabled?: boolean;
 }
 
 const SECTION_LABELS: Record<Section, string> = {
@@ -57,6 +58,7 @@ export function Topbar({
   onlineCount,
   orders = [],
   leads = [],
+  realtimeEnabled = true,
 }: TopbarProps) {
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
   const [isWhatsAppConnected, setIsWhatsAppConnected] = useState<boolean | null>(null);
@@ -141,6 +143,7 @@ export function Topbar({
           onlineCount={onlineCount}
           orders={orders as PaymentOrder[]}
           leads={leads as Lead[]}
+          realtimeEnabled={realtimeEnabled}
         />
 
         {/* Botão Exportar CSV (Desktop) */}

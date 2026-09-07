@@ -31,6 +31,7 @@ interface NotificationCenterProps {
   onlineCount?: number;
   orders?: PaymentOrder[];
   leads?: Lead[];
+  realtimeEnabled?: boolean;
 }
 
 function formatBRL(val: number): string {
@@ -90,6 +91,7 @@ export function NotificationCenter({
   onNavigate,
   orders = [],
   leads = [],
+  realtimeEnabled = true,
 }: NotificationCenterProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [realtimeEvents, setRealtimeEvents] = useState<DashboardNotification[]>([]);
@@ -113,6 +115,10 @@ export function NotificationCenter({
 
   // Escuta novos eventos em Realtime do Supabase (pix_orders e quiz_funnel_leads)
   useEffect(() => {
+    if (!realtimeEnabled) {
+      setRealtimeEvents([]);
+      return;
+    }
     const channel = supabase
       .channel("notif-center-rt")
       .on(
@@ -172,7 +178,7 @@ export function NotificationCenter({
     return () => {
       void supabase.removeChannel(channel);
     };
-  }, []);
+  }, [realtimeEnabled]);
 
   // Notificações derivadas das ordens reais e leads reais
   const notifications: DashboardNotification[] = useMemo(() => {

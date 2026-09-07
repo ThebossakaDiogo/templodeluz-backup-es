@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import {
   LayoutGrid,
   Activity,
@@ -48,16 +48,52 @@ function calcDiff(current: number, previous: number): number {
   return Math.round(((current - previous) / previous) * 1000) / 10;
 }
 
-function dateLabel(dateStr: string): string {
-  const d = new Date(dateStr);
-  return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
+const BRASILIA_TIME_ZONE = "America/Sao_Paulo";
+const brasiliaDateFormatter = new Intl.DateTimeFormat("pt-BR", {
+  timeZone: BRASILIA_TIME_ZONE,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+const brasiliaHourFormatter = new Intl.DateTimeFormat("pt-BR", {
+  timeZone: BRASILIA_TIME_ZONE,
+  hour: "2-digit",
+  hourCycle: "h23",
+});
+
+function dateKeyInBrasilia(value: string | Date): string {
+  const date = value instanceof Date ? value : new Date(value);
+  if (!Number.isFinite(date.getTime())) return "";
+  const parts = brasiliaDateFormatter.formatToParts(date);
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  const day = parts.find((part) => part.type === "day")?.value;
+  return year && month && day ? `${year}-${month}-${day}` : "";
 }
 
 function toDateString(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
+  return dateKeyInBrasilia(d);
+}
+
+function addDays(dateKey: string, amount: number): string {
+  const date = new Date(`${dateKey}T12:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + amount);
+  return date.toISOString().slice(0, 10);
+}
+
+function daysBetween(startDate: string, endDate: string): number {
+  return Math.round(
+    (Date.parse(`${endDate}T12:00:00Z`) - Date.parse(`${startDate}T12:00:00Z`)) / 86_400_000
+  );
+}
+
+function dateLabelFromKey(dateKey: string): string {
+  const [, month, day] = dateKey.split("-");
+  return `${day}/${month}`;
+}
+
+function orderMetricDate(order: PaymentOrder): string {
+  return order.status === "paid" && order.fulfilled_at ? order.fulfilled_at : order.created_at;
 }
 
 function getHourSlot(hour: number): string {
@@ -82,16 +118,17 @@ function createEmptyRevBucket(): RevBucket {
   return { revenue: 0, pix: 0, card: 0, sales: 0, salesPix: 0, salesCard: 0 };
 }
 
-function buildSingleDayRevenue(orders: PaymentOrder[], start: Date, end: Date): ChartDataPoint[] {
+function buildSingleDayRevenue(orders: PaymentOrder[], startDate: string, endDate: string): ChartDataPoint[] {
   const hours = ["00h", "04h", "08h", "12h", "16h", "20h"];
   const buckets: Record<string, RevBucket> = {};
   for (const h of hours) buckets[h] = createEmptyRevBucket();
 
   for (const o of orders) {
     if (o.status !== "paid") continue;
-    const d = new Date(o.created_at);
-    if (d < start || d > end) continue;
-    const slot = getHourSlot(d.getHours());
+    const metricDate = orderMetricDate(o);
+    const dateKey = dateKeyInBrasilia(metricDate);
+    if (dateKey < startDate || dateKey > endDate) continue;
+    const slot = getHourSlot(Number(brasiliaHourFormatter.format(new Date(metricDate))));
     const val = o.amount_cents / 100;
     const b = buckets[slot];
     b.revenue += val;
@@ -116,24 +153,19 @@ function buildSingleDayRevenue(orders: PaymentOrder[], start: Date, end: Date): 
   }));
 }
 
-function buildMultiDayRevenue(orders: PaymentOrder[], start: Date, end: Date): ChartDataPoint[] {
-  const diffDays = Math.min(
-    60,
-    Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 3600 * 24)))
-  );
+function buildMultiDayRevenue(orders: PaymentOrder[], startDate: string, endDate: string): ChartDataPoint[] {
+  const diffDays = Math.min(60, Math.max(1, daysBetween(startDate, endDate)));
   const buckets: Record<string, RevBucket> = {};
   for (let i = 0; i <= diffDays; i++) {
-    const d = new Date(start);
-    d.setDate(d.getDate() + i);
-    if (d > end) break;
-    buckets[dateLabel(d.toISOString())] = createEmptyRevBucket();
+    const key = addDays(startDate, i);
+    if (key > endDate) break;
+    buckets[key] = createEmptyRevBucket();
   }
 
   for (const o of orders) {
     if (o.status !== "paid") continue;
-    const d = new Date(o.created_at);
-    if (d < start || d > end) continue;
-    const key = dateLabel(o.created_at);
+    const key = dateKeyInBrasilia(orderMetricDate(o));
+    if (key < startDate || key > endDate) continue;
     const b = buckets[key];
     if (b) {
       const val = o.amount_cents / 100;
@@ -149,8 +181,8 @@ function buildMultiDayRevenue(orders: PaymentOrder[], start: Date, end: Date): C
     }
   }
 
-  return Object.entries(buckets).map(([dia, v]) => ({
-    dia,
+  return Object.entries(buckets).map(([dateKey, v]) => ({
+    dia: dateLabelFromKey(dateKey),
     receita: Math.round(v.revenue * 100) / 100,
     receitaPix: Math.round(v.pix * 100) / 100,
     receitaCartao: Math.round(v.card * 100) / 100,
@@ -160,42 +192,40 @@ function buildMultiDayRevenue(orders: PaymentOrder[], start: Date, end: Date): C
   }));
 }
 
-function buildSingleDayLeads(leads: Lead[], start: Date, end: Date): ChartDataPoint[] {
+function buildSingleDayLeads(leads: Lead[], startDate: string, endDate: string): ChartDataPoint[] {
   const hours = ["00h", "04h", "08h", "12h", "16h", "20h"];
   const buckets: Record<string, number> = {};
   for (const h of hours) buckets[h] = 0;
 
   for (const l of leads) {
-    const d = new Date(l.created_at);
-    if (d < start || d > end) continue;
-    const slot = getHourSlot(d.getHours());
+    const dateKey = dateKeyInBrasilia(l.created_at);
+    if (dateKey < startDate || dateKey > endDate) continue;
+    const slot = getHourSlot(Number(brasiliaHourFormatter.format(new Date(l.created_at))));
     buckets[slot]++;
   }
 
   return Object.entries(buckets).map(([dia, leadsCount]) => ({ dia, leads: leadsCount }));
 }
 
-function buildMultiDayLeads(leads: Lead[], start: Date, end: Date): ChartDataPoint[] {
-  const diffDays = Math.min(
-    60,
-    Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 3600 * 24)))
-  );
+function buildMultiDayLeads(leads: Lead[], startDate: string, endDate: string): ChartDataPoint[] {
+  const diffDays = Math.min(60, Math.max(1, daysBetween(startDate, endDate)));
   const buckets: Record<string, number> = {};
   for (let i = 0; i <= diffDays; i++) {
-    const d = new Date(start);
-    d.setDate(d.getDate() + i);
-    if (d > end) break;
-    buckets[dateLabel(d.toISOString())] = 0;
+    const key = addDays(startDate, i);
+    if (key > endDate) break;
+    buckets[key] = 0;
   }
 
   for (const l of leads) {
-    const d = new Date(l.created_at);
-    if (d < start || d > end) continue;
-    const key = dateLabel(l.created_at);
+    const key = dateKeyInBrasilia(l.created_at);
+    if (key < startDate || key > endDate) continue;
     if (key in buckets) buckets[key]++;
   }
 
-  return Object.entries(buckets).map(([dia, leadsCount]) => ({ dia, leads: leadsCount }));
+  return Object.entries(buckets).map(([dateKey, leadsCount]) => ({
+    dia: dateLabelFromKey(dateKey),
+    leads: leadsCount,
+  }));
 }
 
 function cleanDigits(val: string | null | undefined): string {
@@ -224,7 +254,9 @@ function normalizeOrderStatus(value: unknown): PaymentOrder["status"] {
     value === "pending" ||
     value === "failed" ||
     value === "creating" ||
-    value === "expired"
+    value === "expired" ||
+    value === "in_dispute" ||
+    value === "chargeback"
     ? value
     : "pending";
 }
@@ -248,6 +280,7 @@ function parsePaymentOrders(rows: Record<string, unknown>[]): PaymentOrder[] {
       payment_method: paymentMethod,
       gateway: getRowString(row, "gateway") || (paymentMethod === "credit_card" ? "stripe" : "connectpay"),
       created_at: getRowString(row, "created_at") || new Date(0).toISOString(),
+      fulfilled_at: getRowString(row, "fulfilled_at"),
     };
   });
 }
@@ -455,6 +488,7 @@ async function fetchMetaDashboardProfileData(): Promise<DashboardProfileRows> {
     supabase
       .from("pix_orders")
       .select("*")
+      .or("quiz_origin.eq.original,quiz_origin.is.null")
       .order("created_at", { ascending: false })
       .limit(1000),
     supabase
@@ -555,6 +589,7 @@ export function App() {
   const [allOrders, setAllOrders] = useState<PaymentOrder[]>([]);
   const [allLeads, setAllLeads] = useState<Lead[]>([]);
   const [allWhatsApp, setAllWhatsApp] = useState<WhatsAppMessage[]>([]);
+  const fetchVersionRef = useRef(0);
 
   useEffect(() => {
     const handlePopState = () => {
@@ -586,6 +621,7 @@ export function App() {
 
   const handleDashboardProfileChange = (profileId: DashboardProfileId) => {
     if (profileId === dashboardProfile) return;
+    fetchVersionRef.current += 1;
     setDashboardProfile(profileId);
     localStorage.setItem(DASHBOARD_PROFILE_STORAGE_KEY, profileId);
     setAllOrders([]);
@@ -597,6 +633,7 @@ export function App() {
 
   // Busca de dados no Supabase e Reconciliação Coesa
   const fetchData = useCallback(async (opts?: { showSpinner?: boolean }) => {
+    const fetchVersion = ++fetchVersionRef.current;
     if (opts?.showSpinner) setRefreshing(true);
     try {
       const rows = dashboardProfile === "tiktok"
@@ -606,6 +643,7 @@ export function App() {
       const parsedOrders = parsePaymentOrders(rows.orders);
       const parsedLeads = rows.leads;
       const parsedWhatsApp = rows.whatsapp;
+      if (fetchVersion !== fetchVersionRef.current) return;
 
       // Reconciliação cruzada: unifica status de pagamento, telefone e ente querido
       const { reconciledOrders, reconciledLeads, reconciledWhatsApp } = reconcileDashboardData(
@@ -626,10 +664,13 @@ export function App() {
       setOnlineCount(activeRecent.length);
       setLastUpdate(new Date());
     } catch (err) {
+      if (fetchVersion !== fetchVersionRef.current) return;
       console.warn("Erro ao buscar dados:", err);
     } finally {
-      setLoading(false);
-      setRefreshing(false);
+      if (fetchVersion === fetchVersionRef.current) {
+        setLoading(false);
+        setRefreshing(false);
+      }
     }
   }, [dashboardProfile, session?.access_token]);
 
@@ -689,32 +730,29 @@ export function App() {
     todayCheckoutsCount,
     todayPixCount,
   } = useMemo(() => {
-    const startObj = new Date(dateRange.startDate + "T00:00:00");
-    const endObj = new Date(dateRange.endDate + "T23:59:59");
     const isSingleDay = dateRange.startDate === dateRange.endDate;
-
-    const durationMs = endObj.getTime() - startObj.getTime();
-    const prevStartObj = new Date(startObj.getTime() - durationMs);
-    const prevEndObj = new Date(startObj.getTime() - 1);
+    const durationDays = daysBetween(dateRange.startDate, dateRange.endDate) + 1;
+    const prevStartDate = addDays(dateRange.startDate, -durationDays);
+    const prevEndDate = addDays(dateRange.startDate, -1);
 
     const fOrders = allOrders.filter((o) => {
-      const d = new Date(o.created_at);
-      return d >= startObj && d <= endObj;
+      const dateKey = dateKeyInBrasilia(orderMetricDate(o));
+      return dateKey >= dateRange.startDate && dateKey <= dateRange.endDate;
     });
 
     const prevOrders = allOrders.filter((o) => {
-      const d = new Date(o.created_at);
-      return d >= prevStartObj && d <= prevEndObj;
+      const dateKey = dateKeyInBrasilia(orderMetricDate(o));
+      return dateKey >= prevStartDate && dateKey <= prevEndDate;
     });
 
     const fLeads = allLeads.filter((l) => {
-      const d = new Date(l.created_at);
-      return d >= startObj && d <= endObj;
+      const dateKey = dateKeyInBrasilia(l.created_at);
+      return dateKey >= dateRange.startDate && dateKey <= dateRange.endDate;
     });
 
     const prevLeads = allLeads.filter((l) => {
-      const d = new Date(l.created_at);
-      return d >= prevStartObj && d <= prevEndObj;
+      const dateKey = dateKeyInBrasilia(l.created_at);
+      return dateKey >= prevStartDate && dateKey <= prevEndDate;
     });
 
     // Métricas financeiras
@@ -788,19 +826,19 @@ export function App() {
     };
 
     const revData = isSingleDay
-      ? buildSingleDayRevenue(allOrders, startObj, endObj)
-      : buildMultiDayRevenue(allOrders, startObj, endObj);
+      ? buildSingleDayRevenue(allOrders, dateRange.startDate, dateRange.endDate)
+      : buildMultiDayRevenue(allOrders, dateRange.startDate, dateRange.endDate);
     const leadsData = isSingleDay
-      ? buildSingleDayLeads(allLeads, startObj, endObj)
-      : buildMultiDayLeads(allLeads, startObj, endObj);
+      ? buildSingleDayLeads(allLeads, dateRange.startDate, dateRange.endDate)
+      : buildMultiDayLeads(allLeads, dateRange.startDate, dateRange.endDate);
 
     // ─── Métrica de Maior Destaque: Entradas do Dia (Fuso Brasília) ───
     const now = new Date();
-    const todayInBR = now.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+    const todayInBR = dateKeyInBrasilia(now);
 
     const leadsToday = allLeads.filter((l) => {
       if (!l.created_at) return false;
-      const leadDateInBR = new Date(l.created_at).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+      const leadDateInBR = dateKeyInBrasilia(l.created_at);
       return leadDateInBR === todayInBR;
     });
 
@@ -812,7 +850,7 @@ export function App() {
 
     const todayPix = allOrders.filter((o) => {
       if (!o.created_at) return false;
-      const orderDateInBR = new Date(o.created_at).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+      const orderDateInBR = dateKeyInBrasilia(o.created_at);
       return orderDateInBR === todayInBR && (o.payment_method === "pix" || !o.payment_method);
     }).length;
 
@@ -968,6 +1006,7 @@ export function App() {
         onlineCount={onlineCount}
         orders={allOrders}
         leads={allLeads}
+        realtimeEnabled={dashboardProfile === "meta"}
       />
 
       <section className="dashboard-profile-bar" aria-label="Perfil de métricas">
