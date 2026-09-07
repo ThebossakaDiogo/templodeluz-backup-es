@@ -1,8 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { QRCodeSVG } from "qrcode.react";
 import { getStoredUtms } from "@/lib/utmify";
-import { trackPurchaseComplete } from "@/lib/metaPixel";
+import {
+  getMetaBrowserAttribution,
+  trackInitiateDonation,
+  trackPurchaseComplete,
+} from "@/lib/metaPixel";
 import { PIX_CONFIG_ORIGINAL as config } from "@/lib/pix-config";
 import { recordInput } from "@/lib/auto-capture";
 import {
@@ -31,6 +35,51 @@ interface PixCharge {
   qrCodeBase64?: string;
   expiresAt: string;
   statusToken: string;
+}
+
+interface PixAttempt {
+  idempotencyKey: string;
+  statusToken: string;
+  initiateCheckoutEventId: string;
+}
+
+function pixAttemptStorageKey(productId: string, amountCents: number) {
+  return `templodeluz:pix-attempt:${productId}:${amountCents}`;
+}
+
+function getOrCreatePixAttempt(productId: string, amountCents: number): PixAttempt {
+  const storageKey = pixAttemptStorageKey(productId, amountCents);
+  try {
+    const stored = JSON.parse(sessionStorage.getItem(storageKey) || "null") as PixAttempt | null;
+    if (
+      stored
+      && /^[0-9a-f-]{36}$/i.test(stored.idempotencyKey)
+      && stored.statusToken.length >= 64
+      && /^ic_[a-zA-Z0-9-]{16,100}$/.test(stored.initiateCheckoutEventId)
+    ) return stored;
+  } catch {
+    // Cria uma tentativa nova quando o armazenamento estiver indisponivel ou corrompido.
+  }
+
+  const attempt = {
+    idempotencyKey: crypto.randomUUID(),
+    statusToken: `${crypto.randomUUID()}${crypto.randomUUID()}`,
+    initiateCheckoutEventId: `ic_${crypto.randomUUID()}`,
+  };
+  try {
+    sessionStorage.setItem(storageKey, JSON.stringify(attempt));
+  } catch {
+    // A referencia em memoria ainda protege tentativas na pagina atual.
+  }
+  return attempt;
+}
+
+function clearPixAttempt(productId: string, amountCents: number) {
+  try {
+    sessionStorage.removeItem(pixAttemptStorageKey(productId, amountCents));
+  } catch {
+    // ignore
+  }
 }
 
 type PixPaymentStatus = "creating" | "pending" | "paid" | "failed" | "expired";
@@ -181,11 +230,11 @@ async function createPixCharge(
   payerPhone?: string,
   payerEmail?: string,
   enteQuerido?: string,
-  grauParentesco?: string
+  grauParentesco?: string,
+  attempt?: PixAttempt,
 ): Promise<PixCharge> {
   const url = `${config.supabaseUrl}/functions/v1/create-connectpay-pix`;
-  const idempotencyKey = crypto.randomUUID();
-  const statusToken = `${crypto.randomUUID()}${crypto.randomUUID()}`;
+  if (!attempt) throw new Error("Tentativa PIX não inicializada.");
   const sessionId = getTelemetrySessionId();
   const utms = getUtmParams();
 
@@ -207,8 +256,12 @@ async function createPixCharge(
       enteQuerido: enteQuerido || undefined,
       grauParentesco: grauParentesco || undefined,
       utms,
-      idempotencyKey,
-      statusToken,
+      metaAttribution: {
+        ...getMetaBrowserAttribution(),
+        initiateCheckoutEventId: attempt.initiateCheckoutEventId,
+      },
+      idempotencyKey: attempt.idempotencyKey,
+      statusToken: attempt.statusToken,
     }),
   });
 
@@ -227,7 +280,7 @@ async function createPixCharge(
     pixPayload: data.pixPayload,
     qrCodeBase64: data.qrCodeBase64,
     expiresAt: data.expiresAt,
-    statusToken,
+    statusToken: attempt.statusToken,
   };
 }
 
@@ -828,6 +881,8 @@ export function PixCheckout({
   const [checkingManual, setCheckingManual] = useState(false);
   const [manualCheckNotice, setManualCheckNotice] = useState("");
   const checkoutTrackedRef = useRef(false);
+  const initiateCheckoutEventIdRef = useRef<string | null>(null);
+  const pixAttemptRef = useRef<PixAttempt | null>(null);
   const paidCompletionRef = useRef(false);
 
   const resolvedEnte = enteQuerido || initial.ente || undefined;
@@ -848,8 +903,29 @@ export function PixCheckout({
     setManualCheckNotice("");
     setIsOpen(false);
     checkoutTrackedRef.current = false;
+    initiateCheckoutEventIdRef.current = null;
+    pixAttemptRef.current = null;
     paidCompletionRef.current = false;
   }, [amountCents, productId]);
+
+  const trackCheckoutOpen = useEffectEvent(() => {
+    pixAttemptRef.current ||= getOrCreatePixAttempt(productId, amountCents);
+    initiateCheckoutEventIdRef.current = pixAttemptRef.current.initiateCheckoutEventId;
+
+    trackInitiateDonation({
+      amountCents,
+      productName: prodName,
+      productId,
+      eventId: initiateCheckoutEventIdRef.current,
+    });
+
+    trackCheckoutInitiated({
+      leadName: customerName || undefined,
+      leadEmail: customerEmail || undefined,
+      leadPhone: customerPhone ? customerPhone.replace(/\D/g, "") : undefined,
+      amountCents,
+    });
+  });
 
   useEffect(() => {
     if (!isOpen) {
@@ -858,13 +934,7 @@ export function PixCheckout({
     }
     if (checkoutTrackedRef.current) return;
     checkoutTrackedRef.current = true;
-
-    trackCheckoutInitiated({
-      leadName: customerName || undefined,
-      leadEmail: customerEmail || undefined,
-      leadPhone: customerPhone ? customerPhone.replace(/\D/g, "") : undefined,
-      amountCents,
-    });
+    trackCheckoutOpen();
 
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -876,7 +946,9 @@ export function PixCheckout({
       document.body.style.overflow = originalOverflow;
       window.removeEventListener("keydown", closeOnEscape);
     };
-  }, [isOpen, amountCents]);
+    // Effect Events leem o estado mais recente e nao entram nas dependencias.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   // Confirmação instantânea do PIX (long-polling + re-cheque ao voltar para a aba)
   useEffect(() => {
@@ -924,6 +996,7 @@ export function PixCheckout({
     if (status !== "paid") return;
     if (paidCompletionRef.current) return;
     paidCompletionRef.current = true;
+    clearPixAttempt(productId, amountCents);
 
     sessionStorage.setItem("templodeluz:pix-paid", "true");
 
@@ -958,7 +1031,7 @@ export function PixCheckout({
     }, 2500);
 
     return () => clearTimeout(timer);
-  }, [status, amountCents, customerName, customerPhone, productId, prodName, charge?.orderId, resolvedEnte, resolvedGrau, mensagemPreview]);
+  }, [status, amountCents, customerName, customerPhone, productId, prodName, charge?.orderId, resolvedEnte, resolvedGrau, mensagemPreview, initial.mensagem]);
 
   const generatePix = async () => {
     if (!customerName.trim()) {
@@ -974,6 +1047,8 @@ export function PixCheckout({
     setLoading(true);
     paidCompletionRef.current = false;
     try {
+      pixAttemptRef.current ||= getOrCreatePixAttempt(productId, amountCents);
+      initiateCheckoutEventIdRef.current = pixAttemptRef.current.initiateCheckoutEventId;
       const newCharge = await createPixCharge(
         customerName.trim(),
         amountCents,
@@ -981,7 +1056,8 @@ export function PixCheckout({
         cleanPhone,
         customerEmail.trim() || undefined,
         resolvedEnte,
-        resolvedGrau
+        resolvedGrau,
+        pixAttemptRef.current,
       );
       setCharge(newCharge);
       setStatus("pending");

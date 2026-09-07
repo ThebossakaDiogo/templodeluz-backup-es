@@ -29,6 +29,7 @@ api-pix/
     connectpay-webhook/
     create-connectpay-pix/
     get-connectpay-pix-status/
+    process-meta-conversions/
   supabase/migrations/
   .env.example
   .env.local
@@ -43,11 +44,17 @@ CONNECTPAY_API_SECRET=
 CONNECTPAY_WEBHOOK_TOKEN=
 CONNECTPAY_WEBHOOK_URL=https://SEU_PROJECT_REF.supabase.co/functions/v1/connectpay-webhook?token=O_MESMO_TOKEN
 CORS_ALLOWED_ORIGINS=https://seu-dominio.com,http://localhost:5173
+META_PIXEL_ID=1076049174870131
+META_CAPI_ACCESS_TOKEN=token_gerado_em_Meta_Events_Manager_Conversions_API
+META_GRAPH_API_VERSION=v23.0
+# META_TEST_EVENT_CODE=TEST12345
 ```
 
 O Supabase mostra apenas o hash dos Secrets hospedados e nao oferece uma operacao para recuperar o valor original. Guarde a chave bruta em um gerenciador de segredos seguro.
 
 Nunca use prefixo `VITE_`, `NEXT_PUBLIC_` ou equivalente em `CONNECTPAY_API_SECRET`, `CONNECTPAY_WEBHOOK_TOKEN`, `SUPABASE_SECRET_KEY` ou `SUPABASE_SERVICE_ROLE_KEY`.
+
+O `META_CAPI_ACCESS_TOKEN` tambem e exclusivamente de backend. O webhook envia `Purchase` para a Meta Conversions API somente depois de confirmar a transacao diretamente na ConnectPay. O mesmo `orderId` e usado como `event_id` no Pixel e no servidor, permitindo deduplicacao pela Meta. A tabela `meta_conversion_deliveries` registra tentativas, respostas e impede envios duplicados.
 
 ## Instalacao
 
@@ -124,9 +131,12 @@ O Supabase fornece automaticamente `SUPABASE_URL` e as chaves de backend para as
 npm run deploy:create
 npm run deploy:status
 npm run deploy:webhook
+npm run deploy:meta-worker
 ```
 
-O webhook usa `verify_jwt = false` porque a ConnectPay nao envia um JWT do Supabase. As funcoes chamadas pelo navegador mantem verificacao JWT e recebem a chave publica no header de autorizacao.
+As funcoes usam `verify_jwt = false` porque o gateway atual rejeita a chave JWT legada do projeto. As funcoes do navegador validam explicitamente a chave publica esperada nos headers e a origem permitida; o webhook valida o token privado da ConnectPay.
+
+O worker `process-meta-conversions` exige a chave publica exata do proprio projeto e nao recebe IDs externos: ele apenas consome a outbox interna. A migration agenda uma chamada de recuperacao a cada 5 minutos. Entregas normais continuam imediatas; o cron recupera falhas com lease, backoff exponencial e limite de 10 tentativas.
 
 ### 8. Configure a ConnectPay
 

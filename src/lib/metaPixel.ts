@@ -27,6 +27,10 @@ declare global {
 export function initMetaPixel(pixelId = META_PIXEL_ID) {
   if (typeof window === "undefined") return;
 
+  // Guarda o fbclid assim que a pagina abre; o checkout pode acontecer
+  // depois de varias trocas de rota e ainda precisa montar o _fbc correto.
+  getMetaBrowserAttribution();
+
   // Se o fbq ainda não foi inicializado, cria a fila padrão do Facebook
   if (!window.fbq) {
     const fbq: MetaFbqFunction = function (...args: unknown[]) {
@@ -72,7 +76,11 @@ export function initMetaPixel(pixelId = META_PIXEL_ID) {
  * Dispara um evento padrão do Meta Pixel
  * Ex: fbqTrack('PageView'), fbqTrack('Purchase', { value: 19.00, currency: 'BRL' })
  */
-export function fbqTrack(eventName: string, params?: Record<string, unknown>) {
+export function fbqTrack(
+  eventName: string,
+  params?: Record<string, unknown>,
+  eventOptions?: Record<string, unknown>,
+) {
   if (typeof window === "undefined") return;
 
   // Auto-inicializa se necessário
@@ -83,7 +91,11 @@ export function fbqTrack(eventName: string, params?: Record<string, unknown>) {
   try {
     if (typeof window.fbq === "function") {
       if (params) {
-        window.fbq("track", eventName, params);
+        if (eventOptions) {
+          window.fbq("track", eventName, params, eventOptions);
+        } else {
+          window.fbq("track", eventName, params);
+        }
       } else {
         window.fbq("track", eventName);
       }
@@ -91,6 +103,57 @@ export function fbqTrack(eventName: string, params?: Record<string, unknown>) {
   } catch (err) {
     console.warn(`[META PIXEL ERROR] Falha ao disparar evento ${eventName}:`, err);
   }
+}
+
+function readCookie(name: string) {
+  if (typeof document === "undefined") return "";
+  const prefix = `${name}=`;
+  return (
+    document.cookie
+      .split(";")
+      .map((part) => part.trim())
+      .find((part) => part.startsWith(prefix))
+      ?.slice(prefix.length) || ""
+  );
+}
+
+export function getMetaBrowserAttribution() {
+  if (typeof window === "undefined") return {};
+
+  const currentUrl = new URL(window.location.href);
+  let storedFbclid = "";
+  let storedFbc = "";
+  try {
+    storedFbclid = sessionStorage.getItem("templodeluz:fbclid") || "";
+    storedFbc = sessionStorage.getItem("templodeluz:fbc") || "";
+  } catch {
+    // Navegadores com armazenamento bloqueado ainda enviam os demais sinais.
+  }
+  const fbclid = (currentUrl.searchParams.get("fbclid") || storedFbclid).slice(0, 500);
+  if (fbclid) {
+    try {
+      sessionStorage.setItem("templodeluz:fbclid", fbclid);
+    } catch {
+      // ignore
+    }
+  }
+
+  const fbp = readCookie("_fbp");
+  const cookieFbc = readCookie("_fbc");
+  const fbc = cookieFbc || storedFbc || (fbclid ? `fb.1.${Date.now()}.${fbclid}` : "");
+  if (fbc && fbc !== storedFbc) {
+    try {
+      sessionStorage.setItem("templodeluz:fbc", fbc);
+    } catch {
+      // ignore
+    }
+  }
+
+  return {
+    ...(fbp ? { fbp } : {}),
+    ...(fbc ? { fbc } : {}),
+    eventSourceUrl: window.location.href,
+  };
 }
 
 /**
@@ -156,7 +219,6 @@ export function trackQuizStep(step: string, data?: Record<string, any>) {
     result: {
       custom: "Quiz_Step_8_Resultado_Oferta",
       title: "Etapa 8 - Página de Agendamento e Doação",
-      standard: "InitiateCheckout",
     },
   };
 
@@ -201,19 +263,24 @@ export function trackInitiateDonation(options: {
   amountCents: number;
   productName: string;
   productId: string;
-  paymentMethod: "pix" | "cartao";
+  paymentMethod?: "pix" | "cartao";
+  eventId?: string;
 }) {
   const value = Number((options.amountCents / 100).toFixed(2));
 
   // Evento padrão da Meta
-  fbqTrack("InitiateCheckout", {
-    value: value,
-    currency: "BRL",
-    content_name: options.productName,
-    content_category: "Doação",
-    content_ids: [options.productId],
-    num_items: 1,
-  });
+  fbqTrack(
+    "InitiateCheckout",
+    {
+      value: value,
+      currency: "BRL",
+      content_name: options.productName,
+      content_category: "Doação",
+      content_ids: [options.productId],
+      num_items: 1,
+    },
+    options.eventId ? { eventID: options.eventId } : undefined,
+  );
 
   // Evento personalizado
   fbqTrackCustom("Iniciou_Doacao", {
@@ -221,7 +288,7 @@ export function trackInitiateDonation(options: {
     moeda: "BRL",
     produto: options.productName,
     produto_id: options.productId,
-    metodo_pagamento: options.paymentMethod,
+    ...(options.paymentMethod ? { metodo_pagamento: options.paymentMethod } : {}),
   });
 }
 
@@ -238,15 +305,19 @@ export function trackPurchaseComplete(options: {
   const value = Number((options.amountCents / 100).toFixed(2));
 
   // 1. Evento Padrão Purchase (Compra com Valor Monetário)
-  fbqTrack("Purchase", {
-    value: value,
-    currency: "BRL",
-    content_name: options.productName,
-    content_type: "product",
-    content_ids: [options.productId],
-    num_items: 1,
-    order_id: options.orderId || `ped_${Date.now()}`,
-  });
+  fbqTrack(
+    "Purchase",
+    {
+      value: value,
+      currency: "BRL",
+      content_name: options.productName,
+      content_type: "product",
+      content_ids: [options.productId],
+      num_items: 1,
+      order_id: options.orderId || `ped_${Date.now()}`,
+    },
+    options.orderId ? { eventID: options.orderId } : undefined,
+  );
 
   // 2. Evento Padrão Donate (Doação na Meta)
   fbqTrack("Donate", {

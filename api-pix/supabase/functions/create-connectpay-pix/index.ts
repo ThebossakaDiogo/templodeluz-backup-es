@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { digits, isUuid, isValidCpf, resolveChargeAmount } from '../_shared/pix.ts';
+import { deliverMetaInitiateCheckout, runInBackground } from '../_shared/meta-conversions.ts';
 
 const QUIZ_ORIGIN = 'original';
 const PIX_ACCOUNT_KEY = 'connectpay_original';
@@ -50,6 +51,18 @@ function serviceRoleKey() {
   }
 }
 
+function hasProjectApiKey(req: Request) {
+  const expected = [Deno.env.get('SUPABASE_ANON_KEY')].filter(Boolean);
+  try {
+    expected.push(...Object.values(JSON.parse(Deno.env.get('SUPABASE_PUBLISHABLE_KEYS') ?? '{}')));
+  } catch {
+    // Mantem compatibilidade com projetos que ainda usam apenas a chave legada.
+  }
+  const apiKey = req.headers.get('apikey') ?? '';
+  const bearer = (req.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '');
+  return Boolean(apiKey && expected.includes(apiKey) && (!bearer || expected.includes(bearer)));
+}
+
 async function sha256(value: string) {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
   return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
@@ -60,6 +73,22 @@ function clientIp(req: Request) {
     ?? req.headers.get('x-real-ip')
     ?? req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
     ?? 'unknown';
+}
+
+function optionalMetaCookie(value: unknown) {
+  const normalized = typeof value === 'string' ? value.trim().slice(0, 255) : '';
+  return /^fb\.1\.\d{10,16}\.[^\s]{1,220}$/.test(normalized) ? normalized : null;
+}
+
+function eventSourceUrl(value: unknown, requestOrigin: string) {
+  try {
+    const source = new URL(typeof value === 'string' ? value : requestOrigin);
+    if (!['http:', 'https:'].includes(source.protocol)) return requestOrigin || null;
+    if (requestOrigin && source.origin !== requestOrigin) return requestOrigin;
+    return source.toString().slice(0, 2048);
+  } catch {
+    return requestOrigin || null;
+  }
 }
 
 function chargeResponse(order: Record<string, unknown>, statusToken: string) {
@@ -84,7 +113,8 @@ Deno.serve(async (req) => {
       : new Response('ok', { headers: cors(origin) });
   }
   if (req.method !== 'POST') return json(origin, { error: 'Metodo nao permitido.' }, 405);
-  if (origin && !isAllowedOrigin(origin)) return json(origin, { error: 'Origem nao autorizada.' }, 403);
+  if (!hasProjectApiKey(req)) return json(origin, { error: 'Nao autorizado.' }, 401);
+  if (!origin || !isAllowedOrigin(origin)) return json(origin, { error: 'Origem nao autorizada.' }, 403);
 
   let supabase: ReturnType<typeof createClient> | null = null;
   let orderId: string | null = null;
@@ -193,6 +223,13 @@ Deno.serve(async (req) => {
     const enteQuerido = typeof input?.enteQuerido === 'string' ? input.enteQuerido.trim() : null;
     const grauParentesco = typeof input?.grauParentesco === 'string' ? input.grauParentesco.trim() : null;
     const utmParams = (typeof input?.utms === 'object' && input.utms !== null ? input.utms : {}) as Record<string, unknown>;
+    const metaAttribution = (typeof input?.metaAttribution === 'object' && input.metaAttribution !== null
+      ? input.metaAttribution
+      : {}) as Record<string, unknown>;
+    const initiateCheckoutEventId = typeof metaAttribution.initiateCheckoutEventId === 'string'
+      && /^ic_[a-zA-Z0-9-]{16,100}$/.test(metaAttribution.initiateCheckoutEventId)
+      ? metaAttribution.initiateCheckoutEventId
+      : `ic_${idempotencyKey}`;
 
     if (
       !/^\S+@\S+\.\S+$/.test(customerEmail)
@@ -227,7 +264,16 @@ Deno.serve(async (req) => {
       quiz_origin: QUIZ_ORIGIN,
       pix_account_key: PIX_ACCOUNT_KEY,
       pix_account_fingerprint: accountFingerprint,
+      meta_client_ip_address: clientIp(req),
+      meta_client_user_agent: (req.headers.get('user-agent') ?? '').slice(0, 1000) || null,
+      meta_event_source_url: eventSourceUrl(metaAttribution.eventSourceUrl, origin),
+      meta_initiate_checkout_event_id: initiateCheckoutEventId,
     };
+
+    const metaFbp = optionalMetaCookie(metaAttribution.fbp);
+    const metaFbc = optionalMetaCookie(metaAttribution.fbc);
+    if (metaFbp) orderInsertPayload.meta_fbp = metaFbp;
+    if (metaFbc) orderInsertPayload.meta_fbc = metaFbc;
 
     if (sessionId) orderInsertPayload.session_id = sessionId;
     if (enteQuerido) orderInsertPayload.ente_querido = enteQuerido;
@@ -329,16 +375,17 @@ Deno.serve(async (req) => {
       }, 502);
     }
 
-    const { data: completedOrder, error: updateError } = await supabase.from('pix_orders').update({
-      status: 'pending',
-      connectpay_transaction_id: transactionId,
-      connectpay_status: String(data?.status ?? 'PENDING').toUpperCase(),
-      pix_payload: pixPayload,
-      qr_code_base64: qrCodeBase64,
-      expires_at: expiresAt,
-      updated_at: new Date().toISOString(),
-    }).eq('id', order.id).select('id, connectpay_transaction_id, pix_payload, qr_code_base64, expires_at, quiz_origin, pix_account_key, pix_account_fingerprint').single();
+    const { data: completedOrder, error: updateError } = await supabase.rpc('finalize_connectpay_pix_creation', {
+      p_order_id: order.id,
+      p_transaction_id: transactionId,
+      p_connectpay_status: String(data?.status ?? 'PENDING').toUpperCase(),
+      p_pix_payload: pixPayload,
+      p_qr_code_base64: qrCodeBase64,
+      p_expires_at: expiresAt,
+    });
     if (updateError || !completedOrder) throw updateError ?? new Error('ORDER_UPDATE_FAILED');
+
+    runInBackground(deliverMetaInitiateCheckout(supabase, completedOrder), 'META IC DELIVERY');
 
     return json(origin, chargeResponse(completedOrder, statusToken));
   } catch (error) {

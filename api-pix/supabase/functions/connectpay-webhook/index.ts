@@ -2,6 +2,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { amountToCents, isUuid, normalizeConnectPayStatus } from '../_shared/pix.ts';
 import { deliverMetaUtmifyPaidOrder } from '../_shared/utmify.ts';
+import { deliverMetaInitiateCheckout, deliverMetaPurchase, runInBackground } from '../_shared/meta-conversions.ts';
 
 const QUIZ_ORIGIN = 'original';
 const PIX_ACCOUNT_KEY = 'connectpay_original';
@@ -111,9 +112,10 @@ Deno.serve(async (req) => {
       pix_account_fingerprint: accountFingerprint,
     }).eq('order_id', orderId).eq('connectpay_transaction_id', transactionId).eq('status', verifiedStatus);
 
-    // Se aprovado/pago, sincroniza funil, whatsapp e notifica UTMify
+    // O pagamento e a outbox ja estao persistidos. Sincronizacoes externas rodam
+    // fora do ACK para a ConnectPay nunca repetir um pagamento por falha de marketing.
     if (normalizeConnectPayStatus(verifiedStatus) === 'paid') {
-      try {
+      runInBackground((async () => {
         const { data: orderData, error: orderDataError } = await supabase
           .from('pix_orders')
           .select('*')
@@ -167,11 +169,17 @@ Deno.serve(async (req) => {
           }).eq('lead_email', orderData.customer_email));
         }
 
-        await deliverMetaUtmifyPaidOrder(supabase, orderData);
-      } catch (utmErr) {
-        console.warn('[CONNECTPAY WEBHOOK SYNC/UTMIFY ERROR]', utmErr);
-        throw utmErr;
-      }
+        const deliveries = await Promise.allSettled([
+          deliverMetaUtmifyPaidOrder(supabase, orderData),
+          deliverMetaInitiateCheckout(supabase, orderData),
+          deliverMetaPurchase(supabase, orderData),
+        ]);
+        deliveries.forEach((delivery) => {
+          if (delivery.status === 'rejected') {
+            console.warn('[CONNECTPAY WEBHOOK DELIVERY WARN]', delivery.reason);
+          }
+        });
+      })(), 'CONNECTPAY PAID BACKGROUND SYNC');
     }
 
     return Response.json({ received: true, processed: result?.processed === true });

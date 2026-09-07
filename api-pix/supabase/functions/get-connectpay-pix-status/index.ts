@@ -2,6 +2,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { amountToCents, isUuid, normalizeConnectPayStatus } from '../_shared/pix.ts';
 import { deliverMetaUtmifyPaidOrder } from '../_shared/utmify.ts';
+import { deliverMetaInitiateCheckout, deliverMetaPurchase, runInBackground } from '../_shared/meta-conversions.ts';
 
 const QUIZ_ORIGIN = 'original';
 const PIX_ACCOUNT_KEY = 'connectpay_original';
@@ -46,6 +47,18 @@ function serviceRoleKey() {
   }
 }
 
+function hasProjectApiKey(req: Request) {
+  const expected = [Deno.env.get('SUPABASE_ANON_KEY')].filter(Boolean);
+  try {
+    expected.push(...Object.values(JSON.parse(Deno.env.get('SUPABASE_PUBLISHABLE_KEYS') ?? '{}')));
+  } catch {
+    // Mantem compatibilidade com projetos que ainda usam apenas a chave legada.
+  }
+  const apiKey = req.headers.get('apikey') ?? '';
+  const bearer = (req.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '');
+  return Boolean(apiKey && expected.includes(apiKey) && (!bearer || expected.includes(bearer)));
+}
+
 async function sha256(value: string) {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
   return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
@@ -59,7 +72,8 @@ Deno.serve(async (req) => {
       : new Response('ok', { headers: cors(origin) });
   }
   if (req.method !== 'POST') return json(origin, { error: 'Metodo nao permitido.' }, 405);
-  if (origin && !isAllowedOrigin(origin)) return json(origin, { error: 'Origem nao autorizada.' }, 403);
+  if (!hasProjectApiKey(req)) return json(origin, { error: 'Nao autorizado.' }, 401);
+  if (!origin || !isAllowedOrigin(origin)) return json(origin, { error: 'Origem nao autorizada.' }, 403);
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
@@ -110,13 +124,21 @@ Deno.serve(async (req) => {
 
     const terminalStatuses = new Set(['paid', 'failed', 'expired', 'in_dispute', 'chargeback']);
 
+    const schedulePaidDeliveries = (order: Record<string, any>) => {
+      runInBackground(Promise.allSettled([
+        deliverMetaUtmifyPaidOrder(supabase, order),
+        deliverMetaInitiateCheckout(supabase, order),
+        deliverMetaPurchase(supabase, order),
+      ]).then((deliveries) => deliveries.forEach((delivery) => {
+        if (delivery.status === 'rejected') {
+          console.warn('Paid order delivery failed', delivery.reason instanceof Error ? delivery.reason.message : delivery.reason);
+        }
+      })), 'PAID ORDER DELIVERY');
+    };
+
     const reconcileWithGateway = async (currentOrder: Record<string, any>) => {
       if (terminalStatuses.has(currentOrder.status) || !currentOrder.connectpay_transaction_id) {
-        if (currentOrder.status === 'paid') {
-          await deliverMetaUtmifyPaidOrder(supabase, currentOrder).catch((error) => {
-            console.warn('UTMify delivery retry failed', error instanceof Error ? error.message : error);
-          });
-        }
+        if (currentOrder.status === 'paid') schedulePaidDeliveries(currentOrder);
         return currentOrder;
       }
 
@@ -158,9 +180,7 @@ Deno.serve(async (req) => {
 
       const refreshed = await readStatus();
       if (refreshed && normalizeConnectPayStatus(verifiedStatus) === 'paid') {
-        await deliverMetaUtmifyPaidOrder(supabase, refreshed).catch((error) => {
-          console.warn('UTMify delivery failed', error instanceof Error ? error.message : error);
-        });
+        schedulePaidDeliveries(refreshed);
       }
       return refreshed ?? currentOrder;
     };

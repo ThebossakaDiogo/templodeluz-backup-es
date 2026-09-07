@@ -65,6 +65,17 @@ O projeto consiste em um funil de quiz/landing page para captação de leads e v
 ### 5.1 Meta Pixel
 - Carregado apenas no quiz original.
 - Eventos de etapa disparam Meta Pixel + Telemetria Supabase.
+- O evento `Purchase` usa o `orderId` como `event_id` para deduplicar Pixel e Conversions API.
+
+### 5.1.1 Meta Conversions API
+- Vendas PIX aprovadas sao enviadas pelo webhook da ConnectPay diretamente para a Meta.
+- O envio ocorre somente depois da verificacao da transacao no gateway.
+- `_fbp`, `_fbc`, IP, user-agent e URL da pagina sao persistidos no pedido para melhorar o Event Match Quality.
+- Nome, e-mail, telefone e identificador externo sao normalizados e enviados com SHA-256.
+- A tabela `meta_conversion_deliveries` fornece idempotencia, auditoria e nova tentativa.
+- O worker protegido `process-meta-conversions` recupera filas e leases expiradas com backoff, sem bloquear o webhook ou a entrega do QR Code; um cron de seguranca roda a cada 5 minutos.
+- `InitiateCheckout` e disparado no Pixel ao abrir o checkout e confirmado pela CAPI quando a cobranca ConnectPay e criada, usando o mesmo `event_id`.
+- Segredos necessarios: `META_CAPI_ACCESS_TOKEN`, `META_PIXEL_ID` e `META_GRAPH_API_VERSION`.
 
 ### 5.2 UTMIFY
 - **Meta**: sempre ativo; entrega via `utmify_deliveries` outbox (idempotente).
