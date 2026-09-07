@@ -313,7 +313,7 @@ async function getPixStatus(
 }
 
 function getUtmParams() {
-  return getStoredUtms();
+  return getStoredUtms(true);
 }
 
 function getInitialCapturedData() {

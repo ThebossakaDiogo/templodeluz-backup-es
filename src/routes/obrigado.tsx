@@ -4,7 +4,7 @@ import confetti from "canvas-confetti";
 import { Halos, Reveal, Stars, Card } from "@/components/funnel/Shell";
 import { IMAGES } from "@/components/funnel/data";
 import { trackPurchaseComplete } from "@/lib/metaPixel";
-import { sendUtmifyOrder } from "@/lib/utmify";
+import { getStoredUtms, sendUtmifyOrder } from "@/lib/utmify";
 
 export const Route = createFileRoute("/obrigado")({
   head: () => ({
@@ -71,6 +71,7 @@ function ObrigadoPage() {
                 priceInCents: 1900,
               },
             ],
+            trackingParameters: getStoredUtms(true),
           });
 
           trackPurchaseComplete({

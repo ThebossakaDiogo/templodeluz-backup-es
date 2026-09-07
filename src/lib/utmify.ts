@@ -53,7 +53,7 @@ export interface UtmifyOrderPayload {
 /**
  * Captura e persiste os parâmetros UTM da URL em localStorage
  */
-export function captureAndStoreUtms(): TrackingParameters {
+export function captureAndStoreUtms(force = false): TrackingParameters {
   if (typeof window === "undefined") {
     return {
       src: null,
@@ -68,7 +68,7 @@ export function captureAndStoreUtms(): TrackingParameters {
 
   try {
     const urlParams = new URLSearchParams(window.location.search);
-    const existingRaw = localStorage.getItem(STORAGE_KEY_UTMS);
+    const existingRaw = force ? null : localStorage.getItem(STORAGE_KEY_UTMS);
     const existing: TrackingParameters = existingRaw ? JSON.parse(existingRaw) : {};
 
     const utmKeys: Array<keyof TrackingParameters> = [
@@ -94,7 +94,7 @@ export function captureAndStoreUtms(): TrackingParameters {
       }
     });
 
-    if (hasNew || !existingRaw) {
+    if (hasNew || !existingRaw || force) {
       localStorage.setItem(STORAGE_KEY_UTMS, JSON.stringify(current));
     }
 
@@ -116,7 +116,7 @@ export function captureAndStoreUtms(): TrackingParameters {
 /**
  * Retorna os parâmetros UTM armazenados
  */
-export function getStoredUtms(): TrackingParameters {
+export function getStoredUtms(forceRefresh = false): TrackingParameters {
   if (typeof window === "undefined") {
     return {
       src: null,
@@ -129,8 +129,8 @@ export function getStoredUtms(): TrackingParameters {
     };
   }
   try {
-    const raw = localStorage.getItem(STORAGE_KEY_UTMS);
-    const parsed = raw ? JSON.parse(raw) : captureAndStoreUtms();
+    const raw = forceRefresh ? null : localStorage.getItem(STORAGE_KEY_UTMS);
+    const parsed = raw ? JSON.parse(raw) : captureAndStoreUtms(forceRefresh);
     return {
       src: parsed.src ?? null,
       sck: parsed.sck ?? null,
@@ -189,6 +189,15 @@ export async function sendUtmifyOrder(order: UtmifyOrderPayload): Promise<boolea
       0,
     );
 
+    const hasTracking =
+      Boolean(utms.src) ||
+      Boolean(utms.sck) ||
+      Boolean(utms.utm_source) ||
+      Boolean(utms.utm_medium) ||
+      Boolean(utms.utm_campaign) ||
+      Boolean(utms.utm_content) ||
+      Boolean(utms.utm_term);
+
     const payload = {
       orderId: String(order.orderId),
       platform: order.platform || "TemploDeLuz",
@@ -204,15 +213,19 @@ export async function sendUtmifyOrder(order: UtmifyOrderPayload): Promise<boolea
         country: order.customer.country || "BR",
       },
       products: normalizedProducts,
-      trackingParameters: {
-        src: utms.src ?? null,
-        sck: utms.sck ?? null,
-        utm_source: utms.utm_source ?? null,
-        utm_medium: utms.utm_medium ?? null,
-        utm_campaign: utms.utm_campaign ?? null,
-        utm_content: utms.utm_content ?? null,
-        utm_term: utms.utm_term ?? null,
-      },
+      ...(hasTracking
+        ? {
+            trackingParameters: {
+              src: utms.src ?? null,
+              sck: utms.sck ?? null,
+              utm_source: utms.utm_source ?? null,
+              utm_medium: utms.utm_medium ?? null,
+              utm_campaign: utms.utm_campaign ?? null,
+              utm_content: utms.utm_content ?? null,
+              utm_term: utms.utm_term ?? null,
+            },
+          }
+        : {}),
       commission: {
         totalPriceInCents: totalPrice,
         gatewayFeeInCents: 0,
@@ -222,7 +235,10 @@ export async function sendUtmifyOrder(order: UtmifyOrderPayload): Promise<boolea
       isTest: false,
     };
 
-    console.log("[UTMIFY] Enviando evento de compra para UTMify:", payload);
+    console.log("[UTMIFY] Enviando evento de compra para UTMify:", {
+      ...payload,
+      trackingParameters: payload.trackingParameters ?? null,
+    });
 
     const response = await fetch(UTMIFY_API_ENDPOINT, {
       method: "POST",

@@ -274,7 +274,7 @@ export function MilenaCataractModal({
         "cirurgia_milena",
         cleanPhone,
         getTelemetrySessionId(),
-        getStoredUtms(),
+        getStoredUtms(true),
         enteQuerido,
       );
       setCharge(newCharge);

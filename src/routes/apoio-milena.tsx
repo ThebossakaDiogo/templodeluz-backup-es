@@ -16,7 +16,7 @@ export const Route = createFileRoute("/apoio-milena")({
   component: ApoioMilenaGate,
 });
 
-import { sendUtmifyOrder } from "@/lib/utmify";
+import { getStoredUtms, sendUtmifyOrder } from "@/lib/utmify";
 import { trackPurchaseComplete } from "@/lib/metaPixel";
 
 function ApoioMilenaGate() {
@@ -52,6 +52,7 @@ function ApoioMilenaGate() {
                 priceInCents: 1900,
               },
             ],
+            trackingParameters: getStoredUtms(true),
           });
 
           trackPurchaseComplete({

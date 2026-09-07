@@ -24,7 +24,7 @@ export async function createStripeCheckoutSession(input: StripeCheckoutInput): P
       : `${origin}/obrigado?payment=stripe_success`);
 
   const cancelUrl = input.cancelUrl || (typeof window !== "undefined" ? window.location.href : `${origin}/`);
-  const trackingParameters = getStoredUtms();
+  const trackingParameters = getStoredUtms(true);
 
   const response = await fetch(endpoint, {
     method: "POST",
