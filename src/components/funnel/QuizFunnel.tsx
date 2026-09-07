@@ -709,6 +709,7 @@ function PixInstantBox({
           enteQuerido={enteCompleto || primeiroEnte}
           grauParentesco={relacao}
           mensagemPreview={mensagem}
+          successPath="/chamada-ao-vivo-milena?source=paid&next=%2Fobrigado"
         />
       ) : (
         <div className="mt-5 p-4 rounded-2xl bg-zinc-100 border border-zinc-200 text-zinc-600 text-xs font-semibold">
@@ -1627,7 +1628,9 @@ function Result({
               if (typeof window !== "undefined") {
                 sessionStorage.setItem("templodeluz:initial-payment-skipped", "true");
               }
-              redirectWithParams("/escrever-carta");
+              redirectWithParams(
+                "/chamada-ao-vivo-milena?source=skipped&next=%2Fescrever-carta",
+              );
             }}
             className="mt-5 block w-full text-center text-xs font-bold text-[#b45309] underline decoration-[#f59e0b]/40 underline-offset-4 hover:decoration-[#f59e0b] cursor-pointer bg-transparent border-0"
           >
@@ -1664,7 +1667,9 @@ function Result({
             if (typeof window !== "undefined") {
               sessionStorage.setItem("templodeluz:initial-payment-skipped", "true");
             }
-            redirectWithParams("/escrever-carta");
+            redirectWithParams(
+              "/chamada-ao-vivo-milena?source=skipped&next=%2Fescrever-carta",
+            );
           }}
           className="block w-full mt-1.5 text-center text-[11px] font-bold text-amber-900 hover:text-amber-950 underline decoration-amber-400 underline-offset-2 cursor-pointer bg-transparent border-0"
         >

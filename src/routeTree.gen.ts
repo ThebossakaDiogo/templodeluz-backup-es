@@ -14,6 +14,7 @@ import { Route as AbandonosRouteImport } from './routes/abandonos'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AjudaMilenaRouteImport } from './routes/ajuda-milena'
 import { Route as ApoioMilenaRouteImport } from './routes/apoio-milena'
+import { Route as ChamadaAoVivoMilenaRouteImport } from './routes/chamada-ao-vivo-milena'
 import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
 import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
 import { Route as ConversasRouteImport } from './routes/conversas'
@@ -59,6 +60,11 @@ const AjudaMilenaRoute = AjudaMilenaRouteImport.update({
 const ApoioMilenaRoute = ApoioMilenaRouteImport.update({
   id: '/apoio-milena',
   path: '/apoio-milena',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChamadaAoVivoMilenaRoute = ChamadaAoVivoMilenaRouteImport.update({
+  id: '/chamada-ao-vivo-milena',
+  path: '/chamada-ao-vivo-milena',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ComoFuncionaRoute = ComoFuncionaRouteImport.update({
@@ -173,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/ajuda-milena': typeof AjudaMilenaRoute
   '/apoio-milena': typeof ApoioMilenaRoute
+  '/chamada-ao-vivo-milena': typeof ChamadaAoVivoMilenaRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/conversas': typeof ConversasRoute
@@ -201,6 +208,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/ajuda-milena': typeof AjudaMilenaRoute
   '/apoio-milena': typeof ApoioMilenaRoute
+  '/chamada-ao-vivo-milena': typeof ChamadaAoVivoMilenaRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/conversas': typeof ConversasRoute
@@ -230,6 +238,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/ajuda-milena': typeof AjudaMilenaRoute
   '/apoio-milena': typeof ApoioMilenaRoute
+  '/chamada-ao-vivo-milena': typeof ChamadaAoVivoMilenaRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/conversas': typeof ConversasRoute
@@ -260,6 +269,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/ajuda-milena'
     | '/apoio-milena'
+    | '/chamada-ao-vivo-milena'
     | '/como-funciona'
     | '/configuracoes'
     | '/conversas'
@@ -288,6 +298,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/ajuda-milena'
     | '/apoio-milena'
+    | '/chamada-ao-vivo-milena'
     | '/como-funciona'
     | '/configuracoes'
     | '/conversas'
@@ -316,6 +327,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/ajuda-milena'
     | '/apoio-milena'
+    | '/chamada-ao-vivo-milena'
     | '/como-funciona'
     | '/configuracoes'
     | '/conversas'
@@ -345,6 +357,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   AjudaMilenaRoute: typeof AjudaMilenaRoute
   ApoioMilenaRoute: typeof ApoioMilenaRoute
+  ChamadaAoVivoMilenaRoute: typeof ChamadaAoVivoMilenaRoute
   ComoFuncionaRoute: typeof ComoFuncionaRoute
   ConfiguracoesRoute: typeof ConfiguracoesRoute
   ConversasRoute: typeof ConversasRoute
@@ -403,6 +416,13 @@ declare module '@tanstack/react-router' {
       path: '/apoio-milena'
       fullPath: '/apoio-milena'
       preLoaderRoute: typeof ApoioMilenaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chamada-ao-vivo-milena': {
+      id: '/chamada-ao-vivo-milena'
+      path: '/chamada-ao-vivo-milena'
+      fullPath: '/chamada-ao-vivo-milena'
+      preLoaderRoute: typeof ChamadaAoVivoMilenaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/como-funciona': {
@@ -561,6 +581,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   AjudaMilenaRoute: AjudaMilenaRoute,
   ApoioMilenaRoute: ApoioMilenaRoute,
+  ChamadaAoVivoMilenaRoute: ChamadaAoVivoMilenaRoute,
   ComoFuncionaRoute: ComoFuncionaRoute,
   ConfiguracoesRoute: ConfiguracoesRoute,
   ConversasRoute: ConversasRoute,

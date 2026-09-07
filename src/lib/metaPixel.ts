@@ -342,6 +342,12 @@ export function trackPurchaseComplete(options: {
       moeda: "BRL",
       metodo: options.paymentMethod,
     });
+  } else if (options.productId === "chamada_ao_vivo_milena") {
+    fbqTrackCustom("Doacao_Chamada_Ao_Vivo", {
+      valor: value,
+      moeda: "BRL",
+      metodo: options.paymentMethod,
+    });
   } else {
     fbqTrackCustom("Doacao_Cirurgia_Milena", {
       valor: value,

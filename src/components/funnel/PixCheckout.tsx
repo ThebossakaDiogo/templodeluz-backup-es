@@ -21,12 +21,17 @@ import {
 import { CardFlagsBadgeRow } from "./CardFlags";
 
 export interface PixCheckoutProps {
-  productId: "carta_sagrada" | "campanha_cirurgia" | "cirurgia_milena";
+  productId: "carta_sagrada" | "campanha_cirurgia" | "cirurgia_milena" | "chamada_ao_vivo_milena";
   amountCents: number;
   initialCustomerName?: string | undefined;
   enteQuerido?: string | undefined;
   grauParentesco?: string | undefined;
   mensagemPreview?: string | undefined;
+  successPath?: string | undefined;
+}
+
+function appendQuery(path: string, query: string) {
+  return `${path}${path.includes("?") ? "&" : "?"}${query}`;
 }
 
 interface PixCharge {
@@ -363,7 +368,7 @@ function getInitialCapturedData() {
   return { name, phone, email, ente, relacao, mensagem };
 }
 
-function PixInstructionStepList() {
+function PixInstructionStepList({ isLiveCall = false }: { readonly isLiveCall?: boolean }) {
   return (
     <div className="mt-3.5 rounded-2xl border border-emerald-200/70 bg-[#f7fbf8] p-4 text-left shadow-sm">
       <div className="flex items-center gap-2 mb-2.5">
@@ -411,7 +416,7 @@ function PixInstructionStepList() {
             4
           </span>
           <span>
-            Cole o código e confirme o pagamento. Em seguida, <strong>retorne imediatamente a esta tela</strong> para sua carta ser liberada!
+            Cole o código e confirme o pagamento. Em seguida, <strong>retorne imediatamente a esta tela</strong> para {isLiveCall ? "escolher o horário da chamada" : "sua carta ser liberada"}!
           </span>
         </li>
       </ol>
@@ -444,6 +449,8 @@ function PixFormView({
   onPhoneBlur,
   onGeneratePix,
 }: Readonly<PixFormViewProps>) {
+  const isLiveCall = productId === "chamada_ao_vivo_milena";
+
   return (
     <>
       <div className="mb-4 rounded-2xl border border-[#e2d5f1] bg-gradient-to-br from-[#faf7fc] to-[#f4edfa] p-4 text-left shadow-sm">
@@ -453,19 +460,22 @@ function PixFormView({
           </div>
           <div className="flex-1 min-w-0">
             <h4 className="text-xs font-black uppercase tracking-wide text-[#381a60]">
-              Sua Intenção & Vela de Luz
+              {isLiveCall ? "Sua Chamada Particular" : "Sua Intenção & Vela de Luz"}
             </h4>
             <p className="mt-1 text-[12px] leading-relaxed text-[#4d366b]">
-              A sua vela e prece foram dedicadas no altar espiritual. Esta contribuição simbólica de{" "}
-              <strong>R$ {formattedAmount}</strong> é destinada à manutenção dos trabalhos mediúnicos do Templo de Luz.
+              {isLiveCall ? (
+                <>O pagamento de <strong>R$ {formattedAmount}</strong> confirma sua reserva para uma chamada particular com Milena.</>
+              ) : (
+                <>A sua vela e prece foram dedicadas no altar espiritual. Esta contribuição simbólica de <strong>R$ {formattedAmount}</strong> é destinada à manutenção dos trabalhos mediúnicos do Templo de Luz.</>
+              )}
             </p>
             <div className="mt-2.5 flex items-center gap-1.5 text-[11px] font-bold text-emerald-700">
               <SparkleIcon className="w-3.5 h-3.5 shrink-0" />
-              <span>Sua Carta Psicografada completa será revelada na tela imediatamente após o pagamento.</span>
+              <span>{isLiveCall ? "Após a confirmação, você escolherá um horário disponível." : "Sua Carta Psicografada completa será revelada na tela imediatamente após o pagamento."}</span>
             </div>
             <div className="mt-2 flex items-start gap-1.5 rounded-lg bg-emerald-100/60 p-2 text-[11px] font-semibold text-emerald-950">
               <ReturnIcon className="w-3.5 h-3.5 text-emerald-700 shrink-0 mt-0.5" />
-              <span>Após pagar no app do seu banco, retorne a esta página para receber sua carta.</span>
+              <span>Após pagar no app do seu banco, retorne a esta página para {isLiveCall ? "agendar sua chamada" : "receber sua carta"}.</span>
             </div>
           </div>
         </div>
@@ -494,7 +504,7 @@ function PixFormView({
           <span>Seu WhatsApp (com DDD):</span>
         </span>
         <span className="text-[10.5px] font-semibold text-emerald-700">
-          Para envio da foto da carta
+          {isLiveCall ? "Para confirmação do horário" : "Para envio da foto da carta"}
         </span>
       </label>
       <input
@@ -558,6 +568,7 @@ interface PixPendingViewProps {
   readonly manualCheckNotice: string;
   readonly onCopyPix: () => void;
   readonly onManualCheck: () => void;
+  readonly isLiveCall?: boolean;
 }
 
 function PixPendingView({
@@ -568,6 +579,7 @@ function PixPendingView({
   manualCheckNotice,
   onCopyPix,
   onManualCheck,
+  isLiveCall = false,
 }: Readonly<PixPendingViewProps>) {
   // Timestamp absoluto estável no futuro para contagem regressiva contínua
   const [targetTimestamp] = useState<number>(() => {
@@ -642,8 +654,9 @@ function PixPendingView({
               <span className="text-[10px] font-medium text-[#667781]">agora</span>
             </div>
             <div className="mt-1 rounded-xl rounded-tl-sm bg-white px-3 py-2 text-[12.5px] leading-relaxed text-[#181126] shadow-sm">
-              💚 Olá! Já recebi a sua solicitação aqui no WhatsApp e estou aguardando para começar a
-              sua carta. Assim que o PIX for confirmado, eu já inicio a psicografia. Estou esperando!
+              {isLiveCall
+                ? "💚 Olá! Sua solicitação de chamada foi recebida. Assim que o PIX for confirmado, você poderá escolher seu horário."
+                : "💚 Olá! Já recebi a sua solicitação aqui no WhatsApp e estou aguardando para começar a sua carta. Assim que o PIX for confirmado, eu já inicio a psicografia. Estou esperando!"}
             </div>
           </div>
         </div>
@@ -671,7 +684,7 @@ function PixPendingView({
         </div>
         {remaining <= 60 && (
           <p className="mt-1.5 text-[11px] font-bold text-red-600">
-            ⏳ Últimos segundos para manter a sua vaga no oratório!
+            ⏳ Últimos segundos para manter a sua {isLiveCall ? "reserva" : "vaga no oratório"}!
           </p>
         )}
       </div>
@@ -716,13 +729,13 @@ function PixPendingView({
               Retorne a esta página após pagar no banco:
             </span>
             <span>
-              Mantenha esta tela aberta. Assim que confirmar o pagamento no seu banco, volte imediatamente para cá para acessar sua <strong>Carta Psicografada completa</strong>.
+              Mantenha esta tela aberta. Assim que confirmar o pagamento no seu banco, volte imediatamente para cá para {isLiveCall ? "escolher o horário da chamada" : "acessar sua Carta Psicografada completa"}.
             </span>
           </div>
         </div>
       </div>
 
-      <PixInstructionStepList />
+      <PixInstructionStepList isLiveCall={isLiveCall} />
 
       <button
         type="button"
@@ -778,6 +791,8 @@ function CardFormView({
   onPhoneBlur,
   onStartStripe,
 }: Readonly<CardFormViewProps>) {
+  const isLiveCall = productId === "chamada_ao_vivo_milena";
+
   return (
     <>
       <div className="space-y-3 text-left">
@@ -791,7 +806,7 @@ function CardFormView({
               <span>Seu WhatsApp (com DDD):</span>
             </span>
             <span className="text-[10.5px] font-semibold text-[#6366f1]">
-              Para envio da carta
+              {isLiveCall ? "Para confirmação do horário" : "Para envio da carta"}
             </span>
           </label>
           <input
@@ -811,7 +826,7 @@ function CardFormView({
           <div className="flex items-start gap-2">
             <ReturnIcon className="w-4 h-4 text-indigo-700 shrink-0 mt-0.5" />
             <p className="text-[11.5px] text-indigo-950 leading-relaxed">
-              No próximo passo você preencherá os dados do cartão no ambiente seguro da <strong>Stripe</strong>. <strong>Após concluir, retorne a esta página para receber sua carta.</strong>
+              No próximo passo você preencherá os dados do cartão no ambiente seguro da <strong>Stripe</strong>. <strong>Após concluir, retorne a esta página para {isLiveCall ? "escolher o horário da chamada" : "receber sua carta"}.</strong>
             </p>
           </div>
         </div>
@@ -857,6 +872,7 @@ export function PixCheckout({
   enteQuerido,
   grauParentesco,
   mensagemPreview,
+  successPath,
 }: Readonly<PixCheckoutProps>) {
   const initial = getInitialCapturedData();
   const [isOpen, setIsOpen] = useState(false);
@@ -884,7 +900,9 @@ export function PixCheckout({
   const prodName =
     productId === "carta_sagrada"
       ? "Carta Psicografada Sagrada"
-      : "Campanha Solidária - Cirurgia Médium Milena";
+      : productId === "chamada_ao_vivo_milena"
+        ? "Chamada Ao Vivo com Milena"
+        : "Campanha Solidária - Cirurgia Médium Milena";
 
   useEffect(() => {
     setCharge(null);
@@ -1017,13 +1035,15 @@ export function PixCheckout({
     });
 
     const timer = setTimeout(() => {
-      window.location.href = `/obrigado?orderId=${encodeURIComponent(
-        charge?.orderId || ""
-      )}&method=pix`;
+      const target = successPath || "/obrigado";
+      window.location.href = appendQuery(
+        target,
+        `orderId=${encodeURIComponent(charge?.orderId || "")}&method=pix`,
+      );
     }, 2500);
 
     return () => clearTimeout(timer);
-  }, [status, amountCents, customerName, customerPhone, productId, prodName, charge?.orderId, resolvedEnte, resolvedGrau, mensagemPreview, initial.mensagem]);
+  }, [status, amountCents, customerName, customerPhone, productId, prodName, charge?.orderId, resolvedEnte, resolvedGrau, mensagemPreview, initial.mensagem, successPath]);
 
   const generatePix = async () => {
     if (!customerName.trim()) {
@@ -1032,7 +1052,7 @@ export function PixCheckout({
     }
     const cleanPhone = customerPhone.replace(/\D/g, "");
     if (cleanPhone.length < 10) {
-      setError("Por favor, informe seu WhatsApp com DDD para envio da foto da carta.");
+      setError(`Por favor, informe seu WhatsApp com DDD para ${productId === "chamada_ao_vivo_milena" ? "confirmar o horário" : "envio da foto da carta"}.`);
       return;
     }
     setError("");
@@ -1103,7 +1123,7 @@ export function PixCheckout({
   const startStripeCheckout = async () => {
     const cleanPhone = customerPhone.replace(/\D/g, "");
     if (cleanPhone.length < 10) {
-      setError("Por favor, informe seu WhatsApp com DDD para envio da carta.");
+      setError(`Por favor, informe seu WhatsApp com DDD para ${productId === "chamada_ao_vivo_milena" ? "confirmar o horário" : "envio da carta"}.`);
       return;
     }
     setError("");
@@ -1137,6 +1157,8 @@ export function PixCheckout({
         );
       }
 
+      const checkoutSuccessPath = successPath || "/obrigado";
+      const checkoutCancelPath = successPath || "/quiz";
       const url = `${config.supabaseUrl}/functions/v1/create-stripe-checkout`;
       const response = await fetch(url, {
         method: "POST",
@@ -1148,8 +1170,8 @@ export function PixCheckout({
           customerName: payerName,
           customerEmail: customerEmail.trim() || undefined,
           customerPhone: cleanPhone,
-          successUrl: `${window.location.origin}/obrigado?method=card&session_id={CHECKOUT_SESSION_ID}`,
-          cancelUrl: `${window.location.origin}/quiz?payment=cancelled`,
+          successUrl: `${window.location.origin}${appendQuery(checkoutSuccessPath, "method=card&session_id={CHECKOUT_SESSION_ID}")}`,
+          cancelUrl: `${window.location.origin}${appendQuery(checkoutCancelPath, "payment=cancelled")}`,
           trackingParameters: getUtmParams(),
         }),
       });
@@ -1250,7 +1272,7 @@ export function PixCheckout({
                     <span>Ambiente Seguro Criptografado</span>
                   </div>
                   <h3 className="text-xl font-extrabold text-[#181126]">
-                    Finalizar Sua Contribuição
+                    {productId === "chamada_ao_vivo_milena" ? "Reservar Sua Chamada" : "Finalizar Sua Contribuição"}
                   </h3>
                   <p className="mt-0.5 text-sm font-black text-emerald-700">
                     Valor total: R$ {formattedAmount}
@@ -1336,6 +1358,7 @@ export function PixCheckout({
                         manualCheckNotice={manualCheckNotice}
                         onCopyPix={copyPix}
                         onManualCheck={handleManualCheckStatus}
+                        isLiveCall={productId === "chamada_ao_vivo_milena"}
                       />
                     </>
                   )}

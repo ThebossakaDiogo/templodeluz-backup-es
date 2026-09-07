@@ -59,7 +59,11 @@ Deno.serve(async (req) => {
             },
             body: JSON.stringify({
               product_id: productId,
-              product_name: productId === 'carta_sagrada' ? 'Carta Psicografada Sagrada' : 'Cirurgia Médium Milena',
+              product_name: productId === 'carta_sagrada'
+                ? 'Carta Psicografada Sagrada'
+                : productId === 'chamada_ao_vivo_milena'
+                  ? 'Chamada Ao Vivo com Milena'
+                  : 'Cirurgia Médium Milena',
               amount_cents: amountTotal,
               status: 'paid',
               customer_name: customerName,
@@ -119,7 +123,11 @@ Deno.serve(async (req) => {
           products: [
             {
               id: productId,
-              name: productId === 'carta_sagrada' ? 'Carta Psicografada Sagrada' : 'Cirurgia Médium Milena',
+              name: productId === 'carta_sagrada'
+                ? 'Carta Psicografada Sagrada'
+                : productId === 'chamada_ao_vivo_milena'
+                  ? 'Chamada Ao Vivo com Milena'
+                  : 'Cirurgia Médium Milena',
               planId: 'plano_unico',
               planName: 'Pagamento Único',
               quantity: 1,
