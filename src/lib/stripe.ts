@@ -1,4 +1,4 @@
-import { PIX_CONFIG_ORIGINAL } from "./pix-config";
+import { PIX_CONFIG_ORIGINAL, pixFunctionHeaders } from "./pix-config";
 import { getStoredUtms } from "./utmify";
 
 export interface StripeCheckoutInput {
@@ -12,7 +12,6 @@ export interface StripeCheckoutInput {
 
 export async function createStripeCheckoutSession(input: StripeCheckoutInput): Promise<{ url: string }> {
   const supabaseUrl = PIX_CONFIG_ORIGINAL.supabaseUrl;
-  const anonKey = PIX_CONFIG_ORIGINAL.supabaseAnonKey;
   const endpoint = `${supabaseUrl.replace(/\/$/, "")}/functions/v1/create-stripe-checkout`;
   const origin = typeof window !== "undefined" ? window.location.origin : "";
   const successUrl = input.successUrl || (input.productId === "carta_sagrada"
@@ -23,11 +22,7 @@ export async function createStripeCheckoutSession(input: StripeCheckoutInput): P
 
   const response = await fetch(endpoint, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      apikey: anonKey,
-      Authorization: `Bearer ${anonKey}`,
-    },
+    headers: pixFunctionHeaders(),
     body: JSON.stringify({
       amountCents: input.amountCents,
       productName: input.productName,

@@ -57,6 +57,8 @@ O projeto consiste em um funil de quiz/landing page para captação de leads e v
 - `src/lib/pix-config.ts`: `PIX_CONFIG_ORIGINAL`
 - `quiz-templodeluz/src/lib/pix-config.ts`: `PIX_CONFIG_MIRRORED`
 - Ambas as configurações são imutáveis e explícitas para evitar roteamento cruzado.
+- O Meta usa a chave moderna `sb_publishable_...`, enviada no header `apikey` e nunca como JWT Bearer.
+- Projeto, chave, conta, CORS, webhook e autenticação PIX só podem ser alterados com autorização explícita e teste HTTP antes do deploy.
 
 ---
 

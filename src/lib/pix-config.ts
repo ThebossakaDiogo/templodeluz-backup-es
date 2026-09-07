@@ -3,5 +3,18 @@ export const PIX_CONFIG_ORIGINAL = Object.freeze({
   pixAccountKey: "connectpay_original" as const,
   supabaseUrl: "https://opftmzegcvfyoinjfmcj.supabase.co",
   supabaseAnonKey:
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wZnRtemVnY3ZmeW9pbmpmbWNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNzgyMDksImV4cCI6MjEwMzg1NDIwOX0.VpQitxh7x5v_0k5q35hhMz3eAATUHGERubdmA_TnR24",
+    "sb_publishable_QUVM0xTRlp-_GU7T0M2IYA_p0IxKffU",
 });
+
+/** Chaves sb_publishable_ são enviadas em apikey, nunca como JWT Bearer. */
+export function pixFunctionHeaders(
+  config: { readonly supabaseAnonKey: string } = PIX_CONFIG_ORIGINAL,
+): Record<string, string> {
+  return {
+    "Content-Type": "application/json",
+    apikey: config.supabaseAnonKey,
+    ...(config.supabaseAnonKey.startsWith("eyJ")
+      ? { Authorization: `Bearer ${config.supabaseAnonKey}` }
+      : {}),
+  };
+}

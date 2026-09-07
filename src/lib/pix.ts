@@ -1,3 +1,5 @@
+import { pixFunctionHeaders } from "./pix-config";
+
 export interface PixClientConfig {
   quizOrigin: "original" | "mirrored";
   pixAccountKey: "connectpay_original" | "connectpay_mirrored";
@@ -55,11 +57,7 @@ export async function createPixCharge(
   const statusToken = `${crypto.randomUUID()}${crypto.randomUUID()}`;
   const response = await fetch(functionUrl(config, "create-connectpay-pix"), {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      apikey: config.supabaseAnonKey,
-      Authorization: `Bearer ${config.supabaseAnonKey}`,
-    },
+    headers: pixFunctionHeaders(config),
     body: JSON.stringify({
       productId: input.productId,
       quizOrigin: config.quizOrigin,
@@ -82,11 +80,7 @@ export async function createPixCharge(
 export async function getPixStatus(config: PixClientConfig, charge: PixCharge) {
   const response = await fetch(functionUrl(config, "get-connectpay-pix-status"), {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      apikey: config.supabaseAnonKey,
-      Authorization: `Bearer ${config.supabaseAnonKey}`,
-    },
+    headers: pixFunctionHeaders(config),
     body: JSON.stringify({
       orderId: charge.orderId,
       quizOrigin: config.quizOrigin,

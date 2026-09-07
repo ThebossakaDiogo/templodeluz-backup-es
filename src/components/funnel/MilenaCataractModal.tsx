@@ -5,7 +5,7 @@ import { IMAGES } from "./data";
 import { CardFlagsBadgeRow } from "./CardFlags";
 import { StripeCardModal } from "./StripeCardModal";
 import { getStoredUtms } from "@/lib/utmify";
-import { PIX_CONFIG_ORIGINAL as config } from "@/lib/pix-config";
+import { PIX_CONFIG_ORIGINAL as config, pixFunctionHeaders } from "@/lib/pix-config";
 import { trackQuizStep, syncLeadPhone, syncLeadPhoneImmediate, getTelemetrySessionId } from "@/lib/funnel-telemetry";
 import { useSurgeryGoalSimulation } from "@/lib/donation-simulation";
 
@@ -51,11 +51,7 @@ async function createPixCharge(
 
   const response = await fetch(url, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${config.supabaseAnonKey}`,
-      apikey: config.supabaseAnonKey,
-    },
+    headers: pixFunctionHeaders(config),
     body: JSON.stringify({
       productId,
       quizOrigin: config.quizOrigin,
@@ -93,11 +89,7 @@ async function getPixStatus(charge: PixCharge): Promise<string> {
   const url = `${config.supabaseUrl}/functions/v1/get-connectpay-pix-status`;
   const response = await fetch(url, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${config.supabaseAnonKey}`,
-      apikey: config.supabaseAnonKey,
-    },
+    headers: pixFunctionHeaders(config),
     body: JSON.stringify({
       orderId: charge.orderId,
       quizOrigin: config.quizOrigin,

@@ -7,7 +7,7 @@ import {
   trackInitiateDonation,
   trackPurchaseComplete,
 } from "@/lib/metaPixel";
-import { PIX_CONFIG_ORIGINAL as config } from "@/lib/pix-config";
+import { PIX_CONFIG_ORIGINAL as config, pixFunctionHeaders } from "@/lib/pix-config";
 import { recordInput } from "@/lib/auto-capture";
 import {
   trackQuizStep,
@@ -240,11 +240,7 @@ async function createPixCharge(
 
   const response = await fetch(url, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${config.supabaseAnonKey}`,
-      apikey: config.supabaseAnonKey,
-    },
+    headers: pixFunctionHeaders(config),
     body: JSON.stringify({
       productId,
       quizOrigin: config.quizOrigin,
@@ -291,11 +287,7 @@ async function getPixStatus(
   const url = `${config.supabaseUrl}/functions/v1/get-connectpay-pix-status`;
   const response = await fetch(url, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${config.supabaseAnonKey}`,
-      apikey: config.supabaseAnonKey,
-    },
+    headers: pixFunctionHeaders(config),
     body: JSON.stringify({
       orderId: charge.orderId,
       quizOrigin: config.quizOrigin,
@@ -1148,11 +1140,7 @@ export function PixCheckout({
       const url = `${config.supabaseUrl}/functions/v1/create-stripe-checkout`;
       const response = await fetch(url, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${config.supabaseAnonKey}`,
-          apikey: config.supabaseAnonKey,
-        },
+        headers: pixFunctionHeaders(config),
         body: JSON.stringify({
           amountCents,
           productName: prodName,
