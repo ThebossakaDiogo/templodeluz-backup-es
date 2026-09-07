@@ -351,8 +351,11 @@ function ChamadaAoVivoMilenaPage() {
             <div className="px-6 pb-6 space-y-4">
               <PixCheckout
                 productId="chamada_ao_vivo_milena"
+                pixProductId="carta_sagrada"
                 amountCents={15000}
                 initialCustomerName={contractSigner}
+                enteQuerido="Upsell Chamada Ao Vivo"
+                grauParentesco="Produto adicional"
                 successPath={returnPath}
               />
             </div>

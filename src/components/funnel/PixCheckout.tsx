@@ -22,6 +22,7 @@ import { CardFlagsBadgeRow } from "./CardFlags";
 
 export interface PixCheckoutProps {
   productId: "carta_sagrada" | "campanha_cirurgia" | "cirurgia_milena" | "chamada_ao_vivo_milena";
+  pixProductId?: "carta_sagrada" | "cirurgia_milena" | undefined;
   amountCents: number;
   initialCustomerName?: string | undefined;
   enteQuerido?: string | undefined;
@@ -867,6 +868,7 @@ function CardFormView({
 
 export function PixCheckout({
   productId,
+  pixProductId,
   amountCents,
   initialCustomerName,
   enteQuerido,
@@ -1064,7 +1066,7 @@ export function PixCheckout({
       const newCharge = await createPixCharge(
         customerName.trim(),
         amountCents,
-        productId,
+        pixProductId || productId,
         cleanPhone,
         customerEmail.trim() || undefined,
         resolvedEnte,
