@@ -7,6 +7,7 @@ import { PixCheckout } from "./PixCheckout";
 import { SocialProofSection } from "./SocialProofSection";
 import { SacredCandle } from "./SacredCandle";
 import { StripeCardModal } from "./StripeCardModal";
+import { WhatsAppContactModal } from "./WhatsAppContactModal";
 import { recordInput } from "@/lib/auto-capture";
 import { trackQuizStep } from "@/lib/metaPixel";
 import { trackQuizStep as trackQuizTelemetry } from "@/lib/funnel-telemetry";
@@ -514,6 +515,8 @@ function PixInstantBox({
   enteCompleto,
   relacao,
   mensagem,
+  temas = [],
+  horario,
 }: {
   readonly primeiroNome?: string;
   readonly primeiroEnte?: string;
@@ -521,11 +524,14 @@ function PixInstantBox({
   readonly enteCompleto?: string;
   readonly relacao?: string;
   readonly mensagem?: string;
+  readonly temas?: string[];
+  readonly horario?: string;
 }) {
   const [selectedAmount, setSelectedAmount] = useState<number>(20);
   const [customInput, setCustomInput] = useState<string>("");
   const [isCustom, setIsCustom] = useState<boolean>(false);
   const [stripeModalOpen, setStripeModalOpen] = useState<boolean>(false);
+  const [whatsAppModalOpen, setWhatsAppModalOpen] = useState<boolean>(false);
 
   const activeAmount = isCustom ? Number(customInput.replace(/\D/g, "")) || 0 : selectedAmount;
   const impact = getDonationPsychologicalImpact(activeAmount, primeiroEnte, primeiroNome);
@@ -540,6 +546,27 @@ function PixInstantBox({
     const raw = e.target.value.replace(/\D/g, "");
     setIsCustom(true);
     setCustomInput(raw);
+  };
+
+  const handleIrParaPergaminho = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("templodeluz:initial-payment-skipped", "true");
+    }
+    try {
+      trackQuizTelemetry({
+        stepIndex: 99,
+        stepName: "checkout_skipped",
+        leadName: primeiroNome,
+        enteQuerido: primeiroEnte,
+      });
+    } catch (err) {
+      console.warn("[TELEMETRY]", err);
+    }
+    redirectWithParams("/escrever-carta");
   };
 
   const presets = [
@@ -744,31 +771,154 @@ function PixInstantBox({
         </p>
       </div>
 
-      {/* Opção de Prosseguir sem Contribuir de Primeira */}
-      <div className="mt-4 pt-3.5 border-t border-slate-200/70 text-center">
-        <Link
-          to="/escrever-carta"
-          onClick={() => {
-            if (typeof window !== "undefined") {
-              sessionStorage.setItem("templodeluz:initial-payment-skipped", "true");
-            }
-            trackQuizTelemetry({
-              stepIndex: 99,
-              stepName: "checkout_skipped",
-              leadName: primeiroNome,
-              enteQuerido: primeiroEnte,
-            });
-          }}
-          className="group inline-flex items-center gap-1.5 text-xs font-semibold text-[#6b5883] hover:text-[#2d144d] transition-colors cursor-pointer"
+      {/* Botão de WhatsApp Oficial - Espaçoso, Elegante e Direto */}
+      <div className="mt-4 pt-3.5 border-t border-slate-100">
+        <button
+          type="button"
+          onClick={() => setWhatsAppModalOpen(true)}
+          className="group relative w-full overflow-hidden rounded-2xl bg-gradient-to-r from-[#128C7E] via-[#25D366] to-[#075E54] p-3.5 sm:p-4 text-white shadow-md shadow-emerald-900/15 hover:shadow-lg hover:shadow-emerald-900/25 active:scale-[0.99] transition-all text-left cursor-pointer"
         >
-          <span className="underline underline-offset-4 decoration-[#d5c7e4] group-hover:decoration-[#2d144d]">
+          {/* Brilho suave deslizante */}
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
+
+          <div className="flex items-center gap-3 relative z-10">
+            {/* Ícone WhatsApp com Ponto Online Vivo */}
+            <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-[#25D366] shadow-sm">
+              <svg
+                className="w-6 h-6 text-[#25D366]"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.694.062-1.107-.07-.251-.08-.574-.188-.988-.369-1.758-.767-2.903-2.545-2.991-2.663-.088-.118-.718-.956-.718-1.822 0-.866.453-1.293.614-1.469.161-.177.351-.221.468-.221.117 0 .234.001.336.006.107.005.251-.041.393.298.146.351.498 1.214.542 1.303.044.088.073.192.015.308-.059.117-.088.19-.176.293-.088.103-.186.23-.265.31-.088.088-.18.184-.078.36.103.176.458.756.983 1.224.676.602 1.246.789 1.422.877.176.088.279.074.382-.044.103-.117.439-.512.556-.688.117-.176.235-.147.396-.088.161.059 1.026.484 1.202.572.176.088.293.132.337.206.044.074.044.43-.1 1.035z" />
+                <path d="M12 2C6.477 2 2 6.477 2 12c0 1.891.523 3.664 1.435 5.186L2.1 22l4.98-1.306A9.958 9.958 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18.2c-1.635 0-3.15-.494-4.414-1.343l-.316-.214-2.95.774.787-2.876-.234-.336A8.163 8.163 0 0 1 3.8 12c0-4.521 3.679-8.2 8.2-8.2 4.521 0 8.2 3.679 8.2 8.2 0 4.521-3.679 8.2-8.2 8.2z" />
+              </svg>
+              <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-200 opacity-80" />
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-[#25D366] border-2 border-white" />
+              </span>
+            </div>
+
+            {/* Textos sem aperto */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-100 bg-black/15 px-2 py-0.5 rounded-md">
+                  WhatsApp Oficial
+                </span>
+                <span className="text-[10.5px] font-semibold text-emerald-100/90">
+                  Médium Milena
+                </span>
+              </div>
+              <div className="text-[14px] sm:text-[15px] font-black text-white leading-snug mt-0.5">
+                Falar com a Médium no WhatsApp
+              </div>
+              <p className="text-[11.5px] text-emerald-100/90 leading-tight mt-0.5 truncate">
+                Dúvidas ou prefere atendimento direto? Toque aqui
+              </p>
+            </div>
+
+            {/* Seta direta e limpa */}
+            <div className="shrink-0 flex items-center justify-center h-8 w-8 rounded-full bg-white/20 text-white font-black text-sm group-hover:bg-white group-hover:text-emerald-700 transition-all">
+              ›
+            </div>
+          </div>
+        </button>
+      </div>
+
+      <WhatsAppContactModal
+        isOpen={whatsAppModalOpen}
+        onClose={() => setWhatsAppModalOpen(false)}
+        nomeConsulente={nomeCompleto || primeiroNome}
+        nomeEnte={enteCompleto || primeiroEnte}
+        grauParentesco={relacao}
+        mensagemPreview={mensagem}
+        temas={temas}
+        horario={horario}
+        onSelectDonateNow={() => {
+          setWhatsAppModalOpen(false);
+          const pixSection = document.getElementById("pix-section");
+          if (pixSection) {
+            pixSection.scrollIntoView({ behavior: "smooth" });
+          }
+        }}
+      />
+
+      {/* Box Nobre do Pergaminho: Elegante, Espaçoso e Acolhedor */}
+      <div className="mt-5 pt-4 border-t border-slate-200/70">
+        <div className="rounded-2xl border border-amber-300/80 bg-gradient-to-b from-[#fffefc] to-[#faf5ea] p-4 sm:p-5 text-left shadow-xs">
+          {/* Badge & Título */}
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100/90 border border-amber-300/80 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-amber-950">
+              📜 Oratório Sagrado
+            </span>
+            <span className="text-[11px] font-bold text-amber-800">
+              Acesso Liberado
+            </span>
+          </div>
+
+          <h4 className="text-[14px] sm:text-[15px] font-black text-stone-900 leading-snug">
             Desejo redigir minha carta no pergaminho sem realizar a contribuição da vela agora
-          </span>
-          <span className="font-bold text-sm transition-transform group-hover:translate-x-1">›</span>
-        </Link>
-        <p className="mt-1 text-[11px] text-[#8e7a60]">
-          Sua mensagem será salva no pergaminho sagrado e você poderá redigi-la antes de enviar à médium.
-        </p>
+          </h4>
+
+          <p className="mt-1 text-[12px] text-stone-600 leading-relaxed">
+            Sua mensagem será salva no pergaminho sagrado e você poderá redigi-la antes de enviar à médium.
+          </p>
+
+          {/* Opções de Escolha em Linhas Espaçosas e Agradáveis */}
+          <div className="mt-3.5 space-y-2">
+            <div className="text-[11px] font-black uppercase tracking-wider text-amber-950">
+              ✨ Lá dentro você decide livremente:
+            </div>
+
+            {/* Opção 1 */}
+            <div className="flex items-start gap-3 rounded-xl bg-white/90 border border-amber-200/70 p-3 shadow-2xs">
+              <span className="text-lg shrink-0 mt-0.5">🕊️</span>
+              <div className="min-w-0">
+                <span className="text-xs font-black text-stone-900 block leading-tight">
+                  1. Apenas selecionar os temas espirituais
+                </span>
+                <span className="text-[11.5px] text-stone-600 leading-relaxed block mt-0.5">
+                  Não quer escrever nada? Basta marcar os temas (paz, conselho, sinal) e a médium conduzirá as orações na sessão.
+                </span>
+              </div>
+            </div>
+
+            {/* Opção 2 */}
+            <div className="flex items-start gap-3 rounded-xl bg-white/90 border border-amber-200/70 p-3 shadow-2xs">
+              <span className="text-lg shrink-0 mt-0.5">✍️</span>
+              <div className="min-w-0">
+                <span className="text-xs font-black text-stone-900 block leading-tight">
+                  2. Escrever com suas próprias palavras
+                </span>
+                <span className="text-[11.5px] text-stone-600 leading-relaxed block mt-0.5">
+                  Prefere desabafar e deixar um relato especial para <strong>{primeiroEnte}</strong>? Escreva à mão livre no pergaminho.
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Botão de Destaque Limpo, Amigável e 100% Desbloqueado */}
+          <div className="mt-4 pt-1 space-y-2">
+            <button
+              type="button"
+              onClick={handleIrParaPergaminho}
+              className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 hover:to-amber-800 p-3.5 text-center text-white font-extrabold text-xs sm:text-[13px] uppercase tracking-wider shadow-md hover:shadow-lg active:scale-[0.99] transition-all cursor-pointer border-0"
+            >
+              <span>Acessar Pergaminho & Preencher Carta</span>
+              <span className="text-sm font-bold">→</span>
+            </button>
+
+            <div className="text-center pt-0.5">
+              <button
+                type="button"
+                onClick={handleIrParaPergaminho}
+                className="inline-block text-[11.5px] font-semibold text-amber-900/90 hover:text-amber-950 underline decoration-amber-400/80 underline-offset-2 transition-colors cursor-pointer bg-transparent border-0 p-0"
+              >
+                Desejo redigir minha carta no pergaminho sem realizar a contribuição da vela agora ›
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -1464,18 +1614,25 @@ function Result({
             enteCompleto={ente}
             relacao={relacao}
             mensagem={mensagem}
+            horario={horarioExibicao}
           />
 
           {/* Selo de Garantia Sagrada e Segurança Premium */}
           <SecurityGuaranteeSeal />
 
           {/* Link para o simulador de carta em pergaminho */}
-          <Link
-            to="/escrever-carta"
-            className="mt-5 block text-center text-xs font-bold text-[#b45309] underline decoration-[#f59e0b]/40 underline-offset-4 hover:decoration-[#f59e0b]"
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                sessionStorage.setItem("templodeluz:initial-payment-skipped", "true");
+              }
+              redirectWithParams("/escrever-carta");
+            }}
+            className="mt-5 block w-full text-center text-xs font-bold text-[#b45309] underline decoration-[#f59e0b]/40 underline-offset-4 hover:decoration-[#f59e0b] cursor-pointer bg-transparent border-0"
           >
-            ✍️ Ou clique aqui para redigir sua carta no simulador de pergaminho ›
-          </Link>
+            📜 Desejo redigir minha carta no pergaminho sem realizar a contribuição da vela agora ›
+          </button>
         </Reveal>
 
         <Reveal className="mt-10">
@@ -1485,7 +1642,7 @@ function Result({
       </div>
 
       {/* CTA fixa inferior para PIX / Doação */}
-      <div className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-[480px] border-t border-[#ece4f4] bg-white/95 px-4 pt-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] backdrop-blur-md shadow-2xl">
+      <div className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-[480px] border-t border-[#ece4f4] bg-white/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md shadow-2xl">
         <button
           type="button"
           onClick={() => {
@@ -1493,12 +1650,25 @@ function Result({
             if (el) el.scrollIntoView({ behavior: "smooth" });
             else go();
           }}
-          className="utmify-initiate-checkout cta-hot w-full cursor-pointer rounded-xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 px-5 py-3.5 text-[14.5px] font-extrabold tracking-wide text-white uppercase shadow-lg shadow-emerald-600/25 transition-transform hover:-translate-y-0.5"
+          className="utmify-initiate-checkout cta-hot w-full cursor-pointer rounded-xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 px-5 py-3 text-[14px] font-extrabold tracking-wide text-white uppercase shadow-lg shadow-emerald-600/25 transition-transform hover:-translate-y-0.5"
         >
           <span className="relative z-10 flex items-center justify-center gap-2">
             <PixIcon className="w-4 h-4 text-white shrink-0 drop-shadow-xs" />
             <span>Consagrar Vela de {primeiroEnte} no Oratório (PIX)</span>
           </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            if (typeof window !== "undefined") {
+              sessionStorage.setItem("templodeluz:initial-payment-skipped", "true");
+            }
+            redirectWithParams("/escrever-carta");
+          }}
+          className="block w-full mt-1.5 text-center text-[11px] font-bold text-amber-900 hover:text-amber-950 underline decoration-amber-400 underline-offset-2 cursor-pointer bg-transparent border-0"
+        >
+          ✍️ Desejo preencher a carta no pergaminho sem doar a vela agora ›
         </button>
       </div>
     </div>
@@ -1659,11 +1829,11 @@ export function QuizFunnel() {
 
     const snapshot = telemetrySnapshotRef.current;
     trackQuizStep(step, {
-      nome_consulente: snapshot.nome || undefined,
-      nome_ente: snapshot.ente || undefined,
-      relacao: snapshot.relacao || undefined,
-      tempo: snapshot.tempo || undefined,
-      dor: snapshot.dorPrincipal || undefined,
+      nome_consulente: (snapshot["nome"] as string) || undefined,
+      nome_ente: (snapshot["ente"] as string) || undefined,
+      relacao: (snapshot["relacao"] as string) || undefined,
+      tempo: (snapshot["tempo"] as string) || undefined,
+      dor: (snapshot["dorPrincipal"] as string) || undefined,
     });
 
     const stepOrderMap: Record<Step, number> = {
@@ -1680,12 +1850,12 @@ export function QuizFunnel() {
     trackQuizTelemetry({
       stepIndex: stepOrderMap[step] || 1,
       stepName: step,
-      leadName: (snapshot.nome as string) || undefined,
-      enteQuerido: (snapshot.ente as string) || undefined,
-      grauParentesco: (snapshot.relacao as string) || undefined,
-      mensagemPreview: (snapshot.mensagem as string) || undefined,
-      temas: Array.isArray(snapshot.temasEscolhidos) && snapshot.temasEscolhidos.length > 0
-        ? snapshot.temasEscolhidos as string[]
+      leadName: (snapshot["nome"] as string) || undefined,
+      enteQuerido: (snapshot["ente"] as string) || undefined,
+      grauParentesco: (snapshot["relacao"] as string) || undefined,
+      mensagemPreview: (snapshot["mensagem"] as string) || undefined,
+      temas: Array.isArray(snapshot["temasEscolhidos"]) && snapshot["temasEscolhidos"].length > 0
+        ? (snapshot["temasEscolhidos"] as string[])
         : undefined,
       completed: step === "result",
     });

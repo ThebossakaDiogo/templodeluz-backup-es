@@ -644,8 +644,26 @@ export function MilenaCataractModal({
               )}
             </div>
 
+            {/* Botão para Pular Doação e Ir Direto para o WhatsApp */}
+            <div className="mt-4 pt-3.5 border-t border-stone-200/90 space-y-1.5 text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onProceedToWhatsApp();
+                }}
+                className="w-full py-3 px-4 rounded-2xl bg-stone-50 hover:bg-emerald-50/70 border-2 border-dashed border-stone-300 hover:border-emerald-500 text-stone-700 hover:text-emerald-950 font-extrabold text-xs uppercase tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer shadow-2xs group"
+              >
+                <span>Pular doação e falar com a Médium no WhatsApp</span>
+                <span className="text-sm font-black group-hover:translate-x-1 transition-transform">→</span>
+              </button>
+              <p className="text-[10.5px] text-stone-400 font-medium">
+                🤍 Se não puder doar agora, sua carta será acolhida no oratório com todo respeito e amor.
+              </p>
+            </div>
+
             {/* Garantias Limpas */}
-            <div className="mt-4 pt-3 border-t border-stone-100 flex flex-wrap items-center justify-center gap-3 text-[10px] font-semibold text-stone-400">
+            <div className="mt-3 pt-2.5 border-t border-stone-100 flex flex-wrap items-center justify-center gap-3 text-[10px] font-semibold text-stone-400">
               <span className="inline-flex items-center gap-1">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 text-emerald-600">
                   <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
@@ -663,7 +681,7 @@ export function MilenaCataractModal({
             </div>
 
             {/* Link Suave de Fechamento */}
-            <div className="mt-2.5 text-center">
+            <div className="mt-2 text-center">
               <button
                 type="button"
                 onClick={onClose}

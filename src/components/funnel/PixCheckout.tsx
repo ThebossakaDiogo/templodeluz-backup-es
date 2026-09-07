@@ -486,9 +486,10 @@ function PixFormView({
   );
 }
 
-function secondsUntil(expiresAt: string): number {
+function secondsUntil(expiresAt?: string | null): number {
+  if (!expiresAt) return 15 * 60;
   const target = new Date(expiresAt).getTime();
-  if (Number.isFinite(target) && target > 0) {
+  if (Number.isFinite(target) && target > Date.now() + 10_000) {
     return Math.max(0, Math.floor((target - Date.now()) / 1000));
   }
   return 15 * 60;
@@ -523,19 +524,35 @@ function PixPendingView({
   onCopyPix,
   onManualCheck,
 }: Readonly<PixPendingViewProps>) {
-  const [totalSeconds] = useState(() => {
-    const t = secondsUntil(charge.expiresAt);
-    return t > 0 ? t : 15 * 60;
+  // Timestamp absoluto estável no futuro para contagem regressiva contínua
+  const [targetTimestamp] = useState<number>(() => {
+    if (charge.expiresAt) {
+      const parsed = new Date(charge.expiresAt).getTime();
+      if (Number.isFinite(parsed) && parsed > Date.now() + 10_000) {
+        return parsed;
+      }
+    }
+    return Date.now() + 15 * 60 * 1000;
   });
-  const [remaining, setRemaining] = useState(() => Math.max(0, secondsUntil(charge.expiresAt)));
+
+  const [totalSeconds] = useState<number>(() => {
+    return Math.max(60, Math.floor((targetTimestamp - Date.now()) / 1000));
+  });
+
+  const [remaining, setRemaining] = useState<number>(() => {
+    return Math.max(0, Math.floor((targetTimestamp - Date.now()) / 1000));
+  });
 
   useEffect(() => {
-    setRemaining(Math.max(0, secondsUntil(charge.expiresAt)));
-    const id = window.setInterval(() => {
-      setRemaining(Math.max(0, secondsUntil(charge.expiresAt)));
-    }, 1000);
-    return () => window.clearInterval(id);
-  }, [charge.expiresAt]);
+    const updateCountdown = () => {
+      const diff = Math.max(0, Math.floor((targetTimestamp - Date.now()) / 1000));
+      setRemaining(diff);
+    };
+
+    updateCountdown();
+    const timerId = window.setInterval(updateCountdown, 1000);
+    return () => window.clearInterval(timerId);
+  }, [targetTimestamp]);
 
   const urgencyPercent = Math.max(0, Math.min(100, (remaining / totalSeconds) * 100));
   const urgencyTone =
@@ -917,7 +934,7 @@ export function PixCheckout({
       productName: prodName,
       productId,
       paymentMethod: "pix",
-      orderId: charge?.orderId,
+      ...(charge?.orderId ? { orderId: charge.orderId } : {}),
     });
 
     trackQuizStep({

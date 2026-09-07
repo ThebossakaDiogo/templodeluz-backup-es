@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Halos, Reveal, Stars, Footer } from "@/components/funnel/Shell";
 import { PixCheckout } from "@/components/funnel/PixCheckout";
 import { StripeCardModal } from "@/components/funnel/StripeCardModal";
+import { WhatsAppContactModal } from "@/components/funnel/WhatsAppContactModal";
 import { IMAGES } from "@/components/funnel/data";
 import { useSurgeryGoalSimulation } from "@/lib/donation-simulation";
 
@@ -122,6 +123,7 @@ export function AjudaMilenaPage() {
   const [isCustom, setIsCustom] = useState<boolean>(false);
   const [donorIdx, setDonorIdx] = useState(0);
   const [stripeModalOpen, setStripeModalOpen] = useState(false);
+  const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false);
   const [isRetorno, setIsRetorno] = useState(false);
 
   useEffect(() => {
@@ -526,6 +528,65 @@ export function AjudaMilenaPage() {
               <p className="text-[12px] text-[#786445] leading-relaxed">
                 ✨ Após confirmar o pagamento PIX ou Cartão, você será redirecionado(a) automaticamente.
               </p>
+
+              {/* Botão de WhatsApp Oficial - Espaçoso, Elegante e Direto */}
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => setWhatsAppModalOpen(true)}
+                  className="group relative w-full overflow-hidden rounded-2xl bg-gradient-to-r from-[#128C7E] via-[#25D366] to-[#075E54] p-3.5 sm:p-4 text-white shadow-md shadow-emerald-900/15 hover:shadow-lg hover:shadow-emerald-900/25 active:scale-[0.99] transition-all text-left cursor-pointer"
+                >
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
+
+                  <div className="flex items-center gap-3 relative z-10">
+                    <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-[#25D366] shadow-sm">
+                      <svg
+                        className="w-6 h-6 text-[#25D366]"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.694.062-1.107-.07-.251-.08-.574-.188-.988-.369-1.758-.767-2.903-2.545-2.991-2.663-.088-.118-.718-.956-.718-1.822 0-.866.453-1.293.614-1.469.161-.177.351-.221.468-.221.117 0 .234.001.336.006.107.005.251-.041.393.298.146.351.498 1.214.542 1.303.044.088.073.192.015.308-.059.117-.088.19-.176.293-.088.103-.186.23-.265.31-.088.088-.18.184-.078.36.103.176.458.756.983 1.224.676.602 1.246.789 1.422.877.176.088.279.074.382-.044.103-.117.439-.512.556-.688.117-.176.235-.147.396-.088.161.059 1.026.484 1.202.572.176.088.293.132.337.206.044.074.044.43-.1 1.035z" />
+                        <path d="M12 2C6.477 2 2 6.477 2 12c0 1.891.523 3.664 1.435 5.186L2.1 22l4.98-1.306A9.958 9.958 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18.2c-1.635 0-3.15-.494-4.414-1.343l-.316-.214-2.95.774.787-2.876-.234-.336A8.163 8.163 0 0 1 3.8 12c0-4.521 3.679-8.2 8.2-8.2 4.521 0 8.2 3.679 8.2 8.2 0 4.521-3.679 8.2-8.2 8.2z" />
+                      </svg>
+                      <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-200 opacity-80" />
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-[#25D366] border-2 border-white" />
+                      </span>
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-100 bg-black/15 px-2 py-0.5 rounded-md">
+                          WhatsApp Oficial
+                        </span>
+                        <span className="text-[10.5px] font-semibold text-emerald-100/90">
+                          Médium Milena
+                        </span>
+                      </div>
+                      <div className="text-[14px] sm:text-[15px] font-black text-white leading-snug mt-0.5">
+                        Falar com a Médium no WhatsApp
+                      </div>
+                      <p className="text-[11.5px] text-emerald-100/90 leading-tight mt-0.5 truncate">
+                        Dúvidas sobre a cirurgia, acolhimento ou doação? Toque aqui
+                      </p>
+                    </div>
+
+                    <div className="shrink-0 flex items-center justify-center h-8 w-8 rounded-full bg-white/20 text-white font-black text-sm group-hover:bg-white group-hover:text-emerald-700 transition-all">
+                      ›
+                    </div>
+                  </div>
+                </button>
+              </div>
+
+              <WhatsAppContactModal
+                isOpen={whatsAppModalOpen}
+                onClose={() => setWhatsAppModalOpen(false)}
+                nomeConsulente="Consulente"
+                nomeEnte="Ente Querido"
+                grauParentesco="Familiar"
+                mensagemPreview="Gostaria de falar com a Médium Milena Medeiros sobre a cirurgia e a carta psicografada."
+              />
 
               <Link
                 to="/como-funciona"
