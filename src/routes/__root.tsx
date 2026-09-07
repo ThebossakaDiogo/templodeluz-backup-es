@@ -292,7 +292,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   useEffect(() => {
-    captureAndStoreUtms(true);
+    captureAndStoreUtms();
     initMetaPixel();
   }, []);
 

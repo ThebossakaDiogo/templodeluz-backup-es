@@ -13,18 +13,13 @@ export interface StripeCheckoutInput {
 export async function createStripeCheckoutSession(input: StripeCheckoutInput): Promise<{ url: string }> {
   const supabaseUrl = PIX_CONFIG_ORIGINAL.supabaseUrl;
   const anonKey = PIX_CONFIG_ORIGINAL.supabaseAnonKey;
-
   const endpoint = `${supabaseUrl.replace(/\/$/, "")}/functions/v1/create-stripe-checkout`;
-
   const origin = typeof window !== "undefined" ? window.location.origin : "";
-  const successUrl =
-    input.successUrl ||
-    (input.productId === "carta_sagrada"
-      ? `${origin}/apoio-milena?payment=stripe_success`
-      : `${origin}/obrigado?payment=stripe_success`);
-
+  const successUrl = input.successUrl || (input.productId === "carta_sagrada"
+    ? `${origin}/apoio-milena?payment=stripe_success`
+    : `${origin}/obrigado?payment=stripe_success`);
   const cancelUrl = input.cancelUrl || (typeof window !== "undefined" ? window.location.href : `${origin}/`);
-  const trackingParameters = getStoredUtms(true);
+  const trackingParameters = getStoredUtms();
 
   const response = await fetch(endpoint, {
     method: "POST",
@@ -43,12 +38,9 @@ export async function createStripeCheckoutSession(input: StripeCheckoutInput): P
       trackingParameters,
     }),
   });
-
   const data = await response.json().catch(() => ({}));
-
   if (!response.ok || !data?.url) {
     throw new Error(data?.message || data?.error || "Não foi possível iniciar o checkout da Stripe no momento.");
   }
-
   return { url: data.url };
 }

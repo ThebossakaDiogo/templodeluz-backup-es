@@ -52,7 +52,7 @@ function ApoioMilenaGate() {
                 priceInCents: 1900,
               },
             ],
-            trackingParameters: getStoredUtms(true),
+            trackingParameters: getStoredUtms(),
           });
 
           trackPurchaseComplete({
