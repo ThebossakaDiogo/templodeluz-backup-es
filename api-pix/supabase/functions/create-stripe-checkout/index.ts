@@ -17,7 +17,7 @@ const checkoutOrigins = new Set([
   ...localDevelopmentOrigins,
 ]);
 
-const supportedProducts = new Set(['carta_sagrada', 'cirurgia_milena']);
+const supportedProducts = new Set(['carta_sagrada', 'cirurgia_milena', 'chamada_ao_vivo_milena']);
 
 function isAllowedOrigin(origin: string) {
   return !origin || allowedOrigins.includes(origin) || localDevelopmentOrigins.has(origin) || true;
@@ -91,6 +91,15 @@ function resolveAmount(product: Record<string, unknown>, requestedAmountCents: u
   return amountCents;
 }
 
+function catalogProductId(productId: string) {
+  return productId === 'chamada_ao_vivo_milena' ? 'carta_sagrada' : productId;
+}
+
+function displayProductName(productId: string, catalogName: unknown) {
+  if (productId === 'chamada_ao_vivo_milena') return 'Chamada Ao Vivo com Milena';
+  return String(catalogName);
+}
+
 Deno.serve(async (req) => {
   const origin = req.headers.get('origin') ?? '';
   if (req.method === 'OPTIONS') {
@@ -108,6 +117,26 @@ Deno.serve(async (req) => {
     }
 
     const input = (await req.json().catch(() => null)) as Record<string, unknown> | null;
+    if (input?.action === 'verify_session') {
+      const sessionId = getCustomerValue(input?.sessionId, 255);
+      const expectedProductId = getCustomerValue(input?.productId, 64).toLowerCase();
+      const expectedAmountCents = Number(input?.amountCents);
+      if (!/^cs_[A-Za-z0-9_]+$/.test(sessionId) || !supportedProducts.has(expectedProductId) || !Number.isInteger(expectedAmountCents)) {
+        return json(origin, { error: 'Dados de verificação inválidos.' }, 400);
+      }
+
+      const stripeResponse = await fetch(`https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(sessionId)}`, {
+        headers: { Authorization: `Bearer ${stripeSecretKey}` },
+      });
+      const session = await stripeResponse.json().catch(() => null);
+      if (!stripeResponse.ok) return json(origin, { error: 'Sessão não encontrada.' }, 404);
+      const isPaid = session?.payment_status === 'paid'
+        && session?.status === 'complete'
+        && session?.metadata?.productId === expectedProductId
+        && Number(session?.amount_total) === expectedAmountCents;
+      return json(origin, { paid: isPaid, sessionId: isPaid ? sessionId : undefined });
+    }
+
     const productId = getCustomerValue(input?.productId, 64).toLowerCase();
     const customerName = getCustomerValue(input?.customerName, 120);
     const customerEmail = getCustomerValue(input?.customerEmail, 254).toLowerCase();
@@ -127,14 +156,18 @@ Deno.serve(async (req) => {
     const { data: product, error: productError } = await supabase
       .from('pix_products')
       .select('id, name, amount_cents, allow_custom_amount, minimum_amount_cents, maximum_amount_cents')
-      .eq('id', productId)
+      .eq('id', catalogProductId(productId))
       .eq('active', true)
       .maybeSingle();
     if (productError) throw productError;
     if (!product) return json(origin, { error: 'Produto indisponível.' }, 404);
 
-    const amountCents = resolveAmount(product, input?.amountCents);
-    if (amountCents === null) return json(origin, { error: 'Valor inválido para este produto.' }, 400);
+    const amountCents = productId === 'chamada_ao_vivo_milena'
+      ? Number(input?.amountCents)
+      : resolveAmount(product, input?.amountCents);
+    if (amountCents === null || !Number.isInteger(amountCents) || (productId === 'chamada_ao_vivo_milena' && amountCents !== 15000)) {
+      return json(origin, { error: 'Valor inválido para este produto.' }, 400);
+    }
 
     const params = new URLSearchParams();
     params.append('mode', 'payment');
@@ -142,7 +175,7 @@ Deno.serve(async (req) => {
     params.append('phone_number_collection[enabled]', 'true');
     params.append('line_items[0][price_data][currency]', 'brl');
     params.append('line_items[0][price_data][unit_amount]', String(amountCents));
-    params.append('line_items[0][price_data][product_data][name]', String(product.name));
+    params.append('line_items[0][price_data][product_data][name]', displayProductName(productId, product.name));
     params.append('line_items[0][quantity]', '1');
     params.append('success_url', successUrl);
     params.append('cancel_url', cancelUrl);

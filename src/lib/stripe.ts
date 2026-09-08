@@ -3,7 +3,7 @@ import { getStoredUtms } from "./utmify";
 
 export interface StripeCheckoutInput {
   amountCents: number;
-  productId: "carta_sagrada" | "cirurgia_milena";
+  productId: "carta_sagrada" | "cirurgia_milena" | "chamada_ao_vivo_milena";
   productName: string;
   customerName?: string;
   successUrl?: string;
@@ -40,4 +40,20 @@ export async function createStripeCheckoutSession(input: StripeCheckoutInput): P
     throw new Error(data?.message || data?.error || "Não foi possível iniciar o checkout da Stripe no momento.");
   }
   return { url: data.url };
+}
+
+export async function verifyStripeCheckoutSession(input: {
+  readonly sessionId: string;
+  readonly productId: StripeCheckoutInput["productId"];
+  readonly amountCents: number;
+}): Promise<boolean> {
+  const endpoint = `${PIX_CONFIG_ORIGINAL.supabaseUrl.replace(/\/$/, "")}/functions/v1/create-stripe-checkout`;
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: pixFunctionHeaders(),
+    body: JSON.stringify({ action: "verify_session", ...input }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data?.error || "Não foi possível validar o pagamento por cartão.");
+  return data?.paid === true;
 }

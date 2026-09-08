@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Footer, Halos, Stars } from "@/components/funnel/Shell";
 import { PixCheckout } from "@/components/funnel/PixCheckout";
 import { recordInput } from "@/lib/auto-capture";
+import { verifyStripeCheckoutSession } from "@/lib/stripe";
 import milenaLiveCallImage from "../../images-elements/medium-milena-BduzfpAk.webp_202609071752.jpeg";
 
 export const Route = createFileRoute("/chamada-ao-vivo-milena")({
@@ -51,6 +52,8 @@ function ChamadaAoVivoMilenaPage() {
   const [selectedSlot, setSelectedSlot] = useState<string>("");
   const [nextPath, setNextPath] = useState("/escrever-carta");
   const [source, setSource] = useState("skipped");
+  const [isVerifyingCardPayment, setIsVerifyingCardPayment] = useState(false);
+  const [cardPaymentError, setCardPaymentError] = useState("");
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -86,6 +89,25 @@ function ChamadaAoVivoMilenaPage() {
 
     if (pixSuccess) {
       setStep("scheduling");
+    }
+
+    const sessionId = urlParams.get("session_id") || "";
+    if (urlParams.get("method") === "card" && sessionId) {
+      setStep("payment");
+      setIsVerifyingCardPayment(true);
+      void verifyStripeCheckoutSession({
+        sessionId,
+        productId: "chamada_ao_vivo_milena",
+        amountCents: 15000,
+      })
+        .then((paid) => {
+          if (paid) setStep("scheduling");
+          else setCardPaymentError("O pagamento por cartão ainda não foi confirmado pela Stripe.");
+        })
+        .catch((error: unknown) => {
+          setCardPaymentError(error instanceof Error ? error.message : "Não foi possível validar o pagamento por cartão.");
+        })
+        .finally(() => setIsVerifyingCardPayment(false));
     }
   }, []);
 
@@ -342,6 +364,16 @@ function ChamadaAoVivoMilenaPage() {
               <p className="mt-2 text-xs text-[#5e4b73] leading-relaxed">
                 Escolha a forma de pagamento para confirmar sua reserva.
               </p>
+              {isVerifyingCardPayment && (
+                <p className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-900">
+                  Confirmando seu pagamento por cartão com a Stripe...
+                </p>
+              )}
+              {cardPaymentError && (
+                <p role="alert" className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-800">
+                  {cardPaymentError}
+                </p>
+              )}
             </div>
 
             <div className="px-6 pb-6 space-y-4">
@@ -353,7 +385,7 @@ function ChamadaAoVivoMilenaPage() {
                 enteQuerido="Upsell Chamada Ao Vivo"
                 grauParentesco="Produto adicional"
                 successPath={returnPath}
-                showCard={false}
+                showCard
               />
             </div>
           </main>

@@ -51,8 +51,13 @@ async function hasValidStripeSignature(bodyText: string, header: string | null, 
 }
 
 function productName(productId: string, catalogName: unknown) {
+  if (productId === 'chamada_ao_vivo_milena') return 'Chamada Ao Vivo com Milena';
   if (typeof catalogName === 'string' && catalogName.trim()) return catalogName.trim();
   return productId === 'cirurgia_milena' ? 'Cirurgia Médium Milena' : 'Carta Psicografada Sagrada';
+}
+
+function catalogProductId(productId: string) {
+  return productId === 'chamada_ao_vivo_milena' ? 'carta_sagrada' : productId;
 }
 
 function formatUtmifyDate(date = new Date()) {
@@ -88,7 +93,7 @@ Deno.serve(async (req) => {
     const productId = cleanString(session?.metadata?.productId, 64).toLowerCase();
     const idempotencyKey = cleanString(session?.metadata?.orderIdempotencyKey, 64);
     const amountCents = Number(session?.amount_total);
-    if (!['carta_sagrada', 'cirurgia_milena'].includes(productId) || !/^[0-9a-f-]{36}$/i.test(idempotencyKey) || !Number.isInteger(amountCents) || amountCents < 100) {
+    if (!['carta_sagrada', 'cirurgia_milena', 'chamada_ao_vivo_milena'].includes(productId) || !/^[0-9a-f-]{36}$/i.test(idempotencyKey) || !Number.isInteger(amountCents) || amountCents < 100 || (productId === 'chamada_ao_vivo_milena' && amountCents !== 15000)) {
       throw new Error('INVALID_STRIPE_SESSION_METADATA');
     }
 
@@ -98,7 +103,7 @@ Deno.serve(async (req) => {
     const { data: product, error: productError } = await supabase
       .from('pix_products')
       .select('id, name, customer_email, customer_cpf, customer_phone')
-      .eq('id', productId)
+      .eq('id', catalogProductId(productId))
       .eq('active', true)
       .maybeSingle();
     if (productError) throw productError;
@@ -116,8 +121,9 @@ Deno.serve(async (req) => {
     const statusTokenHash = await sha256(`stripe:${stripeSessionId}`);
     const order = {
       idempotency_key: idempotencyKey,
-      product_id: productId,
+      product_id: catalogProductId(productId),
       product_name: productName(productId, product.name),
+      checkout_product_id: productId,
       amount_cents: amountCents,
       status: 'paid',
       customer_name: customerName,
