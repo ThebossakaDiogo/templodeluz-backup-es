@@ -1221,24 +1221,27 @@ function Loading({
   return (
     <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-gradient-to-b from-[#281044] via-[#19092b] to-[#0f0619] px-4 py-8 text-center text-white sm:px-6">
       <Halos />
-      <div className="relative z-10 w-full max-w-[430px] rounded-[30px] border border-white/15 bg-white/[0.075] p-5 shadow-[0_28px_90px_-30px_rgba(0,0,0,0.85)] backdrop-blur-xl sm:p-7">
-        <span className="inline-flex rounded-full border border-amber-300/30 bg-amber-200/10 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.16em] text-amber-200">
+      <div className="relative z-10 w-full max-w-[410px] overflow-hidden rounded-[28px] border border-white/15 bg-[radial-gradient(circle_at_50%_0%,rgba(145,91,172,0.22),transparent_42%),rgba(255,255,255,0.075)] p-5 shadow-[0_28px_90px_-30px_rgba(0,0,0,0.85)] backdrop-blur-xl sm:max-w-[430px] sm:p-7">
+        <div className="pointer-events-none absolute -left-16 top-16 h-36 w-36 rounded-full bg-[#8f55ae]/15 blur-3xl" />
+        <div className="pointer-events-none absolute -right-20 bottom-12 h-40 w-40 rounded-full bg-amber-400/10 blur-3xl" />
+        <span className="relative inline-flex items-center gap-2 rounded-full border border-amber-300/35 bg-amber-200/10 px-3.5 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.16em] text-amber-200 shadow-[inset_0_1px_rgba(255,255,255,0.12)]">
+          <span className="h-1.5 w-1.5 rounded-full bg-amber-300 shadow-[0_0_8px_rgba(251,191,36,0.9)]" />
           Preparação protegida
         </span>
 
-        <div className="mt-2 flex justify-center">
+        <div className="relative mt-1 flex justify-center">
           <SacredCandle />
         </div>
 
-        <h2 className="font-display text-[24px] font-black leading-tight text-white sm:text-[27px]">
+        <h2 className="relative mx-auto max-w-[330px] font-display text-[25px] font-black leading-[1.12] text-white sm:max-w-none sm:text-[27px]">
           Estamos preparando seu pedido, {primeiroNome}
         </h2>
-        <p className="mx-auto mt-2 max-w-[340px] text-[13px] leading-relaxed text-[#d9cce7]">
+        <p className="relative mx-auto mt-2.5 max-w-[330px] text-[13px] leading-relaxed text-[#d9cce7]">
           Aguarde alguns instantes enquanto organizamos as informações de {primeiroEnte} com
           cuidado.
         </p>
 
-        <div className="mt-5">
+        <div className="relative mt-5 rounded-2xl border border-white/10 bg-black/15 p-3.5">
           <progress
             value={pct}
             max={100}
@@ -1247,20 +1250,20 @@ function Loading({
           />
           <div
             aria-hidden="true"
-            className="h-2.5 overflow-hidden rounded-full border border-white/10 bg-black/35 p-0.5"
+            className="h-2.5 overflow-hidden rounded-full border border-white/10 bg-black/45 p-0.5 shadow-inner"
           >
             <div
               className="h-full rounded-full bg-gradient-to-r from-amber-300 via-amber-400 to-orange-400 shadow-[0_0_14px_rgba(251,191,36,0.45)] transition-[width] duration-300 ease-out"
               style={{ width: `${pct}%` }}
             />
           </div>
-          <div className="mt-2 flex items-center justify-between text-[10.5px] font-bold text-[#cfc0dc]">
-            <span>{stages[activeStage]?.title}</span>
-            <span className="text-amber-300">{pct}%</span>
+          <div className="mt-2.5 flex items-center justify-between text-[10.5px] font-bold text-[#cfc0dc]">
+            <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-emerald-300 animate-pulse" />{stages[activeStage]?.title}</span>
+            <span className="rounded-full bg-amber-300/10 px-2 py-0.5 text-amber-200">{pct}%</span>
           </div>
         </div>
 
-        <div className="mt-5 space-y-2 text-left">
+        <div className="relative mt-5 space-y-2 text-left">
           {stages.map((stage, index) => {
             const isComplete = index < activeStage || pct === 100;
             const isActive = index === activeStage && pct < 100;
