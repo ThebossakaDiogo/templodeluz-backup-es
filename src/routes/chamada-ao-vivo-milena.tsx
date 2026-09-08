@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Footer, Halos, Stars } from "@/components/funnel/Shell";
 import { PixCheckout } from "@/components/funnel/PixCheckout";
-import { trackPurchaseComplete } from "@/lib/metaPixel";
 import { recordInput } from "@/lib/auto-capture";
 import milenaLiveCallImage from "../../images-elements/medium-milena-BduzfpAk.webp_202609071752.jpeg";
 
@@ -70,26 +69,23 @@ function ChamadaAoVivoMilenaPage() {
       // Mantém o campo vazio se o armazenamento estiver indisponível ou corrompido.
     }
 
-    const stripeSuccess = urlParams.get("method") === "card" && urlParams.has("session_id");
-    const pixSuccess = urlParams.get("method") === "pix" && urlParams.has("orderId");
-
-    if (stripeSuccess || pixSuccess) {
-      const sid = urlParams.get("session_id") || urlParams.get("orderId") || "";
-      setStep("scheduling");
-
-      if (stripeSuccess) {
-        const storageKey = `templodeluz:chamada-card-pixel:${sid}`;
-        if (!sessionStorage.getItem(storageKey)) {
-          sessionStorage.setItem(storageKey, "true");
-          trackPurchaseComplete({
-            amountCents: 15000,
-            productName: "Chamada Ao Vivo com Milena",
-            productId: "chamada_ao_vivo_milena",
-            paymentMethod: "cartao",
-            orderId: sid || `stripe_chamada_${Date.now()}`,
-          });
-        }
+    const orderId = urlParams.get("orderId") || "";
+    let pixSuccess = false;
+    if (urlParams.get("method") === "pix" && orderId) {
+      try {
+        const receipt = JSON.parse(
+          sessionStorage.getItem(`templodeluz:payment-receipt:${orderId}`) || "null",
+        ) as { productId?: string; amountCents?: number; method?: string } | null;
+        pixSuccess = receipt?.productId === "chamada_ao_vivo_milena"
+          && receipt?.amountCents === 15000
+          && receipt?.method === "pix";
+      } catch {
+        pixSuccess = false;
       }
+    }
+
+    if (pixSuccess) {
+      setStep("scheduling");
     }
   }, []);
 
@@ -357,6 +353,7 @@ function ChamadaAoVivoMilenaPage() {
                 enteQuerido="Upsell Chamada Ao Vivo"
                 grauParentesco="Produto adicional"
                 successPath={returnPath}
+                showCard={false}
               />
             </div>
           </main>
@@ -448,12 +445,12 @@ function ChamadaAoVivoMilenaPage() {
                 </svg>
               </div>
               <h2 className="font-display text-2xl font-black text-[#181126]">
-                Horário Selecionado!
+                Horário Pré-selecionado!
               </h2>
               <p className="text-sm text-[#5e4b73] max-w-sm mx-auto leading-relaxed">
-                Sua chamada ao vivo com a médium Milena Medeiros foi reservada para{" "}
-                <strong>{selectedDate}</strong>. Envie a confirmação no WhatsApp para receber o link
-                de acesso.
+                Você escolheu <strong>{selectedDate}</strong> para a chamada ao vivo com a médium
+                Milena Medeiros. Envie a confirmação no WhatsApp para validar a disponibilidade e
+                receber o link de acesso.
               </p>
 
               <div className="pt-4 space-y-3">
@@ -471,7 +468,7 @@ function ChamadaAoVivoMilenaPage() {
                   </div>
                   <div className="flex justify-between text-xs font-bold text-[#181126] mt-1">
                     <span>Status</span>
-                    <span className="text-emerald-600">Confirmado</span>
+                    <span className="text-amber-700">Aguardando confirmação</span>
                   </div>
                 </div>
                 <a

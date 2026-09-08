@@ -16,58 +16,14 @@ export const Route = createFileRoute("/apoio-milena")({
   component: ApoioMilenaGate,
 });
 
-import { getStoredUtms, sendUtmifyOrder } from "@/lib/utmify";
-import { trackPurchaseComplete } from "@/lib/metaPixel";
-
 function ApoioMilenaGate() {
   const [paid, setPaid] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const urlParams = new URLSearchParams(window.location.search);
-      const isStripe = urlParams.get("payment") === "stripe_success" || urlParams.get("session_id");
-
-      if (isStripe) {
-        sessionStorage.setItem("templodeluz:pix-paid", "true");
-        setPaid(true);
-
-        // Garante que o evento Stripe seja enviado apenas 1 vez para a UTMify e Meta Pixel
-        const alreadySent = sessionStorage.getItem("utmify_sent_stripe_carta");
-        if (!alreadySent) {
-          sessionStorage.setItem("utmify_sent_stripe_carta", "true");
-
-          void sendUtmifyOrder({
-            orderId: urlParams.get("session_id") || `stripe_carta_${Date.now()}`,
-            platform: "TemploDeLuz",
-            paymentMethod: "credit_card",
-            status: "paid",
-            customer: {
-              name: "Consulente Templo de Luz",
-            },
-            products: [
-              {
-                id: "carta_sagrada",
-                name: "Carta Psicografada Sagrada",
-                quantity: 1,
-                priceInCents: 1900,
-              },
-            ],
-            trackingParameters: getStoredUtms(),
-          });
-
-          trackPurchaseComplete({
-            amountCents: 1900,
-            productName: "Carta Psicografada Sagrada",
-            productId: "carta_sagrada",
-            paymentMethod: "cartao",
-            orderId: urlParams.get("session_id") || `stripe_carta_${Date.now()}`,
-          });
-        }
-        return;
-      }
+      const flag = sessionStorage.getItem("templodeluz:pix-paid");
+      setPaid(flag === "true");
     }
-    const flag = sessionStorage.getItem("templodeluz:pix-paid");
-    setPaid(flag === "true");
   }, []);
 
   // Loading

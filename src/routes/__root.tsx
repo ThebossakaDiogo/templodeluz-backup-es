@@ -113,7 +113,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "canonical", href: "https://templodeluz.com" },
       { rel: "preconnect", href: "https://opftmzegcvfyoinjfmcj.supabase.co", crossOrigin: "anonymous" },
       { rel: "dns-prefetch", href: "https://opftmzegcvfyoinjfmcj.supabase.co" },
-      { rel: "dns-prefetch", href: "https://cdn.utmify.com.br" },
       { rel: "dns-prefetch", href: "https://connect.facebook.net" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
@@ -167,7 +166,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 import { LiveActivityToast } from "@/components/funnel/LiveActivityToast";
 import { captureAndStoreUtms } from "@/lib/utmify";
-import { initMetaPixel } from "@/lib/metaPixel";
+import { getMetaBrowserAttribution } from "@/lib/metaPixel";
 import { useEffect } from "react";
 
 function RootShell({ children }: { readonly children: ReactNode }) {
@@ -175,84 +174,6 @@ function RootShell({ children }: { readonly children: ReactNode }) {
     <html lang="pt-BR">
       <head>
         <HeadContent />
-        {/* ─── NORMALIZAÇÃO DE UTM (META / GOOGLE) ───
-             Roda antes do UTMify para padronizar utm_source/xcod e
-             colar o click-id da origem. Leve e síncrono (sem impacto). */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function () {
-              var POLL_MS = 500;
-              var UTM_SEP = "jLj";
-              var XCOD_SEP = "hQwK21wXxR";
-              var STORAGE_KEY = { FB: "lead", google: "lead-google" };
-              function getOrigin(utmSource) {
-                if (!utmSource) return null;
-                var base = utmSource.split(UTM_SEP)[0];
-                switch (base.toLowerCase()) {
-                  case "fb": return "FB";
-                  case "google": return "google";
-                  default: return null;
-                }
-              }
-              function getLeadIdFromStorage(origin) {
-                var key = STORAGE_KEY[origin];
-                if (!key) return null;
-                var raw = null; try { raw = localStorage.getItem(key); } catch (e) {}
-                if (!raw) return null;
-                try { var obj = JSON.parse(raw); return obj && obj._id ? String(obj._id) : null; } catch (e) { return null; }
-              }
-              function resolveLeadId(utmSource, origin) {
-                var prefix = origin + UTM_SEP;
-                if (utmSource && utmSource.indexOf(prefix) === 0) {
-                  var id = utmSource.slice(prefix.length);
-                  if (id) return id;
-                }
-                return getLeadIdFromStorage(origin);
-              }
-              function applyIfNeeded() {
-                var url = new URL(window.location.href);
-                var currentSource = url.searchParams.get("utm_source");
-                var origin = getOrigin(currentSource);
-                if (!origin) return false;
-                var id = resolveLeadId(currentSource, origin);
-                if (!id) return false;
-                var desired = origin + UTM_SEP + id;
-                var changed = false;
-                if (currentSource !== desired) { url.searchParams.set("utm_source", desired); changed = true; }
-                var currentXcod = url.searchParams.get("xcod");
-                if (currentXcod) {
-                  var parts = currentXcod.split(XCOD_SEP);
-                  if (parts[0] !== desired) { parts[0] = desired; url.searchParams.set("xcod", parts.join(XCOD_SEP)); changed = true; }
-                }
-                if (!changed) return true;
-                if (window.history && window.history.replaceState) { window.history.replaceState(null, "", url.toString()); return true; }
-                window.location.replace(url.toString());
-                return true;
-              }
-              if (applyIfNeeded()) return;
-              var interval = setInterval(function () { if (applyIfNeeded()) clearInterval(interval); }, POLL_MS);
-            })();`,
-          }}
-        />
-        {/* ─── UTMIFY TRACKING SCRIPTS ─── */}
-        <script
-          src="https://cdn.utmify.com.br/scripts/utms/latest.js"
-          data-utmify-prevent-subids
-          async
-          defer
-        />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.pixelId = "Szz1ObkJ95rX3A8C3M7VcjACLPHBRAr5HGx4";
-              var a = document.createElement("script");
-              a.setAttribute("async", "");
-              a.setAttribute("defer", "");
-              a.src = "https://cdn.utmify.com.br/scripts/pixel/pixel.js";
-              document.head.appendChild(a);
-            `,
-          }}
-        />
         {/* ─── META PIXEL (FACEBOOK ADS) ─── */}
         <script
           dangerouslySetInnerHTML={{
@@ -293,7 +214,8 @@ function RootComponent() {
 
   useEffect(() => {
     captureAndStoreUtms();
-    initMetaPixel();
+    // O Pixel já é inicializado no head; aqui apenas preservamos fbclid/_fbc para o checkout.
+    getMetaBrowserAttribution();
   }, []);
 
   return (

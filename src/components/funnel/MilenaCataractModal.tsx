@@ -8,6 +8,7 @@ import { getStoredUtms } from "@/lib/utmify";
 import { PIX_CONFIG_ORIGINAL as config, pixFunctionHeaders } from "@/lib/pix-config";
 import { trackQuizStep, syncLeadPhone, syncLeadPhoneImmediate, getTelemetrySessionId } from "@/lib/funnel-telemetry";
 import { useSurgeryGoalSimulation } from "@/lib/donation-simulation";
+import { parseBrazilianCurrency, sanitizeBrazilianCurrencyInput } from "@/lib/currency";
 
 export interface MilenaCataractModalProps {
   readonly isOpen: boolean;
@@ -129,7 +130,7 @@ export function MilenaCataractModal({
   const paymentHandledRef = useRef(false);
   const cataractSim = useSurgeryGoalSimulation();
   const effectiveAmountCents = isCustom
-    ? Math.max(500, (Number(customValue.replace(/\D/g, "")) || 5) * 100)
+    ? Math.max(1000, Math.round((parseBrazilianCurrency(customValue) || 10) * 100))
     : amountCents;
 
   // Recupera dados capturados no quiz
@@ -218,7 +219,6 @@ export function MilenaCataractModal({
   const formattedAmount = (effectiveAmountCents / 100).toFixed(2).replace(".", ",");
 
   const presets = [
-    { val: 500, label: "R$ 5", tag: "Mínimo" },
     { val: 1000, label: "R$ 10", tag: "Vela Sagrada" },
     { val: 1500, label: "R$ 15", tag: "Mais Escolhido", highlight: true },
     { val: 2500, label: "R$ 25", tag: "Corrente de Fé" },
@@ -233,9 +233,8 @@ export function MilenaCataractModal({
   };
 
   const handleCustomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value.replace(/\D/g, "");
     setIsCustom(true);
-    setCustomValue(raw);
+    setCustomValue(sanitizeBrazilianCurrencyInput(e.target.value));
     setCharge(null);
   };
 
@@ -250,8 +249,8 @@ export function MilenaCataractModal({
       return;
     }
 
-    if (effectiveAmountCents < 500) {
-      setError("O valor mínimo solidário para a consagração é de R$ 5,00.");
+    if (effectiveAmountCents < 1000) {
+      setError("O valor mínimo solidário para a consagração é de R$ 10,00.");
       return;
     }
 
@@ -368,7 +367,7 @@ export function MilenaCataractModal({
                 <span className="text-xl shrink-0 mt-0.5">🕯️</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-[12px] text-[#78350f] leading-relaxed">
-                    Antes de encaminhar sua carta ao WhatsApp da médium, junte-se aos irmãos do templo: uma contribuição simbólica a partir de <strong>R$ 5,00</strong> ajuda no custo do procedimento cirúrgico nos olhos e cobre a vela de 7 dias, garantindo que as cartas continuem sendo psicografadas.
+                    Antes de encaminhar sua carta ao WhatsApp da médium, junte-se aos irmãos do templo: uma contribuição simbólica a partir de <strong>R$ 10,00</strong> ajuda no custo do procedimento cirúrgico nos olhos e cobre a vela de 7 dias, garantindo que as cartas continuem sendo psicografadas.
                   </p>
 
                   {/* Barra de Progresso Solidária Dinâmica da Catarata */}
@@ -401,7 +400,7 @@ export function MilenaCataractModal({
                   Escolha o valor da sua contribuição fraterna:
                 </span>
                 <span className="text-[10px] font-extrabold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-                  Mínimo R$ 5,00
+                  Mínimo R$ 10,00
                 </span>
               </div>
 
@@ -464,10 +463,10 @@ export function MilenaCataractModal({
                   </span>
                   <input
                     type="text"
-                    inputMode="numeric"
+                    inputMode="decimal"
                     value={customValue}
                     onChange={handleCustomChange}
-                    placeholder="Digite o valor (mínimo 5)"
+                    placeholder="Ex: 25 ou 19,90 (mínimo 10)"
                     className="w-full pl-9 pr-3 py-2.5 rounded-xl border-2 border-purple-400 text-xs font-bold text-stone-900 outline-hidden focus:border-[#2d144d] shadow-2xs"
                   />
                 </div>

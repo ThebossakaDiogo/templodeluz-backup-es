@@ -6,6 +6,7 @@ import { StripeCardModal } from "@/components/funnel/StripeCardModal";
 import { WhatsAppContactModal } from "@/components/funnel/WhatsAppContactModal";
 import { IMAGES } from "@/components/funnel/data";
 import { useSurgeryGoalSimulation } from "@/lib/donation-simulation";
+import { parseBrazilianCurrency, sanitizeBrazilianCurrencyInput } from "@/lib/currency";
 
 export const Route = createFileRoute("/ajuda-milena")({
   head: () => ({
@@ -143,7 +144,7 @@ export function AjudaMilenaPage() {
     return () => clearInterval(timer);
   }, []);
 
-  const activeAmount = isCustom ? Number(customInput) || 0 : selectedAmount;
+  const activeAmount = isCustom ? parseBrazilianCurrency(customInput) : selectedAmount;
   const impact = getSurgeryPsychologicalImpact(activeAmount);
   const currentDonor = RECENT_DONORS_LIST[donorIdx] ?? RECENT_DONORS_LIST[0]!;
 
@@ -154,9 +155,8 @@ export function AjudaMilenaPage() {
   };
 
   const handleCustomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value.replace(/\D/g, "");
     setIsCustom(true);
-    setCustomInput(raw);
+    setCustomInput(sanitizeBrazilianCurrencyInput(e.target.value));
   };
 
   return (
@@ -424,10 +424,10 @@ export function AjudaMilenaPage() {
                   <input
                     id="ajuda-custom-amount"
                     type="text"
-                    inputMode="numeric"
+                    inputMode="decimal"
                     value={customInput}
                     onChange={handleCustomChange}
-                    placeholder="Ex: 50"
+                    placeholder="Ex: 50 ou 19,90"
                     className="w-full pl-11 pr-4 py-2.5 rounded-xl border-2 border-[#e5daf0] focus:border-[#f59e0b] bg-white text-[16px] font-black text-[#181126] outline-hidden shadow-2xs"
                   />
                 </div>

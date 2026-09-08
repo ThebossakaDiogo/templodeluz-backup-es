@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { createStripeCheckoutSession } from "@/lib/stripe";
-import { CHECKOUT_URL } from "./data";
 import { trackInitiateDonation } from "@/lib/metaPixel";
 import { CreditCard } from "@/components/ui/credit-card";
 import { CardFlagsBadgeRow } from "./CardFlags";
@@ -102,14 +101,9 @@ export function StripeCardModal({
         throw new Error("Link da Stripe não retornado.");
       }
     } catch (err) {
-      console.warn("Stripe Checkout Session fallback:", err);
-      // Se a Edge Function da Stripe não estiver ativa ou faltar a chave secreta, usa o link de checkout alternativo
-      if (CHECKOUT_URL) {
-        window.location.href = CHECKOUT_URL;
-      } else {
-        setError(err instanceof Error ? err.message : "Não foi possível abrir o checkout da Stripe.");
-        setLoading(false);
-      }
+      console.warn("Stripe Checkout Session failed:", err);
+      setError(err instanceof Error ? err.message : "Não foi possível abrir o checkout da Stripe.");
+      setLoading(false);
     }
   };
 

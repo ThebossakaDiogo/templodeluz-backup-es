@@ -19,6 +19,7 @@ export async function createStripeCheckoutSession(input: StripeCheckoutInput): P
     : `${origin}/obrigado?payment=stripe_success`);
   const cancelUrl = input.cancelUrl || (typeof window !== "undefined" ? window.location.href : `${origin}/`);
   const trackingParameters = getStoredUtms();
+  const idempotencyKey = crypto.randomUUID();
 
   const response = await fetch(endpoint, {
     method: "POST",
@@ -31,6 +32,7 @@ export async function createStripeCheckoutSession(input: StripeCheckoutInput): P
       successUrl,
       cancelUrl,
       trackingParameters,
+      idempotencyKey,
     }),
   });
   const data = await response.json().catch(() => ({}));

@@ -3,8 +3,6 @@ import { useEffect, useState } from "react";
 import confetti from "canvas-confetti";
 import { Halos, Reveal, Stars, Card } from "@/components/funnel/Shell";
 import { IMAGES } from "@/components/funnel/data";
-import { trackPurchaseComplete } from "@/lib/metaPixel";
-import { getStoredUtms, sendUtmifyOrder } from "@/lib/utmify";
 
 export const Route = createFileRoute("/obrigado")({
   head: () => ({
@@ -50,40 +48,6 @@ function ObrigadoPage() {
     }
 
     if (typeof window !== "undefined") {
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get("payment") === "stripe_success" || urlParams.get("session_id")) {
-        const alreadySent = sessionStorage.getItem("utmify_sent_stripe_cirurgia");
-        if (!alreadySent) {
-          sessionStorage.setItem("utmify_sent_stripe_cirurgia", "true");
-          void sendUtmifyOrder({
-            orderId: urlParams.get("session_id") || `stripe_cirurgia_${Date.now()}`,
-            platform: "TemploDeLuz",
-            paymentMethod: "credit_card",
-            status: "paid",
-            customer: {
-              name: userName || "Consulente Templo de Luz",
-            },
-            products: [
-              {
-                id: "cirurgia_milena",
-                name: "Campanha Solidária - Cirurgia Médium Milena",
-                quantity: 1,
-                priceInCents: 1900,
-              },
-            ],
-            trackingParameters: getStoredUtms(),
-          });
-
-          trackPurchaseComplete({
-            amountCents: 1900,
-            productName: "Campanha Solidária - Cirurgia Médium Milena",
-            productId: "cirurgia_milena",
-            paymentMethod: "cartao",
-            orderId: urlParams.get("session_id") || `stripe_cirurgia_${Date.now()}`,
-          });
-        }
-      }
-
       const logs = localStorage.getItem("play_and_win_captured_logs");
       if (logs) {
         try {
@@ -100,7 +64,7 @@ function ObrigadoPage() {
         }
       }
     }
-  }, [userName]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#f9f6fc] text-foreground antialiased selection:bg-[#f5d285] selection:text-[#160829]">

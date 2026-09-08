@@ -29,10 +29,32 @@ export interface PixCheckoutProps {
   grauParentesco?: string | undefined;
   mensagemPreview?: string | undefined;
   successPath?: string | undefined;
+  includePaymentParams?: boolean | undefined;
+  showCard?: boolean | undefined;
 }
 
 function appendQuery(path: string, query: string) {
   return `${path}${path.includes("?") ? "&" : "?"}${query}`;
+}
+
+function storePaymentReceipt({
+  orderId,
+  productId,
+  amountCents,
+}: {
+  readonly orderId: string;
+  readonly productId: PixCheckoutProps["productId"];
+  readonly amountCents: number;
+}) {
+  if (!orderId) return;
+  try {
+    sessionStorage.setItem(
+      `templodeluz:payment-receipt:${orderId}`,
+      JSON.stringify({ productId, amountCents, method: "pix", paidAt: new Date().toISOString() }),
+    );
+  } catch {
+    // A confirmação continua na página atual quando o armazenamento está indisponível.
+  }
 }
 
 interface PixCharge {
@@ -88,9 +110,22 @@ function clearPixAttempt(productId: string, amountCents: number) {
   }
 }
 
-type PixPaymentStatus = "creating" | "pending" | "paid" | "failed" | "expired";
+type PixPaymentStatus =
+  | "creating"
+  | "pending"
+  | "paid"
+  | "failed"
+  | "expired"
+  | "in_dispute"
+  | "chargeback";
 
-const terminalStatuses = new Set<PixPaymentStatus>(["paid", "failed", "expired"]);
+const terminalStatuses = new Set<PixPaymentStatus>([
+  "paid",
+  "failed",
+  "expired",
+  "in_dispute",
+  "chargeback",
+]);
 
 const statusMessage: Record<PixPaymentStatus, string> = {
   creating: "Gerando cobrança PIX...",
@@ -98,6 +133,8 @@ const statusMessage: Record<PixPaymentStatus, string> = {
   paid: "Pagamento confirmado!",
   failed: "Falha na cobrança",
   expired: "Código PIX expirado",
+  in_dispute: "Pagamento em análise",
+  chargeback: "Pagamento estornado",
 };
 
 function PixIcon({
@@ -545,9 +582,7 @@ function PixFormView({
 function secondsUntil(expiresAt?: string | null): number {
   if (!expiresAt) return 15 * 60;
   const target = new Date(expiresAt).getTime();
-  if (Number.isFinite(target) && target > Date.now() + 10_000) {
-    return Math.max(0, Math.floor((target - Date.now()) / 1000));
-  }
+  if (Number.isFinite(target)) return Math.max(0, Math.floor((target - Date.now()) / 1000));
   return 15 * 60;
 }
 
@@ -569,6 +604,7 @@ interface PixPendingViewProps {
   readonly manualCheckNotice: string;
   readonly onCopyPix: () => void;
   readonly onManualCheck: () => void;
+  readonly onRegenerate: () => void;
   readonly isLiveCall?: boolean;
 }
 
@@ -580,15 +616,14 @@ function PixPendingView({
   manualCheckNotice,
   onCopyPix,
   onManualCheck,
+  onRegenerate,
   isLiveCall = false,
 }: Readonly<PixPendingViewProps>) {
   // Timestamp absoluto estável no futuro para contagem regressiva contínua
   const [targetTimestamp] = useState<number>(() => {
     if (charge.expiresAt) {
       const parsed = new Date(charge.expiresAt).getTime();
-      if (Number.isFinite(parsed) && parsed > Date.now() + 10_000) {
-        return parsed;
-      }
+      if (Number.isFinite(parsed)) return parsed;
     }
     return Date.now() + 15 * 60 * 1000;
   });
@@ -627,6 +662,37 @@ function PixPendingView({
         <p className="text-sm font-black">Pagamento confirmado com sucesso!</p>
         <p className="mt-1 text-xs text-emerald-700">
           Redirecionando automaticamente em instantes...
+        </p>
+      </div>
+    );
+  }
+
+  if (status === "failed" || status === "expired") {
+    return (
+      <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-center text-red-950">
+        <p className="text-sm font-black">
+          {status === "expired" ? "Este código PIX expirou." : "Não foi possível concluir esta cobrança."}
+        </p>
+        <p className="mt-1 text-xs text-red-800">
+          Gere um novo código para continuar com segurança.
+        </p>
+        <button
+          type="button"
+          onClick={onRegenerate}
+          className="mt-4 cursor-pointer rounded-xl bg-red-700 px-4 py-2.5 text-xs font-black text-white transition-colors hover:bg-red-800"
+        >
+          Gerar novo PIX
+        </button>
+      </div>
+    );
+  }
+
+  if (status === "in_dispute" || status === "chargeback") {
+    return (
+      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-center text-amber-950">
+        <p className="text-sm font-black">Pagamento indisponível para liberação automática.</p>
+        <p className="mt-1 text-xs text-amber-800">
+          Fale com o atendimento caso precise de ajuda com esta cobrança.
         </p>
       </div>
     );
@@ -875,6 +941,8 @@ export function PixCheckout({
   grauParentesco,
   mensagemPreview,
   successPath,
+  includePaymentParams = true,
+  showCard = true,
 }: Readonly<PixCheckoutProps>) {
   const initial = getInitialCapturedData();
   const [isOpen, setIsOpen] = useState(false);
@@ -1009,8 +1077,15 @@ export function PixCheckout({
     if (paidCompletionRef.current) return;
     paidCompletionRef.current = true;
     clearPixAttempt(productId, amountCents);
+    storePaymentReceipt({
+      orderId: charge?.orderId || "",
+      productId,
+      amountCents,
+    });
 
-    sessionStorage.setItem("templodeluz:pix-paid", "true");
+    if (productId === "carta_sagrada") {
+      sessionStorage.setItem("templodeluz:pix-paid", "true");
+    }
 
     // A conversão para a UTMify é registrada pelo webhook confirmado do gateway.
     // Isso evita duplicar uma compra entre cliente e servidor.
@@ -1038,14 +1113,13 @@ export function PixCheckout({
 
     const timer = setTimeout(() => {
       const target = successPath || "/obrigado";
-      window.location.href = appendQuery(
-        target,
-        `orderId=${encodeURIComponent(charge?.orderId || "")}&method=pix`,
-      );
+      window.location.href = includePaymentParams
+        ? appendQuery(target, `orderId=${encodeURIComponent(charge?.orderId || "")}&method=pix`)
+        : target;
     }, 2500);
 
     return () => clearTimeout(timer);
-  }, [status, amountCents, customerName, customerPhone, productId, prodName, charge?.orderId, resolvedEnte, resolvedGrau, mensagemPreview, initial.mensagem, successPath]);
+  }, [status, amountCents, customerName, customerPhone, productId, prodName, charge?.orderId, resolvedEnte, resolvedGrau, mensagemPreview, initial.mensagem, successPath, includePaymentParams]);
 
   const generatePix = async () => {
     if (!customerName.trim()) {
@@ -1122,6 +1196,16 @@ export function PixCheckout({
     }
   };
 
+  const regeneratePix = () => {
+    clearPixAttempt(productId, amountCents);
+    pixAttemptRef.current = null;
+    setCharge(null);
+    setStatus("creating");
+    setCopied(false);
+    setError("");
+    setManualCheckNotice("");
+  };
+
   const startStripeCheckout = async () => {
     const cleanPhone = customerPhone.replace(/\D/g, "");
     if (cleanPhone.length < 10) {
@@ -1131,6 +1215,7 @@ export function PixCheckout({
     setError("");
     setCardLoading(true);
     const payerName = customerName.trim() || "Consulente";
+    pixAttemptRef.current ||= getOrCreatePixAttempt(productId, amountCents);
 
     try {
       trackQuizStep({
@@ -1160,7 +1245,7 @@ export function PixCheckout({
       }
 
       const checkoutSuccessPath = successPath || "/obrigado";
-      const checkoutCancelPath = successPath || "/quiz";
+      const checkoutCancelPath = successPath || "/";
       const url = `${config.supabaseUrl}/functions/v1/create-stripe-checkout`;
       const response = await fetch(url, {
         method: "POST",
@@ -1172,7 +1257,9 @@ export function PixCheckout({
           customerName: payerName,
           customerEmail: customerEmail.trim() || undefined,
           customerPhone: cleanPhone,
-          successUrl: `${window.location.origin}${appendQuery(checkoutSuccessPath, "method=card&session_id={CHECKOUT_SESSION_ID}")}`,
+          telemetrySessionId: getTelemetrySessionId(),
+          idempotencyKey: pixAttemptRef.current.idempotencyKey,
+          successUrl: `${window.location.origin}${includePaymentParams ? appendQuery(checkoutSuccessPath, "method=card&session_id={CHECKOUT_SESSION_ID}") : checkoutSuccessPath}`,
           cancelUrl: `${window.location.origin}${appendQuery(checkoutCancelPath, "payment=cancelled")}`,
           trackingParameters: getUtmParams(),
         }),
@@ -1243,11 +1330,15 @@ export function PixCheckout({
             <ZapIcon className="w-3.5 h-3.5 text-emerald-600" />
             <span>PIX Instantâneo</span>
           </span>
-          <span className="h-3 w-px bg-[#d8caea]" />
-          <span className="flex items-center gap-1.5">
-            <CardIcon className="w-3.5 h-3.5 text-[#6366f1]" />
-            <span>Cartão em até 12x (Stripe)</span>
-          </span>
+          {showCard && (
+            <>
+              <span className="h-3 w-px bg-[#d8caea]" />
+              <span className="flex items-center gap-1.5">
+                <CardIcon className="w-3.5 h-3.5 text-[#6366f1]" />
+                <span>Cartão em até 12x (Stripe)</span>
+              </span>
+            </>
+          )}
           <span className="h-3 w-px bg-[#d8caea]" />
           <span className="flex items-center gap-1.5">
             <ShieldLockIcon className="w-3.5 h-3.5 text-emerald-600" />
@@ -1262,6 +1353,8 @@ export function PixCheckout({
         createPortal(
           <div
             aria-modal="true"
+            role="dialog"
+            aria-label={productId === "chamada_ao_vivo_milena" ? "Checkout da chamada ao vivo" : "Checkout da contribuição"}
             className="fixed inset-0 z-[200] flex items-end justify-center bg-black/75 backdrop-blur-sm sm:items-center sm:p-4"
           >
             <div className="fixed inset-0" onClick={() => setIsOpen(false)} aria-hidden="true" />
@@ -1291,7 +1384,7 @@ export function PixCheckout({
               </div>
 
               {/* Seletor de Abas: PIX vs Cartão Stripe */}
-              {!charge && (
+              {!charge && showCard && (
                 <div className="mb-5 flex rounded-xl border border-[#d8caea] bg-[#f8f5fc] p-1 gap-1">
                   <button
                     type="button"
@@ -1360,6 +1453,7 @@ export function PixCheckout({
                         manualCheckNotice={manualCheckNotice}
                         onCopyPix={copyPix}
                         onManualCheck={handleManualCheckStatus}
+                        onRegenerate={regeneratePix}
                         isLiveCall={productId === "chamada_ao_vivo_milena"}
                       />
                     </>
@@ -1368,7 +1462,7 @@ export function PixCheckout({
               )}
 
               {/* Conteúdo da Aba Cartão Stripe */}
-              {activeTab === "card" && !charge && (
+              {showCard && activeTab === "card" && !charge && (
                 <CardFormView
                   productId={productId}
                   formattedAmount={formattedAmount}

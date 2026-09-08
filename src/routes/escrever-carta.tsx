@@ -63,6 +63,29 @@ const TEMAS_GUIADOS = [
 
 const WHATSAPP_NUMBER = "5519998316353"; // +55 19 99831-6353 - Milena Medeiros - Templo Da Luz
 
+function normalizeThemeIds(values: unknown): string[] {
+  if (!Array.isArray(values)) return [];
+
+  const ids = new Set<string>();
+  for (const value of values) {
+    const normalized = String(value).trim().toLocaleLowerCase("pt-BR");
+    if (["paz", "conselho", "perdao", "sinal", "lembranca"].includes(normalized)) {
+      ids.add(normalized);
+    } else if (normalized.includes("paz")) {
+      ids.add("paz");
+    } else if (normalized.includes("conselho") || normalized.includes("bênção")) {
+      ids.add("conselho");
+    } else if (normalized.includes("perdão") || normalized.includes("reconciliação")) {
+      ids.add("perdao");
+    } else if (normalized.includes("sinal") || normalized.includes("confirmação")) {
+      ids.add("sinal");
+    } else if (normalized.includes("lembrança") || normalized.includes("recado")) {
+      ids.add("lembranca");
+    }
+  }
+  return [...ids];
+}
+
 function parseStoredLogs(logs: string | null) {
   if (!logs) return null;
   try {
@@ -181,6 +204,7 @@ function EscreverCartaPage() {
   const [copied, setCopied] = useState(false);
   const [fontStyle, setFontStyle] = useState<"handwriting" | "cursive">("handwriting");
   const [isCataractModalOpen, setIsCataractModalOpen] = useState(false);
+  const [letterValidationError, setLetterValidationError] = useState("");
 
   const ghostNome = useGhostTypewriter(GHOST_NAMES);
   const ghostEnte = useGhostTypewriter(GHOST_ENTES);
@@ -211,7 +235,7 @@ function EscreverCartaPage() {
         setMode("livre");
         foundData = true;
       } else if (quiz.temasEscolhidos?.length > 0) {
-        setSelectedTemas(quiz.temasEscolhidos);
+        setSelectedTemas(normalizeThemeIds(quiz.temasEscolhidos));
         setMode("guiada");
         foundData = true;
       }
@@ -248,10 +272,8 @@ function EscreverCartaPage() {
     syncFromLogs();
 
     setHasQuizData(foundData);
-    // Se não encontrou dados anteriores, abre diretamente a visualização do molde
-    if (!foundData) {
-      setWorkflowStep("preview");
-    }
+    // Sem dados do quiz, exige que a pessoa escolha e preencha o pedido antes do envio.
+    if (!foundData) setWorkflowStep("choose");
   }, []);
 
   const toggleTema = (id: string) => {
@@ -356,6 +378,13 @@ function EscreverCartaPage() {
   };
 
   const handleSendWhatsApp = () => {
+    if (nome.trim().length < 3 || ente.trim().length < 2) {
+      setLetterValidationError("Informe seu nome e o nome do ente querido antes de enviar o pedido.");
+      setWorkflowStep("rewrite");
+      setMobileTab("editor");
+      return;
+    }
+    setLetterValidationError("");
     const isPixPaid = typeof window !== "undefined" && sessionStorage.getItem("templodeluz:pix-paid") === "true";
     const isCatarataPaid = typeof window !== "undefined" && sessionStorage.getItem("templodeluz:catarata-paid") === "true";
     const urlParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
@@ -755,6 +784,12 @@ function EscreverCartaPage() {
                   <p className="text-xs text-stone-500 mt-1 leading-relaxed">
                     Personalize os anseios do seu coração ou escreva livremente com suas próprias palavras.
                   </p>
+
+                  {letterValidationError && (
+                    <p role="alert" className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-800">
+                      {letterValidationError}
+                    </p>
+                  )}
 
                   {/* Seletor de Modo Clean (Guiada vs Livre) */}
                   <div className="grid grid-cols-2 gap-1.5 mt-4 p-1 bg-stone-100 rounded-2xl">

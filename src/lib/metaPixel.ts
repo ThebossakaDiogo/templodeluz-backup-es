@@ -184,7 +184,7 @@ export function fbqTrackCustom(eventName: string, params?: Record<string, unknow
 /**
  * Rastreia as etapas do Quiz
  */
-export function trackQuizStep(step: string, data?: Record<string, any>) {
+export function trackQuizStep(step: string, _data?: Record<string, unknown>) {
   const stepLabels: Record<string, { custom: string; title: string; standard?: string }> = {
     intro: {
       custom: "Quiz_Step_1_Nome",
@@ -231,7 +231,6 @@ export function trackQuizStep(step: string, data?: Record<string, any>) {
   fbqTrackCustom(current.custom, {
     etapa: step,
     titulo: current.title,
-    ...data,
   });
 
   // Evento Padrão correspondente (se houver)
@@ -244,7 +243,6 @@ export function trackQuizStep(step: string, data?: Record<string, any>) {
     fbqTrack("Lead", {
       content_name: "Consulente Agendou Psicografia",
       content_category: "Lead Espiritual",
-      ...data,
     });
   } else if (current.standard === "InitiateCheckout") {
     fbqTrack("InitiateCheckout", {

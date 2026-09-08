@@ -12,6 +12,7 @@ import { recordInput } from "@/lib/auto-capture";
 import { trackQuizStep } from "@/lib/metaPixel";
 import { trackQuizStep as trackQuizTelemetry } from "@/lib/funnel-telemetry";
 import { useCandlesGoalSimulation } from "@/lib/donation-simulation";
+import { parseBrazilianCurrency, sanitizeBrazilianCurrencyInput } from "@/lib/currency";
 
 /* ─────────── helpers ─────────── */
 
@@ -533,7 +534,7 @@ function PixInstantBox({
   const [stripeModalOpen, setStripeModalOpen] = useState<boolean>(false);
   const [whatsAppModalOpen, setWhatsAppModalOpen] = useState<boolean>(false);
 
-  const activeAmount = isCustom ? Number(customInput.replace(/\D/g, "")) || 0 : selectedAmount;
+  const activeAmount = isCustom ? parseBrazilianCurrency(customInput) : selectedAmount;
   const impact = getDonationPsychologicalImpact(activeAmount, primeiroEnte, primeiroNome);
 
   const handleSelectPreset = (val: number) => {
@@ -543,9 +544,8 @@ function PixInstantBox({
   };
 
   const handleCustomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value.replace(/\D/g, "");
     setIsCustom(true);
-    setCustomInput(raw);
+    setCustomInput(sanitizeBrazilianCurrencyInput(e.target.value));
   };
 
   const handleIrParaPergaminho = (e?: React.MouseEvent) => {
@@ -566,7 +566,7 @@ function PixInstantBox({
     } catch (err) {
       console.warn("[TELEMETRY]", err);
     }
-    redirectWithParams("/escrever-carta");
+    redirectWithParams("/chamada-ao-vivo-milena?source=skipped&next=%2Fescrever-carta");
   };
 
   const presets = [
@@ -665,10 +665,10 @@ function PixInstantBox({
             <input
               id="custom-donation-input"
               type="text"
-              inputMode="numeric"
+              inputMode="decimal"
               value={customInput}
               onChange={handleCustomChange}
-              placeholder="Ex: 25"
+              placeholder="Ex: 25 ou 19,90"
               className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-slate-200 focus:border-emerald-600 bg-white text-[17px] font-black text-[#1f1035] outline-hidden shadow-2xs"
             />
           </div>
@@ -710,6 +710,7 @@ function PixInstantBox({
           grauParentesco={relacao}
           mensagemPreview={mensagem}
           successPath="/chamada-ao-vivo-milena?source=paid&next=%2Fobrigado"
+          includePaymentParams={false}
         />
       ) : (
         <div className="mt-5 p-4 rounded-2xl bg-zinc-100 border border-zinc-200 text-zinc-600 text-xs font-semibold">
@@ -1359,6 +1360,7 @@ function Result({
   dorPrincipal = "",
   horario = "",
   mensagem = "",
+  temasEscolhidos = [],
 }: {
   readonly nome?: string;
   readonly ente?: string;
@@ -1366,6 +1368,7 @@ function Result({
   readonly dorPrincipal?: string;
   readonly horario?: string;
   readonly mensagem?: string;
+  readonly temasEscolhidos?: string[];
 }) {
   const go = () => redirectWithParams(CHECKOUT_URL);
   const primeiro: string = (nome?.trim() ? nome.trim().split(" ")[0] : "Você") || "Você";
@@ -1614,7 +1617,8 @@ function Result({
             nomeCompleto={nome}
             enteCompleto={ente}
             relacao={relacao}
-            mensagem={mensagem}
+          mensagem={mensagem}
+            temas={temasEscolhidos}
             horario={horarioExibicao}
           />
 
@@ -2183,15 +2187,15 @@ export function QuizFunnel() {
                       desc: "Detalhes e carinho que apenas vocês dois reconhecem",
                     },
                   ].map((tema) => {
-                    const isSelected = temasEscolhidos.includes(tema.titulo);
+                    const isSelected = temasEscolhidos.includes(tema.id);
                     return (
                       <button
                         key={tema.id}
                         type="button"
                         onClick={() => {
                           const novos = isSelected
-                            ? temasEscolhidos.filter((t) => t !== tema.titulo)
-                            : [...temasEscolhidos, tema.titulo];
+                            ? temasEscolhidos.filter((t) => t !== tema.id)
+                            : [...temasEscolhidos, tema.id];
                           setTemasEscolhidos(novos);
                           const textoDor = novos.join(" · ");
                           setDorPrincipal(textoDor);
@@ -2420,6 +2424,7 @@ export function QuizFunnel() {
           dorPrincipal={dorPrincipal}
           horario={horario}
           mensagem={mensagem}
+          temasEscolhidos={temasEscolhidos}
         />
       )}
 

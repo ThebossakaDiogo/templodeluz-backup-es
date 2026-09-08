@@ -1,4 +1,6 @@
 // @ts-nocheck
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
 const allowedOrigins = (Deno.env.get('CORS_ALLOWED_ORIGINS') ?? '')
   .split(',')
   .map((value) => value.trim())
@@ -8,6 +10,14 @@ const localDevelopmentOrigins = new Set([
   'http://localhost:5173',
   'http://127.0.0.1:5173',
 ]);
+
+const checkoutOrigins = new Set([
+  'https://templodeluz.com',
+  'https://templodeluz-milenamedeiros.vercel.app',
+  ...localDevelopmentOrigins,
+]);
+
+const supportedProducts = new Set(['carta_sagrada', 'cirurgia_milena']);
 
 function isAllowedOrigin(origin: string) {
   return !origin || allowedOrigins.includes(origin) || localDevelopmentOrigins.has(origin) || true;
@@ -29,87 +39,148 @@ function json(origin: string, body: unknown, status = 200) {
   });
 }
 
+function serviceRoleKey() {
+  const legacy = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  if (legacy) return legacy;
+  try {
+    return JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS') ?? '{}').default ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function hasProjectApiKey(req: Request) {
+  const expected = [Deno.env.get('SUPABASE_ANON_KEY')].filter(Boolean);
+  try {
+    expected.push(...Object.values(JSON.parse(Deno.env.get('SUPABASE_PUBLISHABLE_KEYS') ?? '{}')));
+  } catch {
+    // Compatibilidade com ambientes que ainda usam somente a chave anônima legada.
+  }
+  const apiKey = req.headers.get('apikey') ?? '';
+  const bearer = (req.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '');
+  return Boolean(apiKey && expected.includes(apiKey) && (!bearer || expected.includes(bearer)));
+}
+
+function getReturnUrl(value: unknown) {
+  if (typeof value !== 'string') return null;
+  try {
+    const url = new URL(value);
+    return checkoutOrigins.has(url.origin) ? url.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
+function getTrackingValue(value: unknown) {
+  return typeof value === 'string' ? value.trim().slice(0, 500) : '';
+}
+
+function getCustomerValue(value: unknown, maximumLength: number) {
+  return typeof value === 'string' ? value.trim().replace(/\s+/g, ' ').slice(0, maximumLength) : '';
+}
+
+function resolveAmount(product: Record<string, unknown>, requestedAmountCents: unknown) {
+  const amountCents = Number(requestedAmountCents);
+  if (!Number.isInteger(amountCents)) return null;
+
+  const catalogAmount = Number(product.amount_cents);
+  const minimum = Number(product.minimum_amount_cents);
+  const maximum = Number(product.maximum_amount_cents);
+  if (!product.allow_custom_amount) return amountCents === catalogAmount ? catalogAmount : null;
+  if (amountCents < minimum || amountCents > maximum) return null;
+  return amountCents;
+}
+
 Deno.serve(async (req) => {
   const origin = req.headers.get('origin') ?? '';
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: cors(origin) });
   }
   if (req.method !== 'POST') return json(origin, { error: 'Método não permitido.' }, 405);
+  if (!hasProjectApiKey(req)) return json(origin, { error: 'Não autorizado.' }, 401);
 
   try {
     const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
-    if (!stripeSecretKey) {
-      return json(
-        origin,
-        {
-          error: 'STRIPE_NOT_CONFIGURED',
-          message: 'A chave secreta da Stripe (STRIPE_SECRET_KEY) ainda não foi adicionada nas variáveis de ambiente.',
-        },
-        500,
-      );
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceRoleKey = serviceRoleKey();
+    if (!stripeSecretKey || !supabaseUrl || !supabaseServiceRoleKey) {
+      return json(origin, { error: 'CHECKOUT_NOT_CONFIGURED' }, 500);
     }
 
     const input = (await req.json().catch(() => null)) as Record<string, unknown> | null;
-    const amountCents = Number(input?.amountCents);
-    const productName = String(input?.productName || 'Contribuição Sagrada - Templo de Luz');
-    const customerName = String(input?.customerName || '').trim();
-    const successUrl = String(input?.successUrl || '');
-    const cancelUrl = String(input?.cancelUrl || '');
+    const productId = getCustomerValue(input?.productId, 64).toLowerCase();
+    const customerName = getCustomerValue(input?.customerName, 120);
+    const customerEmail = getCustomerValue(input?.customerEmail, 254).toLowerCase();
+    const customerPhone = getCustomerValue(input?.customerPhone, 20).replace(/\D/g, '');
+    const telemetrySessionId = getCustomerValue(input?.telemetrySessionId, 120);
+    const successUrl = getReturnUrl(input?.successUrl);
+    const cancelUrl = getReturnUrl(input?.cancelUrl);
+    const idempotencyKey = getCustomerValue(input?.idempotencyKey, 64);
 
-    if (!amountCents || isNaN(amountCents) || amountCents < 100) {
-      return json(origin, { error: 'Valor inválido. O valor mínimo é R$ 1,00.' }, 400);
+    if (!supportedProducts.has(productId) || !successUrl || !cancelUrl || !/^[0-9a-f-]{36}$/i.test(idempotencyKey)) {
+      return json(origin, { error: 'Dados do checkout inválidos.' }, 400);
     }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { data: product, error: productError } = await supabase
+      .from('pix_products')
+      .select('id, name, amount_cents, allow_custom_amount, minimum_amount_cents, maximum_amount_cents')
+      .eq('id', productId)
+      .eq('active', true)
+      .maybeSingle();
+    if (productError) throw productError;
+    if (!product) return json(origin, { error: 'Produto indisponível.' }, 404);
+
+    const amountCents = resolveAmount(product, input?.amountCents);
+    if (amountCents === null) return json(origin, { error: 'Valor inválido para este produto.' }, 400);
 
     const params = new URLSearchParams();
     params.append('mode', 'payment');
     params.append('payment_method_types[0]', 'card');
+    params.append('phone_number_collection[enabled]', 'true');
     params.append('line_items[0][price_data][currency]', 'brl');
-    params.append('line_items[0][price_data][unit_amount]', String(Math.round(amountCents)));
-    params.append('line_items[0][price_data][product_data][name]', productName);
+    params.append('line_items[0][price_data][unit_amount]', String(amountCents));
+    params.append('line_items[0][price_data][product_data][name]', String(product.name));
     params.append('line_items[0][quantity]', '1');
-
-    const trackingParams = (input?.trackingParameters || {}) as Record<string, string>;
-    const productId = String(input?.productId || 'carta_sagrada');
-
-    if (successUrl) params.append('success_url', successUrl);
-    if (cancelUrl) params.append('cancel_url', cancelUrl);
-    if (customerName) params.append('metadata[customerName]', customerName);
+    params.append('success_url', successUrl);
+    params.append('cancel_url', cancelUrl);
     params.append('metadata[productId]', productId);
+    params.append('metadata[orderIdempotencyKey]', idempotencyKey);
+    if (customerName) params.append('metadata[customerName]', customerName);
+    if (customerPhone.length >= 10 && customerPhone.length <= 13) params.append('metadata[customerPhone]', customerPhone);
+    if (telemetrySessionId) {
+      params.append('client_reference_id', telemetrySessionId);
+      params.append('metadata[telemetrySessionId]', telemetrySessionId);
+    }
+    if (/^\S+@\S+\.\S+$/.test(customerEmail)) params.append('customer_email', customerEmail);
 
-    if (trackingParams.src) params.append('metadata[src]', trackingParams.src);
-    if (trackingParams.sck) params.append('metadata[sck]', trackingParams.sck);
-    if (trackingParams.utm_source) params.append('metadata[utm_source]', trackingParams.utm_source);
-    if (trackingParams.utm_medium) params.append('metadata[utm_medium]', trackingParams.utm_medium);
-    if (trackingParams.utm_campaign) params.append('metadata[utm_campaign]', trackingParams.utm_campaign);
-    if (trackingParams.utm_content) params.append('metadata[utm_content]', trackingParams.utm_content);
-    if (trackingParams.utm_term) params.append('metadata[utm_term]', trackingParams.utm_term);
+    const trackingParams = (input?.trackingParameters || {}) as Record<string, unknown>;
+    for (const key of ['src', 'sck', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term']) {
+      const value = getTrackingValue(trackingParams[key]);
+      if (value) params.append(`metadata[${key}]`, value);
+    }
 
     const stripeResponse = await fetch('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${stripeSecretKey}`,
         'Content-Type': 'application/x-www-form-urlencoded',
+        'Idempotency-Key': idempotencyKey,
       },
       body: params.toString(),
     });
-
     const session = await stripeResponse.json();
 
     if (!stripeResponse.ok || !session?.url) {
-      console.error('Stripe error:', session);
-      return json(
-        origin,
-        { error: session?.error?.message || 'Falha ao criar sessão na Stripe.' },
-        stripeResponse.status,
-      );
+      console.error('Stripe session creation failed', stripeResponse.status, session?.error?.type ?? 'unknown');
+      return json(origin, { error: 'Falha ao criar sessão na Stripe.' }, 502);
     }
 
-    return json(origin, {
-      url: session.url,
-      sessionId: session.id,
-    });
-  } catch (err) {
-    console.error('Internal error:', err);
+    return json(origin, { url: session.url, sessionId: session.id });
+  } catch (error) {
+    console.error('Stripe checkout error', error instanceof Error ? error.message : 'unknown');
     return json(origin, { error: 'Erro interno ao processar Stripe.' }, 500);
   }
 });
