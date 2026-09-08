@@ -161,8 +161,7 @@ Deno.serve(async (req) => {
       const now = formatUtmifyDate();
       const trackingParameters = Object.fromEntries(
         ['src', 'sck', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term']
-          .map((key) => [key, cleanString(session?.metadata?.[key], 500)])
-          .filter(([, value]) => Boolean(value)),
+          .map((key) => [key, cleanString(session?.metadata?.[key], 500) || null]),
       );
       const utmifyResponse = await fetch('https://api.utmify.com.br/api-credentials/orders', {
         method: 'POST',
@@ -176,7 +175,7 @@ Deno.serve(async (req) => {
           approvedDate: now,
           customer: { name: customerName, email: customerEmail, phone: customerPhone, document: customerCpf, country: 'BR' },
           products: [{ id: productId, name: productName(productId, product.name), planId: 'plano_unico', planName: 'Pagamento Único', quantity: 1, priceInCents: amountCents }],
-          ...(Object.keys(trackingParameters).length > 0 ? { trackingParameters } : {}),
+          trackingParameters,
           commission: { totalPriceInCents: amountCents, gatewayFeeInCents: 0, userCommissionInCents: amountCents, currency: 'BRL' },
           isTest: false,
         }),

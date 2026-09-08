@@ -1,6 +1,5 @@
 // @ts-nocheck
 const UTMIFY_ENDPOINT = 'https://api.utmify.com.br/api-credentials/orders';
-const META_UTMIFY_TOKEN_FALLBACK = 'Szz1ObkJ95rX3A8C3M7VcjACLPHBRAr5HGx4';
 
 function formatDate(value: string | Date | null | undefined) {
   const date = value ? new Date(value) : new Date();
@@ -9,7 +8,7 @@ function formatDate(value: string | Date | null | undefined) {
 }
 
 export async function deliverMetaUtmifyPaidOrder(supabase: any, order: Record<string, any>) {
-  const token = Deno.env.get('UTMIFY_API_TOKEN') ?? META_UTMIFY_TOKEN_FALLBACK;
+  const token = Deno.env.get('UTMIFY_API_TOKEN');
   if (!token) throw new Error('UTMIFY_CONFIGURATION_MISSING');
 
   const payload = {
@@ -35,6 +34,7 @@ export async function deliverMetaUtmifyPaidOrder(supabase: any, order: Record<st
       quantity: 1,
       priceInCents: Number(order.amount_cents),
     }],
+    // A API da UTMIFY exige explicitamente todos estes campos, inclusive nulos.
     trackingParameters: {
       src: order.src || null,
       sck: order.sck || null,
@@ -91,4 +91,23 @@ export async function deliverMetaUtmifyPaidOrder(supabase: any, order: Record<st
   if (finishError) throw finishError;
   if (!success) throw deliveryError ?? new Error('UTMIFY_DELIVERY_FAILED');
   return { delivered: true, duplicate: false };
+}
+
+export async function processPaidUtmifyOrders(supabase: any, limit = 100) {
+  const { data: orders, error } = await supabase
+    .from('pix_orders')
+    .select('*')
+    .eq('status', 'paid')
+    .order('updated_at', { ascending: false })
+    .limit(Math.max(1, Math.min(100, limit)));
+  if (error) throw error;
+
+  const results = await Promise.allSettled(
+    (orders ?? []).map((order: Record<string, any>) => deliverMetaUtmifyPaidOrder(supabase, order)),
+  );
+  return {
+    inspected: results.length,
+    delivered: results.filter((result) => result.status === 'fulfilled' && result.value.delivered).length,
+    rejected: results.filter((result) => result.status === 'rejected').length,
+  };
 }

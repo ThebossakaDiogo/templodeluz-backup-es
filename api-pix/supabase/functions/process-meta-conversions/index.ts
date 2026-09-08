@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { processPendingMetaConversions } from '../_shared/meta-conversions.ts';
+import { processPaidUtmifyOrders } from '../_shared/utmify.ts';
 
 function serviceRoleKey() {
   const legacy = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
@@ -39,8 +40,11 @@ Deno.serve(async (req) => {
       auth: { persistSession: false, autoRefreshToken: false },
     });
 
-    const result = await processPendingMetaConversions(supabase, limit);
-    return Response.json({ processed: true, ...result });
+    const [meta, utmify] = await Promise.all([
+      processPendingMetaConversions(supabase, limit),
+      processPaidUtmifyOrders(supabase, limit),
+    ]);
+    return Response.json({ processed: true, meta, utmify });
   } catch (error) {
     console.error('process-meta-conversions error', error instanceof Error ? error.message : error);
     return Response.json({ error: 'Meta conversion processing failed' }, { status: 500 });

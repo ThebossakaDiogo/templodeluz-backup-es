@@ -127,8 +127,27 @@ export function captureAndStoreUtms(): TrackingParameters {
 
     TRACKING_KEYS.forEach((key) => {
       const value = cleanTrackingValue(urlParams.get(key));
-      if (value) tracking[key] = value;
+      if (value && !tracking[key]) tracking[key] = value;
     });
+
+    const aliases: Partial<Record<keyof TrackingParameters, string[]>> = {
+      utm_campaign: ["utm_id", "campaign_id", "campaignid", "fb_campaign_id"],
+      utm_content: ["adset_id", "adsetid", "fb_adset_id"],
+      utm_term: ["ad_id", "adid", "fb_ad_id"],
+    };
+    for (const [key, parameterNames] of Object.entries(aliases) as Array<[
+      keyof TrackingParameters,
+      string[],
+    ]>) {
+      if (tracking[key]) continue;
+      for (const parameterName of parameterNames) {
+        const value = cleanTrackingValue(urlParams.get(parameterName));
+        if (value) {
+          tracking[key] = value;
+          break;
+        }
+      }
+    }
     inferTrafficSource(urlParams, tracking);
 
     localStorage.setItem(STORAGE_KEY_UTMS, JSON.stringify(tracking));
