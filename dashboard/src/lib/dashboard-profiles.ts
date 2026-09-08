@@ -84,7 +84,7 @@ export async function fetchTikTokDashboardProfileData(
   const response = await fetch(
     `${tiktokSupabaseUrl.replace(/\/$/, "")}/functions/v1/dashboard-profile-data`,
     {
-      method: "GET",
+      method: "POST",
       headers: {
         Authorization: `Bearer ${tiktokSupabaseAnonKey}`,
         apikey: tiktokSupabaseAnonKey,

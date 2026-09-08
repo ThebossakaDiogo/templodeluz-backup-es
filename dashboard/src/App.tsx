@@ -488,7 +488,7 @@ async function fetchMetaDashboardProfileData(): Promise<DashboardProfileRows> {
     supabase
       .from("pix_orders")
       .select("*")
-      .or("quiz_origin.eq.original,quiz_origin.is.null")
+      .or("and(quiz_origin.eq.original,pix_account_key.eq.connectpay_original),and(status.eq.paid,quiz_origin.is.null,pix_account_key.is.null)")
       .order("created_at", { ascending: false })
       .limit(1000),
     supabase
