@@ -4,7 +4,7 @@ const DEFAULT_GRAPH_API_VERSION = 'v23.0';
 const DEFAULT_EVENT_SOURCE_URL = 'https://templodeluz.com/';
 const QUIZ_ORIGIN = 'original';
 
-function isMetaOrder(order: Record<string, any>) {
+export function isEligibleMetaOrder(order: Record<string, any>) {
   const source = cleanText(order.utm_source).toLowerCase();
   const isTikTokTraffic = Boolean(cleanText(order.ttclid))
     || /^(tiktok|tt|tik)(?:$|[^a-z])/.test(source);
@@ -84,6 +84,7 @@ async function buildUserData(order: Record<string, any>) {
 }
 
 function customData(order: Record<string, any>) {
+  const paymentMethod = order.payment_method === 'credit_card' ? 'credit_card' : 'pix';
   return {
     currency: String(order.currency || 'BRL'),
     value: Number((Number(order.amount_cents) / 100).toFixed(2)),
@@ -92,7 +93,7 @@ function customData(order: Record<string, any>) {
     content_type: 'product',
     num_items: 1,
     order_id: String(order.id),
-    payment_method: 'pix',
+    payment_method: paymentMethod,
   };
 }
 
@@ -183,12 +184,12 @@ async function deliverMetaEvent(supabase: any, order: Record<string, any>, event
 }
 
 export async function deliverMetaPurchase(supabase: any, order: Record<string, any>) {
-  if (!isMetaOrder(order)) return { delivered: false, skipped: true };
+  if (!isEligibleMetaOrder(order)) return { delivered: false, skipped: true };
   return deliverMetaEvent(supabase, order, await buildMetaPurchaseEvent(order));
 }
 
 export async function deliverMetaInitiateCheckout(supabase: any, order: Record<string, any>) {
-  if (!isMetaOrder(order)) return { delivered: false, skipped: true };
+  if (!isEligibleMetaOrder(order)) return { delivered: false, skipped: true };
   return deliverMetaEvent(supabase, order, await buildMetaInitiateCheckoutEvent(order));
 }
 
@@ -225,6 +226,40 @@ export async function processPendingMetaConversions(supabase: any, limit = 25) {
   return {
     inspected: results.length,
     fulfilled: results.filter((result) => result.status === 'fulfilled').length,
+    rejected: results.filter((result) => result.status === 'rejected').length,
+  };
+}
+
+export async function recoverEligibleMetaPurchases(supabase: any, days = 7, limit = 100) {
+  const since = new Date(Date.now() - Math.max(1, Math.min(7, days)) * 86_400_000).toISOString();
+  const { data: orders, error } = await supabase
+    .from('pix_orders')
+    .select('*')
+    .eq('status', 'paid')
+    .eq('quiz_origin', QUIZ_ORIGIN)
+    .gte('updated_at', since)
+    .order('updated_at', { ascending: false })
+    .limit(Math.max(1, Math.min(100, limit)));
+  if (error) throw error;
+
+  const eligibleOrders = (orders ?? []).filter(isEligibleMetaOrder);
+  await Promise.all(eligibleOrders.map(async (order: Record<string, any>) => {
+    const { error: resetError } = await supabase
+      .from('meta_conversion_deliveries')
+      .update({ delivery_status: 'queued', next_attempt_at: new Date().toISOString() })
+      .eq('order_id', order.id)
+      .eq('event_name', 'Purchase')
+      .in('delivery_status', ['queued', 'failed']);
+    if (resetError) throw resetError;
+  }));
+  const results = await Promise.allSettled(
+    eligibleOrders.map((order: Record<string, any>) => deliverMetaPurchase(supabase, order)),
+  );
+  return {
+    inspected: orders?.length ?? 0,
+    eligible: eligibleOrders.length,
+    delivered: results.filter((result) => result.status === 'fulfilled' && result.value.delivered).length,
+    duplicates: results.filter((result) => result.status === 'fulfilled' && result.value.duplicate).length,
     rejected: results.filter((result) => result.status === 'rejected').length,
   };
 }

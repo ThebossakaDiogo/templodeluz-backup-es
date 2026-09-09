@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { buildMetaInitiateCheckoutEvent, buildMetaPurchaseEvent } from './meta-conversions.ts';
+import { buildMetaInitiateCheckoutEvent, buildMetaPurchaseEvent, isEligibleMetaOrder } from './meta-conversions.ts';
 
 async function hash(value: string) {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
@@ -70,4 +70,22 @@ test('adiciona codigo do Brasil quando o telefone local comeca pelo DDD 55', asy
   });
 
   assert.deepEqual(event.user_data.ph, [await hash('5555999999999')]);
+});
+
+test('aceita somente vendas do quiz principal sem sinais TikTok', () => {
+  assert.equal(isEligibleMetaOrder({ quiz_origin: 'original', utm_source: 'facebook' }), true);
+  assert.equal(isEligibleMetaOrder({ quiz_origin: 'mirrored', utm_source: 'facebook' }), false);
+  assert.equal(isEligibleMetaOrder({ quiz_origin: 'original', utm_source: 'tiktok' }), false);
+  assert.equal(isEligibleMetaOrder({ quiz_origin: 'original', ttclid: 'click-id' }), false);
+});
+
+test('identifica cartão no payload Purchase', async () => {
+  const event = await buildMetaPurchaseEvent({
+    id: '550e8400-e29b-41d4-a716-446655440000',
+    product_id: 'carta_sagrada',
+    product_name: 'Carta Psicografada Sagrada',
+    amount_cents: 1900,
+    payment_method: 'credit_card',
+  });
+  assert.equal(event.custom_data.payment_method, 'credit_card');
 });

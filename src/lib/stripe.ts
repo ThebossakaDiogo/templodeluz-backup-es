@@ -1,4 +1,5 @@
 import { PIX_CONFIG_ORIGINAL, pixFunctionHeaders } from "./pix-config";
+import { getMetaBrowserAttribution } from "./metaPixel";
 import { getStoredUtms } from "./utmify";
 
 export interface StripeCheckoutInput {
@@ -19,6 +20,7 @@ export async function createStripeCheckoutSession(input: StripeCheckoutInput): P
     : `${origin}/obrigado?payment=stripe_success`);
   const cancelUrl = input.cancelUrl || (typeof window !== "undefined" ? window.location.href : `${origin}/`);
   const trackingParameters = getStoredUtms();
+  const metaAttribution = getMetaBrowserAttribution();
   const idempotencyKey = crypto.randomUUID();
 
   const response = await fetch(endpoint, {
@@ -32,6 +34,7 @@ export async function createStripeCheckoutSession(input: StripeCheckoutInput): P
       successUrl,
       cancelUrl,
       trackingParameters,
+      metaAttribution,
       idempotencyKey,
     }),
   });

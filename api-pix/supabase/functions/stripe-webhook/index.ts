@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { deliverMetaPurchase, runInBackground } from '../_shared/meta-conversions.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -141,11 +142,29 @@ Deno.serve(async (req) => {
       stripe_session_id: stripeSessionId,
       fulfilled_at: new Date().toISOString(),
       quiz_origin: QUIZ_ORIGIN,
+      meta_fbp: cleanString(session?.metadata?.metaFbp, 255) || null,
+      meta_fbc: cleanString(session?.metadata?.metaFbc, 255) || null,
+      meta_event_source_url: cleanString(session?.metadata?.metaEventSourceUrl, 500) || null,
+      src: cleanString(session?.metadata?.src, 500) || null,
+      sck: cleanString(session?.metadata?.sck, 500) || null,
+      utm_source: cleanString(session?.metadata?.utm_source, 500) || null,
+      utm_medium: cleanString(session?.metadata?.utm_medium, 500) || null,
+      utm_campaign: cleanString(session?.metadata?.utm_campaign, 500) || null,
+      utm_content: cleanString(session?.metadata?.utm_content, 500) || null,
+      utm_term: cleanString(session?.metadata?.utm_term, 500) || null,
     };
     const { error: orderError } = await supabase
       .from('pix_orders')
       .upsert(order, { onConflict: 'idempotency_key', ignoreDuplicates: false });
     if (orderError) throw orderError;
+
+    const { data: orderForDelivery, error: orderForDeliveryError } = await supabase
+      .from('pix_orders')
+      .select('*')
+      .eq('idempotency_key', idempotencyKey)
+      .maybeSingle();
+    if (orderForDeliveryError || !orderForDelivery) throw orderForDeliveryError ?? new Error('STRIPE_ORDER_NOT_FOUND');
+    runInBackground(deliverMetaPurchase(supabase, orderForDelivery), 'STRIPE META PURCHASE DELIVERY');
 
     const telemetrySessionId = cleanString(session?.metadata?.telemetrySessionId || session?.client_reference_id, 120);
     if (telemetrySessionId) {

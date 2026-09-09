@@ -76,6 +76,10 @@ function getTrackingValue(value: unknown) {
   return typeof value === 'string' ? value.trim().slice(0, 500) : '';
 }
 
+function getMetaAttributionValue(value: unknown, maximumLength: number) {
+  return typeof value === 'string' ? value.trim().slice(0, maximumLength) : '';
+}
+
 function isTikTokTraffic(tracking: Record<string, unknown>) {
   const source = getTrackingValue(tracking.utm_source).toLowerCase();
   return Boolean(getTrackingValue(tracking.ttclid)) || /^(tiktok|tt|tik)(?:$|[^a-z])/.test(source);
@@ -205,6 +209,13 @@ Deno.serve(async (req) => {
       const value = getTrackingValue(trackingParams[key]);
       if (value) params.append(`metadata[${key}]`, value);
     }
+    const metaAttribution = (input?.metaAttribution || {}) as Record<string, unknown>;
+    const metaFbp = getMetaAttributionValue(metaAttribution.fbp, 255);
+    const metaFbc = getMetaAttributionValue(metaAttribution.fbc, 255);
+    const metaEventSourceUrl = getMetaAttributionValue(metaAttribution.eventSourceUrl, 500);
+    if (metaFbp) params.append('metadata[metaFbp]', metaFbp);
+    if (metaFbc) params.append('metadata[metaFbc]', metaFbc);
+    if (metaEventSourceUrl) params.append('metadata[metaEventSourceUrl]', metaEventSourceUrl);
 
     const stripeResponse = await fetch('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',
