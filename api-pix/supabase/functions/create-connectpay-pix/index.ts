@@ -91,6 +91,11 @@ function eventSourceUrl(value: unknown, requestOrigin: string) {
   }
 }
 
+function isTikTokTraffic(utms: Record<string, unknown>) {
+  const source = String(utms.utm_source ?? '').trim().toLowerCase();
+  return Boolean(String(utms.ttclid ?? '').trim()) || /^(tiktok|tt|tik)(?:$|[^a-z])/.test(source);
+}
+
 function chargeResponse(order: Record<string, unknown>, statusToken: string) {
   return {
     orderId: order.id,
@@ -223,6 +228,9 @@ Deno.serve(async (req) => {
     const enteQuerido = typeof input?.enteQuerido === 'string' ? input.enteQuerido.trim() : null;
     const grauParentesco = typeof input?.grauParentesco === 'string' ? input.grauParentesco.trim() : null;
     const utmParams = (typeof input?.utms === 'object' && input.utms !== null ? input.utms : {}) as Record<string, unknown>;
+    if (isTikTokTraffic(utmParams)) {
+      return json(origin, { error: 'Use o quiz TikTok para concluir este checkout.' }, 400);
+    }
     const metaAttribution = (typeof input?.metaAttribution === 'object' && input.metaAttribution !== null
       ? input.metaAttribution
       : {}) as Record<string, unknown>;

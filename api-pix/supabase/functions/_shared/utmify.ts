@@ -1,5 +1,13 @@
 // @ts-nocheck
 const UTMIFY_ENDPOINT = 'https://api.utmify.com.br/api-credentials/orders';
+const QUIZ_ORIGIN = 'original';
+
+function isMetaOrder(order: Record<string, any>) {
+  const source = String(order.utm_source ?? '').trim().toLowerCase();
+  const isTikTokTraffic = Boolean(String(order.ttclid ?? '').trim())
+    || /^(tiktok|tt|tik)(?:$|[^a-z])/.test(source);
+  return order.quiz_origin === QUIZ_ORIGIN && !isTikTokTraffic;
+}
 
 function formatDate(value: string | Date | null | undefined) {
   const date = value ? new Date(value) : new Date();
@@ -8,6 +16,8 @@ function formatDate(value: string | Date | null | undefined) {
 }
 
 export async function deliverMetaUtmifyPaidOrder(supabase: any, order: Record<string, any>) {
+  if (!isMetaOrder(order)) return { delivered: false, skipped: true };
+
   const token = Deno.env.get('UTMIFY_API_TOKEN');
   if (!token) throw new Error('UTMIFY_CONFIGURATION_MISSING');
 
@@ -98,6 +108,7 @@ export async function processPaidUtmifyOrders(supabase: any, limit = 100) {
     .from('pix_orders')
     .select('*')
     .eq('status', 'paid')
+    .eq('quiz_origin', QUIZ_ORIGIN)
     .order('updated_at', { ascending: false })
     .limit(Math.max(1, Math.min(100, limit)));
   if (error) throw error;

@@ -2,6 +2,14 @@
 const DEFAULT_META_PIXEL_ID = '1076049174870131';
 const DEFAULT_GRAPH_API_VERSION = 'v23.0';
 const DEFAULT_EVENT_SOURCE_URL = 'https://templodeluz.com/';
+const QUIZ_ORIGIN = 'original';
+
+function isMetaOrder(order: Record<string, any>) {
+  const source = cleanText(order.utm_source).toLowerCase();
+  const isTikTokTraffic = Boolean(cleanText(order.ttclid))
+    || /^(tiktok|tt|tik)(?:$|[^a-z])/.test(source);
+  return order.quiz_origin === QUIZ_ORIGIN && !isTikTokTraffic;
+}
 
 function cleanText(value: unknown) {
   return String(value ?? '').trim();
@@ -175,10 +183,12 @@ async function deliverMetaEvent(supabase: any, order: Record<string, any>, event
 }
 
 export async function deliverMetaPurchase(supabase: any, order: Record<string, any>) {
+  if (!isMetaOrder(order)) return { delivered: false, skipped: true };
   return deliverMetaEvent(supabase, order, await buildMetaPurchaseEvent(order));
 }
 
 export async function deliverMetaInitiateCheckout(supabase: any, order: Record<string, any>) {
+  if (!isMetaOrder(order)) return { delivered: false, skipped: true };
   return deliverMetaEvent(supabase, order, await buildMetaInitiateCheckoutEvent(order));
 }
 

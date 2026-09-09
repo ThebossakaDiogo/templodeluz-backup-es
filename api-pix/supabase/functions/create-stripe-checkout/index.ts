@@ -18,6 +18,7 @@ const checkoutOrigins = new Set([
 ]);
 
 const supportedProducts = new Set(['carta_sagrada', 'cirurgia_milena', 'chamada_ao_vivo_milena']);
+const QUIZ_ORIGIN = 'original';
 
 function isAllowedOrigin(origin: string) {
   return !origin || allowedOrigins.includes(origin) || localDevelopmentOrigins.has(origin) || true;
@@ -73,6 +74,11 @@ function getReturnUrl(value: unknown) {
 
 function getTrackingValue(value: unknown) {
   return typeof value === 'string' ? value.trim().slice(0, 500) : '';
+}
+
+function isTikTokTraffic(tracking: Record<string, unknown>) {
+  const source = getTrackingValue(tracking.utm_source).toLowerCase();
+  return Boolean(getTrackingValue(tracking.ttclid)) || /^(tiktok|tt|tik)(?:$|[^a-z])/.test(source);
 }
 
 function getCustomerValue(value: unknown, maximumLength: number) {
@@ -133,6 +139,7 @@ Deno.serve(async (req) => {
       const isPaid = session?.payment_status === 'paid'
         && session?.status === 'complete'
         && session?.metadata?.productId === expectedProductId
+        && session?.metadata?.quizOrigin === QUIZ_ORIGIN
         && Number(session?.amount_total) === expectedAmountCents;
       return json(origin, { paid: isPaid, sessionId: isPaid ? sessionId : undefined });
     }
@@ -180,6 +187,7 @@ Deno.serve(async (req) => {
     params.append('success_url', successUrl);
     params.append('cancel_url', cancelUrl);
     params.append('metadata[productId]', productId);
+    params.append('metadata[quizOrigin]', QUIZ_ORIGIN);
     params.append('metadata[orderIdempotencyKey]', idempotencyKey);
     if (customerName) params.append('metadata[customerName]', customerName);
     if (customerPhone.length >= 10 && customerPhone.length <= 13) params.append('metadata[customerPhone]', customerPhone);
@@ -190,6 +198,9 @@ Deno.serve(async (req) => {
     if (/^\S+@\S+\.\S+$/.test(customerEmail)) params.append('customer_email', customerEmail);
 
     const trackingParams = (input?.trackingParameters || {}) as Record<string, unknown>;
+    if (isTikTokTraffic(trackingParams)) {
+      return json(origin, { error: 'Use o quiz TikTok para concluir este checkout.' }, 400);
+    }
     for (const key of ['src', 'sck', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term']) {
       const value = getTrackingValue(trackingParams[key]);
       if (value) params.append(`metadata[${key}]`, value);

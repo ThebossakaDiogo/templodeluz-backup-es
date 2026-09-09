@@ -88,11 +88,11 @@ Deno.serve(async (request) => {
       supabase
         .from("pix_orders")
         .select("*")
-        .or("and(quiz_origin.eq.mirrored,pix_account_key.eq.connectpay_mirrored),and(status.eq.paid,quiz_origin.is.null,pix_account_key.is.null)")
+        .eq("quiz_origin", "mirrored")
         .order("created_at", { ascending: false })
         .limit(1000),
-      supabase.from("quiz_funnel_leads").select("*").order("created_at", { ascending: false }).limit(2000),
-      supabase.from("whatsapp_conversations").select("*").order("created_at", { ascending: false }).limit(1000),
+      supabase.from("quiz_funnel_leads").select("*").eq("quiz_origin", "mirrored").order("created_at", { ascending: false }).limit(2000),
+      supabase.from("whatsapp_conversations").select("*").eq("quiz_origin", "mirrored").order("created_at", { ascending: false }).limit(1000),
     ]);
     const queryError = orders.error ?? leads.error ?? whatsapp.error;
     if (queryError) {

@@ -483,12 +483,18 @@ const ALLOWED_ADMIN_EMAILS = new Set([
 
 const THEME_STORAGE_KEY = "od-neo-theme";
 
+function isTikTokAttributedOrder(order: Record<string, unknown>) {
+  const source = String(order.utm_source ?? "").trim().toLowerCase();
+  return Boolean(String(order.ttclid ?? "").trim())
+    || /^(tiktok|tt|tik)(?:$|[^a-z])/.test(source);
+}
+
 async function fetchMetaDashboardProfileData(): Promise<DashboardProfileRows> {
   const [ordersResult, leadsResult, waResult] = await Promise.all([
     supabase
       .from("pix_orders")
       .select("*")
-      .or("and(quiz_origin.eq.original,pix_account_key.eq.connectpay_original),and(status.eq.paid,quiz_origin.is.null,pix_account_key.is.null)")
+      .eq("quiz_origin", "original")
       .order("created_at", { ascending: false })
       .limit(1000),
     supabase
@@ -507,7 +513,8 @@ async function fetchMetaDashboardProfileData(): Promise<DashboardProfileRows> {
   if (firstError) throw firstError;
 
   return {
-    orders: (ordersResult.data ?? []) as Record<string, unknown>[],
+    orders: ((ordersResult.data ?? []) as Record<string, unknown>[])
+      .filter((order) => !isTikTokAttributedOrder(order)),
     leads: (leadsResult.data ?? []) as Lead[],
     whatsapp: (waResult.data ?? []) as WhatsAppMessage[],
   };

@@ -5,6 +5,7 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, apikey, content-type, stripe-signature',
 };
+const QUIZ_ORIGIN = 'original';
 
 function serviceRoleKey() {
   const legacy = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
@@ -85,6 +86,9 @@ Deno.serve(async (req) => {
     if (session?.payment_status !== 'paid' || !session?.id) {
       return Response.json({ received: true, eventId: event?.id }, { headers: corsHeaders });
     }
+    if (session?.metadata?.quizOrigin !== QUIZ_ORIGIN) {
+      return Response.json({ received: true, ignored: true, eventId: event?.id }, { headers: corsHeaders });
+    }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseKey = serviceRoleKey();
@@ -136,6 +140,7 @@ Deno.serve(async (req) => {
       gateway: 'stripe',
       stripe_session_id: stripeSessionId,
       fulfilled_at: new Date().toISOString(),
+      quiz_origin: QUIZ_ORIGIN,
     };
     const { error: orderError } = await supabase
       .from('pix_orders')

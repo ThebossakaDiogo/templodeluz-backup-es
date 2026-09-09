@@ -174,6 +174,16 @@ function RootShell({ children }: { readonly children: ReactNode }) {
     <html lang="pt-BR">
       <head>
         <HeadContent />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function () {
+              var url = new URL(window.location.href);
+              var source = (url.searchParams.get("utm_source") || "").toLowerCase();
+              var isTikTok = Boolean(url.searchParams.get("ttclid")) || /^(tiktok|tt|tik)(?:$|[^a-z])/.test(source);
+              if (isTikTok) window.location.replace("https://quiz-templodeluz.vercel.app" + url.pathname + url.search + url.hash);
+            })();`,
+          }}
+        />
         {/* ─── META PIXEL (FACEBOOK ADS) ─── */}
         <script
           dangerouslySetInnerHTML={{
@@ -213,6 +223,9 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const source = (params.get("utm_source") || "").toLowerCase();
+    if (params.has("ttclid") || /^(tiktok|tt|tik)(?:$|[^a-z])/.test(source)) return;
     captureAndStoreUtms();
     // O Pixel já é inicializado no head; aqui apenas preservamos fbclid/_fbc para o checkout.
     getMetaBrowserAttribution();
