@@ -2,10 +2,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Check, ExternalLink, MessageCircle, Play, QrCode, RefreshCw, ShieldCheck } from "lucide-react";
 import {
   EVOLUTION_MANAGER_URL,
+  getEvolutionLocalQrCode,
   getEvolutionLocalStatus,
   restartEvolutionLocal,
   startEvolutionLocal,
   type EvolutionLocalState,
+  type EvolutionLocalQrCode,
   type EvolutionLocalStatus,
 } from "@/services/evolution-local-bridge";
 
@@ -31,6 +33,8 @@ export function EvolutionLocalControl({ onConnectionChange }: EvolutionLocalCont
   const [status, setStatus] = useState<EvolutionLocalStatus | null>(null);
   const [bridgeAvailable, setBridgeAvailable] = useState<boolean | null>(null);
   const [busy, setBusy] = useState<"start" | "restart" | null>(null);
+  const [qrCode, setQrCode] = useState<EvolutionLocalQrCode | null>(null);
+  const [qrLoading, setQrLoading] = useState(false);
   const [error, setError] = useState("");
   const pollTimer = useRef<number | null>(null);
   const mounted = useRef(true);
@@ -91,6 +95,22 @@ export function EvolutionLocalControl({ onConnectionChange }: EvolutionLocalCont
         setBusy(null);
         pollTimer.current = window.setTimeout(() => void refresh(true), 3_000);
       }
+    }
+  };
+
+  const loadQrCode = async () => {
+    setQrLoading(true);
+    setError("");
+    try {
+      const qr = await getEvolutionLocalQrCode();
+      if (!mounted.current) return;
+      setQrCode(qr);
+      await refresh(false);
+    } catch (operationError) {
+      if (!mounted.current) return;
+      setError(operationError instanceof Error ? operationError.message : "Não foi possível gerar o QR Code.");
+    } finally {
+      if (mounted.current) setQrLoading(false);
     }
   };
 
@@ -189,14 +209,15 @@ export function EvolutionLocalControl({ onConnectionChange }: EvolutionLocalCont
               </button>
             )}
             {!allDone && evolutionReady && !whatsappReady && (
-              <a className="btn btn-primary" href={EVOLUTION_MANAGER_URL} target="_blank" rel="noreferrer">
-                <QrCode size={16} /> Escanear o QR Code
-              </a>
+              <button type="button" className="btn btn-primary" disabled={qrLoading} onClick={() => void loadQrCode()}>
+                {qrLoading ? <RefreshCw size={16} style={spinStyle} /> : <QrCode size={16} />}
+                {qrCode ? "Atualizar QR Code" : "Escanear o QR Code"}
+              </button>
             )}
 
             {allDone && (
               <div className="connect-wizard-done">
-                <Check size={16} /> WhatsApp conectado na instância <strong>dipefy-drop</strong>.
+                <Check size={16} /> WhatsApp conectado na instância <strong>{status?.whatsapp.instance ?? "Evolution Local"}</strong>.
               </div>
             )}
 
@@ -210,6 +231,27 @@ export function EvolutionLocalControl({ onConnectionChange }: EvolutionLocalCont
               Abrir painel <ExternalLink size={14} />
             </a>
           </footer>
+          {qrCode && !whatsappReady && (
+            <section className="mt-5 grid gap-4 rounded-2xl border border-[#d8caea] bg-[#faf7fd] p-4 sm:grid-cols-[1fr_180px] sm:items-center">
+              <div>
+                <span className="section-kicker">Novo número</span>
+                <h3 className="mt-1 text-base font-black text-[#2d144d]">Escaneie pelo WhatsApp</h3>
+                <p className="mt-1 text-xs leading-relaxed text-[#6d5488]">
+                  No celular: Configurações → Aparelhos conectados → Conectar aparelho.
+                </p>
+                {qrCode.pairingCode && <p className="mt-2 text-xs font-bold text-[#2d144d]">Código: {qrCode.pairingCode}</p>}
+              </div>
+              {qrCode.base64 ? (
+                <img
+                  src={qrCode.base64.startsWith("data:") ? qrCode.base64 : `data:image/png;base64,${qrCode.base64}`}
+                  alt="QR Code para conectar o WhatsApp"
+                  className="mx-auto h-[180px] w-[180px] rounded-xl border border-[#d8caea] bg-white p-2"
+                />
+              ) : (
+                <code className="break-all rounded-xl bg-white p-3 text-xs text-[#2d144d]">{qrCode.code || "QR indisponível"}</code>
+              )}
+            </section>
+          )}
         </>
       )}
     </section>

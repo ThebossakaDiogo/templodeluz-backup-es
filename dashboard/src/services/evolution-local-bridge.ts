@@ -27,6 +27,13 @@ export interface EvolutionLocalStatus {
   error?: string;
 }
 
+export interface EvolutionLocalQrCode {
+  instance: string;
+  base64: string | null;
+  code: string | null;
+  pairingCode: string | null;
+}
+
 const BRIDGE_URL = "http://127.0.0.1:3210";
 
 async function request<T>(path: string, options: RequestInit = {}, timeoutMs = 8_000): Promise<T> {
@@ -65,6 +72,10 @@ export async function restartEvolutionLocal(): Promise<EvolutionLocalStatus> {
 
 export async function stopEvolutionLocal(): Promise<EvolutionLocalStatus> {
   return request<EvolutionLocalStatus>("/evolution/stop", { method: "POST" }, 150_000);
+}
+
+export async function getEvolutionLocalQrCode(): Promise<EvolutionLocalQrCode> {
+  return request<EvolutionLocalQrCode>("/evolution/qrcode", { method: "POST" }, 30_000);
 }
 
 export const EVOLUTION_MANAGER_URL = "http://127.0.0.1:8080/manager";
