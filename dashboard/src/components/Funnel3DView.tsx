@@ -564,7 +564,6 @@ export function Funnel3DView({ leads }: Funnel3DViewProps) {
         >
           <svg
             width="100%"
-            height="auto"
             viewBox={`0 0 ${svgW} ${svgH}`}
             onMouseLeave={() => setHoveredIdx(null)}
             style={{
