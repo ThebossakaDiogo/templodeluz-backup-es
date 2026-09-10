@@ -52,17 +52,16 @@ export function json(origin: string, body: unknown, status = 200) {
 }
 
 export function allowedAdminEmails() {
-  return new Set(
-    (Deno.env.get('DASHBOARD_ALLOWED_ADMIN_EMAILS') ?? '')
+  const configured = (Deno.env.get('DASHBOARD_ALLOWED_ADMIN_EMAILS') ?? '')
       .split(',')
       .map((value) => value.trim().toLowerCase())
-      .filter(Boolean),
-  );
+      .filter(Boolean);
+  return new Set(configured.length ? configured : ['suporte.tempodeluz@gmail.com']);
 }
 
 export async function requireDashboardAdmin(request: Request) {
-  const metaUrl = Deno.env.get('DASHBOARD_META_SUPABASE_URL');
-  const metaAnonKey = Deno.env.get('DASHBOARD_META_SUPABASE_ANON_KEY');
+  const metaUrl = Deno.env.get('DASHBOARD_META_SUPABASE_URL') ?? Deno.env.get('SUPABASE_URL');
+  const metaAnonKey = Deno.env.get('DASHBOARD_META_SUPABASE_ANON_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY');
   // Meta invokes directly with Authorization; TikTok forwards that token explicitly.
   const authorization = request.headers.get('x-meta-authorization') ?? request.headers.get('authorization') ?? '';
   if (!metaUrl || !metaAnonKey || !authorization.startsWith('Bearer ')) return false;
