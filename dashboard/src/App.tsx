@@ -689,41 +689,7 @@ export function App() {
     return () => clearInterval(interval);
   }, [authLoading, fetchData]);
 
-  // Realtime Supabase
-  useEffect(() => {
-    if (dashboardProfile !== "meta") return;
-
-    const ch1 = supabase
-      .channel("rt-orders")
-      .on("postgres_changes", { event: "*", schema: "public", table: "pix_orders" }, () =>
-        void fetchData()
-      )
-      .subscribe();
-
-    const ch2 = supabase
-      .channel("rt-leads")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "quiz_funnel_leads" },
-        () => void fetchData()
-      )
-      .subscribe();
-
-    const ch3 = supabase
-      .channel("rt-whatsapp")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "whatsapp_conversations" },
-        () => void fetchData()
-      )
-      .subscribe();
-
-    return () => {
-      void supabase.removeChannel(ch1);
-      void supabase.removeChannel(ch2);
-      void supabase.removeChannel(ch3);
-    };
-  }, [dashboardProfile, fetchData]);
+  // O dashboard usa polling resiliente (20s) acima para funcionar em redes que bloqueiam WebSocket.
 
   // Cálculos reativos ao DateRange com separação total PIX e Cartão
   const {

@@ -1,4 +1,4 @@
-const CACHE_NAME = "od-metrics-shell-v3";
+const CACHE_NAME = "od-metrics-shell-v4";
 const APP_SHELL = [
   "/",
   "/manifest.webmanifest",
@@ -11,7 +11,9 @@ const APP_SHELL = [
 ];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => Promise.allSettled(APP_SHELL.map((asset) => cache.add(asset)))),
+  );
   self.skipWaiting();
 });
 
@@ -26,33 +28,14 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   const request = event.request;
-  if (request.method !== "GET") return;
-
-  const url = new URL(request.url);
-  if (url.origin !== self.location.origin) return;
-
-  if (request.mode === "navigate") {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          const copy = response.clone();
-          void caches.open(CACHE_NAME).then((cache) => cache.put("/", copy));
-          return response;
-        })
-        .catch(() => caches.match("/")),
-    );
-    return;
-  }
+  if (request.method !== "GET" || request.mode !== "navigate") return;
 
   event.respondWith(
-    caches.match(request).then((cached) => {
-      if (cached) return cached;
-      return fetch(request).then((response) => {
-        if (response.ok) {
-          const copy = response.clone();
-          void caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-        }
-        return response;
+    fetch(request).catch(async () => {
+      const cached = await caches.match("/");
+      return cached || new Response("Dashboard indisponível offline.", {
+        status: 503,
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
       });
     }),
   );

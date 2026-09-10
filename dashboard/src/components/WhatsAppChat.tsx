@@ -17,7 +17,6 @@ import {
   Upload,
   X,
 } from "lucide-react";
-import { supabase } from "@/lib/supabase";
 import type { DashboardProfileId } from "@/lib/dashboard-profiles";
 import { createWhatsAppChatClient } from "@/services/whatsapp-chat";
 import type {
@@ -166,26 +165,14 @@ export function WhatsAppChat({ profile, accessToken, onUnreadCountChange }: What
   }, [loadSelectedThread, selectedThread?.id]);
 
   useEffect(() => {
+    // Polling mantém o inbox atualizado mesmo em redes que bloqueiam WebSocket/Realtme.
     const refreshInbox = () => {
       void reload();
       if (selectedThread) void loadSelectedThread(selectedThread);
     };
     const interval = window.setInterval(refreshInbox, 12_000);
-
-    if (profile === "meta") {
-      const channel = supabase
-        .channel("rt-whatsapp-chat")
-        .on("postgres_changes", { event: "*", schema: "public", table: "whatsapp_chat_threads" }, refreshInbox)
-        .on("postgres_changes", { event: "*", schema: "public", table: "whatsapp_chat_messages" }, refreshInbox)
-        .subscribe();
-      return () => {
-        window.clearInterval(interval);
-        void supabase.removeChannel(channel);
-      };
-    }
-
     return () => window.clearInterval(interval);
-  }, [loadSelectedThread, profile, reload, selectedThread]);
+  }, [loadSelectedThread, reload, selectedThread]);
 
   const handleSelectThread = (thread: WhatsAppChatThread) => {
     setSelectedThread(thread);
