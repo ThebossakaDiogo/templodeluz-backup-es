@@ -62,9 +62,7 @@ function getPageNumbers(totalPages: number, currentPage: number): number[] {
 }
 
 function calculateTelemetryMetrics(leads: readonly Lead[]) {
-  const checkouts = leads.filter(
-    (l) => l.checkout_initiated || l.highest_step_index >= 8 || l.checkout_status === "checkout_initiated"
-  );
+  const checkouts = leads.filter((l) => l.checkout_opened || l.checkout_initiated);
   const pixes = leads.filter(
     (l) => l.pix_generated || l.checkout_status === "pix_generated"
   );
@@ -90,7 +88,7 @@ function calculateTelemetryMetrics(leads: readonly Lead[]) {
 }
 
 function matchesFilter(l: Lead, filter: string): boolean {
-  if (filter === "checkout") return Boolean(l.checkout_initiated || l.highest_step_index >= 8);
+  if (filter === "checkout") return Boolean(l.checkout_opened || l.checkout_initiated);
   if (filter === "pix") return Boolean(l.pix_generated || l.checkout_status === "pix_generated");
   if (filter === "declined") return Boolean(l.card_declined || l.payment_status === "failed");
   if (filter === "paid") return l.payment_status === "paid";

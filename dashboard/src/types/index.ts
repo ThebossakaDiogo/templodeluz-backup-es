@@ -15,6 +15,10 @@ export interface Lead {
   time_spent_seconds?: number;
   checkout_initiated?: boolean;
   checkout_initiated_at?: string | null;
+  checkout_opened?: boolean;
+  checkout_opened_at?: string | null;
+  checkout_form_started?: boolean;
+  checkout_form_started_at?: string | null;
   pix_generated?: boolean;
   pix_generated_at?: string | null;
   card_declined?: boolean;

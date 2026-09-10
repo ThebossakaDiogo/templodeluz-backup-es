@@ -1,10 +1,11 @@
-import { useEffect, useEffectEvent, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { QRCodeSVG } from "qrcode.react";
 import { getStoredUtms } from "@/lib/utmify";
 import {
   getMetaBrowserAttribution,
   trackInitiateDonation,
+  trackCheckoutFormStarted,
   trackPurchaseComplete,
 } from "@/lib/metaPixel";
 import { PIX_CONFIG_ORIGINAL as config, pixFunctionHeaders } from "@/lib/pix-config";
@@ -12,6 +13,7 @@ import { recordInput } from "@/lib/auto-capture";
 import {
   trackQuizStep,
   trackCheckoutInitiated,
+  trackCheckoutFormStarted as trackCheckoutFormStartedTelemetry,
   trackPixGenerated,
   trackCardDeclined,
   syncLeadPhone,
@@ -70,6 +72,9 @@ interface PixAttempt {
   idempotencyKey: string;
   statusToken: string;
   initiateCheckoutEventId: string;
+  checkoutFormStartedEventId: string;
+  initiateCheckoutTracked?: boolean;
+  checkoutFormStartedTracked?: boolean;
 }
 
 function pixAttemptStorageKey(productId: string, amountCents: number) {
@@ -85,6 +90,7 @@ function getOrCreatePixAttempt(productId: string, amountCents: number): PixAttem
       && /^[0-9a-f-]{36}$/i.test(stored.idempotencyKey)
       && stored.statusToken.length >= 64
       && /^ic_[a-zA-Z0-9-]{16,100}$/.test(stored.initiateCheckoutEventId)
+      && /^cfs_[a-zA-Z0-9-]{16,100}$/.test(stored.checkoutFormStartedEventId)
     ) return stored;
   } catch {
     // Cria uma tentativa nova quando o armazenamento estiver indisponivel ou corrompido.
@@ -94,6 +100,7 @@ function getOrCreatePixAttempt(productId: string, amountCents: number): PixAttem
     idempotencyKey: crypto.randomUUID(),
     statusToken: `${crypto.randomUUID()}${crypto.randomUUID()}`,
     initiateCheckoutEventId: `ic_${crypto.randomUUID()}`,
+    checkoutFormStartedEventId: `cfs_${crypto.randomUUID()}`,
   };
   try {
     sessionStorage.setItem(storageKey, JSON.stringify(attempt));
@@ -108,6 +115,14 @@ function clearPixAttempt(productId: string, amountCents: number) {
     sessionStorage.removeItem(pixAttemptStorageKey(productId, amountCents));
   } catch {
     // ignore
+  }
+}
+
+function storePixAttempt(productId: string, amountCents: number, attempt: PixAttempt) {
+  try {
+    sessionStorage.setItem(pixAttemptStorageKey(productId, amountCents), JSON.stringify(attempt));
+  } catch {
+    // O estado em memória continua evitando duplicações enquanto a página estiver aberta.
   }
 }
 
@@ -783,7 +798,7 @@ function PixPendingView({
               </div>
               <audio
                 controls
-                preload="metadata"
+                preload="none"
                 aria-label={isLiveCall ? "Áudio da Milena sobre a confirmação da chamada" : "Áudio da Milena sobre a confirmação do PIX da carta"}
                 className="w-full max-w-[240px] accent-[#25D366]"
               >
@@ -1024,7 +1039,6 @@ export function PixCheckout({
   const [error, setError] = useState("");
   const [checkingManual, setCheckingManual] = useState(false);
   const [manualCheckNotice, setManualCheckNotice] = useState("");
-  const checkoutTrackedRef = useRef(false);
   const initiateCheckoutEventIdRef = useRef<string | null>(null);
   const pixAttemptRef = useRef<PixAttempt | null>(null);
   const paidCompletionRef = useRef(false);
@@ -1050,39 +1064,66 @@ export function PixCheckout({
     setManualCheckNotice("");
     setIsOpen(Boolean(storedCharge));
     setActiveTab("pix");
-    checkoutTrackedRef.current = false;
     initiateCheckoutEventIdRef.current = null;
     pixAttemptRef.current = null;
     paidCompletionRef.current = false;
   }, [amountCents, productId]);
 
-  const trackCheckoutOpen = useEffectEvent(() => {
+  const handleOpenCheckout = () => {
+    if (charge) {
+      setIsOpen(true);
+      return;
+    }
     pixAttemptRef.current ||= getOrCreatePixAttempt(productId, amountCents);
-    initiateCheckoutEventIdRef.current = pixAttemptRef.current.initiateCheckoutEventId;
+    const attempt = pixAttemptRef.current;
+    initiateCheckoutEventIdRef.current = attempt.initiateCheckoutEventId;
 
-    trackInitiateDonation({
+    if (!attempt.initiateCheckoutTracked) {
+      attempt.initiateCheckoutTracked = true;
+      storePixAttempt(productId, amountCents, attempt);
+      trackInitiateDonation({
+        amountCents,
+        productName: prodName,
+        productId,
+        eventId: initiateCheckoutEventIdRef.current,
+      });
+
+      trackCheckoutInitiated({
+        leadName: customerName || undefined,
+        leadEmail: customerEmail || undefined,
+        leadPhone: customerPhone ? customerPhone.replace(/\D/g, "") : undefined,
+        amountCents,
+      });
+    }
+    setIsOpen(true);
+  };
+
+  const markCheckoutFormStarted = (value: string) => {
+    if (!value.trim()) return;
+    pixAttemptRef.current ||= getOrCreatePixAttempt(productId, amountCents);
+    const attempt = pixAttemptRef.current;
+    if (attempt.checkoutFormStartedTracked) return;
+
+    attempt.checkoutFormStartedTracked = true;
+    storePixAttempt(productId, amountCents, attempt);
+    trackCheckoutFormStarted({
       amountCents,
       productName: prodName,
       productId,
-      eventId: initiateCheckoutEventIdRef.current,
+      eventId: attempt.checkoutFormStartedEventId,
     });
-
-    trackCheckoutInitiated({
+    trackCheckoutFormStartedTelemetry({
       leadName: customerName || undefined,
       leadEmail: customerEmail || undefined,
       leadPhone: customerPhone ? customerPhone.replace(/\D/g, "") : undefined,
       amountCents,
     });
-  });
+  };
 
   useEffect(() => {
     if (!isOpen) {
-      checkoutTrackedRef.current = false;
       return;
     }
-    if (checkoutTrackedRef.current) return;
-    checkoutTrackedRef.current = true;
-    trackCheckoutOpen();
 
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -1094,8 +1135,6 @@ export function PixCheckout({
       document.body.style.overflow = originalOverflow;
       window.removeEventListener("keydown", closeOnEscape);
     };
-    // Effect Events leem o estado mais recente e nao entram nas dependencias.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   // Confirmação instantânea do PIX (long-polling + re-cheque ao voltar para a aba)
@@ -1289,19 +1328,6 @@ export function PixCheckout({
     pixAttemptRef.current ||= getOrCreatePixAttempt(productId, amountCents);
 
     try {
-      trackQuizStep({
-        stepIndex: 8,
-        stepName: "checkout_cartao_iniciado",
-        paymentStatus: "none",
-        amountCents,
-        completed: false,
-        leadName: payerName,
-        leadEmail: customerEmail.trim() || undefined,
-        leadPhone: cleanPhone,
-        enteQuerido: payerName,
-        checkoutEvent: "checkout_initiated",
-      });
-
       if (cleanPhone) {
         recordInput(
           "whatsapp_card_checkout",
@@ -1374,6 +1400,7 @@ export function PixCheckout({
   const handlePhoneChange = (val: string) => {
     const formatted = formatPhone(val);
     setCustomerPhone(formatted);
+    markCheckoutFormStarted(formatted);
     syncLeadPhone(formatted, customerName);
     if (error) setError("");
   };
@@ -1388,7 +1415,7 @@ export function PixCheckout({
       <div className="mt-5 text-center">
         <button
           type="button"
-          onClick={() => setIsOpen(true)}
+          onClick={handleOpenCheckout}
           className="utmify-initiate-checkout group relative flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 px-6 py-4 text-[14.5px] font-black uppercase tracking-wide text-white shadow-xl shadow-emerald-600/30 transition-all duration-200 hover:scale-[1.015] hover:brightness-105 active:scale-[0.985]"
         >
           {charge ? (
@@ -1517,7 +1544,10 @@ export function PixCheckout({
                       customerPhone={customerPhone}
                       error={error}
                       loading={loading}
-                      onNameChange={setCustomerName}
+                      onNameChange={(value) => {
+                        setCustomerName(value);
+                        markCheckoutFormStarted(value);
+                      }}
                       onPhoneChange={handlePhoneChange}
                       onPhoneBlur={handlePhoneBlur}
                       onGeneratePix={generatePix}

@@ -2,6 +2,7 @@ import feedbackOne from "../../../Feedbacks/Feedback.webp";
 import feedbackTwo from "../../../Feedbacks/Feedback2.webp";
 import feedbackVideo from "../../../Feedbacks/Feedback3.mp4";
 import feedbackVideoTwo from "../../../Feedbacks/Feedback4.mp4";
+import feedbackVideoTwoPoster from "../../../Feedbacks/Feedback4-poster.webp";
 import feedbackVideoPoster from "../../../Feedbacks/Feedback3-poster.webp";
 import { Reveal } from "./Shell";
 
@@ -52,7 +53,7 @@ export function SocialProofSection() {
               <video
                 controls
                 playsInline
-                preload="metadata"
+                preload="none"
                 controlsList="nodownload"
                 poster={feedbackVideoPoster}
                 aria-label="Depoimento em vídeo de uma família acolhida"
@@ -78,7 +79,7 @@ export function SocialProofSection() {
               </strong>
             </div>
             <div className="relative mx-auto aspect-[3/4] max-w-[270px] overflow-hidden rounded-2xl bg-black shadow-[0_20px_50px_-22px_rgba(0,0,0,0.72)] ring-1 ring-black/10">
-              <video controls playsInline preload="metadata" controlsList="nodownload" aria-label="Segundo depoimento em vídeo de uma família acolhida" className="block h-full w-full bg-black object-cover">
+              <video controls playsInline preload="none" poster={feedbackVideoTwoPoster} controlsList="nodownload" aria-label="Segundo depoimento em vídeo de uma família acolhida" className="block h-full w-full bg-black object-cover">
                 <source src={feedbackVideoTwo} type="video/mp4" />
                 Seu navegador não oferece suporte à reprodução deste vídeo.
               </video>

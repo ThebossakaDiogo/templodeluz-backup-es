@@ -160,7 +160,11 @@ export function getMetaBrowserAttribution() {
  * Dispara um evento personalizado do Meta Pixel
  * Ex: fbqTrackCustom('Quiz_Step_1_Nome', { step: 1 })
  */
-export function fbqTrackCustom(eventName: string, params?: Record<string, unknown>) {
+export function fbqTrackCustom(
+  eventName: string,
+  params?: Record<string, unknown>,
+  options?: { eventID?: string },
+) {
   if (typeof window === "undefined") return;
 
   // Auto-inicializa se necessário
@@ -171,9 +175,9 @@ export function fbqTrackCustom(eventName: string, params?: Record<string, unknow
   try {
     if (typeof window.fbq === "function") {
       if (params) {
-        window.fbq("trackCustom", eventName, params);
+        window.fbq("trackCustom", eventName, params, options);
       } else {
-        window.fbq("trackCustom", eventName);
+        window.fbq("trackCustom", eventName, undefined, options);
       }
     }
   } catch (err) {
@@ -288,6 +292,26 @@ export function trackInitiateDonation(options: {
     produto_id: options.productId,
     ...(options.paymentMethod ? { metodo_pagamento: options.paymentMethod } : {}),
   });
+}
+
+/** Registra a primeira interação com os campos do checkout, sem alegar pagamento. */
+export function trackCheckoutFormStarted(options: {
+  amountCents: number;
+  productName: string;
+  productId: string;
+  eventId?: string;
+}) {
+  const value = Number((options.amountCents / 100).toFixed(2));
+  fbqTrackCustom(
+    "CheckoutFormStarted",
+    {
+      value,
+      currency: "BRL",
+      content_name: options.productName,
+      content_ids: [options.productId],
+    },
+    options.eventId ? { eventID: options.eventId } : undefined,
+  );
 }
 
 /**

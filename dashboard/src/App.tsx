@@ -784,9 +784,7 @@ export function App() {
     const pixPending = pending.filter((o) => o.payment_method === "pix" || !o.payment_method);
 
     // Métricas de Checkout e Retenção
-    const checkoutsInit = fLeads.filter(
-      (l) => l.checkout_initiated || l.highest_step_index >= 8 || l.checkout_status === "checkout_initiated"
-    );
+    const checkoutsInit = fLeads.filter((l) => l.checkout_opened || l.checkout_initiated);
     const pixGenerated = fLeads.filter(
       (l) => l.pix_generated || l.checkout_status === "pix_generated"
     );
@@ -851,9 +849,7 @@ export function App() {
 
     const todayEntries = leadsToday.length;
 
-    const todayCheckouts = leadsToday.filter(
-      (l) => l.checkout_initiated || l.highest_step_index >= 8 || l.checkout_status === "checkout_initiated"
-    ).length;
+    const todayCheckouts = leadsToday.filter((l) => l.checkout_opened || l.checkout_initiated).length;
 
     const todayPix = allOrders.filter((o) => {
       if (!o.created_at) return false;

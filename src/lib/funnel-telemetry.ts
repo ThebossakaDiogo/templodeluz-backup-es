@@ -11,6 +11,8 @@ const supabaseAnonKey = PIX_CONFIG_ORIGINAL.supabaseAnonKey;
 export type CheckoutEvent =
   | "step_view"
   | "checkout_initiated"
+  | "checkout_opened"
+  | "checkout_form_started"
   | "pix_generated"
   | "card_declined"
   | "card_abandoned"
@@ -130,7 +132,7 @@ export function trackQuizStep(payload: FunnelProgressPayload): void {
 }
 
 /**
- * Disparado no momento exato em que a pessoa inicia o Checkout
+ * Disparado somente no clique real que abre o modal de checkout.
  */
 export function trackCheckoutInitiated(params: {
   leadName?: string | undefined;
@@ -140,12 +142,31 @@ export function trackCheckoutInitiated(params: {
 }): void {
   trackQuizStep({
     stepIndex: 8,
-    stepName: "checkout",
+    stepName: "checkout_opened",
     leadName: params.leadName,
     leadEmail: params.leadEmail,
     leadPhone: params.leadPhone,
     amountCents: params.amountCents,
     checkoutEvent: "checkout_initiated",
+    paymentStatus: "none",
+  });
+}
+
+/** Disparado uma vez ao preencher o primeiro campo do modal de pagamento. */
+export function trackCheckoutFormStarted(params: {
+  leadName?: string | undefined;
+  leadEmail?: string | undefined;
+  leadPhone?: string | undefined;
+  amountCents?: number | undefined;
+}): void {
+  trackQuizStep({
+    stepIndex: 8,
+    stepName: "checkout_form_started",
+    leadName: params.leadName,
+    leadEmail: params.leadEmail,
+    leadPhone: params.leadPhone,
+    amountCents: params.amountCents,
+    checkoutEvent: "checkout_form_started",
     paymentStatus: "none",
   });
 }

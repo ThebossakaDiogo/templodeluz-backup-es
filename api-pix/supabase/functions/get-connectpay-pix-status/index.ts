@@ -2,7 +2,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { amountToCents, isUuid, normalizeConnectPayStatus } from '../_shared/pix.ts';
 import { deliverMetaUtmifyPaidOrder } from '../_shared/utmify.ts';
-import { deliverMetaInitiateCheckout, deliverMetaPurchase, runInBackground } from '../_shared/meta-conversions.ts';
+import { deliverMetaPurchase, runInBackground } from '../_shared/meta-conversions.ts';
 
 const QUIZ_ORIGIN = 'original';
 const PIX_ACCOUNT_KEY = 'connectpay_original';
@@ -127,7 +127,6 @@ Deno.serve(async (req) => {
     const schedulePaidDeliveries = (order: Record<string, any>) => {
       runInBackground(Promise.allSettled([
         deliverMetaUtmifyPaidOrder(supabase, order),
-        deliverMetaInitiateCheckout(supabase, order),
         deliverMetaPurchase(supabase, order),
       ]).then((deliveries) => deliveries.forEach((delivery) => {
         if (delivery.status === 'rejected') {

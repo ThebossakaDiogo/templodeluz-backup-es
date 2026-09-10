@@ -218,9 +218,16 @@ export async function processPendingMetaConversions(supabase: any, limit = 25) {
       .eq('id', delivery.order_id)
       .maybeSingle();
     if (orderError || !order) throw orderError ?? new Error('ORDER_NOT_FOUND');
-    return delivery.event_name === 'Purchase'
-      ? deliverMetaPurchase(supabase, order)
-      : deliverMetaInitiateCheckout(supabase, order);
+    if (delivery.event_name === 'InitiateCheckout') {
+      await supabase
+        .from('meta_conversion_deliveries')
+        .update({ delivery_status: 'sent', sent_at: new Date().toISOString(), last_error: 'Superseded by checkout-open event' })
+        .eq('order_id', delivery.order_id)
+        .eq('event_name', 'InitiateCheckout')
+        .in('delivery_status', ['queued', 'failed', 'processing']);
+      return { delivered: false, skipped: true };
+    }
+    return deliverMetaPurchase(supabase, order);
   }));
 
   return {

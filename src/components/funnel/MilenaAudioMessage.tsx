@@ -39,7 +39,7 @@ export function MilenaAudioMessage() {
         <div className="mt-4 rounded-2xl border border-[#e5daf0] bg-white/90 p-3 shadow-sm">
           <audio
             controls
-            preload="metadata"
+            preload="none"
             aria-label="Mensagem em áudio de Milena Medeiros sobre a contribuição das velas"
             className="w-full accent-[#6b21a8]"
           >

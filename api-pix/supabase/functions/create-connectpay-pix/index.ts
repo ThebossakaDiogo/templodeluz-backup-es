@@ -1,7 +1,6 @@
 // @ts-nocheck
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { digits, isUuid, isValidCpf, resolveChargeAmount } from '../_shared/pix.ts';
-import { deliverMetaInitiateCheckout, runInBackground } from '../_shared/meta-conversions.ts';
 
 const QUIZ_ORIGIN = 'original';
 const PIX_ACCOUNT_KEY = 'connectpay_original';
@@ -393,7 +392,13 @@ Deno.serve(async (req) => {
     });
     if (updateError || !completedOrder) throw updateError ?? new Error('ORDER_UPDATE_FAILED');
 
-    runInBackground(deliverMetaInitiateCheckout(supabase, completedOrder), 'META IC DELIVERY');
+    // InitiateCheckout é enviado no clique que abre o modal, antes de qualquer PIX ser criado.
+    // O banco legou uma outbox de IC vinculada ao pedido; ela não representa este estágio do funil.
+    await supabase
+      .from('meta_conversion_deliveries')
+      .delete()
+      .eq('order_id', completedOrder.id)
+      .eq('event_name', 'InitiateCheckout');
 
     return json(origin, chargeResponse(completedOrder, statusToken));
   } catch (error) {
