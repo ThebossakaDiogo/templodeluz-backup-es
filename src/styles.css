@@ -117,6 +117,7 @@
 
   html {
     scroll-behavior: smooth;
+    font-size: 17px;
   }
 
   body {
@@ -124,12 +125,38 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    line-height: 1.6;
+  }
+
+  input,
+  textarea,
+  select {
+    font-size: 1rem !important;
+    line-height: 1.45;
+  }
+
+  button:not([aria-label]) {
+    min-height: 2.7rem;
   }
 
   ::selection {
     background: var(--accent-soft);
     color: var(--primary-deep);
   }
+}
+
+/* Conforto visual: mantém rótulos úteis acima do tamanho difícil de ler em celular. */
+body [class*="text-[9px]"] { font-size: 0.78rem !important; }
+body [class*="text-[9.5px]"] { font-size: 0.8rem !important; }
+body [class*="text-[10px]"] { font-size: 0.82rem !important; }
+body [class*="text-[10.5px]"] { font-size: 0.84rem !important; }
+body [class*="text-[11px]"] { font-size: 0.86rem !important; }
+body [class*="text-[11.5px]"] { font-size: 0.88rem !important; }
+body [class*="text-[12px]"] { font-size: 0.9rem !important; }
+
+@media (max-width: 640px) {
+  html { font-size: 17px; }
+  button:not([aria-label]) { min-height: 2.85rem; }
 }
 
 @utility font-display {
