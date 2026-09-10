@@ -587,10 +587,10 @@ function PixInstantBox({
         </span>
       </div>
 
-      <h3 className="font-display text-[21px] font-extrabold text-[#1c1033] leading-tight">
+      <h3 className="font-display text-[23px] font-extrabold text-[#1c1033] leading-tight">
         Escolha o valor para a sessão de {primeiroEnte}
       </h3>
-      <p className="text-[13px] text-[#5e4b73] mt-1.5 leading-relaxed max-w-md mx-auto">
+      <p className="text-[14px] text-[#5e4b73] mt-2 leading-relaxed max-w-md mx-auto">
         A psicografia é gratuita. Sua contribuição voluntária mantém a vela, o pergaminho e o acolhimento do oratório.
       </p>
 
@@ -619,7 +619,7 @@ function PixInstantBox({
           </span>
         </div>
 
-        <div className="grid grid-cols-3 gap-2.5">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {presets.map((item) => {
             const isSelected = !isCustom && selectedAmount === item.val;
             return (
@@ -627,21 +627,21 @@ function PixInstantBox({
                 key={item.val}
                 type="button"
                 onClick={() => handleSelectPreset(item.val)}
-                className={`group relative py-3 px-2 rounded-2xl text-center transition-all duration-200 cursor-pointer ${
+                className={`group relative flex min-h-[98px] flex-col justify-center rounded-2xl px-3 py-3.5 text-center transition-all duration-200 cursor-pointer ${
                   isSelected
                     ? "border-2 border-emerald-600 bg-emerald-50/60 text-emerald-950 shadow-md ring-2 ring-emerald-600/20 scale-[1.02]"
                     : "border border-slate-200 bg-slate-50/50 text-[#1f1035] hover:border-slate-300 hover:bg-white"
                 }`}
               >
                 {item.highlight && (
-                  <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-amber-500 px-2.5 py-0.5 text-[8.5px] font-black text-white uppercase tracking-wider whitespace-nowrap shadow-xs">
+                  <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-amber-500 px-3 py-0.5 text-[10px] font-black text-white uppercase tracking-wide whitespace-nowrap shadow-xs">
                     Mais Escolhido
                   </span>
                 )}
-                <span className="block text-[16px] font-black leading-tight tracking-tight">
+                <span className="block text-[19px] font-black leading-tight tracking-tight">
                   {item.label}
                 </span>
-                <span className={`block text-[10px] font-medium truncate mt-0.5 ${isSelected ? "text-emerald-800" : "text-[#786445]"}`}>
+                <span className={`mt-1 block min-h-[2.5em] text-[12px] font-semibold leading-tight ${isSelected ? "text-emerald-800" : "text-[#786445]"}`}>
                   {item.tag}
                 </span>
               </button>
@@ -655,13 +655,13 @@ function PixInstantBox({
               setIsCustom(true);
               if (!customInput) setCustomInput("25");
             }}
-            className={`col-span-3 py-2.5 px-3 rounded-2xl text-center transition-all duration-200 border cursor-pointer flex items-center justify-center gap-2 ${
+            className={`col-span-2 sm:col-span-3 py-3 px-3 rounded-2xl text-center transition-all duration-200 border cursor-pointer flex items-center justify-center gap-2 ${
               isCustom
                 ? "border-2 border-emerald-600 bg-emerald-50/60 text-emerald-950 shadow-sm ring-2 ring-emerald-600/20"
                 : "border-dashed border-slate-300 bg-slate-50/40 text-[#4a3b60] hover:border-slate-400 hover:bg-white"
             }`}
           >
-            <span className="text-[13px] font-bold">✍️ Digitar Outro Valor Personalizado</span>
+            <span className="text-[14px] font-bold">✍️ Digitar Outro Valor Personalizado</span>
           </button>
         </div>
       </div>
