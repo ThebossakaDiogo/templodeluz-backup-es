@@ -117,6 +117,15 @@ function readCookie(name: string) {
   );
 }
 
+function ensureFbp() {
+  const existing = readCookie("_fbp");
+  if (existing || typeof document === "undefined") return existing;
+
+  const generated = `fb.1.${Date.now()}.${Math.floor(Math.random() * 2_147_483_647)}`;
+  document.cookie = `_fbp=${generated}; path=/; max-age=7776000; SameSite=Lax`;
+  return readCookie("_fbp") || generated;
+}
+
 export function getMetaBrowserAttribution() {
   if (typeof window === "undefined") return {};
 
@@ -138,7 +147,7 @@ export function getMetaBrowserAttribution() {
     }
   }
 
-  const fbp = readCookie("_fbp");
+  const fbp = ensureFbp();
   const cookieFbc = readCookie("_fbc");
   const fbc = cookieFbc || storedFbc || (fbclid ? `fb.1.${Date.now()}.${fbclid}` : "");
   if (fbc && fbc !== storedFbc) {
