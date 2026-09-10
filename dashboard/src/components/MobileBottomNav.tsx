@@ -21,7 +21,7 @@ interface MobileBottomNavProps {
 
 const PRIMARY_ITEMS = [
   { id: "visao-geral" as Section, label: "Visão geral", Icon: LayoutGrid },
-  { id: "whatsapp" as Section, label: "WhatsApp", Icon: MessageCircle },
+  { id: "whatsapp" as Section, label: "WhatsApp Chat", Icon: MessageCircle },
   { id: "rastreamento" as Section, label: "Funil", Icon: Activity },
   { id: "pedidos" as Section, label: "Pedidos", Icon: CreditCard },
 ];

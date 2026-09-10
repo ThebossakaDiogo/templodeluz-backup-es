@@ -24,7 +24,7 @@ import { ConsulentesTelemetryTable } from "@/components/ConsulentesTelemetryTabl
 import { TodayHeroMetric } from "@/components/TodayHeroMetric";
 import { EvolutionLocalControl } from "@/components/EvolutionLocalControl";
 import { EvolutionGuide } from "@/components/EvolutionGuide";
-import { WhatsAppTracker } from "@/components/WhatsAppTracker";
+import { WhatsAppChat } from "@/components/WhatsAppChat";
 import { AbandonmentTracker } from "@/components/AbandonmentTracker";
 import { ProfileView } from "@/components/ProfileView";
 import { LoginPage } from "@/components/LoginPage";
@@ -595,7 +595,7 @@ export function App() {
 
   const [allOrders, setAllOrders] = useState<PaymentOrder[]>([]);
   const [allLeads, setAllLeads] = useState<Lead[]>([]);
-  const [allWhatsApp, setAllWhatsApp] = useState<WhatsAppMessage[]>([]);
+  const [whatsAppChatUnreadCount, setWhatsAppChatUnreadCount] = useState(0);
   const fetchVersionRef = useRef(0);
 
   useEffect(() => {
@@ -633,7 +633,7 @@ export function App() {
     localStorage.setItem(DASHBOARD_PROFILE_STORAGE_KEY, profileId);
     setAllOrders([]);
     setAllLeads([]);
-    setAllWhatsApp([]);
+    setWhatsAppChatUnreadCount(0);
     setOnlineCount(0);
     setLoading(true);
   };
@@ -653,7 +653,7 @@ export function App() {
       if (fetchVersion !== fetchVersionRef.current) return;
 
       // Reconciliação cruzada: unifica status de pagamento, telefone e ente querido
-      const { reconciledOrders, reconciledLeads, reconciledWhatsApp } = reconcileDashboardData(
+      const { reconciledOrders, reconciledLeads } = reconcileDashboardData(
         parsedOrders,
         parsedLeads,
         parsedWhatsApp
@@ -661,7 +661,6 @@ export function App() {
 
       setAllOrders(reconciledOrders);
       setAllLeads(reconciledLeads);
-      setAllWhatsApp(reconciledWhatsApp);
 
       // Pessoas ao vivo (últimos 15 minutos)
       const fifteenMinAgo = Date.now() - 15 * 60 * 1000;
@@ -890,9 +889,9 @@ export function App() {
     { id: "abandonos" as Section, label: "Abandono & Recuperação", icon: AlertOctagon, badge: pixUnpaidOver1hCount > 0 ? `${pixUnpaidOver1hCount}` : undefined },
     { id: "pedidos" as Section, label: "Pedidos & Vendas", icon: CreditCard },
     { id: "relatorios" as Section, label: "Relatórios & UTMs", icon: BarChart3 },
-    { id: "whatsapp" as Section, label: "WhatsApp Tracker", icon: MessageSquare, badge: allWhatsApp.filter((w) => w.payment_status !== "paid").length || undefined },
+    { id: "whatsapp" as Section, label: "WhatsApp Chat", icon: MessageSquare, badge: whatsAppChatUnreadCount || undefined },
     { id: "perfil" as Section, label: "Meu Perfil", icon: User },
-  ], [onlineCount, pixUnpaidOver1hCount, allWhatsApp]);
+  ], [onlineCount, pixUnpaidOver1hCount, whatsAppChatUnreadCount]);
 
   const exportCsv = () => {
     const rows = [
@@ -1193,10 +1192,10 @@ export function App() {
 
           {/* SLUG: /whatsapp */}
           {section === "whatsapp" && (
-            <WhatsAppTracker
-              messages={allWhatsApp}
-              loading={loading}
-              onRefresh={fetchData}
+            <WhatsAppChat
+              profile={dashboardProfile}
+              accessToken={session.access_token}
+              onUnreadCountChange={setWhatsAppChatUnreadCount}
             />
           )}
 
@@ -1213,7 +1212,7 @@ export function App() {
       <MobileBottomNav
         currentSection={section}
         onSelect={handleNavigate}
-        unreadWhatsAppCount={allWhatsApp.filter((w) => w.payment_status !== "paid").length}
+        unreadWhatsAppCount={whatsAppChatUnreadCount}
       />
     </div>
   );

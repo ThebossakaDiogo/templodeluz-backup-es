@@ -34,6 +34,11 @@ export interface EvolutionLocalQrCode {
   pairingCode: string | null;
 }
 
+export interface EvolutionLocalSendResult {
+  remote_message_id: string | null;
+  payload?: Record<string, unknown>;
+}
+
 const BRIDGE_URL = "http://127.0.0.1:3210";
 
 async function request<T>(path: string, options: RequestInit = {}, timeoutMs = 8_000): Promise<T> {
@@ -75,7 +80,21 @@ export async function stopEvolutionLocal(): Promise<EvolutionLocalStatus> {
 }
 
 export async function getEvolutionLocalQrCode(): Promise<EvolutionLocalQrCode> {
-  return request<EvolutionLocalQrCode>("/evolution/qrcode", { method: "POST" }, 30_000);
+  return request<EvolutionLocalQrCode>("/evolution/qrcode", { method: "POST", body: JSON.stringify({ profile: "meta" }) }, 30_000);
+}
+
+export async function sendEvolutionLocalText(profile: "meta" | "tiktok", phone: string, text: string): Promise<EvolutionLocalSendResult> {
+  return request<EvolutionLocalSendResult>("/whatsapp/send-text", {
+    method: "POST",
+    body: JSON.stringify({ profile, phone, text }),
+  }, 30_000);
+}
+
+export async function sendEvolutionLocalMedia(profile: "meta" | "tiktok", phone: string, mediaUrl: string, caption: string, mimeType?: string): Promise<EvolutionLocalSendResult> {
+  return request<EvolutionLocalSendResult>("/whatsapp/send-media", {
+    method: "POST",
+    body: JSON.stringify({ profile, phone, mediaUrl, caption, mimeType }),
+  }, 45_000);
 }
 
 export const EVOLUTION_MANAGER_URL = "http://127.0.0.1:8080/manager";

@@ -47,7 +47,7 @@ export function FloatingDockNav({
     { id: "rastreamento", label: "Funil & Telemetria", icon: Activity, badge: onlineCount > 0 ? `${onlineCount}` : undefined },
     { id: "pedidos",      label: "Pedidos & Vendas", icon: CreditCard },
     { id: "relatorios",   label: "Relatórios & UTMs", icon: BarChart3 },
-    { id: "whatsapp",     label: "WhatsApp Tracker", icon: MessageSquare },
+    { id: "whatsapp",     label: "WhatsApp Chat", icon: MessageSquare },
     { id: "perfil",       label: "Meu Perfil", icon: User },
   ];
 

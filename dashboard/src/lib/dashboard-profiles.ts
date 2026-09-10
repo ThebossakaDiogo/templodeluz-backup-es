@@ -74,6 +74,39 @@ function toArray<T>(value: unknown): T[] {
   return Array.isArray(value) ? (value as T[]) : [];
 }
 
+export async function invokeTikTokDashboardFunction<T>(
+  functionName: string,
+  metaAccessToken: string | undefined,
+  body: unknown
+): Promise<T> {
+  if (!metaAccessToken) {
+    throw new Error("Sessão administrativa ausente para consultar o perfil TikTok.");
+  }
+
+  const response = await fetch(
+    `${tiktokSupabaseUrl.replace(/\/$/, "")}/functions/v1/${functionName}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${tiktokSupabaseAnonKey}`,
+        apikey: tiktokSupabaseAnonKey,
+        "Content-Type": "application/json",
+        "x-meta-authorization": `Bearer ${metaAccessToken}`,
+      },
+      body: JSON.stringify(body),
+    }
+  );
+
+  const payload = (await response.json().catch(() => ({}))) as T & {
+    error?: string;
+    message?: string;
+  };
+  if (!response.ok || payload.error) {
+    throw new Error(payload.error || payload.message || `Falha ao chamar ${functionName}.`);
+  }
+  return payload;
+}
+
 export async function fetchTikTokDashboardProfileData(
   metaAccessToken: string | undefined
 ): Promise<DashboardProfileRows> {
@@ -81,22 +114,11 @@ export async function fetchTikTokDashboardProfileData(
     throw new Error("Sessão administrativa ausente para consultar o perfil TikTok.");
   }
 
-  const response = await fetch(
-    `${tiktokSupabaseUrl.replace(/\/$/, "")}/functions/v1/dashboard-profile-data`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${tiktokSupabaseAnonKey}`,
-        apikey: tiktokSupabaseAnonKey,
-        "x-meta-authorization": `Bearer ${metaAccessToken}`,
-      },
-    }
+  const payload = await invokeTikTokDashboardFunction<DashboardProfileApiResponse>(
+    "dashboard-profile-data",
+    metaAccessToken,
+    {}
   );
-
-  const payload = (await response.json().catch(() => ({}))) as DashboardProfileApiResponse;
-  if (!response.ok || payload.error) {
-    throw new Error(payload.error || payload.message || "Falha ao carregar dados do perfil TikTok.");
-  }
 
   const data = payload.data ?? payload;
   return {

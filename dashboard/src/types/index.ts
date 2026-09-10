@@ -113,3 +113,66 @@ export interface WhatsAppMessage {
   utm_source?: string;
   created_at: string;
 }
+
+export type WhatsAppThreadStatus = "open" | "resolved" | "opted_out";
+export type WhatsAppMessageDirection = "inbound" | "outbound" | "ai";
+export type WhatsAppMessageType = "text" | "image" | "document" | "audio";
+
+export interface WhatsAppChatThread {
+  id: string;
+  customer_name: string | null;
+  customer_email: string | null;
+  customer_phone: string;
+  ente_querido: string | null;
+  payment_status: "paid" | "pending" | "none" | null;
+  status: WhatsAppThreadStatus;
+  last_message_content: string | null;
+  last_message_direction: WhatsAppMessageDirection | null;
+  last_message_at: string;
+  unread_count: number;
+  created_at: string;
+}
+
+export interface WhatsAppChatMessage {
+  id: string;
+  thread_id: string;
+  direction: WhatsAppMessageDirection;
+  message_type: WhatsAppMessageType;
+  content: string | null;
+  media_url: string | null;
+  media_name: string | null;
+  delivery_status: "queued" | "sent" | "delivered" | "read" | "failed" | null;
+  failure_reason: string | null;
+  created_at: string;
+}
+
+export interface WhatsAppMaterial {
+  id: string;
+  name: string;
+  category: string | null;
+  description: string | null;
+  mime_type: string;
+  size_bytes: number;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface WhatsAppAiSettings {
+  enabled: boolean;
+  ai_enabled?: boolean;
+  brand_instructions: string;
+  tone: string;
+  away_message: string | null;
+  response_window_minutes: number;
+  message_limit: number;
+  updated_at: string | null;
+}
+
+export interface WhatsAppAiRun {
+  id: string;
+  thread_id: string;
+  status: "draft" | "sent" | "skipped" | "failed";
+  summary: string | null;
+  error: string | null;
+  created_at: string;
+}
