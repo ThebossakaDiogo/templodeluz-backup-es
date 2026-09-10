@@ -28,12 +28,17 @@ export interface PixCheckoutProps {
   pixProductId?: "carta_sagrada" | "cirurgia_milena" | undefined;
   amountCents: number;
   initialCustomerName?: string | undefined;
+  initialCustomerPhone?: string | undefined;
+  initialCustomerEmail?: string | undefined;
   enteQuerido?: string | undefined;
   grauParentesco?: string | undefined;
   mensagemPreview?: string | undefined;
   successPath?: string | undefined;
   includePaymentParams?: boolean | undefined;
   showCard?: boolean | undefined;
+  autoOpen?: boolean | undefined;
+  autoGeneratePix?: boolean | undefined;
+  displayProductName?: string | undefined;
 }
 
 function appendQuery(path: string, query: string) {
@@ -1018,19 +1023,24 @@ export function PixCheckout({
   pixProductId,
   amountCents,
   initialCustomerName,
+  initialCustomerPhone,
+  initialCustomerEmail,
   enteQuerido,
   grauParentesco,
   mensagemPreview,
   successPath,
   includePaymentParams = true,
   showCard = true,
+  autoOpen = false,
+  autoGeneratePix = false,
+  displayProductName,
 }: Readonly<PixCheckoutProps>) {
   const initial = getInitialCapturedData();
-  const [isOpen, setIsOpen] = useState(() => Boolean(getStoredPixCharge(productId, amountCents)));
+  const [isOpen, setIsOpen] = useState(() => autoOpen || Boolean(getStoredPixCharge(productId, amountCents)));
   const [activeTab, setActiveTab] = useState<"pix" | "card">("pix");
   const [customerName, setCustomerName] = useState(() => initialCustomerName || initial.name);
-  const [customerEmail] = useState(() => initial.email);
-  const [customerPhone, setCustomerPhone] = useState(() => initial.phone);
+  const [customerEmail] = useState(() => initialCustomerEmail || initial.email);
+  const [customerPhone, setCustomerPhone] = useState(() => initialCustomerPhone || initial.phone);
   const [charge, setCharge] = useState<PixCharge | null>(() => getStoredPixCharge(productId, amountCents));
   const [status, setStatus] = useState<PixPaymentStatus>(() => getStoredPixCharge(productId, amountCents) ? "pending" : "creating");
   const [loading, setLoading] = useState(false);
@@ -1042,17 +1052,19 @@ export function PixCheckout({
   const initiateCheckoutEventIdRef = useRef<string | null>(null);
   const pixAttemptRef = useRef<PixAttempt | null>(null);
   const paidCompletionRef = useRef(false);
+  const autoCheckoutStartedRef = useRef(false);
 
   const resolvedEnte = enteQuerido || initial.ente || undefined;
   const resolvedGrau = grauParentesco || initial.relacao || undefined;
 
   const formattedAmount = (amountCents / 100).toFixed(2).replace(".", ",");
-  const prodName =
+  const prodName = displayProductName || (
     productId === "carta_sagrada"
       ? "Carta Psicografada Sagrada"
       : productId === "chamada_ao_vivo_milena"
         ? "Chamada Ao Vivo com Milena"
-        : "Campanha Solidária - Cirurgia Médium Milena";
+        : "Campanha Solidária - Cirurgia Médium Milena"
+  );
 
   useEffect(() => {
     const storedCharge = getStoredPixCharge(productId, amountCents);
@@ -1062,12 +1074,13 @@ export function PixCheckout({
     setError("");
     setCheckingManual(false);
     setManualCheckNotice("");
-    setIsOpen(Boolean(storedCharge));
+    setIsOpen(autoOpen || Boolean(storedCharge));
     setActiveTab("pix");
     initiateCheckoutEventIdRef.current = null;
     pixAttemptRef.current = null;
     paidCompletionRef.current = false;
-  }, [amountCents, productId]);
+    autoCheckoutStartedRef.current = false;
+  }, [amountCents, productId, autoOpen]);
 
   const handleOpenCheckout = () => {
     if (charge) {
@@ -1304,6 +1317,13 @@ export function PixCheckout({
       setCheckingManual(false);
     }
   };
+
+  useEffect(() => {
+    if (!autoOpen || !autoGeneratePix || autoCheckoutStartedRef.current || charge || loading) return;
+    autoCheckoutStartedRef.current = true;
+    handleOpenCheckout();
+    void generatePix();
+  }, [autoOpen, autoGeneratePix, charge, loading, customerName, customerPhone]);
 
   const regeneratePix = () => {
     clearPixAttempt(productId, amountCents);

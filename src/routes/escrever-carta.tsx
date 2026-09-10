@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { recordInput } from "@/lib/auto-capture";
 import { trackWhatsAppEvent } from "@/lib/whatsapp-telemetry";
+import { PixCheckout } from "@/components/funnel/PixCheckout";
 
 export const Route = createFileRoute("/escrever-carta")({
   head: () => ({
@@ -205,6 +206,7 @@ function EscreverCartaPage() {
   const [letterValidationError, setLetterValidationError] = useState("");
   const [letterFormat, setLetterFormat] = useState<"digital" | "physical">("digital");
   const [isPhysicalModalOpen, setIsPhysicalModalOpen] = useState(false);
+  const [isPhysicalCheckoutOpen, setIsPhysicalCheckoutOpen] = useState(false);
   const [shipping, setShipping] = useState({ cep: "", address: "", number: "", complement: "", neighborhood: "", city: "", state: "" });
 
   const ghostNome = useGhostTypewriter(GHOST_NAMES);
@@ -408,6 +410,8 @@ function EscreverCartaPage() {
         setIsPhysicalModalOpen(true);
         return;
       }
+      setIsPhysicalCheckoutOpen(true);
+      return;
     }
     setLetterValidationError("");
     executeWhatsAppRedirect();
@@ -500,7 +504,7 @@ function EscreverCartaPage() {
                 className={`rounded-2xl border-2 p-4 text-left transition-all ${isPhysicalLetter ? "border-amber-500 bg-amber-50 shadow-sm" : "border-stone-200 bg-white hover:border-amber-300"}`}
               >
                 <span className="block text-xl font-black text-[#241535]">Carta Digital <span className="text-amber-700">+ Física</span></span>
-                <span className="mt-1 block text-xs leading-relaxed text-stone-600">Inclui solicitação de envio físico. Frete: <strong>R$ 34,90</strong>, combinado pelo WhatsApp.</span>
+                <span className="mt-1 block text-xs leading-relaxed text-stone-600">Inclui envio físico. Frete: <strong>R$ 34,90</strong> pago com PIX ou cartão após informar o endereço.</span>
               </button>
             </div>
             {isPhysicalLetter && (
@@ -515,7 +519,7 @@ function EscreverCartaPage() {
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <p className="text-xs font-black text-emerald-950">Temas selecionados no quiz</p>
-                <p className="mt-0.5 text-xs text-emerald-800">{selectedThemeLabels || "Você pode escolher ou alterar os temas na próxima etapa."}</p>
+              <p className="mt-0.5 text-xs text-emerald-800">{selectedThemeLabels || "Você pode escolher ou alterar os temas na próxima etapa."}</p>
               </div>
               <button type="button" onClick={() => { setMode("guiada"); setWorkflowStep("rewrite"); setMobileTab("editor"); }} className="text-xs font-black text-emerald-800 underline underline-offset-2">Alterar temas</button>
             </div>
@@ -619,12 +623,13 @@ function EscreverCartaPage() {
           <button
             type="button"
             onClick={handleSendWhatsApp}
-            className="mt-4 inline-flex w-full max-w-2xl items-center justify-center gap-2 rounded-2xl border border-emerald-600 bg-white px-5 py-3.5 text-sm font-black text-emerald-700 shadow-sm transition-colors hover:bg-emerald-50"
+            className="group relative mt-4 inline-flex w-full max-w-2xl overflow-hidden items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 px-5 py-3.5 text-sm font-black text-white shadow-lg shadow-emerald-700/25 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-emerald-700/30 active:translate-y-0"
           >
-            <span className="text-lg">💬</span>
-            Conversar com a Milena no WhatsApp
+            <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/35 to-transparent transition-transform duration-1000 ease-out group-hover:translate-x-full" />
+            <span className="relative text-lg">💬</span>
+            <span className="relative">Conversar com a Milena no WhatsApp</span>
           </button>
-          <p className="mt-2 text-center text-[11px] text-stone-500">Você poderá enviar os dados da carta e combinar o envio físico, se selecionado.</p>
+          <p className="mt-2 text-center text-[11px] text-stone-500">Carta digital segue pelo WhatsApp. Carta física abre pagamento seguro após o endereço.</p>
 
           <p className="text-xs text-stone-400 text-center mt-7 flex items-center gap-1.5">
             <span>🔒</span>
@@ -1258,7 +1263,7 @@ function EscreverCartaPage() {
               <div>
                 <span className="inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-amber-900">📮 Envio de Carta Física</span>
                 <h2 id="physical-letter-title" className="mt-2 font-display text-xl font-black text-[#181126]">Para onde devemos enviar sua carta?</h2>
-                <p className="mt-1 text-xs leading-relaxed text-stone-600">O frete de <strong>R$ 34,90</strong> e os detalhes da carta física serão combinados diretamente no WhatsApp. Não há cobrança nesta página.</p>
+                <p className="mt-1 text-xs leading-relaxed text-stone-600">O frete de <strong>R$ 34,90</strong> será pago no próximo passo por PIX ou cartão. Depois da confirmação, você segue para o WhatsApp com a solicitação completa.</p>
               </div>
               <button type="button" onClick={() => setIsPhysicalModalOpen(false)} className="rounded-full p-2 text-stone-500 hover:bg-stone-100" aria-label="Fechar endereço">✕</button>
             </div>
@@ -1274,10 +1279,27 @@ function EscreverCartaPage() {
             </div>
 
             {letterValidationError && <p role="alert" className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-800">{letterValidationError}</p>}
-            <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-xs leading-relaxed text-emerald-950">✓ Seus dados serão incluídos na mensagem pronta. Na próxima tela, siga para o WhatsApp para combinar o pagamento do frete e o envio físico.</div>
-            <button type="button" onClick={() => { const cep = shipping.cep.replace(/\D/g, ""); if (cep.length !== 8 || !shipping.address.trim() || !shipping.number.trim() || !shipping.neighborhood.trim() || !shipping.city.trim() || shipping.state.trim().length !== 2) { setLetterValidationError("Preencha CEP e endereço completo para solicitar a carta física."); return; } setLetterValidationError(""); setIsPhysicalModalOpen(false); }} className="mt-4 w-full rounded-2xl bg-emerald-600 px-4 py-3.5 text-sm font-black text-white shadow-lg shadow-emerald-700/20 hover:bg-emerald-700">Salvar endereço e continuar</button>
+            <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-xs leading-relaxed text-emerald-950">✓ Seus dados ficam vinculados à solicitação. No próximo passo, o QR Code PIX já ficará aberto; cartão estará disponível logo abaixo.</div>
+            <button type="button" onClick={() => { const cep = shipping.cep.replace(/\D/g, ""); if (cep.length !== 8 || !shipping.address.trim() || !shipping.number.trim() || !shipping.neighborhood.trim() || !shipping.city.trim() || shipping.state.trim().length !== 2) { setLetterValidationError("Preencha CEP e endereço completo para solicitar a carta física."); return; } setLetterValidationError(""); setIsPhysicalModalOpen(false); setIsPhysicalCheckoutOpen(true); }} className="mt-4 w-full rounded-2xl bg-emerald-600 px-4 py-3.5 text-sm font-black text-white shadow-lg shadow-emerald-700/20 hover:bg-emerald-700">Continuar para pagamento do frete</button>
           </div>
         </div>
+      )}
+      {isPhysicalCheckoutOpen && (
+        <PixCheckout
+          productId="carta_sagrada"
+          amountCents={3490}
+          initialCustomerName={nome}
+          initialCustomerPhone={phone}
+          initialCustomerEmail={email}
+          enteQuerido={ente}
+          grauParentesco={relacao}
+          mensagemPreview={`${textoPergaminho}\n\nEnvio físico: ${shipping.address}, ${shipping.number}, ${shipping.neighborhood}, ${shipping.city}/${shipping.state}, CEP ${shipping.cep}`}
+          successPath="/obrigado"
+          showCard
+          autoOpen
+          autoGeneratePix
+          displayProductName="Frete da Carta Física"
+        />
       )}
     </div>
   );
