@@ -110,6 +110,50 @@ function clearPixAttempt(productId: string, amountCents: number) {
   }
 }
 
+function pixChargeStorageKey(productId: string, amountCents: number) {
+  return `templodeluz:pix-charge:${config.quizOrigin}:${productId}:${amountCents}`;
+}
+
+function isStoredPixCharge(value: unknown): value is PixCharge {
+  if (!value || typeof value !== "object") return false;
+  const charge = value as Partial<PixCharge>;
+  return Boolean(
+    charge.orderId
+    && charge.pixPayload
+    && charge.statusToken
+    && typeof charge.orderId === "string"
+    && typeof charge.pixPayload === "string"
+    && typeof charge.statusToken === "string"
+    && charge.statusToken.length >= 64,
+  );
+}
+
+function getStoredPixCharge(productId: string, amountCents: number): PixCharge | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const stored = JSON.parse(localStorage.getItem(pixChargeStorageKey(productId, amountCents)) || "null");
+    return isStoredPixCharge(stored) ? stored : null;
+  } catch {
+    return null;
+  }
+}
+
+function storePixCharge(productId: string, amountCents: number, charge: PixCharge) {
+  try {
+    localStorage.setItem(pixChargeStorageKey(productId, amountCents), JSON.stringify(charge));
+  } catch {
+    // O PIX continua visível na tela atual quando o armazenamento estiver indisponível.
+  }
+}
+
+function clearStoredPixCharge(productId: string, amountCents: number) {
+  try {
+    localStorage.removeItem(pixChargeStorageKey(productId, amountCents));
+  } catch {
+    // ignore
+  }
+}
+
 type PixPaymentStatus =
   | "creating"
   | "pending"
@@ -619,19 +663,9 @@ function PixPendingView({
   onRegenerate,
   isLiveCall = false,
 }: Readonly<PixPendingViewProps>) {
-  // Timestamp absoluto estável no futuro para contagem regressiva contínua
-  const [targetTimestamp] = useState<number>(() => {
-    if (charge.expiresAt) {
-      const parsed = new Date(charge.expiresAt).getTime();
-      if (Number.isFinite(parsed)) return parsed;
-    }
-    return Date.now() + 15 * 60 * 1000;
-  });
-
-  const [totalSeconds] = useState<number>(() => {
-    return Math.max(60, Math.floor((targetTimestamp - Date.now()) / 1000));
-  });
-
+  const totalSeconds = 15 * 60;
+  const [cycleIndex, setCycleIndex] = useState(0);
+  const [targetTimestamp, setTargetTimestamp] = useState<number>(() => Date.now() + totalSeconds * 1000);
   const [remaining, setRemaining] = useState<number>(() => {
     return Math.max(0, Math.floor((targetTimestamp - Date.now()) / 1000));
   });
@@ -639,13 +673,35 @@ function PixPendingView({
   useEffect(() => {
     const updateCountdown = () => {
       const diff = Math.max(0, Math.floor((targetTimestamp - Date.now()) / 1000));
+      if (diff <= 0) {
+        setCycleIndex((current) => current + 1);
+        setTargetTimestamp(Date.now() + totalSeconds * 1000);
+        setRemaining(totalSeconds);
+        return;
+      }
       setRemaining(diff);
     };
 
     updateCountdown();
     const timerId = window.setInterval(updateCountdown, 1000);
     return () => window.clearInterval(timerId);
-  }, [targetTimestamp]);
+  }, [targetTimestamp, totalSeconds]);
+
+  const cycleMessages = [
+    {
+      label: "Prioridade reservada por",
+      final: `Últimos segundos desta rodada para manter sua ${isLiveCall ? "reserva" : "vaga no oratório"} em destaque.`,
+    },
+    {
+      label: "Nova janela de confirmação",
+      final: "Ainda dá tempo. Copie o PIX e volte para esta tela depois de pagar.",
+    },
+    {
+      label: "Seu PIX continua ativo por",
+      final: "O código permanece aqui para você concluir com calma e segurança.",
+    },
+  ];
+  const cycleMessage = cycleMessages[cycleIndex % cycleMessages.length];
 
   const urgencyPercent = Math.max(0, Math.min(100, (remaining / totalSeconds) * 100));
   const urgencyTone =
@@ -737,7 +793,7 @@ function PixPendingView({
               <circle cx="12" cy="12" r="9" />
               <path d="M12 7v5l3 3" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            Sua vaga expira em
+            {cycleMessage.label}
           </span>
           <span className={`text-[18px] font-black tabular-nums leading-none ${urgencyTone.text}`}>
             {formatCountdown(remaining)}
@@ -751,7 +807,7 @@ function PixPendingView({
         </div>
         {remaining <= 60 && (
           <p className="mt-1.5 text-[11px] font-bold text-red-600">
-            ⏳ Últimos segundos para manter a sua {isLiveCall ? "reserva" : "vaga no oratório"}!
+            {cycleMessage.final}
           </p>
         )}
       </div>
@@ -945,13 +1001,13 @@ export function PixCheckout({
   showCard = true,
 }: Readonly<PixCheckoutProps>) {
   const initial = getInitialCapturedData();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(() => Boolean(getStoredPixCharge(productId, amountCents)));
   const [activeTab, setActiveTab] = useState<"pix" | "card">("pix");
   const [customerName, setCustomerName] = useState(() => initialCustomerName || initial.name);
   const [customerEmail] = useState(() => initial.email);
   const [customerPhone, setCustomerPhone] = useState(() => initial.phone);
-  const [charge, setCharge] = useState<PixCharge | null>(null);
-  const [status, setStatus] = useState<PixPaymentStatus>("creating");
+  const [charge, setCharge] = useState<PixCharge | null>(() => getStoredPixCharge(productId, amountCents));
+  const [status, setStatus] = useState<PixPaymentStatus>(() => getStoredPixCharge(productId, amountCents) ? "pending" : "creating");
   const [loading, setLoading] = useState(false);
   const [cardLoading, setCardLoading] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -975,13 +1031,15 @@ export function PixCheckout({
         : "Campanha Solidária - Cirurgia Médium Milena";
 
   useEffect(() => {
-    setCharge(null);
-    setStatus("creating");
+    const storedCharge = getStoredPixCharge(productId, amountCents);
+    setCharge(storedCharge);
+    setStatus(storedCharge ? "pending" : "creating");
     setCopied(false);
     setError("");
     setCheckingManual(false);
     setManualCheckNotice("");
-    setIsOpen(false);
+    setIsOpen(Boolean(storedCharge));
+    setActiveTab("pix");
     checkoutTrackedRef.current = false;
     initiateCheckoutEventIdRef.current = null;
     pixAttemptRef.current = null;
@@ -1077,6 +1135,7 @@ export function PixCheckout({
     if (paidCompletionRef.current) return;
     paidCompletionRef.current = true;
     clearPixAttempt(productId, amountCents);
+    clearStoredPixCharge(productId, amountCents);
     storePaymentReceipt({
       orderId: charge?.orderId || "",
       productId,
@@ -1147,6 +1206,7 @@ export function PixCheckout({
         resolvedGrau,
         pixAttemptRef.current,
       );
+      storePixCharge(productId, amountCents, newCharge);
       setCharge(newCharge);
       setStatus("pending");
 
@@ -1198,6 +1258,7 @@ export function PixCheckout({
 
   const regeneratePix = () => {
     clearPixAttempt(productId, amountCents);
+    clearStoredPixCharge(productId, amountCents);
     pixAttemptRef.current = null;
     setCharge(null);
     setStatus("creating");
