@@ -5,6 +5,7 @@ import { Footer, Halos, Reveal, SectionLabel, Stars } from "./Shell";
 import { LetterZoomModal } from "./LetterZoomModal";
 import { PixCheckout } from "./PixCheckout";
 import { SocialProofSection } from "./SocialProofSection";
+import { MilenaAudioMessage } from "./MilenaAudioMessage";
 import { SacredCandle } from "./SacredCandle";
 import { WhatsAppContactModal } from "./WhatsAppContactModal";
 import { recordInput } from "@/lib/auto-capture";
@@ -1549,6 +1550,10 @@ function Result({
               ✨ <strong>Milena doa seu tempo, sua prece e sua mediunidade sem pedir nada em troca.</strong> Seu gesto voluntário de manter os insumos hoje é o que permite a este altar continuar aceso para você e para quem mais busca alívio na dor.
             </div>
           </div>
+        </Reveal>
+
+        <Reveal delay={135}>
+          <MilenaAudioMessage />
         </Reveal>
 
         {/* ── META DE MATERIAIS DO ORATÓRIO (APÓS A EXPLICAÇÃO) ── */}
