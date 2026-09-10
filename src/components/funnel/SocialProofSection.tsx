@@ -77,8 +77,8 @@ export function SocialProofSection() {
                 Mais um relato compartilhado com o Templo
               </strong>
             </div>
-            <div className="relative mx-auto max-w-[330px] overflow-hidden rounded-2xl bg-black shadow-[0_20px_50px_-22px_rgba(0,0,0,0.72)] ring-1 ring-black/10">
-              <video controls playsInline preload="metadata" controlsList="nodownload" aria-label="Segundo depoimento em vídeo de uma família acolhida" className="block max-h-[520px] w-full bg-black object-contain">
+            <div className="relative mx-auto aspect-[3/4] max-w-[270px] overflow-hidden rounded-2xl bg-black shadow-[0_20px_50px_-22px_rgba(0,0,0,0.72)] ring-1 ring-black/10">
+              <video controls playsInline preload="metadata" controlsList="nodownload" aria-label="Segundo depoimento em vídeo de uma família acolhida" className="block h-full w-full bg-black object-cover">
                 <source src={feedbackVideoTwo} type="video/mp4" />
                 Seu navegador não oferece suporte à reprodução deste vídeo.
               </video>
