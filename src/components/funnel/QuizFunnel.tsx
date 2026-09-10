@@ -1624,7 +1624,7 @@ function Result({
             if (el) el.scrollIntoView({ behavior: "smooth" });
             else go();
           }}
-          className="utmify-initiate-checkout cta-hot w-full cursor-pointer rounded-xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 px-5 py-3 text-[14px] font-extrabold tracking-wide text-white uppercase shadow-lg shadow-emerald-600/25 transition-transform hover:-translate-y-0.5"
+          className="cta-hot w-full cursor-pointer rounded-xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 px-5 py-3 text-[14px] font-extrabold tracking-wide text-white uppercase shadow-lg shadow-emerald-600/25 transition-transform hover:-translate-y-0.5"
         >
           <span className="relative z-10 flex items-center justify-center gap-2">
             <span>Continuar para pagamento da vela de {primeiroEnte}</span>

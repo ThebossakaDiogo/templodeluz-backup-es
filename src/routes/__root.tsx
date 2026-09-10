@@ -210,6 +210,7 @@ function RootShell({ children }: { readonly children: ReactNode }) {
             alt=""
           />
         </noscript>
+        <script src="/utmify-meta.js" async defer />
       </head>
       <body suppressHydrationWarning>
         {children}

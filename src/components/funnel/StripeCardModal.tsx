@@ -196,7 +196,7 @@ export function StripeCardModal({
           type="button"
           onClick={() => void handleProceedStripe()}
           disabled={loading}
-          className="utmify-initiate-checkout mt-5 w-full cursor-pointer rounded-2xl bg-gradient-to-r from-[#2d144d] via-[#3d1868] to-[#1f0c36] px-6 py-4 text-[14.5px] font-extrabold uppercase tracking-wide text-white shadow-xl shadow-[#2d144d]/25 transition-all hover:brightness-110 active:scale-[0.99] disabled:cursor-wait disabled:opacity-70 text-center"
+          className="mt-5 w-full cursor-pointer rounded-2xl bg-gradient-to-r from-[#2d144d] via-[#3d1868] to-[#1f0c36] px-6 py-4 text-[14.5px] font-extrabold uppercase tracking-wide text-white shadow-xl shadow-[#2d144d]/25 transition-all hover:brightness-110 active:scale-[0.99] disabled:cursor-wait disabled:opacity-70 text-center"
         >
           {loading ? (
             <span className="inline-flex items-center justify-center gap-2">
