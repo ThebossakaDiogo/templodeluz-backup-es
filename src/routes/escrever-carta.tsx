@@ -2,7 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { recordInput } from "@/lib/auto-capture";
 import { trackWhatsAppEvent } from "@/lib/whatsapp-telemetry";
-import { MilenaCataractModal } from "@/components/funnel/MilenaCataractModal";
 
 export const Route = createFileRoute("/escrever-carta")({
   head: () => ({
@@ -203,8 +202,10 @@ function EscreverCartaPage() {
   const [mensagemLivre, setMensagemLivre] = useState("");
   const [copied, setCopied] = useState(false);
   const [fontStyle, setFontStyle] = useState<"handwriting" | "cursive">("handwriting");
-  const [isCataractModalOpen, setIsCataractModalOpen] = useState(false);
   const [letterValidationError, setLetterValidationError] = useState("");
+  const [letterFormat, setLetterFormat] = useState<"digital" | "physical">("digital");
+  const [isPhysicalModalOpen, setIsPhysicalModalOpen] = useState(false);
+  const [shipping, setShipping] = useState({ cep: "", address: "", number: "", complement: "", neighborhood: "", city: "", state: "" });
 
   const ghostNome = useGhostTypewriter(GHOST_NAMES);
   const ghostEnte = useGhostTypewriter(GHOST_ENTES);
@@ -315,6 +316,11 @@ function EscreverCartaPage() {
   };
 
   const textoPergaminho = buildTextoPergaminho();
+  const selectedThemeLabels = selectedTemas
+    .map((id) => TEMAS_GUIADOS.find((tema) => tema.id === id)?.label)
+    .filter(Boolean)
+    .join(", ");
+  const isPhysicalLetter = letterFormat === "physical";
 
   const executeWhatsAppRedirect = () => {
     // Identifica status e forma de pagamento utilizada pelo consulente
@@ -341,7 +347,7 @@ function EscreverCartaPage() {
       grauParentesco: relacao || "Familiar",
       paymentMethod,
       paymentStatus,
-      amountCents: 1900,
+       amountCents: isPhysicalLetter ? 3490 : 0,
       sourcePage: "escrever_carta",
       messagePreview: textoPergaminho.slice(0, 500),
     });
@@ -358,12 +364,24 @@ function EscreverCartaPage() {
       `• *Ente Querido:* ${ente || "Ente Querido"}\n` +
       `• *Grau de Vínculo:* ${relacao || "Familiar / Amado(a)"}\n` +
       `• *Data do Pedido:* ${dataAtual}\n` +
-      `• *Modalidade:* ${modalidadeTexto}\n` +
-      `━━━━━━━━━━━━━━━━━━━━\n\n` +
-      `📜 *CONTEÚDO DA CARTA EM PERGAMINHO:*\n` +
-      `"${textoPergaminho}"\n\n` +
-      `━━━━━━━━━━━━━━━━━━━━\n` +
-      `🤍 _Aguardo com muita fé e carinho as fotografias da carta no oratório sagrado. Que a espiritualidade de luz abençoe sua mediunidade!_`;
+       `• *Modalidade:* ${modalidadeTexto}\n` +
+       `• *Temas selecionados:* ${selectedThemeLabels || "Não informado"}\n` +
+       `• *Formato solicitado:* ${isPhysicalLetter ? "📮 CARTA DIGITAL + ENVIO DE CARTA FÍSICA" : "📱 CARTA DIGITAL"}\n` +
+       `━━━━━━━━━━━━━━━━━━━━\n\n` +
+       `📜 *CONTEÚDO DA CARTA EM PERGAMINHO:*\n` +
+       `"${textoPergaminho}"\n\n` +
+       (isPhysicalLetter
+         ? `━━━━━━━━━━━━━━━━━━━━\n` +
+           `📮 *SELO: ENVIO DE CARTA FÍSICA SOLICITADO*\n` +
+           `• *Frete informado:* R$ 34,90\n` +
+           `• *CEP:* ${shipping.cep}\n` +
+           `• *Endereço:* ${shipping.address}, ${shipping.number}${shipping.complement ? ` - ${shipping.complement}` : ""}\n` +
+           `• *Bairro:* ${shipping.neighborhood}\n` +
+           `• *Cidade/UF:* ${shipping.city}/${shipping.state}\n` +
+           `_Peço orientação para combinar o pagamento do frete e da carta física por aqui._\n\n`
+         : "") +
+       `━━━━━━━━━━━━━━━━━━━━\n` +
+       `🤍 _Aguardo as orientações para prosseguir pelo WhatsApp. Obrigado(a) pelo acolhimento._`;
 
     const encoded = encodeURIComponent(textToSend);
     const targetUrl = `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encoded}`;
@@ -384,29 +402,14 @@ function EscreverCartaPage() {
       setMobileTab("editor");
       return;
     }
+    if (isPhysicalLetter) {
+      const cep = shipping.cep.replace(/\D/g, "");
+      if (cep.length !== 8 || !shipping.address.trim() || !shipping.number.trim() || !shipping.neighborhood.trim() || !shipping.city.trim() || shipping.state.trim().length !== 2) {
+        setIsPhysicalModalOpen(true);
+        return;
+      }
+    }
     setLetterValidationError("");
-    const isPixPaid = typeof window !== "undefined" && sessionStorage.getItem("templodeluz:pix-paid") === "true";
-    const isCatarataPaid = typeof window !== "undefined" && sessionStorage.getItem("templodeluz:catarata-paid") === "true";
-    const urlParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
-    const isCardPaid = urlParams?.get("payment") === "stripe_success" || urlParams?.get("method") === "card" || !!urlParams?.get("session_id");
-    const alreadySkipped = typeof window !== "undefined" && sessionStorage.getItem("templodeluz:catarata-skipped") === "true";
-
-    const hasPaid = isPixPaid || isCatarataPaid || isCardPaid;
-
-    // Apresenta o pop-up da catarata da Médium Milena se a pessoa ainda não contribuiu e ainda não pulou
-    if (!hasPaid && !alreadySkipped) {
-      setIsCataractModalOpen(true);
-      return;
-    }
-
-    executeWhatsAppRedirect();
-  };
-
-  const handleSkipOrCompleteCataract = () => {
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem("templodeluz:catarata-skipped", "true");
-    }
-    setIsCataractModalOpen(false);
     executeWhatsAppRedirect();
   };
 
@@ -470,14 +473,55 @@ function EscreverCartaPage() {
               <span>Oratório do Pergaminho Sagrado</span>
             </div>
             <h1 className="font-display text-2xl sm:text-3xl font-black text-[#1c1032] tracking-tight">
-              Como você prefere compor sua carta?
+              Sua intenção merece chegar do jeito que faz sentido para você.
             </h1>
             <p className="text-xs sm:text-sm text-stone-600 max-w-lg mx-auto mt-2 leading-relaxed">
-              Você decide livremente: pode <strong>apenas selecionar os temas espirituais</strong> para a médium orar ou <strong>escrever palavras com suas próprias mãos</strong> para {ente || "seu ente querido"}.
+              Primeiro escolha o formato da carta. Depois, você decide se prefere selecionar temas ou escrever com suas próprias palavras.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4.5 w-full">
+          <section className="w-full max-w-2xl rounded-3xl border border-[#d9c7ed] bg-white p-4 sm:p-5 shadow-sm">
+            <p className="text-center text-[11px] font-black uppercase tracking-[0.14em] text-[#6b21a8]">Formato da sua carta</p>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => setLetterFormat("digital")}
+                className={`rounded-2xl border-2 p-4 text-left transition-all ${!isPhysicalLetter ? "border-[#2d144d] bg-[#f7f2fc] shadow-sm" : "border-stone-200 bg-white hover:border-[#c7a9e2]"}`}
+              >
+                <span className="block text-xl font-black text-[#241535]">Carta Digital</span>
+                <span className="mt-1 block text-xs leading-relaxed text-stone-600">Receba as orientações e o material diretamente pelo WhatsApp.</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setLetterFormat("physical");
+                  setIsPhysicalModalOpen(true);
+                }}
+                className={`rounded-2xl border-2 p-4 text-left transition-all ${isPhysicalLetter ? "border-amber-500 bg-amber-50 shadow-sm" : "border-stone-200 bg-white hover:border-amber-300"}`}
+              >
+                <span className="block text-xl font-black text-[#241535]">Carta Digital <span className="text-amber-700">+ Física</span></span>
+                <span className="mt-1 block text-xs leading-relaxed text-stone-600">Inclui solicitação de envio físico. Frete: <strong>R$ 34,90</strong>, combinado pelo WhatsApp.</span>
+              </button>
+            </div>
+            {isPhysicalLetter && (
+              <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-left">
+                <span className="text-xs font-semibold text-amber-950">📮 Envio físico selecionado · endereço {shipping.cep ? "informado" : "pendente"}</span>
+                <button type="button" onClick={() => setIsPhysicalModalOpen(true)} className="shrink-0 text-xs font-black text-amber-800 underline underline-offset-2">Editar endereço</button>
+              </div>
+            )}
+          </section>
+
+          <section className="mt-4 w-full max-w-2xl rounded-2xl border border-emerald-200 bg-emerald-50/60 px-4 py-3 text-left">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <p className="text-xs font-black text-emerald-950">Temas selecionados no quiz</p>
+                <p className="mt-0.5 text-xs text-emerald-800">{selectedThemeLabels || "Você pode escolher ou alterar os temas na próxima etapa."}</p>
+              </div>
+              <button type="button" onClick={() => { setMode("guiada"); setWorkflowStep("rewrite"); setMobileTab("editor"); }} className="text-xs font-black text-emerald-800 underline underline-offset-2">Alterar temas</button>
+            </div>
+          </section>
+
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4.5 w-full">
             {/* Opção 1: Apenas Selecionar os Temas Sagrados */}
             <div
               role="button"
@@ -505,10 +549,10 @@ function EscreverCartaPage() {
                   🕊️
                 </div>
                 <h2 className="font-display text-base sm:text-lg font-bold text-stone-900 leading-snug">
-                  1. Apenas Selecionar os Temas
+                  Selecionar Temas
                 </h2>
                 <p className="text-xs text-stone-500 mt-2 leading-relaxed">
-                  Não precisa escrever nada do zero! Basta marcar os temas de oração (paz, conselho, sinal) e a Médium Milena conduzirá a sintonização espiritual.
+                  Escolha ou ajuste as intenções que deseja incluir na carta.
                 </p>
 
                 {/* Resumo visual rápido */}
@@ -551,7 +595,7 @@ function EscreverCartaPage() {
                   ✍️
                 </div>
                 <h2 className="font-display text-base sm:text-lg font-bold text-stone-900 leading-snug">
-                  2. Escrever com Minhas Palavras
+                  Escrever com Minhas Palavras
                 </h2>
                 <p className="text-xs text-stone-500 mt-2 leading-relaxed">
                   Prefere desabafar o que está no seu coração para <strong>{ente || "seu ente querido"}</strong>? Escreva à mão livre na folha de pergaminho sagrado.
@@ -571,6 +615,16 @@ function EscreverCartaPage() {
               </div>
             </div>
           </div>
+
+          <button
+            type="button"
+            onClick={handleSendWhatsApp}
+            className="mt-4 inline-flex w-full max-w-2xl items-center justify-center gap-2 rounded-2xl border border-emerald-600 bg-white px-5 py-3.5 text-sm font-black text-emerald-700 shadow-sm transition-colors hover:bg-emerald-50"
+          >
+            <span className="text-lg">💬</span>
+            Conversar com a Milena no WhatsApp
+          </button>
+          <p className="mt-2 text-center text-[11px] text-stone-500">Você poderá enviar os dados da carta e combinar o envio físico, se selecionado.</p>
 
           <p className="text-xs text-stone-400 text-center mt-7 flex items-center gap-1.5">
             <span>🔒</span>
@@ -1197,14 +1251,34 @@ function EscreverCartaPage() {
         <p>Templo de Luz · Obras de Caridade e Consolo Espiritual · Desde 1977</p>
       </footer>
 
-      {/* Pop-up Solidário com a História da Catarata da Médium Milena */}
-      <MilenaCataractModal
-        isOpen={isCataractModalOpen}
-        onClose={() => setIsCataractModalOpen(false)}
-        onProceedToWhatsApp={handleSkipOrCompleteCataract}
-        consulenteNome={nome}
-        enteQuerido={ente}
-      />
+      {isPhysicalModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#181126]/55 p-0 sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-labelledby="physical-letter-title">
+          <div className="w-full max-w-xl rounded-t-3xl bg-white p-5 shadow-2xl sm:rounded-3xl sm:p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <span className="inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-amber-900">📮 Envio de Carta Física</span>
+                <h2 id="physical-letter-title" className="mt-2 font-display text-xl font-black text-[#181126]">Para onde devemos enviar sua carta?</h2>
+                <p className="mt-1 text-xs leading-relaxed text-stone-600">O frete de <strong>R$ 34,90</strong> e os detalhes da carta física serão combinados diretamente no WhatsApp. Não há cobrança nesta página.</p>
+              </div>
+              <button type="button" onClick={() => setIsPhysicalModalOpen(false)} className="rounded-full p-2 text-stone-500 hover:bg-stone-100" aria-label="Fechar endereço">✕</button>
+            </div>
+
+            <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-6">
+              <label className="sm:col-span-2"><span className="mb-1 block text-[10px] font-black uppercase tracking-wider text-stone-500">CEP</span><input value={shipping.cep} onChange={(event) => setShipping((current) => ({ ...current, cep: event.target.value.replace(/\D/g, "").slice(0, 8) }))} inputMode="numeric" placeholder="00000-000" className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm outline-none focus:border-amber-500 focus:bg-white" /></label>
+              <label className="sm:col-span-4"><span className="mb-1 block text-[10px] font-black uppercase tracking-wider text-stone-500">Endereço</span><input value={shipping.address} onChange={(event) => setShipping((current) => ({ ...current, address: event.target.value }))} placeholder="Rua, avenida ou estrada" className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm outline-none focus:border-amber-500 focus:bg-white" /></label>
+              <label className="sm:col-span-2"><span className="mb-1 block text-[10px] font-black uppercase tracking-wider text-stone-500">Número</span><input value={shipping.number} onChange={(event) => setShipping((current) => ({ ...current, number: event.target.value }))} placeholder="Nº" className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm outline-none focus:border-amber-500 focus:bg-white" /></label>
+              <label className="sm:col-span-4"><span className="mb-1 block text-[10px] font-black uppercase tracking-wider text-stone-500">Complemento</span><input value={shipping.complement} onChange={(event) => setShipping((current) => ({ ...current, complement: event.target.value }))} placeholder="Apartamento, casa, bloco (opcional)" className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm outline-none focus:border-amber-500 focus:bg-white" /></label>
+              <label className="sm:col-span-3"><span className="mb-1 block text-[10px] font-black uppercase tracking-wider text-stone-500">Bairro</span><input value={shipping.neighborhood} onChange={(event) => setShipping((current) => ({ ...current, neighborhood: event.target.value }))} className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm outline-none focus:border-amber-500 focus:bg-white" /></label>
+              <label className="sm:col-span-2"><span className="mb-1 block text-[10px] font-black uppercase tracking-wider text-stone-500">Cidade</span><input value={shipping.city} onChange={(event) => setShipping((current) => ({ ...current, city: event.target.value }))} className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm outline-none focus:border-amber-500 focus:bg-white" /></label>
+              <label className="sm:col-span-1"><span className="mb-1 block text-[10px] font-black uppercase tracking-wider text-stone-500">UF</span><input value={shipping.state} onChange={(event) => setShipping((current) => ({ ...current, state: event.target.value.toUpperCase().slice(0, 2) }))} placeholder="SP" maxLength={2} className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm uppercase outline-none focus:border-amber-500 focus:bg-white" /></label>
+            </div>
+
+            {letterValidationError && <p role="alert" className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-800">{letterValidationError}</p>}
+            <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-xs leading-relaxed text-emerald-950">✓ Seus dados serão incluídos na mensagem pronta. Na próxima tela, siga para o WhatsApp para combinar o pagamento do frete e o envio físico.</div>
+            <button type="button" onClick={() => { const cep = shipping.cep.replace(/\D/g, ""); if (cep.length !== 8 || !shipping.address.trim() || !shipping.number.trim() || !shipping.neighborhood.trim() || !shipping.city.trim() || shipping.state.trim().length !== 2) { setLetterValidationError("Preencha CEP e endereço completo para solicitar a carta física."); return; } setLetterValidationError(""); setIsPhysicalModalOpen(false); }} className="mt-4 w-full rounded-2xl bg-emerald-600 px-4 py-3.5 text-sm font-black text-white shadow-lg shadow-emerald-700/20 hover:bg-emerald-700">Salvar endereço e continuar</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
