@@ -875,13 +875,9 @@ function PixInstantBox({
             </button>
 
             <div className="text-center pt-0.5">
-              <button
-                type="button"
-                onClick={handleIrParaPergaminho}
-                className="inline-block text-[11.5px] font-semibold text-amber-900/90 hover:text-amber-950 underline decoration-amber-400/80 underline-offset-2 transition-colors cursor-pointer bg-transparent border-0 p-0"
-              >
-                Desejo redigir minha carta no pergaminho sem realizar a contribuição da vela agora ›
-              </button>
+              <p className="text-[11.5px] font-semibold text-amber-900/90">
+                Você seguirá para a chamada ao vivo e depois para o pergaminho.
+              </p>
             </div>
           </div>
         </div>
@@ -1609,7 +1605,7 @@ function Result({
             }}
             className="mt-5 block w-full text-center text-xs font-bold text-[#b45309] underline decoration-[#f59e0b]/40 underline-offset-4 hover:decoration-[#f59e0b] cursor-pointer bg-transparent border-0"
           >
-            📜 Desejo redigir minha carta no pergaminho sem realizar a contribuição da vela agora ›
+            Acessar pergaminho sem contribuir agora ›
           </button>
         </Reveal>
 
@@ -1631,8 +1627,7 @@ function Result({
           className="utmify-initiate-checkout cta-hot w-full cursor-pointer rounded-xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 px-5 py-3 text-[14px] font-extrabold tracking-wide text-white uppercase shadow-lg shadow-emerald-600/25 transition-transform hover:-translate-y-0.5"
         >
           <span className="relative z-10 flex items-center justify-center gap-2">
-            <PixIcon className="w-4 h-4 text-white shrink-0 drop-shadow-xs" />
-            <span>Consagrar Vela de {primeiroEnte} no Oratório (PIX)</span>
+            <span>Continuar para pagamento da vela de {primeiroEnte}</span>
           </span>
         </button>
 
@@ -1648,7 +1643,7 @@ function Result({
           }}
           className="block w-full mt-1.5 text-center text-[11px] font-bold text-amber-900 hover:text-amber-950 underline decoration-amber-400 underline-offset-2 cursor-pointer bg-transparent border-0"
         >
-          ✍️ Desejo preencher a carta no pergaminho sem doar a vela agora ›
+          Acessar pergaminho sem contribuir agora ›
         </button>
       </div>
     </div>
