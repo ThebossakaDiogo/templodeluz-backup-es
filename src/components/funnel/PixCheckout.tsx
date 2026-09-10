@@ -19,6 +19,7 @@ import {
   getTelemetrySessionId,
 } from "@/lib/funnel-telemetry";
 import { CardFlagsBadgeRow } from "./CardFlags";
+import milenaWhatsappPixAudio from "../../../Feedbacks/milena-whatsapp-pix.mp3";
 
 export interface PixCheckoutProps {
   productId: "carta_sagrada" | "campanha_cirurgia" | "cirurgia_milena" | "chamada_ao_vivo_milena";
@@ -776,10 +777,19 @@ function PixPendingView({
               <span className="text-[12px] font-black text-[#181126]">Médium Milena</span>
               <span className="text-[10px] font-medium text-[#667781]">agora</span>
             </div>
-            <div className="mt-1 rounded-xl rounded-tl-sm bg-white px-3 py-2 text-[12.5px] leading-relaxed text-[#181126] shadow-sm">
-              {isLiveCall
-                ? "💚 Olá! Sua solicitação de chamada foi recebida. Assim que o PIX for confirmado, você poderá escolher seu horário."
-                : "💚 Olá! Já recebi a sua solicitação aqui no WhatsApp e estou aguardando para começar a sua carta. Assim que o PIX for confirmado, eu já inicio a psicografia. Estou esperando!"}
+            <div className="mt-1 rounded-xl rounded-tl-sm bg-white px-3 py-2 shadow-sm">
+              <div className="mb-1.5 text-[11px] font-bold leading-tight text-[#181126]">
+                Áudio da Milena aguardando sua confirmação
+              </div>
+              <audio
+                controls
+                preload="metadata"
+                aria-label={isLiveCall ? "Áudio da Milena sobre a confirmação da chamada" : "Áudio da Milena sobre a confirmação do PIX da carta"}
+                className="w-full max-w-[240px] accent-[#25D366]"
+              >
+                <source src={milenaWhatsappPixAudio} type="audio/mpeg" />
+                Seu navegador não oferece suporte à reprodução deste áudio.
+              </audio>
             </div>
           </div>
         </div>
