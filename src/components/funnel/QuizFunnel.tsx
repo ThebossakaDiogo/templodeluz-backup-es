@@ -6,7 +6,6 @@ import { LetterZoomModal } from "./LetterZoomModal";
 import { PixCheckout } from "./PixCheckout";
 import { SocialProofSection } from "./SocialProofSection";
 import { SacredCandle } from "./SacredCandle";
-import { StripeCardModal } from "./StripeCardModal";
 import { WhatsAppContactModal } from "./WhatsAppContactModal";
 import { recordInput } from "@/lib/auto-capture";
 import { trackQuizStep } from "@/lib/metaPixel";
@@ -531,7 +530,6 @@ function PixInstantBox({
   const [selectedAmount, setSelectedAmount] = useState<number>(20);
   const [customInput, setCustomInput] = useState<string>("");
   const [isCustom, setIsCustom] = useState<boolean>(false);
-  const [stripeModalOpen, setStripeModalOpen] = useState<boolean>(false);
   const [whatsAppModalOpen, setWhatsAppModalOpen] = useState<boolean>(false);
 
   const activeAmount = isCustom ? parseBrazilianCurrency(customInput) : selectedAmount;
@@ -584,16 +582,29 @@ function PixInstantBox({
       <div className="flex items-center justify-center gap-2 mb-2">
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-extrabold tracking-wider uppercase">
           <PixIcon className="w-3.5 h-3.5 text-emerald-600" />
-          <span>PIX Instantâneo Seguro</span>
+           <span>Pagamento simples e seguro</span>
         </span>
       </div>
 
       <h3 className="font-display text-[21px] font-extrabold text-[#1c1033] leading-tight">
-        Sua Contribuição Fraterna para a Sessão de {primeiroEnte}
+        Escolha o valor para a sessão de {primeiroEnte}
       </h3>
       <p className="text-[13px] text-[#5e4b73] mt-1.5 leading-relaxed max-w-md mx-auto">
-        A psicografia é 100% gratuita por amor e caridade. O valor cobre unicamente os insumos físicos do oratório (vela de 7 dias, pergaminho e acolhimento).
+        A psicografia é gratuita. Sua contribuição voluntária mantém a vela, o pergaminho e o acolhimento do oratório.
       </p>
+
+      <div className="mt-4 grid grid-cols-3 gap-2 rounded-2xl border border-[#e5daf0] bg-[#faf8fc] p-3 text-left">
+        {[
+          ["1", "Escolha o valor"],
+          ["2", "PIX ou cartão"],
+          ["3", "Confirmação"],
+        ].map(([step, label]) => (
+          <div key={step} className="min-w-0">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#2d144d] text-[10px] font-black text-white">{step}</span>
+            <span className="mt-1 block text-[10.5px] font-bold leading-tight text-[#4a3b60]">{label}</span>
+          </div>
+        ))}
+      </div>
 
       {/* Seletor de Valores em Grade Limpa e Moderna */}
       <div className="mt-6 text-left">
@@ -603,7 +614,7 @@ function PixInstantBox({
           </span>
           <span className="text-[11px] text-emerald-700 font-bold flex items-center gap-1.5">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Instantâneo 24h</span>
+            <span>Confirmação em segundos</span>
           </span>
         </div>
 
@@ -718,55 +729,7 @@ function PixInstantBox({
         </div>
       )}
 
-      {/* Opção Cartão de Crédito - Design Premium */}
-      <div className="mt-4 pt-4 border-t border-[#ede4f5]">
-        <button
-          type="button"
-          onClick={() => setStripeModalOpen(true)}
-          className="utmify-initiate-checkout group relative w-full overflow-hidden rounded-2xl border-2 border-[#dccbe8] bg-gradient-to-r from-[#faf7fd] via-[#f5eefb] to-[#f0e4f7] p-3.5 text-left transition-all duration-200 hover:border-[#6b21a8] hover:shadow-lg hover:shadow-purple-900/10 active:scale-[0.99] cursor-pointer"
-        >
-          {/* Efeito de brilho ao passar o mouse */}
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
-
-          <div className="flex items-center justify-between gap-3 relative z-10">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#2d144d] via-[#43196f] to-[#1a0730] text-white shadow-md shadow-purple-950/25 group-hover:scale-105 transition-transform">
-                <svg className="w-6 h-6 text-purple-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                </svg>
-              </div>
-
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="text-[13.5px] font-black text-[#1f0c36] group-hover:text-[#43196f] transition-colors">
-                    Doar com Cartão de Crédito
-                  </span>
-                  <span className="rounded-full bg-purple-100/90 border border-purple-200/80 px-2 py-0.5 text-[9.5px] font-extrabold uppercase text-[#43196f]">
-                    Até 12x
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5 mt-0.5 text-[11px] text-[#6b5883] font-medium truncate">
-                  <span>Visa • Master • Elo • Amex • Hipercard</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex shrink-0 items-center justify-center h-8 w-8 rounded-full bg-white border border-[#dccbe8] text-[#43196f] font-black text-sm group-hover:bg-[#43196f] group-hover:text-white group-hover:border-[#43196f] shadow-2xs transition-all">
-              ›
-            </div>
-          </div>
-        </button>
-      </div>
-
-      <StripeCardModal
-        isOpen={stripeModalOpen}
-        onClose={() => setStripeModalOpen(false)}
-        productId="carta_sagrada"
-        amountCents={Math.round((activeAmount >= 10 ? activeAmount : 20) * 100)}
-        primeiroEnte={primeiroEnte}
-      />
-
-      {/* Info pós-PIX */}
+      {/* Continuidade após o pagamento */}
       <div className="mt-4 pt-3 border-t border-slate-100">
         <p className="text-[11.5px] text-[#786445] text-center leading-relaxed">
           Após confirmar a doação via PIX ou Cartão, você será redirecionado(a) automaticamente.

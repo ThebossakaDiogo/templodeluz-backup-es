@@ -1,6 +1,7 @@
 import feedbackOne from "../../../Feedbacks/Feedback.webp";
 import feedbackTwo from "../../../Feedbacks/Feedback2.webp";
 import feedbackVideo from "../../../Feedbacks/Feedback3.mp4";
+import feedbackVideoTwo from "../../../Feedbacks/Feedback4.mp4";
 import feedbackVideoPoster from "../../../Feedbacks/Feedback3-poster.webp";
 import { Reveal } from "./Shell";
 
@@ -65,6 +66,23 @@ export function SocialProofSection() {
             <p className="mx-auto mt-3 max-w-[390px] text-center text-[11.5px] leading-relaxed text-[#6c5a82]">
               Toque no vídeo para ouvir o relato recebido pelo Templo de Luz.
             </p>
+          </div>
+
+          <div className="mt-4 rounded-3xl border border-[#e5daf0] bg-white p-3 shadow-sm sm:p-4">
+            <div className="mb-3 px-1 text-left">
+              <span className="block text-[10px] font-extrabold uppercase tracking-[0.15em] text-[#6b21a8]">
+                Novo depoimento em vídeo
+              </span>
+              <strong className="mt-0.5 block text-sm text-[#241535]">
+                Mais um relato compartilhado com o Templo
+              </strong>
+            </div>
+            <div className="relative mx-auto max-w-[330px] overflow-hidden rounded-2xl bg-black shadow-[0_20px_50px_-22px_rgba(0,0,0,0.72)] ring-1 ring-black/10">
+              <video controls playsInline preload="metadata" controlsList="nodownload" aria-label="Segundo depoimento em vídeo de uma família acolhida" className="block max-h-[520px] w-full bg-black object-contain">
+                <source src={feedbackVideoTwo} type="video/mp4" />
+                Seu navegador não oferece suporte à reprodução deste vídeo.
+              </video>
+            </div>
           </div>
 
           <div className="mt-5 grid gap-4 sm:grid-cols-2">

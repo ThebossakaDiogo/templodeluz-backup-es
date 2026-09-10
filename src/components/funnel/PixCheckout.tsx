@@ -1321,7 +1321,7 @@ export function PixCheckout({
           className="utmify-initiate-checkout group relative flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 px-6 py-4 text-[14.5px] font-black uppercase tracking-wide text-white shadow-xl shadow-emerald-600/30 transition-all duration-200 hover:scale-[1.015] hover:brightness-105 active:scale-[0.985]"
         >
           <PixIcon className="w-5 h-5 text-white shrink-0 drop-shadow-xs" />
-          <span>{charge ? "Ver QR Code PIX" : `Gerar Chave PIX de R$ ${formattedAmount}`}</span>
+          <span>{charge ? "Ver QR Code PIX" : `Continuar para pagamento de R$ ${formattedAmount}`}</span>
         </button>
 
         {/* Selos de Confiança */}
@@ -1345,6 +1345,11 @@ export function PixCheckout({
             <span>Criptografia SSL 256 bits</span>
           </span>
         </div>
+        {!charge && showCard && (
+          <p className="mt-2 text-[11px] font-medium text-[#6c5a82]">
+            Na próxima tela, escolha PIX ou cartão. Nenhuma cobrança é feita agora.
+          </p>
+        )}
       </div>
 
       {/* Modal de Checkout */}
@@ -1382,6 +1387,12 @@ export function PixCheckout({
                   ✕
                 </button>
               </div>
+
+              {!charge && showCard && (
+                <p className="mb-4 rounded-xl bg-[#f8f5fc] px-3 py-2 text-left text-[11.5px] leading-relaxed text-[#5e4b73]">
+                  Escolha a forma de pagamento abaixo. PIX confirma em segundos; cartão é processado pelo Stripe.
+                </p>
+              )}
 
               {/* Seletor de Abas: PIX vs Cartão Stripe */}
               {!charge && showCard && (
