@@ -1,24 +1,42 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { z } from "zod";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { QuizFunnel } from "@/components/funnel/QuizFunnel";
-import { ExitIntentBackRedirect } from "@/components/funnel/ExitIntentBackRedirect";
+
+const ExitIntentBackRedirect = lazy(() =>
+  import("@/components/funnel/ExitIntentBackRedirect").then(({ ExitIntentBackRedirect: Component }) => ({ default: Component })),
+);
+
+const QUIZ_STEPS = ["intro", "ente", "relacao", "tempo", "mensagem", "confirma", "loading", "result"] as const;
+type QuizStep = (typeof QUIZ_STEPS)[number];
+
+function isQuizStep(value: unknown): value is QuizStep {
+  return typeof value === "string" && (QUIZ_STEPS as readonly string[]).includes(value);
+}
 
 function QuizPage() {
+  const [loadExitIntent, setLoadExitIntent] = useState(false);
+
+  useEffect(() => {
+    const load = () => setLoadExitIntent(true);
+    if ("requestIdleCallback" in window) {
+      const idleId = window.requestIdleCallback(load, { timeout: 4000 });
+      return () => window.cancelIdleCallback(idleId);
+    }
+    const timeoutId = window.setTimeout(load, 2500);
+    return () => window.clearTimeout(timeoutId);
+  }, []);
+
   return (
     <>
       <QuizFunnel />
-      <ExitIntentBackRedirect enabled />
+      {loadExitIntent && <Suspense fallback={null}><ExitIntentBackRedirect enabled /></Suspense>}
     </>
   );
 }
 
-const stepSchema = z
-  .enum(["intro", "ente", "relacao", "tempo", "mensagem", "confirma", "loading", "result"])
-  .catch("intro");
-
 export const Route = createFileRoute("/")({
   validateSearch: (search: Record<string, unknown>) => ({
-    step: stepSchema.parse(search["step"] ?? "intro"),
+    step: isQuizStep(search["step"]) ? search["step"] : "intro",
   }),
   head: () => ({
     meta: [
