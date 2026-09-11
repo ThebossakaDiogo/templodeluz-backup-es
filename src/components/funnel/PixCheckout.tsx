@@ -39,6 +39,7 @@ export interface PixCheckoutProps {
   autoOpen?: boolean | undefined;
   autoGeneratePix?: boolean | undefined;
   displayProductName?: string | undefined;
+  onPaymentConfirmed?: (() => void) | undefined;
 }
 
 function appendQuery(path: string, query: string) {
@@ -1034,6 +1035,7 @@ export function PixCheckout({
   autoOpen = false,
   autoGeneratePix = false,
   displayProductName,
+  onPaymentConfirmed,
 }: Readonly<PixCheckoutProps>) {
   const initial = getInitialCapturedData();
   const [isOpen, setIsOpen] = useState(() => autoOpen || Boolean(getStoredPixCharge(productId, amountCents)));
@@ -1198,6 +1200,7 @@ export function PixCheckout({
     paidCompletionRef.current = true;
     clearPixAttempt(productId, amountCents);
     clearStoredPixCharge(productId, amountCents);
+    onPaymentConfirmed?.();
     storePaymentReceipt({
       orderId: charge?.orderId || "",
       productId,
@@ -1240,7 +1243,7 @@ export function PixCheckout({
     }, 2500);
 
     return () => clearTimeout(timer);
-  }, [status, amountCents, customerName, customerPhone, productId, prodName, charge?.orderId, resolvedEnte, resolvedGrau, mensagemPreview, initial.mensagem, successPath, includePaymentParams]);
+  }, [status, amountCents, customerName, customerPhone, productId, prodName, charge?.orderId, resolvedEnte, resolvedGrau, mensagemPreview, initial.mensagem, successPath, includePaymentParams, onPaymentConfirmed]);
 
   const generatePix = async () => {
     if (!customerName.trim()) {
@@ -1319,10 +1322,10 @@ export function PixCheckout({
   };
 
   useEffect(() => {
-    if (!autoOpen || !autoGeneratePix || autoCheckoutStartedRef.current || charge || loading) return;
+    if (!autoOpen || autoCheckoutStartedRef.current || charge || loading) return;
     autoCheckoutStartedRef.current = true;
     handleOpenCheckout();
-    void generatePix();
+    if (autoGeneratePix) void generatePix();
   }, [autoOpen, autoGeneratePix, charge, loading, customerName, customerPhone]);
 
   const regeneratePix = () => {
@@ -1482,10 +1485,10 @@ export function PixCheckout({
             aria-modal="true"
             role="dialog"
             aria-label={productId === "chamada_ao_vivo_milena" ? "Checkout da chamada ao vivo" : "Checkout da contribuição"}
-            className="fixed inset-0 z-[200] flex items-end justify-center bg-black/75 backdrop-blur-sm sm:items-center sm:p-4"
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/75 p-3 backdrop-blur-sm sm:p-5"
           >
             <div className="fixed inset-0" onClick={() => setIsOpen(false)} aria-hidden="true" />
-            <div className="relative z-10 max-h-[92dvh] w-full overflow-y-auto rounded-t-3xl border border-[#e5daf0] bg-white p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] text-center shadow-2xl sm:max-w-[440px] sm:rounded-3xl sm:p-6">
+            <div className="relative z-10 max-h-[calc(100dvh-24px)] w-full overflow-y-auto overscroll-contain rounded-[26px] border border-[#e5daf0] bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] text-center shadow-2xl sm:max-w-[460px] sm:p-6">
               {/* Topo do Modal */}
               <div className="mb-4 flex items-start justify-between gap-3 text-left">
                 <div>

@@ -2,7 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import confetti from "canvas-confetti";
 import { Halos, Reveal, Stars, Card } from "@/components/funnel/Shell";
-import { IMAGES } from "@/components/funnel/data";
 
 export const Route = createFileRoute("/obrigado")({
   head: () => ({
@@ -175,41 +174,6 @@ function ObrigadoPage() {
                 </span>
               </div>
             </Card>
-          </Reveal>
-
-          {/* Card com Foto da Médium e Chamada para a Campanha Solidária */}
-          <Reveal
-            delay={120}
-            className="overflow-hidden rounded-3xl border-2 border-[#fde68a] bg-[#fefaf3] p-5 shadow-sm space-y-3"
-          >
-            <div className="flex items-center gap-3.5">
-              <div className="relative shrink-0">
-                <div className="absolute inset-0 rounded-full cloud-aura blur-md" />
-                <img
-                  src={IMAGES.milenaCatarata}
-                  alt="Milena Medeiros"
-                  className="relative w-14 h-14 rounded-full object-cover object-top border-2 border-[#f59e0b] shadow-sm"
-                />
-              </div>
-              <div>
-                <span className="text-[10.5px] font-extrabold uppercase tracking-wider text-[#b45309] block">
-                  🙏 Corrente de Solidariedade
-                </span>
-                <h4 className="text-[13px] font-extrabold text-[#1a082c]">
-                  Cirurgia dos Olhos da Médium Milena
-                </h4>
-              </div>
-            </div>
-            <p className="text-[12px] text-[#6d5488] leading-relaxed">
-              Ajude Milena a realizar sua cirurgia de catarata para continuar essa missão de amor e
-              cartas psicografadas.
-            </p>
-            <Link
-              to="/apoio-milena"
-              className="inline-flex w-full items-center justify-center py-2.5 px-3 rounded-xl bg-white border border-[#fde68a] text-[#b45309] font-extrabold text-xs shadow-2xs hover:bg-[#fffbeb] transition-colors"
-            >
-              🤍 Conhecer a Campanha e Apoiar a Cirurgia ›
-            </Link>
           </Reveal>
 
           {/* Botão de Redirecionamento Direto */}

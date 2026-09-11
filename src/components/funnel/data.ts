@@ -35,7 +35,7 @@ export const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "Por que é solicitada uma contribuição fraterna se a psicografia é gratuita?",
-    a: "O dom mediúnico e a mensagem espiritual são 100% gratuitos por caridade e amor ao próximo. A contribuição fraterna livre (você escolhe o valor que o seu coração puder a partir de R$ 10) é destinada exclusivamente para cobrir os materiais físicos consumidos no oratório (a vela de cera pura de 7 dias com o nome do seu ente querido, as folhas especiais de algodão e incensos de sintonização), além de apoiar as ações assistenciais do Centro Espírita Casa Nova.",
+    a: "O acolhimento e a mensagem espiritual são gratuitos. A contribuição fraterna livre, a partir de R$ 15, ajuda a cobrir os materiais físicos usados no oratório, como a vela de 7 dias, as folhas especiais e os itens de preparação, além de apoiar as ações assistenciais da casa.",
   },
   {
     q: "E se a carta não tocar o meu coração ou não fizer sentido?",

@@ -98,7 +98,9 @@ Deno.serve(async (req) => {
     const productId = cleanString(session?.metadata?.productId, 64).toLowerCase();
     const idempotencyKey = cleanString(session?.metadata?.orderIdempotencyKey, 64);
     const amountCents = Number(session?.amount_total);
-    if (!['carta_sagrada', 'cirurgia_milena', 'chamada_ao_vivo_milena'].includes(productId) || !/^[0-9a-f-]{36}$/i.test(idempotencyKey) || !Number.isInteger(amountCents) || amountCents < 100 || (productId === 'chamada_ao_vivo_milena' && amountCents !== 15000)) {
+    const isValidLiveCallAmount = productId !== 'chamada_ao_vivo_milena'
+      || [15000, 25000, 50000].includes(amountCents);
+    if (!['carta_sagrada', 'cirurgia_milena', 'chamada_ao_vivo_milena'].includes(productId) || !/^[0-9a-f-]{36}$/i.test(idempotencyKey) || !Number.isInteger(amountCents) || amountCents < 100 || !isValidLiveCallAmount) {
       throw new Error('INVALID_STRIPE_SESSION_METADATA');
     }
 
@@ -192,7 +194,7 @@ Deno.serve(async (req) => {
         headers: { 'Content-Type': 'application/json', 'x-api-token': utmifyToken },
         body: JSON.stringify({
           orderId: stripeSessionId,
-          platform: 'TemploDeLuz',
+          platform: 'TemploDeLuzMeta',
           paymentMethod: 'credit_card',
           status: 'paid',
           createdAt: now,

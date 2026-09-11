@@ -15,9 +15,7 @@ export async function createStripeCheckoutSession(input: StripeCheckoutInput): P
   const supabaseUrl = PIX_CONFIG_ORIGINAL.supabaseUrl;
   const endpoint = `${supabaseUrl.replace(/\/$/, "")}/functions/v1/create-stripe-checkout`;
   const origin = typeof window !== "undefined" ? window.location.origin : "";
-  const successUrl = input.successUrl || (input.productId === "carta_sagrada"
-    ? `${origin}/apoio-milena?payment=stripe_success`
-    : `${origin}/obrigado?payment=stripe_success`);
+  const successUrl = input.successUrl || `${origin}/obrigado?payment=stripe_success`;
   const cancelUrl = input.cancelUrl || (typeof window !== "undefined" ? window.location.href : `${origin}/`);
   const trackingParameters = getStoredUtms();
   const metaAttribution = getMetaBrowserAttribution();

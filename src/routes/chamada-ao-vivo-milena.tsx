@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Footer, Halos, Stars } from "@/components/funnel/Shell";
 import { PixCheckout } from "@/components/funnel/PixCheckout";
 import { recordInput } from "@/lib/auto-capture";
 import { verifyStripeCheckoutSession } from "@/lib/stripe";
 import milenaLiveCallImage from "../../images-elements/medium-milena-BduzfpAk.webp_202609071752.jpeg";
-import milenaLiveCallAudio from "../../Feedbacks/milena-chamada.mp3";
+import milenaLiveCallAudio from "../../Feedbacks/milena-chamada-oferta.mp3";
 
 export const Route = createFileRoute("/chamada-ao-vivo-milena")({
   head: () => ({
@@ -22,6 +23,31 @@ export const Route = createFileRoute("/chamada-ao-vivo-milena")({
 });
 
 type Step = "offer" | "contract" | "payment" | "scheduling" | "confirmed";
+type PeriodPreference = "day" | "night";
+const LIVE_CALL_PACKAGES = [
+  {
+    id: "chamada_2h",
+    hours: 2,
+    amountCents: 15000,
+    title: "Chamada individual de 2 horas",
+    description: "Uma conversa particular, com tempo para escuta, dúvidas e orientação fraterna.",
+  },
+  {
+    id: "acolhimento_4h",
+    hours: 4,
+    amountCents: 25000,
+    title: "Acolhimento espiritual focado de 4 horas",
+    description: "Mais tempo para organizar intenções, momentos de prece e uma orientação espiritual mais detalhada.",
+    popular: true,
+  },
+  {
+    id: "acompanhamento_100_dias",
+    hours: 0,
+    amountCents: 50000,
+    title: "Acompanhamento espiritual semanal por 100 dias",
+    description: "Acompanhamento semanal fraterno, alinhado com a Milena pelo WhatsApp e sem substituir cuidados médicos ou terapêuticos.",
+  },
+] as const;
 
 const CONTRACT_TEXT = `CONTRATO DE CHAMADA AO VIVO — TEMPLO DE LUZ
 
@@ -35,7 +61,7 @@ A medium Milena Medeiros atuara como intermediaria espiritual, transmitindo mens
 A chamada podera ser agendada a partir de 2 horas apos a confirmacao do pagamento, conforme disponibilidade. O participante recebera um link de acesso por WhatsApp ou e-mail.
 
 4. DO PAGAMENTO
-O valor da sessao e de R$ 150,00, pago antecipadamente via PIX ou cartao de credito. O pagamento confirma a reserva do horario.
+O pacote escolhido e {{PACKAGE}}, no valor de {{AMOUNT}}. O pagamento e feito antecipadamente via PIX ou cartao de credito e confirma a solicitacao de agendamento.
 
 5. DO CANCELAMENTO
 Cancelamentos com ate 1 hora de antecedencia recebem reembolso integral. Apos esse prazo, nao ha reembolso, sendo permitido remarcar uma vez.
@@ -50,11 +76,17 @@ function ChamadaAoVivoMilenaPage() {
   const [step, setStep] = useState<Step>("offer");
   const [contractAccepted, setContractAccepted] = useState(false);
   const [contractSigner, setContractSigner] = useState("");
+  const [selectedPackageId, setSelectedPackageId] = useState<(typeof LIVE_CALL_PACKAGES)[number]["id"]>("chamada_2h");
+  const [periodPreference, setPeriodPreference] = useState<PeriodPreference>("day");
+  const [selectedDateKey, setSelectedDateKey] = useState("");
   const [selectedSlot, setSelectedSlot] = useState<string>("");
   const [nextPath, setNextPath] = useState("/escrever-carta");
   const [source, setSource] = useState("skipped");
   const [isVerifyingCardPayment, setIsVerifyingCardPayment] = useState(false);
   const [cardPaymentError, setCardPaymentError] = useState("");
+  const [quizProfile, setQuizProfile] = useState<{ nome?: string; ente?: string; relacao?: string; dorPrincipal?: string }>({});
+  const selectedPackage = LIVE_CALL_PACKAGES.find((item) => item.id === selectedPackageId) ?? LIVE_CALL_PACKAGES[0];
+  const callAmountCents = selectedPackage.amountCents;
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -69,6 +101,8 @@ function ChamadaAoVivoMilenaPage() {
         sessionStorage.getItem("templodeluz:chamada-contract") || "null",
       ) as { signer?: string } | null;
       if (storedContract?.signer) setContractSigner(storedContract.signer);
+      const profile = JSON.parse(localStorage.getItem("templodeluz_quiz_state") || "{}") as { nome?: string; ente?: string; relacao?: string; dorPrincipal?: string };
+      setQuizProfile(profile);
     } catch {
       // Mantém o campo vazio se o armazenamento estiver indisponível ou corrompido.
     }
@@ -81,7 +115,7 @@ function ChamadaAoVivoMilenaPage() {
           sessionStorage.getItem(`templodeluz:payment-receipt:${orderId}`) || "null",
         ) as { productId?: string; amountCents?: number; method?: string } | null;
         pixSuccess = receipt?.productId === "chamada_ao_vivo_milena"
-          && receipt?.amountCents === 15000
+          && receipt?.amountCents === callAmountCents
           && receipt?.method === "pix";
       } catch {
         pixSuccess = false;
@@ -89,7 +123,7 @@ function ChamadaAoVivoMilenaPage() {
     }
 
     if (pixSuccess) {
-      setStep("scheduling");
+      setStep(selectedSlot ? "confirmed" : "scheduling");
     }
 
     const sessionId = urlParams.get("session_id") || "";
@@ -99,10 +133,10 @@ function ChamadaAoVivoMilenaPage() {
       void verifyStripeCheckoutSession({
         sessionId,
         productId: "chamada_ao_vivo_milena",
-        amountCents: 15000,
+        amountCents: callAmountCents,
       })
         .then((paid) => {
-          if (paid) setStep("scheduling");
+          if (paid) setStep(selectedSlot ? "confirmed" : "scheduling");
           else setCardPaymentError("O pagamento por cartão ainda não foi confirmado pela Stripe.");
         })
         .catch((error: unknown) => {
@@ -110,21 +144,31 @@ function ChamadaAoVivoMilenaPage() {
         })
         .finally(() => setIsVerifyingCardPayment(false));
     }
-  }, []);
+  }, [callAmountCents]);
 
   const generateTimeSlots = (): string[] => {
     const slots: string[] = [];
-    const minimumTime = Date.now() + 2 * 60 * 60 * 1000;
-    const halfHour = 30 * 60 * 1000;
-    const firstSlot = Math.ceil(minimumTime / halfHour) * halfHour;
-
-    for (let i = 0; i < 12; i++) {
-      slots.push(new Date(firstSlot + i * halfHour).toISOString());
+    const base = new Date();
+    const hours = periodPreference === "day" ? [10, 11, 14, 15, 16] : [18, 19, 20, 21];
+    for (let dayOffset = 1; dayOffset <= 5; dayOffset++) {
+      for (const hour of hours) {
+        const slot = new Date(base);
+        slot.setDate(base.getDate() + dayOffset);
+        slot.setHours(hour, 0, 0, 0);
+        slots.push(slot.toISOString());
+      }
     }
     return slots;
   };
 
   const timeSlots = generateTimeSlots();
+  const availableDates = Array.from(new Map(timeSlots.map((slot) => {
+    const date = new Date(slot);
+    const key = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(date);
+    return [key, date] as const;
+  })).entries());
+  const activeDateKey = selectedDateKey || availableDates[0]?.[0] || "";
+  const visibleTimeSlots = timeSlots.filter((slot) => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date(slot)) === activeDateKey);
 
   const handleConfirmScheduling = () => {
     if (!selectedSlot) return;
@@ -140,7 +184,7 @@ function ChamadaAoVivoMilenaPage() {
       },
       0,
     );
-    setStep("confirmed");
+    setStep("contract");
   };
 
   const continueFlow = () => {
@@ -172,8 +216,12 @@ function ChamadaAoVivoMilenaPage() {
       }).format(new Date(selectedSlot))
     : "";
   const whatsappConfirmationUrl = `https://api.whatsapp.com/send?phone=5519998316353&text=${encodeURIComponent(
-    `Olá, sou ${contractSigner}. Acabei de contratar a Chamada Ao Vivo e escolhi ${selectedDate} (horário de São Paulo). Gostaria de confirmar meu agendamento.`,
-  )}`;
+     `Olá, sou ${contractSigner}. Contratei ${selectedPackage.title} e indiquei ${selectedDate} (horário de São Paulo) como preferência. Gostaria de confirmar o agendamento.`,
+   )}`;
+  const quizFirstName = quizProfile.nome?.trim().split(/\s+/)[0] || "";
+  const personalizedOffer = quizFirstName && quizProfile.ente
+    ? `${quizFirstName}, pelo que você compartilhou sobre ${quizProfile.ente}${quizProfile.relacao ? ` (${quizProfile.relacao})` : ""}, escolha o formato de conversa que mais respeita o seu momento.`
+    : "Escolha o formato de conversa que mais respeita o seu momento.";
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#fdfbf7] via-[#f7f2ea] to-[#f4eee4] text-[#181126] antialiased">
@@ -186,11 +234,11 @@ function ChamadaAoVivoMilenaPage() {
               <span className="w-1.5 h-1.5 rounded-full bg-[#f5d285] animate-ping" />✨ Convite
               exclusivo
             </span>
-            <figure className="relative mt-5 w-full overflow-hidden rounded-2xl border border-[#f5d285]/55 bg-[#120320] p-1 shadow-[0_18px_45px_rgba(0,0,0,0.38)]">
+            <figure className="relative mt-5 w-full overflow-hidden rounded-3xl border-2 border-[#f5d285]/65 bg-[#120320] p-1.5 shadow-[0_22px_52px_rgba(0,0,0,0.46)]">
               <img
                 src={milenaLiveCallImage}
                 alt="Milena Medeiros durante uma chamada de video ao vivo"
-                className="aspect-[16/10] w-full rounded-[13px] object-cover object-center"
+                className="aspect-[4/3] w-full rounded-[18px] object-cover object-center"
               />
               <figcaption className="absolute bottom-3 left-3 rounded-full border border-white/20 bg-[#160728]/85 px-3 py-1 text-[9px] font-extrabold uppercase tracking-[0.16em] text-white shadow-lg backdrop-blur-md">
                 Atendimento por videochamada
@@ -240,17 +288,16 @@ function ChamadaAoVivoMilenaPage() {
             <div className="px-6 pt-8 pb-4">
               <div className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-center text-[11.5px] font-bold leading-relaxed text-emerald-900">
                 {source === "paid"
-                  ? "Sua contribuição foi confirmada. Esta é uma oportunidade adicional e opcional antes de continuar."
-                  : "Você pode continuar sua carta normalmente. Antes disso, esta oportunidade opcional foi separada para você."}
+                  ? "Sua contribuição foi confirmada. Se desejar, você pode acrescentar uma conversa individual antes de continuar."
+                  : "Você pode continuar sua carta normalmente. Se desejar, escolha uma conversa individual com a Milena."}
               </div>
               <div className="rounded-3xl border-2 border-[#d4af37]/40 bg-gradient-to-br from-[#fbf8ee] via-white to-[#f7f2e4] p-5 shadow-xl text-center space-y-4">
                 <span className="text-4xl">🕯️</span>
                 <h2 className="font-display text-xl font-black text-[#1a082c] leading-snug">
-                  Chamada Individual com Milena
+                  Conversa ao Vivo com Milena
                 </h2>
                 <p className="text-xs text-[#6d5488] leading-relaxed">
-                  Converse ao vivo com Milena Medeiros, receba orientacao espiritual personalizada e
-                  conecte-se com o seu ente querido em um atendimento sigiloso e acolhedor.
+                  {personalizedOffer}
                 </p>
 
                 <div className="grid grid-cols-1 gap-3 pt-2">
@@ -280,20 +327,63 @@ function ChamadaAoVivoMilenaPage() {
                     <span className="text-lg shrink-0">📅</span>
                     <div className="text-left">
                       <span className="block text-xs font-black text-[#1a082c]">
-                        Horário com Antecedência
+                        Escolha Antes de Pagar
                       </span>
                       <span className="block text-[11px] text-[#6d5488]">
-                        Escolha um horário disponível a partir de 2 horas
+                        Defina período, data e horário de preferência
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-3">
-                  <span className="text-3xl font-black text-[#1a082c]">R$ 150,00</span>
-                  <span className="block text-[10px] font-bold text-[#6d5488] mt-1">
-                    Pagamento unico · Sessao completa
-                  </span>
+                <div className="rounded-2xl border border-[#d9c6a3] bg-white/85 px-4 py-3.5 shadow-sm">
+                  <span className="text-[10px] font-black uppercase tracking-[0.14em] text-[#b45309]">Oferta escolhida</span>
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.span
+                      key={selectedPackage.id}
+                      initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
+                      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                      exit={{ opacity: 0, y: -8, filter: "blur(4px)" }}
+                      transition={{ duration: 0.22, ease: "easeOut" }}
+                      className="mt-1 block text-[38px] font-black leading-none text-[#1a082c]"
+                    >
+                      R$ {(callAmountCents / 100).toFixed(2).replace(".", ",")}
+                    </motion.span>
+                  </AnimatePresence>
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.span
+                      key={`${selectedPackage.id}-label`}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                      transition={{ duration: 0.18, ease: "easeOut" }}
+                      className="mt-1 block text-[11.5px] font-bold leading-relaxed text-[#6d5488]"
+                    >
+                      {selectedPackage.title}
+                    </motion.span>
+                  </AnimatePresence>
+                </div>
+
+                <div className="rounded-2xl border border-[#d4af37]/30 bg-white/90 p-3 text-left">
+                  <span className="text-[10.5px] font-bold uppercase tracking-wider text-[#786445]">Quantas horas você prefere?</span>
+                  <div className="mt-2 grid gap-2">
+                    {LIVE_CALL_PACKAGES.map((item) => {
+                      const isSelected = selectedPackageId === item.id;
+                      return (
+                      <button key={item.id} type="button" onClick={() => setSelectedPackageId(item.id)} className={`relative rounded-2xl border-2 p-3.5 text-left transition-all duration-300 ${isSelected ? "z-10 scale-[1.035] border-[#5d4786] bg-[#f6f0fc] ring-4 ring-[#5d4786]/15 shadow-[0_18px_32px_-20px_rgba(45,20,77,0.75)]" : "scale-100 border-[#e5daf0] bg-white hover:border-[#b9a8cf] hover:bg-[#fcfaff]"}`}>
+                        <span className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3">
+                          <strong className="text-[15.5px] font-black leading-snug text-[#1a082c]">{item.title}</strong>
+                          <span className={`shrink-0 text-right font-black ${isSelected ? "text-[18px] text-[#2d144d]" : "text-[15px] text-[#5d4786]"}`}>R$ {(item.amountCents / 100).toFixed(0)},00</span>
+                          <span className="col-span-2 mt-1.5 text-[11px] leading-relaxed text-[#6d5488]">{item.description}</span>
+                          <span className="col-span-2 mt-2 flex items-center justify-between gap-2">
+                            <span className={`text-[9.5px] font-black uppercase tracking-wide ${isSelected ? "text-[#2d144d]" : "text-[#8a779f]"}`}>{isSelected ? "✓ Selecionado" : "Selecionar pacote"}</span>
+                            {item.popular && <span className="rounded-full bg-[#c49a52] px-2 py-0.5 text-[8px] font-black uppercase tracking-wide text-white">Mais escolhida</span>}
+                          </span>
+                        </span>
+                      </button>
+                    )})}
+                  </div>
+                  <p className="mt-3 rounded-xl border border-[#e3dbea] bg-[#f5f1f8] px-3 py-2 text-[11px] leading-relaxed text-[#514763]"><strong>{selectedPackage.title}:</strong> {selectedPackage.description}</p>
                 </div>
               </div>
             </div>
@@ -302,12 +392,13 @@ function ChamadaAoVivoMilenaPage() {
               <button
                 type="button"
                 onClick={() => {
-                  setStep("contract");
+                  setStep("scheduling");
                   handleInitiateCheckout();
                 }}
-                className="w-full cursor-pointer rounded-2xl bg-gradient-to-r from-[#2d144d] via-[#3d1868] to-[#1f0c36] px-6 py-4 text-sm font-black text-white uppercase tracking-wider shadow-lg shadow-[#2d144d]/25 hover:brightness-110 active:scale-[0.99] transition-all"
+                className="group relative w-full cursor-pointer overflow-hidden rounded-2xl bg-gradient-to-r from-[#57a698] via-[#39776c] to-[#285e56] px-6 py-4 text-sm font-black text-white uppercase tracking-wider shadow-[0_16px_30px_-14px_rgba(40,94,86,0.8)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_38px_-14px_rgba(40,94,86,0.9)] active:translate-y-0"
               >
-                Quero reservar minha chamada
+                <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-1000 group-hover:translate-x-full" />
+                <span className="relative flex items-center justify-center gap-2">Continuar <span className="rounded-full bg-white/18 px-2.5 py-1 text-[13px] tracking-normal">R$ {(callAmountCents / 100).toFixed(2).replace(".", ",")}</span></span>
               </button>
               <button
                 type="button"
@@ -332,7 +423,7 @@ function ChamadaAoVivoMilenaPage() {
 
               <div className="mt-4 max-h-[300px] overflow-y-auto rounded-2xl border border-[#e5daf0] bg-[#fbf9f5] p-4">
                 <pre className="text-[11px] leading-relaxed text-[#5e4b73] whitespace-pre-wrap font-sans">
-                  {CONTRACT_TEXT}
+                  {CONTRACT_TEXT.replace("{{PACKAGE}}", selectedPackage.title).replace("{{AMOUNT}}", `R$ ${(callAmountCents / 100).toFixed(2).replace(".", ",")}`)}
                 </pre>
               </div>
 
@@ -392,7 +483,7 @@ function ChamadaAoVivoMilenaPage() {
                 Pagamento da Sessao
               </h2>
               <p className="mt-2 text-xs text-[#5e4b73] leading-relaxed">
-                Escolha a forma de pagamento para confirmar sua reserva.
+                Escolha a forma de pagamento para confirmar sua solicitação de agendamento.
               </p>
               {isVerifyingCardPayment && (
                 <p className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-900">
@@ -410,7 +501,7 @@ function ChamadaAoVivoMilenaPage() {
               <PixCheckout
                 productId="chamada_ao_vivo_milena"
                 pixProductId="carta_sagrada"
-                amountCents={15000}
+                amountCents={callAmountCents}
                 initialCustomerName={contractSigner}
                 enteQuerido="Upsell Chamada Ao Vivo"
                 grauParentesco="Produto adicional"
@@ -428,14 +519,27 @@ function ChamadaAoVivoMilenaPage() {
                 Escolha o Horario da Chamada
               </h2>
               <p className="mt-2 text-xs text-[#5e4b73] leading-relaxed">
-                Selecione um horario disponivel a partir de 2 horas apos o pagamento. Todos os
-                horarios estao no fuso de Sao Paulo.
+                Escolha sua preferência antes do pagamento. Todos os horários estão no fuso de São Paulo e serão confirmados pelo WhatsApp após a compra.
               </p>
             </div>
 
             <div className="px-6 pb-6">
-              <div className="grid grid-cols-3 gap-2">
-                {timeSlots.map((slot) => {
+              <div className="mb-4 grid grid-cols-2 gap-3">
+                <button type="button" onClick={() => { setPeriodPreference("day"); setSelectedSlot(""); }} className={`rounded-2xl border-2 p-3 text-left ${periodPreference === "day" ? "border-[#2d144d] bg-[#f6f0fc]" : "border-[#e5daf0] bg-white"}`}>
+                  <span className="text-lg">☀️</span><span className="mt-1 block text-xs font-black text-[#181126]">De dia</span><span className="block text-[10px] text-[#6d5488]">Manhã e tarde</span>
+                </button>
+                <button type="button" onClick={() => { setPeriodPreference("night"); setSelectedSlot(""); }} className={`rounded-2xl border-2 p-3 text-left ${periodPreference === "night" ? "border-[#2d144d] bg-[#f6f0fc]" : "border-[#e5daf0] bg-white"}`}>
+                  <span className="text-lg">🌙</span><span className="mt-1 block text-xs font-black text-[#181126]">À noite</span><span className="block text-[10px] text-[#6d5488]">Fim de tarde e noite</span>
+                </button>
+              </div>
+              <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
+                {availableDates.map(([dateKey, date]) => {
+                  const label = new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", weekday: "short", day: "2-digit", month: "short" }).format(date);
+                  return <button key={dateKey} type="button" onClick={() => { setSelectedDateKey(dateKey); setSelectedSlot(""); }} className={`shrink-0 rounded-xl border px-3 py-2 text-[11px] font-bold capitalize ${activeDateKey === dateKey ? "border-[#2d144d] bg-[#2d144d] text-white" : "border-[#e5daf0] bg-white text-[#514763]"}`}>{label}</button>;
+                })}
+              </div>
+              <div className="mt-3 grid grid-cols-3 gap-2">
+                {visibleTimeSlots.map((slot) => {
                   const date = new Date(slot);
                   const timeLabel = new Intl.DateTimeFormat("pt-BR", {
                     timeZone: "America/Sao_Paulo",
@@ -471,7 +575,7 @@ function ChamadaAoVivoMilenaPage() {
               {selectedSlot && (
                 <div className="mt-4 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-center">
                   <span className="text-[12px] font-bold text-emerald-800">
-                    Horário selecionado: <strong>{selectedDate}</strong>
+                    Preferência selecionada: <strong>{selectedDate}</strong>
                   </span>
                 </div>
               )}
@@ -484,7 +588,7 @@ function ChamadaAoVivoMilenaPage() {
                 disabled={!selectedSlot}
                 className="w-full cursor-pointer rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 px-6 py-3.5 text-sm font-black text-white uppercase tracking-wider shadow-lg disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-110 active:scale-[0.99] transition-all"
               >
-                Confirmar Agendamento
+                 Revisar contrato
               </button>
             </div>
           </main>
@@ -510,9 +614,8 @@ function ChamadaAoVivoMilenaPage() {
                 Horário Pré-selecionado!
               </h2>
               <p className="text-sm text-[#5e4b73] max-w-sm mx-auto leading-relaxed">
-                Você escolheu <strong>{selectedDate}</strong> para a chamada ao vivo com a médium
-                Milena Medeiros. Envie a confirmação no WhatsApp para validar a disponibilidade e
-                receber o link de acesso.
+                 Você indicou <strong>{selectedDate}</strong> como preferência para a chamada ao vivo com a médium
+                 Milena Medeiros. Envie a confirmação no WhatsApp para validar a disponibilidade e receber o link de acesso.
               </p>
 
               <div className="pt-4 space-y-3">
@@ -521,8 +624,8 @@ function ChamadaAoVivoMilenaPage() {
                     Resumo do Pedido
                   </span>
                   <div className="flex justify-between text-xs font-bold text-[#181126]">
-                    <span>Chamada Ao Vivo</span>
-                    <span>R$ 150,00</span>
+                     <span>{selectedPackage.title}</span>
+                     <span>R$ {(callAmountCents / 100).toFixed(2).replace(".", ",")}</span>
                   </div>
                   <div className="flex justify-between text-xs font-bold text-[#181126] mt-1">
                     <span>Horario</span>

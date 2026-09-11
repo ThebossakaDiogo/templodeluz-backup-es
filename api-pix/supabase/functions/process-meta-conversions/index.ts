@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { processPendingMetaConversions, recoverEligibleMetaPurchases } from '../_shared/meta-conversions.ts';
-import { processPaidUtmifyOrders } from '../_shared/utmify.ts';
+import { processMetaUtmifyOrders } from '../_shared/utmify.ts';
 
 function serviceRoleKey() {
   const legacy = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
 
     const [meta, utmify] = await Promise.all([
       processPendingMetaConversions(supabase, limit),
-      processPaidUtmifyOrders(supabase, limit),
+      processMetaUtmifyOrders(supabase, limit),
     ]);
     const recovery = input?.action === 'recover_purchases'
       ? await recoverEligibleMetaPurchases(supabase, Number(input?.days) || 7, limit)

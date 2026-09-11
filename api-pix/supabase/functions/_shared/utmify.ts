@@ -15,19 +15,17 @@ function formatDate(value: string | Date | null | undefined) {
   return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}:${pad(date.getUTCSeconds())}`;
 }
 
-export async function deliverMetaUtmifyPaidOrder(supabase: any, order: Record<string, any>) {
-  if (!isMetaOrder(order)) return { delivered: false, skipped: true };
+type UtmifyOrderStatus = 'waiting_payment' | 'paid';
 
-  const token = Deno.env.get('UTMIFY_API_TOKEN');
-  if (!token) throw new Error('UTMIFY_CONFIGURATION_MISSING');
-
-  const payload = {
+export function buildMetaUtmifyPayload(order: Record<string, any>, status: UtmifyOrderStatus) {
+  const isPaid = status === 'paid';
+  return {
     orderId: String(order.id),
     platform: 'TemploDeLuzMeta',
-    paymentMethod: 'pix',
-    status: 'paid',
+    paymentMethod: order.payment_method === 'credit_card' ? 'credit_card' : 'pix',
+    status,
     createdAt: formatDate(order.created_at),
-    approvedDate: formatDate(order.updated_at),
+    approvedDate: isPaid ? formatDate(order.fulfilled_at || order.updated_at) : null,
     refundedAt: null,
     customer: {
       name: String(order.customer_name || 'Consulente Templo de Luz'),
@@ -44,7 +42,6 @@ export async function deliverMetaUtmifyPaidOrder(supabase: any, order: Record<st
       quantity: 1,
       priceInCents: Number(order.amount_cents),
     }],
-    // A API da UTMIFY exige explicitamente todos estes campos, inclusive nulos.
     trackingParameters: {
       src: order.src || null,
       sck: order.sck || null,
@@ -62,11 +59,22 @@ export async function deliverMetaUtmifyPaidOrder(supabase: any, order: Record<st
     },
     isTest: false,
   };
+}
+
+async function deliverMetaUtmifyOrder(supabase: any, order: Record<string, any>, eventStatus: UtmifyOrderStatus) {
+  if (!isMetaOrder(order)) return { delivered: false, skipped: true };
+  // Stripe usa o session ID diretamente no webhook para manter pending/paid no mesmo pedido UTMIFY.
+  if (order.gateway === 'stripe') return { delivered: false, skipped: true };
+
+  const token = Deno.env.get('UTMIFY_API_TOKEN');
+  if (!token) throw new Error('UTMIFY_CONFIGURATION_MISSING');
+
+  const payload = buildMetaUtmifyPayload(order, eventStatus);
 
   const { data: claimed, error: claimError } = await supabase.rpc('claim_utmify_delivery', {
     p_order_id: order.id,
     p_destination: 'meta',
-    p_event_status: 'paid',
+    p_event_status: eventStatus,
     p_payload: payload,
   });
   if (claimError) throw claimError;
@@ -92,7 +100,7 @@ export async function deliverMetaUtmifyPaidOrder(supabase: any, order: Record<st
   const { error: finishError } = await supabase.rpc('finish_utmify_delivery', {
     p_order_id: order.id,
     p_destination: 'meta',
-    p_event_status: 'paid',
+    p_event_status: eventStatus,
     p_success: success,
     p_http_status: response?.status ?? 0,
     p_response_body: responseBody,
@@ -103,18 +111,37 @@ export async function deliverMetaUtmifyPaidOrder(supabase: any, order: Record<st
   return { delivered: true, duplicate: false };
 }
 
-export async function processPaidUtmifyOrders(supabase: any, limit = 100) {
+export function deliverMetaUtmifyWaitingPaymentOrder(supabase: any, order: Record<string, any>) {
+  return deliverMetaUtmifyOrder(supabase, order, 'waiting_payment');
+}
+
+export function deliverMetaUtmifyPaidOrder(supabase: any, order: Record<string, any>) {
+  return deliverMetaUtmifyOrder(supabase, order, 'paid');
+}
+
+export function runUtmifyInBackground(promise: Promise<unknown>, label: string) {
+  const tracked = promise.catch((error) => {
+    console.error(label, error instanceof Error ? error.message : error);
+  });
+  const edgeRuntime = (globalThis as any).EdgeRuntime;
+  if (edgeRuntime?.waitUntil) edgeRuntime.waitUntil(tracked);
+  else void tracked;
+}
+
+export async function processMetaUtmifyOrders(supabase: any, limit = 100) {
   const { data: orders, error } = await supabase
     .from('pix_orders')
     .select('*')
-    .eq('status', 'paid')
+    .in('status', ['pending', 'paid'])
     .eq('quiz_origin', QUIZ_ORIGIN)
     .order('updated_at', { ascending: false })
     .limit(Math.max(1, Math.min(100, limit)));
   if (error) throw error;
 
   const results = await Promise.allSettled(
-    (orders ?? []).map((order: Record<string, any>) => deliverMetaUtmifyPaidOrder(supabase, order)),
+    (orders ?? []).map((order: Record<string, any>) => order.status === 'paid'
+      ? deliverMetaUtmifyPaidOrder(supabase, order)
+      : deliverMetaUtmifyWaitingPaymentOrder(supabase, order)),
   );
   return {
     inspected: results.length,

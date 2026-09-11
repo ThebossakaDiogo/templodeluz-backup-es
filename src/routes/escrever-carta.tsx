@@ -204,7 +204,10 @@ function EscreverCartaPage() {
   const [copied, setCopied] = useState(false);
   const [fontStyle, setFontStyle] = useState<"handwriting" | "cursive">("handwriting");
   const [letterValidationError, setLetterValidationError] = useState("");
-  const [letterFormat, setLetterFormat] = useState<"digital" | "physical">("digital");
+  const [letterFormat, setLetterFormat] = useState<"digital" | "physical">(() => {
+    if (typeof window === "undefined") return "digital";
+    return localStorage.getItem("templodeluz:physical-letter-selected") === "true" ? "physical" : "digital";
+  });
   const [isPhysicalModalOpen, setIsPhysicalModalOpen] = useState(false);
   const [isPhysicalCheckoutOpen, setIsPhysicalCheckoutOpen] = useState(false);
   const [shipping, setShipping] = useState({ cep: "", address: "", number: "", complement: "", neighborhood: "", city: "", state: "" });
@@ -323,6 +326,23 @@ function EscreverCartaPage() {
     .filter(Boolean)
     .join(", ");
   const isPhysicalLetter = letterFormat === "physical";
+  const isPhysicalLetterFeePaid = typeof window !== "undefined" && (
+    localStorage.getItem("templodeluz:physical-letter-fee-paid") === "true"
+    || (
+      localStorage.getItem("templodeluz:physical-letter-selected") === "true"
+      && sessionStorage.getItem("templodeluz:physical-letter-fee-included") === "true"
+      && sessionStorage.getItem("templodeluz:pix-paid") === "true"
+    )
+  );
+
+  useEffect(() => {
+    try {
+      if (isPhysicalLetter) localStorage.setItem("templodeluz:physical-letter-selected", "true");
+      else localStorage.removeItem("templodeluz:physical-letter-selected");
+    } catch {
+      // A preferência continua disponível na página atual.
+    }
+  }, [isPhysicalLetter]);
 
   const executeWhatsAppRedirect = () => {
     // Identifica status e forma de pagamento utilizada pelo consulente
@@ -349,7 +369,7 @@ function EscreverCartaPage() {
       grauParentesco: relacao || "Familiar",
       paymentMethod,
       paymentStatus,
-       amountCents: isPhysicalLetter ? 3490 : 0,
+       amountCents: 0,
       sourcePage: "escrever_carta",
       messagePreview: textoPergaminho.slice(0, 500),
     });
@@ -377,7 +397,7 @@ function EscreverCartaPage() {
        (isPhysicalLetter
          ? `━━━━━━━━━━━━━━━━━━━━\n` +
            `📮 *SELO: ENVIO DE CARTA FÍSICA SOLICITADO*\n` +
-           `• *Frete informado:* R$ 34,90\n` +
+           `• *Taxa de envio:* ${isPhysicalLetterFeePaid ? "PAGA ✅" : "A confirmar"}\n` +
            `• *CEP:* ${shipping.cep}\n` +
            `• *Endereço:* ${shipping.address}, ${shipping.number}${shipping.complement ? ` - ${shipping.complement}` : ""}\n` +
            `• *Bairro:* ${shipping.neighborhood}\n` +
@@ -412,7 +432,8 @@ function EscreverCartaPage() {
         setIsPhysicalModalOpen(true);
         return;
       }
-      setIsPhysicalCheckoutOpen(true);
+      if (isPhysicalLetterFeePaid) executeWhatsAppRedirect();
+      else setIsPhysicalCheckoutOpen(true);
       return;
     }
     setLetterValidationError("");
@@ -506,7 +527,7 @@ function EscreverCartaPage() {
                 className={`rounded-2xl border-2 p-4 text-left transition-all ${isPhysicalLetter ? "border-amber-500 bg-amber-50 shadow-sm" : "border-stone-200 bg-white hover:border-amber-300"}`}
               >
                 <span className="block text-xl font-black text-[#241535]">Carta Digital <span className="text-amber-700">+ Física</span></span>
-                <span className="mt-1 block text-xs leading-relaxed text-stone-600">Inclui envio físico. Frete: <strong>R$ 34,90</strong> pago com PIX ou cartão após informar o endereço.</span>
+                <span className="mt-1 block text-xs leading-relaxed text-stone-600">Inclui envio físico. A taxa de <strong>R$ 15,00</strong> já entra no primeiro pagamento quando esta opção é marcada.</span>
               </button>
             </div>
             {isPhysicalLetter && (
@@ -1259,37 +1280,37 @@ function EscreverCartaPage() {
       </footer>
 
       {isPhysicalModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#181126]/55 p-0 sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-labelledby="physical-letter-title">
-          <div className="w-full max-w-xl rounded-t-3xl bg-white p-5 shadow-2xl sm:rounded-3xl sm:p-6">
+        <div className="fixed inset-0 z-[210] flex items-center justify-center bg-[#181126]/60 p-3 backdrop-blur-sm sm:p-5" role="dialog" aria-modal="true" aria-labelledby="physical-letter-title">
+          <div className="relative max-h-[calc(100dvh-24px)] w-full max-w-xl overflow-y-auto overscroll-contain rounded-[26px] bg-white p-4 shadow-2xl sm:p-6">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <span className="inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-amber-900">📮 Envio de Carta Física</span>
                 <h2 id="physical-letter-title" className="mt-2 font-display text-xl font-black text-[#181126]">Para onde devemos enviar sua carta?</h2>
-                <p className="mt-1 text-xs leading-relaxed text-stone-600">O frete de <strong>R$ 34,90</strong> será pago no próximo passo por PIX ou cartão. Depois da confirmação, você segue para o WhatsApp com a solicitação completa.</p>
+                <p className="mt-1 text-xs leading-relaxed text-stone-600">A taxa de envio já foi incluída no primeiro pagamento. Confirme o endereço para enviar sua solicitação pelo WhatsApp.</p>
               </div>
               <button type="button" onClick={() => setIsPhysicalModalOpen(false)} className="rounded-full p-2 text-stone-500 hover:bg-stone-100" aria-label="Fechar endereço">✕</button>
             </div>
 
-            <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-6">
+            <div className="mt-4 grid grid-cols-2 gap-3 sm:mt-5 sm:grid-cols-6">
               <label className="sm:col-span-2"><span className="mb-1 block text-[10px] font-black uppercase tracking-wider text-stone-500">CEP</span><input value={shipping.cep} onChange={(event) => setShipping((current) => ({ ...current, cep: event.target.value.replace(/\D/g, "").slice(0, 8) }))} inputMode="numeric" placeholder="00000-000" className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm outline-none focus:border-amber-500 focus:bg-white" /></label>
-              <label className="sm:col-span-4"><span className="mb-1 block text-[10px] font-black uppercase tracking-wider text-stone-500">Endereço</span><input value={shipping.address} onChange={(event) => setShipping((current) => ({ ...current, address: event.target.value }))} placeholder="Rua, avenida ou estrada" className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm outline-none focus:border-amber-500 focus:bg-white" /></label>
+              <label className="col-span-2 sm:col-span-4"><span className="mb-1 block text-[10px] font-black uppercase tracking-wider text-stone-500">Endereço</span><input value={shipping.address} onChange={(event) => setShipping((current) => ({ ...current, address: event.target.value }))} placeholder="Rua, avenida ou estrada" className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm outline-none focus:border-amber-500 focus:bg-white" /></label>
               <label className="sm:col-span-2"><span className="mb-1 block text-[10px] font-black uppercase tracking-wider text-stone-500">Número</span><input value={shipping.number} onChange={(event) => setShipping((current) => ({ ...current, number: event.target.value }))} placeholder="Nº" className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm outline-none focus:border-amber-500 focus:bg-white" /></label>
-              <label className="sm:col-span-4"><span className="mb-1 block text-[10px] font-black uppercase tracking-wider text-stone-500">Complemento</span><input value={shipping.complement} onChange={(event) => setShipping((current) => ({ ...current, complement: event.target.value }))} placeholder="Apartamento, casa, bloco (opcional)" className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm outline-none focus:border-amber-500 focus:bg-white" /></label>
-              <label className="sm:col-span-3"><span className="mb-1 block text-[10px] font-black uppercase tracking-wider text-stone-500">Bairro</span><input value={shipping.neighborhood} onChange={(event) => setShipping((current) => ({ ...current, neighborhood: event.target.value }))} className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm outline-none focus:border-amber-500 focus:bg-white" /></label>
+              <label className="col-span-2 sm:col-span-4"><span className="mb-1 block text-[10px] font-black uppercase tracking-wider text-stone-500">Complemento</span><input value={shipping.complement} onChange={(event) => setShipping((current) => ({ ...current, complement: event.target.value }))} placeholder="Apartamento, casa, bloco (opcional)" className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm outline-none focus:border-amber-500 focus:bg-white" /></label>
+              <label className="col-span-2 sm:col-span-3"><span className="mb-1 block text-[10px] font-black uppercase tracking-wider text-stone-500">Bairro</span><input value={shipping.neighborhood} onChange={(event) => setShipping((current) => ({ ...current, neighborhood: event.target.value }))} className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm outline-none focus:border-amber-500 focus:bg-white" /></label>
               <label className="sm:col-span-2"><span className="mb-1 block text-[10px] font-black uppercase tracking-wider text-stone-500">Cidade</span><input value={shipping.city} onChange={(event) => setShipping((current) => ({ ...current, city: event.target.value }))} className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm outline-none focus:border-amber-500 focus:bg-white" /></label>
               <label className="sm:col-span-1"><span className="mb-1 block text-[10px] font-black uppercase tracking-wider text-stone-500">UF</span><input value={shipping.state} onChange={(event) => setShipping((current) => ({ ...current, state: event.target.value.toUpperCase().slice(0, 2) }))} placeholder="SP" maxLength={2} className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm uppercase outline-none focus:border-amber-500 focus:bg-white" /></label>
             </div>
 
             {letterValidationError && <p role="alert" className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-800">{letterValidationError}</p>}
-            <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-xs leading-relaxed text-emerald-950">✓ Seus dados ficam vinculados à solicitação. No próximo passo, o QR Code PIX já ficará aberto; cartão estará disponível logo abaixo.</div>
-            <button type="button" onClick={() => { const cep = shipping.cep.replace(/\D/g, ""); if (cep.length !== 8 || !shipping.address.trim() || !shipping.number.trim() || !shipping.neighborhood.trim() || !shipping.city.trim() || shipping.state.trim().length !== 2) { setLetterValidationError("Preencha CEP e endereço completo para solicitar a carta física."); return; } setLetterValidationError(""); setIsPhysicalModalOpen(false); setIsPhysicalCheckoutOpen(true); }} className="utmify-initiate-checkout mt-4 w-full rounded-2xl bg-emerald-600 px-4 py-3.5 text-sm font-black text-white shadow-lg shadow-emerald-700/20 hover:bg-emerald-700">Continuar para pagamento do frete</button>
+            <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-xs leading-relaxed text-emerald-950">✓ Seus dados ficam vinculados à solicitação. A taxa de envio foi incluída no primeiro pagamento.</div>
+            <div className="sticky -bottom-4 z-20 -mx-4 mt-4 border-t border-stone-100 bg-white/95 px-4 pb-1 pt-3 backdrop-blur-md sm:-bottom-6 sm:-mx-6 sm:px-6 sm:pb-1"><button type="button" onClick={() => { const cep = shipping.cep.replace(/\D/g, ""); if (cep.length !== 8 || !shipping.address.trim() || !shipping.number.trim() || !shipping.neighborhood.trim() || !shipping.city.trim() || shipping.state.trim().length !== 2) { setLetterValidationError("Preencha CEP e endereço completo para solicitar a carta física."); return; } setLetterValidationError(""); setIsPhysicalModalOpen(false); if (isPhysicalLetterFeePaid) executeWhatsAppRedirect(); else setIsPhysicalCheckoutOpen(true); }} className="w-full rounded-2xl bg-emerald-600 px-4 py-3.5 text-sm font-black text-white shadow-lg shadow-emerald-700/20 hover:bg-emerald-700">Confirmar endereço e seguir para o WhatsApp</button></div>
           </div>
         </div>
       )}
       {isPhysicalCheckoutOpen && (
         <PixCheckout
           productId="carta_sagrada"
-          amountCents={3490}
+          amountCents={1500}
           initialCustomerName={nome}
           initialCustomerPhone={phone}
           initialCustomerEmail={email}

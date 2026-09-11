@@ -7,6 +7,11 @@ import { trackQuizStep } from "@/lib/metaPixel";
 import { trackQuizStep as trackQuizTelemetry } from "@/lib/funnel-telemetry";
 import { useCandlesGoalSimulation } from "@/lib/donation-simulation";
 import { parseBrazilianCurrency, sanitizeBrazilianCurrencyInput } from "@/lib/currency";
+import { PIX_CONFIG_ORIGINAL, pixFunctionHeaders } from "@/lib/pix-config";
+import milenaCartaImage from "../../../images-elements/medium-milena-carta.jpeg";
+import insumoVelaImage from "../../../images-elements/insumo-vela.png";
+import insumoCartaImage from "../../../images-elements/insumo-carta.png";
+import insumoSopaImage from "../../../images-elements/insumo-sopa.png";
 
 const LetterZoomModal = lazy(() => import("./LetterZoomModal").then(({ LetterZoomModal: Component }) => ({ default: Component })));
 const PixCheckout = lazy(() => import("./PixCheckout").then(({ PixCheckout: Component }) => ({ default: Component })));
@@ -399,20 +404,20 @@ function getDonationPsychologicalImpact(
   primeiroEnte: string,
   primeiroNome: string,
 ) {
-  if (amount < 10) {
+  if (amount < 15) {
     return {
       tier: "invalid",
       icon: "⚠️",
       badge: "Insumos Físicos Mínimos",
-      title: "Mínimo Fraterno de R$ 10",
+      title: "Contribuição mínima de R$ 15",
       description:
-        `O acolhimento espiritual é 100% gratuito. O valor mínimo de R$ 10 é necessário unicamente para custear a vela de cera virgem de 7 dias e o pergaminho consagrado para ${primeiroEnte}.`,
+        `O acolhimento espiritual é gratuito. O mínimo de R$ 15 ajuda a custear a vela de 7 dias e o pergaminho preparado para ${primeiroEnte}.`,
       badgeColor: "bg-red-50 text-red-800 border-red-200",
       cardBorder: "border-red-200 bg-red-50/30",
       isValid: false,
     };
   }
-  if (amount < 15) {
+  if (amount < 20) {
     return {
       tier: "basic",
       icon: "🕯️",
@@ -424,7 +429,7 @@ function getDonationPsychologicalImpact(
       isValid: true,
     };
   }
-  if (amount < 20) {
+  if (amount < 30) {
     return {
       tier: "paper",
       icon: "📜",
@@ -436,7 +441,7 @@ function getDonationPsychologicalImpact(
       isValid: true,
     };
   }
-  if (amount < 35) {
+  if (amount < 40) {
     return {
       tier: "heart",
       icon: "✨",
@@ -448,7 +453,7 @@ function getDonationPsychologicalImpact(
       isValid: true,
     };
   }
-  if (amount < 50) {
+  if (amount < 60) {
     return {
       tier: "light",
       icon: "🌟",
@@ -515,6 +520,184 @@ function PixIcon({
   );
 }
 
+function MilenaSupportPrompt({
+  isOpen,
+  currentAmount,
+  primeiroEnte,
+  onClose,
+  onContinue,
+}: {
+  readonly isOpen: boolean;
+  readonly currentAmount: number;
+  readonly primeiroEnte: string;
+  readonly onClose: () => void;
+  readonly onContinue: (amount: number) => void;
+}) {
+  const [selectedAmount, setSelectedAmount] = useState(currentAmount);
+  const [customExtraInput, setCustomExtraInput] = useState("");
+  const [supportStats, setSupportStats] = useState<{ supporters: number; raisedCents: number } | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setSelectedAmount(currentAmount);
+    setCustomExtraInput("");
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const controller = new AbortController();
+    const params = new URLSearchParams({
+      select: "id,amount_cents",
+      quiz_origin: "eq.original",
+      product_id: "eq.cirurgia_milena",
+      status: "eq.paid",
+      limit: "1000",
+    });
+    void fetch(`${PIX_CONFIG_ORIGINAL.supabaseUrl}/rest/v1/pix_orders?${params}`, {
+      headers: pixFunctionHeaders(PIX_CONFIG_ORIGINAL),
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error(`SUPPORT_STATS_${response.status}`);
+        return response.json() as Promise<Array<{ id: string; amount_cents: number }>>;
+      })
+      .then((orders) => {
+        setSupportStats({
+          supporters: orders.length,
+          raisedCents: orders.reduce((total, order) => total + Number(order.amount_cents || 0), 0),
+        });
+      })
+      .catch((error) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setSupportStats(null);
+      });
+    return () => {
+      controller.abort();
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [currentAmount, isOpen]);
+
+  if (!isOpen) return null;
+
+  const suggestions = [
+    { amount: currentAmount, label: "Manter valor" },
+    { amount: currentAmount + 10, label: "+ R$ 10" },
+    { amount: currentAmount + 20, label: "+ R$ 20" },
+  ];
+  const customExtra = parseBrazilianCurrency(customExtraInput);
+  const invalidCustomExtra = customExtraInput.length > 0 && customExtra < 10;
+  const surgeryTargetCents = 850_000;
+  const raisedCents = supportStats?.raisedCents ?? 0;
+  const goalPercent = Math.min(100, (raisedCents / surgeryTargetCents) * 100);
+  const remainingCents = Math.max(0, surgeryTargetCents - raisedCents);
+  const formatCurrency = (cents: number) => (cents / 100).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+
+  return (
+    <div className="fixed inset-0 z-[220] flex items-center justify-center bg-[#171225]/70 p-3 backdrop-blur-sm sm:p-5" role="dialog" aria-modal="true" aria-labelledby="milena-support-title">
+      <button type="button" aria-label="Fechar" onClick={onClose} className="absolute inset-0 cursor-default" />
+      <div className="relative z-10 flex h-[calc(100dvh-24px)] w-full flex-col overflow-hidden rounded-[26px] border border-[#ded3e8] bg-[#fffefd] shadow-2xl sm:max-w-[580px]">
+        <button type="button" onClick={onClose} aria-label="Fechar janela" className="absolute right-3 top-3 z-30 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-[#171225]/75 text-white backdrop-blur-md hover:bg-[#171225]">✕</button>
+
+        <header className="shrink-0 border-b border-[#3d3152] bg-[#211a35]">
+          <div className="h-[104px] w-full bg-[#171225] p-2 sm:h-[122px]">
+            <img src={IMAGES.milenaCatarata} alt="Milena Medeiros" className="h-full w-full object-contain object-center" loading="lazy" />
+          </div>
+          <div className="px-4 pb-3 pt-2 text-left sm:px-5 sm:pb-4 sm:pt-3">
+            <span className="text-[10px] font-black uppercase tracking-[0.14em] text-[#eadcf5]">Antes de continuar</span>
+            <h3 id="milena-support-title" className="mt-1 max-w-[380px] font-display text-[18px] font-black leading-tight text-white sm:text-[20px]">Se quiser, amplie seu gesto de apoio</h3>
+            <p className="mt-1 text-[11px] leading-relaxed text-[#cec1db]">Escolha opcional para apoiar o tratamento oftalmológico da Milena.</p>
+          </div>
+        </header>
+
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-3 pb-5 sm:p-4 sm:pb-5">
+
+          <div className="grid grid-cols-2 gap-2.5">
+            <div className="rounded-2xl border border-[#e3dbea] bg-[#f5f1f8] p-2.5 text-center">
+              <span className="block text-[17px] font-black text-[#5d4786]">{supportStats?.supporters ?? 0}</span>
+              <span className="text-[10px] font-bold uppercase tracking-wide text-[#6b6175]">apoios confirmados</span>
+            </div>
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-2.5 text-center">
+              <span className="block text-[17px] font-black text-emerald-700">{formatCurrency(raisedCents)}</span>
+              <span className="text-[10px] font-bold uppercase tracking-wide text-emerald-700">arrecadados</span>
+            </div>
+          </div>
+
+          <section className="mt-3 rounded-2xl border border-[#e3dbea] bg-white p-3 shadow-sm" aria-label="Meta da cirurgia">
+            <div className="flex items-end justify-between gap-3">
+              <div className="text-left">
+                <span className="block text-[10px] font-black uppercase tracking-[0.1em] text-[#6b6175]">Meta do tratamento</span>
+                <strong className="mt-0.5 block text-[16px] text-[#272039]">{formatCurrency(surgeryTargetCents)}</strong>
+              </div>
+              <span className="rounded-full bg-[#f2eef8] px-2.5 py-1 text-[10.5px] font-black text-[#5d4786]">{goalPercent.toFixed(1).replace(".", ",")}%</span>
+            </div>
+            <div className="mt-2.5 h-2.5 overflow-hidden rounded-full bg-[#eee9f2] p-0.5 ring-1 ring-[#e3dbea]">
+              <div className="h-full rounded-full bg-gradient-to-r from-[#8b75b2] via-[#6f5aa0] to-[#4b8b7e] transition-[width] duration-700" style={{ width: `${goalPercent}%` }} />
+            </div>
+            <div className="mt-2 flex items-center justify-between gap-3 text-[10.5px] font-semibold text-slate-500">
+              <span>{formatCurrency(raisedCents)} confirmados</span>
+              <span>Faltam {formatCurrency(remainingCents)}</span>
+            </div>
+          </section>
+
+          <div className="mt-3 rounded-2xl border border-[#e3dbea] bg-[#f5f1f8] p-3 text-left">
+            <p className="text-[12.5px] leading-relaxed text-[#514763] sm:text-[13px]">
+              Milena está em acompanhamento para tratar a catarata, que afeta sua leitura e o trabalho com as cartas. A casa mantém uma corrente de apoio para exames, tratamento e recuperação.
+            </p>
+            <p className="mt-1.5 text-[11.5px] font-bold text-[#6b6175]">É opcional. Manter o valor atual não muda o acolhimento ou o atendimento.</p>
+          </div>
+
+          <div className="mt-3 grid grid-cols-3 gap-2 sm:gap-2.5">
+          {suggestions.map((suggestion) => {
+            const selected = suggestion.amount === selectedAmount && customExtraInput.length === 0;
+            return (
+              <button key={suggestion.amount} type="button" onClick={() => { setCustomExtraInput(""); setSelectedAmount(suggestion.amount); }} className={`min-h-[68px] rounded-2xl border px-1 py-2 text-center transition-all sm:px-2 sm:py-2.5 ${selected ? "border-[#6f5aa0] bg-[#f2eef8] ring-4 ring-[#6f5aa0]/10" : "border-slate-200 bg-white hover:border-[#b9a8cf]"}`}>
+                <span className="block text-[16px] font-black text-[#272039]">R$ {suggestion.amount.toFixed(0)}</span>
+                <span className={`mt-1 block text-[9.5px] font-bold ${selected ? "text-[#5d4786]" : "text-slate-500"}`}>
+                  {suggestion.label}
+                </span>
+              </button>
+            );
+          })}
+          </div>
+
+          <div className={`mt-3 rounded-2xl border bg-white p-3 transition-all ${customExtraInput ? "border-[#6f5aa0] ring-4 ring-[#6f5aa0]/10" : "border-slate-200"}`}>
+          <label htmlFor="custom-support-extra" className="block text-left text-[11.5px] font-bold text-[#514763]">Deseja somar outro valor? <span className="font-medium text-slate-500">Mínimo de R$ 10</span></label>
+          <div className="relative mt-2">
+            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[13px] font-black text-[#5d4786]">R$</span>
+            <input
+              id="custom-support-extra"
+              value={customExtraInput}
+              onChange={(event) => {
+                const value = sanitizeBrazilianCurrencyInput(event.target.value);
+                setCustomExtraInput(value);
+                const extra = parseBrazilianCurrency(value);
+                setSelectedAmount(extra >= 10 ? currentAmount + extra : currentAmount);
+              }}
+              inputMode="decimal"
+              placeholder="Digite o valor adicional"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-3 text-[15px] font-black text-[#272039] outline-none focus:border-[#6f5aa0] focus:bg-white"
+            />
+          </div>
+          {invalidCustomExtra && <p className="mt-1.5 text-[10.5px] font-bold text-red-700">O apoio adicional deve ser de pelo menos R$ 10.</p>}
+          </div>
+        </div>
+
+        <footer className="shrink-0 border-t border-slate-200 bg-[#fffefd] px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-12px_28px_-22px_rgba(39,32,57,0.55)] sm:px-5">
+          <button type="button" disabled={invalidCustomExtra} onClick={() => onContinue(selectedAmount)} className="w-full rounded-[14px] bg-gradient-to-r from-[#4b8b7e] via-[#39776c] to-[#2d665e] px-5 py-3.5 text-[14px] font-black text-white shadow-lg shadow-[#39776c]/25 transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50">
+            Continuar com R$ {selectedAmount.toFixed(2).replace(".", ",")}
+          </button>
+          {selectedAmount !== currentAmount && (
+            <button type="button" onClick={() => onContinue(currentAmount)} className="mt-1.5 w-full py-2 text-[11.5px] font-bold text-slate-500 underline decoration-slate-300 underline-offset-2 hover:text-slate-800">
+              Prefiro manter R$ {currentAmount.toFixed(2).replace(".", ",")}
+            </button>
+          )}
+        </footer>
+      </div>
+    </div>
+  );
+}
+
 function PixInstantBox({
   primeiroNome = "Você",
   primeiroEnte = "seu ente querido",
@@ -534,12 +717,18 @@ function PixInstantBox({
   readonly temas?: string[];
   readonly horario?: string;
 }) {
-  const [selectedAmount, setSelectedAmount] = useState<number>(20);
+  const [selectedAmount, setSelectedAmount] = useState<number>(30);
   const [customInput, setCustomInput] = useState<string>("");
   const [isCustom, setIsCustom] = useState<boolean>(false);
   const [whatsAppModalOpen, setWhatsAppModalOpen] = useState<boolean>(false);
+  const [physicalLetterRequested, setPhysicalLetterRequested] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("templodeluz:physical-letter-selected") === "true";
+  });
 
   const activeAmount = isCustom ? parseBrazilianCurrency(customInput) : selectedAmount;
+  const physicalLetterFee = physicalLetterRequested ? 15 : 0;
+  const checkoutAmount = activeAmount + physicalLetterFee;
   const impact = getDonationPsychologicalImpact(activeAmount, primeiroEnte, primeiroNome);
 
   const handleSelectPreset = (val: number) => {
@@ -551,6 +740,21 @@ function PixInstantBox({
   const handleCustomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIsCustom(true);
     setCustomInput(sanitizeBrazilianCurrencyInput(e.target.value));
+  };
+
+  const handlePhysicalLetterPreference = (checked: boolean) => {
+    setPhysicalLetterRequested(checked);
+    try {
+      if (checked) {
+        localStorage.setItem("templodeluz:physical-letter-selected", "true");
+        sessionStorage.setItem("templodeluz:physical-letter-fee-included", "true");
+      } else {
+        localStorage.removeItem("templodeluz:physical-letter-selected");
+        sessionStorage.removeItem("templodeluz:physical-letter-fee-included");
+      }
+    } catch {
+      // A escolha continua ativa durante a sessão atual.
+    }
   };
 
   const handleIrParaPergaminho = (e?: React.MouseEvent) => {
@@ -575,11 +779,11 @@ function PixInstantBox({
   };
 
   const presets = [
-    { val: 10, label: "R$ 10", tag: "Vela" },
     { val: 15, label: "R$ 15", tag: "Vela + papel" },
-    { val: 20, label: "R$ 20", tag: "Vela + pergaminho", highlight: true },
-    { val: 35, label: "R$ 35", tag: "Consagração" },
-    { val: 50, label: "R$ 50", tag: "Luz da casa" },
+    { val: 20, label: "R$ 20", tag: "Vela + pergaminho" },
+    { val: 30, label: "R$ 30", tag: "Apoio completo", highlight: true },
+    { val: 40, label: "R$ 40", tag: "Consagração" },
+    { val: 60, label: "R$ 60", tag: "Luz da casa" },
     { val: 100, label: "R$ 100", tag: "Apoio à casa" },
   ];
 
@@ -619,7 +823,7 @@ function PixInstantBox({
       <div className="mt-5 text-left">
         <div className="mb-3 flex items-center justify-between gap-3 px-1">
           <span className="text-[12px] font-extrabold tracking-[0.08em] text-slate-700 uppercase">Defina o valor</span>
-          <span className="text-[10.5px] font-semibold text-slate-500">Mínimo de R$ 10</span>
+          <span className="text-[10.5px] font-semibold text-slate-500">Mínimo de R$ 15</span>
         </div>
 
         <div className={`mb-5 rounded-2xl border bg-white p-4 transition-all ${isCustom ? "border-[#6f5aa0] ring-4 ring-[#6f5aa0]/10" : "border-slate-200 shadow-sm"}`}>
@@ -677,6 +881,34 @@ function PixInstantBox({
       </div>
       </div>
 
+      <label className={`mt-4 flex cursor-pointer items-start gap-3 rounded-2xl border p-3.5 text-left transition-all ${physicalLetterRequested ? "border-[#6f5aa0] bg-[#f2eef8] ring-4 ring-[#6f5aa0]/10" : "border-slate-200 bg-white hover:border-[#b9a8cf]"}`}>
+        <input
+          type="checkbox"
+          checked={physicalLetterRequested}
+          onChange={(event) => handlePhysicalLetterPreference(event.target.checked)}
+          className="mt-0.5 h-5 w-5 shrink-0 accent-[#5d4786]"
+        />
+        <span className="min-w-0 flex-1">
+          <span className="flex flex-wrap items-center gap-2 text-[13px] font-extrabold text-[#272039]">
+            Quero receber a carta física
+            <span className="rounded-full bg-[#fffefd] px-2 py-0.5 text-[10px] font-black text-[#5d4786] ring-1 ring-[#d8cae5]">+ R$ 15</span>
+          </span>
+          <span className="mt-1 block text-[11.5px] leading-relaxed text-slate-500">
+            R$15 serão incluídos no total do PIX/cartão. Na próxima página, você informa apenas o endereço de entrega.
+          </span>
+        </span>
+      </label>
+
+      {physicalLetterRequested && impact.isValid && (
+        <div className="mt-3 rounded-2xl border border-[#e3dbea] bg-[#f5f1f8] p-3 text-left">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-[12px] font-bold text-[#514763]">Total para pagar agora</span>
+            <span className="text-[18px] font-black text-[#5d4786]">R$ {checkoutAmount.toFixed(2).replace(".", ",")}</span>
+          </div>
+          <p className="mt-1 text-[11px] leading-relaxed text-[#6b6175]">R$ {activeAmount.toFixed(2).replace(".", ",")} de contribuição + R$ 15,00 da taxa de envio físico.</p>
+        </div>
+      )}
+
       {/* Card de Impacto Espiritual Refinado */}
       <div
         className={`mt-4 rounded-2xl border p-4 text-left shadow-2xs transition-all duration-300 ${impact.cardBorder}`}
@@ -696,9 +928,9 @@ function PixInstantBox({
         <h4 className="text-[13.5px] font-extrabold text-[#181126] leading-snug">{impact.title}</h4>
         <p className="text-[12px] text-[#5e4b73] mt-1 leading-relaxed">{impact.description}</p>
 
-        {activeAmount < 10 && (
+        {activeAmount < 15 && (
           <div className="mt-2.5 p-2.5 rounded-xl bg-red-100/80 border border-red-200 text-red-900 text-[11.5px] font-bold leading-tight">
-            ⚠️ O valor mínimo de R$ 10 é necessário unicamente para cobrir a vela de 7 dias e o pergaminho físico de algodão puro.
+            O valor mínimo de R$ 15 ajuda a cobrir a vela de 7 dias e o pergaminho físico.
           </div>
         )}
       </div>
@@ -707,18 +939,22 @@ function PixInstantBox({
         <Suspense fallback={<DeferredFallback />}>
           <PixCheckout
             productId="carta_sagrada"
-            amountCents={Math.round(activeAmount * 100)}
+            amountCents={Math.round(checkoutAmount * 100)}
             initialCustomerName={nomeCompleto || primeiroNome}
             enteQuerido={enteCompleto || primeiroEnte}
             grauParentesco={relacao}
             mensagemPreview={mensagem}
             successPath="/chamada-ao-vivo-milena?source=paid&next=%2Fobrigado"
             includePaymentParams={false}
+            displayProductName={physicalLetterRequested ? "Contribuição + envio de carta física" : undefined}
+            onPaymentConfirmed={() => {
+              if (physicalLetterRequested) localStorage.setItem("templodeluz:physical-letter-fee-paid", "true");
+            }}
           />
         </Suspense>
       ) : (
         <div className="mt-5 p-4 rounded-2xl bg-zinc-100 border border-zinc-200 text-zinc-600 text-xs font-semibold">
-          Por favor, selecione ou digite um valor a partir de R$ 10 para gerar o código PIX.
+          Por favor, selecione ou digite um valor a partir de R$ 15 para continuar.
         </div>
       )}
 
@@ -800,6 +1036,7 @@ function PixInstantBox({
           }
         }}
       /></Suspense>
+
 
       {/* Box Nobre do Pergaminho: Elegante, Espaçoso e Acolhedor */}
       <div className="mt-5 pt-4 border-t border-slate-200/70">
@@ -957,28 +1194,19 @@ function Intro({
 
   return (
     <div className="animate-rise-in bg-[#f5f7fb]">
-      {/* Hero compacto: imagem + headline acima da dobra */}
-      <header className="relative bg-[#211a35] text-white overflow-hidden">
-        <div className="relative w-full h-[340px] sm:h-[420px] overflow-hidden bg-[#171225]">
+       {/* Foto completa da Milena, sem elementos sobrepostos */}
+       <header className="relative bg-[#211a35] text-white overflow-hidden">
+        <div className="w-full bg-[#171225] p-3 sm:p-4">
           <img
-            src={IMAGES.heroBg}
-            alt="Mãe acolhida com a presença de seu ente querido"
-            className="w-full h-full object-cover object-top"
+            src={milenaCartaImage}
+            alt="Milena Medeiros escrevendo uma carta no oratório"
+            className="mx-auto block h-auto w-full max-w-[620px] rounded-2xl object-contain"
             fetchPriority="high"
             decoding="async"
           />
-          <div className="absolute top-4 inset-x-0 flex justify-center z-10 px-4">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-[#171225]/75 backdrop-blur-md px-4 py-1.5 text-[10.5px] font-bold tracking-[0.16em] text-[#eee6f6] uppercase shadow-xl">
-              <span className="w-2 h-2 rounded-full bg-[#c49a52]" />
-              Templo de Luz · Acolhimento espiritual
-            </span>
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-[#211a35] via-transparent to-[#171225]/20 pointer-events-none" />
         </div>
 
-        <Halos />
-
-        <div className="relative z-10 px-4 pb-6 -mt-10">
+        <div className="relative z-10 px-4 pb-6 pt-5">
           <div className="mx-auto max-w-[430px] rounded-[26px] border border-white/10 bg-[#211a35]/95 p-5 sm:p-6 shadow-2xl text-center backdrop-blur-md">
             <Stars className="mb-2" />
             <h1 className="font-display text-[22px] sm:text-[25px] leading-[1.2] font-black text-white tracking-tight">
@@ -1317,37 +1545,32 @@ function Result({
     <div className="animate-rise-in pb-28 text-slate-900 bg-[#f5f7fb]">
       {/* Header com Confirmação Espiritual com a Foto Nítida e Card de Texto */}
       <header className="relative bg-[#211a35] text-white overflow-hidden border-b border-[#ded8e7]">
-        {/* Bloco da Foto Ampla no Topo */}
-        <div className="relative w-full h-[280px] sm:h-[320px] overflow-hidden bg-black">
+        {/* Foto completa, sem elementos sobrepostos */}
+        <div className="w-full bg-[#171225] p-3 sm:p-4">
           <img
-            src={IMAGES.heroBg}
-            alt="Agendamento Espiritual Confirmado"
-            className="w-full h-full object-cover object-top"
+            src={milenaCartaImage}
+            alt="Milena Medeiros escrevendo uma carta no oratório"
+            className="mx-auto block h-auto w-full max-w-[620px] rounded-2xl object-contain"
             loading="lazy"
             decoding="async"
           />
-          <div className="absolute top-4 inset-x-0 flex justify-center z-10 px-4">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-[#171225]/75 px-4 py-1 text-[11px] font-bold tracking-[0.14em] text-[#e5d6f3] uppercase shadow-xl backdrop-blur-md">
-              📜 Pedido organizado com cuidado
-            </span>
-          </div>
-          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#211a35] to-transparent pointer-events-none" />
         </div>
 
-        <Halos />
-
-        {/* Card com Fundo Escuro para a Escrita (não sobrepõe a imagem) */}
-        <div className="relative z-10 px-4 pb-7 -mt-4">
-          <div className="mx-auto max-w-[420px] rounded-[26px] border border-white/10 bg-[#211a35] p-5 sm:p-6 shadow-2xl text-center">
-            <div className="animate-float-soft text-[40px] mb-1">🕊️</div>
-            <h1 className="font-display text-[23px] sm:text-[25px] leading-snug font-extrabold text-white">
+        {/* Texto separado da foto para preservar o enquadramento */}
+        <div className="relative z-10 px-4 pb-7 pt-5">
+          <div className="relative mx-auto max-w-[420px] overflow-hidden rounded-[26px] border border-white/15 bg-[#211a35] p-5 sm:p-6 shadow-2xl text-center">
+            <div className="pointer-events-none absolute -left-14 -top-12 h-32 w-44 rounded-full bg-white/20 blur-3xl" />
+            <div className="pointer-events-none absolute -right-16 bottom-0 h-28 w-52 rounded-full bg-white/15 blur-3xl" />
+            <div className="pointer-events-none absolute left-1/2 top-1/2 h-20 w-60 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#d9c9eb]/10 blur-2xl" />
+            <div className="relative z-10 animate-float-soft text-[40px] mb-1">🕊️</div>
+            <h1 className="relative z-10 font-display text-[23px] sm:text-[25px] leading-snug font-extrabold text-white">
               {primeiro}, seu pedido para{" "}
               <em className="text-[#dcc8f0] not-italic underline decoration-[#c49a52] decoration-2 underline-offset-4">
                 {nomeEnteCompleto}
               </em>{" "}
               está pronto para revisão
             </h1>
-            <p className="mx-auto mt-3 text-[13.5px] leading-relaxed text-zinc-200 font-normal">
+            <p className="relative z-10 mx-auto mt-3 text-[13.5px] leading-relaxed text-zinc-100 font-normal">
               Revise sua intenção, conheça o atendimento e escolha com calma como deseja continuar. Nada é confirmado até você concluir o próximo passo.
             </p>
           </div>
@@ -1475,13 +1698,15 @@ function Result({
               </div>
             </div>
 
+            <div className="mt-4 rounded-2xl border border-orange-300 bg-orange-100 px-4 py-3 text-center text-[12px] font-black leading-relaxed tracking-[0.04em] text-orange-950 uppercase shadow-sm">
+              A CARTA E O TRABALHO DA MÉDIUM SÃO GRATUITOS. A CONTRIBUIÇÃO VOLUNTÁRIA DESTINA-SE AOS MATERIAIS DO ORATÓRIO E ÀS AÇÕES FRATERNAS DA CASA.
+            </div>
+
             {/* 3 Pilares Visuais da Doação */}
             <div className="mt-4 space-y-2.5">
-              <div className="flex items-start gap-3 p-3 rounded-2xl bg-white/90 border border-amber-200/60 shadow-2xs">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50 border border-amber-200 text-lg">
-                  🕯️
-                </span>
-                <div>
+              <div className="flex items-stretch gap-3 overflow-hidden rounded-2xl border border-amber-200/60 bg-white/90 shadow-2xs">
+                <img src={insumoVelaImage} alt="Vela de sete dias no altar" className="h-auto w-24 shrink-0 object-cover sm:w-28" loading="lazy" decoding="async" />
+                <div className="py-3 pr-3">
                   <h4 className="text-[13px] font-extrabold text-[#1f1035]">
                     1. Vela de 7 Dias em Nome de {primeiroEnte}
                   </h4>
@@ -1491,11 +1716,9 @@ function Result({
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-3 rounded-2xl bg-white/90 border border-amber-200/60 shadow-2xs">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50 border border-amber-200 text-lg">
-                  📜
-                </span>
-                <div>
+              <div className="flex items-stretch gap-3 overflow-hidden rounded-2xl border border-amber-200/60 bg-white/90 shadow-2xs">
+                <img src={insumoCartaImage} alt="Papel especial de algodão e pergaminho" className="h-auto w-24 shrink-0 object-cover sm:w-28" loading="lazy" decoding="async" />
+                <div className="py-3 pr-3">
                   <h4 className="text-[13px] font-extrabold text-[#1f1035]">
                     2. Papel Especial de Algodão Puro
                   </h4>
@@ -1505,11 +1728,9 @@ function Result({
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-3 rounded-2xl bg-white/90 border border-amber-200/60 shadow-2xs">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50 border border-amber-200 text-lg">
-                  🍲
-                </span>
-                <div>
+              <div className="flex items-stretch gap-3 overflow-hidden rounded-2xl border border-amber-200/60 bg-white/90 shadow-2xs">
+                <img src={insumoSopaImage} alt="Sopa fraterna e manutenção da casa" className="h-auto w-24 shrink-0 object-cover sm:w-28" loading="lazy" decoding="async" />
+                <div className="py-3 pr-3">
                   <h4 className="text-[13px] font-extrabold text-[#1f1035]">
                     3. Sopa Fraterna & Manutenção da Casa
                   </h4>
