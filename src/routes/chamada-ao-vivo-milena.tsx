@@ -337,7 +337,7 @@ function ChamadaAoVivoMilenaPage() {
                 </div>
 
                 <div className="rounded-2xl border border-[#d9c6a3] bg-white/85 px-4 py-3.5 shadow-sm">
-                  <span className="text-[10px] font-black uppercase tracking-[0.14em] text-[#b45309]">Oferta escolhida</span>
+                  <span className="text-[10px] font-black uppercase tracking-[0.14em] text-[#b45309]">Sessão escolhida</span>
                   <AnimatePresence mode="wait" initial={false}>
                     <motion.span
                       key={selectedPackage.id}
