@@ -1450,7 +1450,7 @@ function Result({
               Por que a psicografia de {primeiroEnte} é 100% gratuita, mas a vela no altar precisa ser mantida com a sua ajuda?
             </h2>
 
-            <div className="mt-3.5 space-y-3 text-[13px] sm:text-[13.5px] text-[#4a3b60] leading-relaxed font-normal">
+            <div className="mt-4 space-y-4 text-[16px] sm:text-[17px] text-[#4a3b60] leading-[1.75] font-normal">
               <p>
                 A mediunidade de Milena Medeiros é um dom divino guiado pela caridade pura de Allan Kardec e Chico Xavier — por isso, <strong className="text-[#1f1035] font-extrabold">você jamais pagará por uma linha sequer da psicografia</strong>. A mensagem de quem você ama é um presente sagrado dos céus.
               </p>
