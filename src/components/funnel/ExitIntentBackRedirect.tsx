@@ -75,15 +75,15 @@ export function ExitIntentBackRedirect({
           aria-labelledby="exit-intent-title"
         >
           <motion.div
-            className="w-full max-w-md overflow-hidden rounded-3xl border border-amber-300/70 bg-[#fffdf8] shadow-2xl"
+            className="w-full max-w-md overflow-hidden rounded-3xl border border-[#ded3e8] bg-[#fffefd] shadow-2xl"
             initial={{ scale: 0.9, y: 24, opacity: 0 }}
             animate={{ scale: 1, y: 0, opacity: 1 }}
             exit={{ scale: 0.92, y: 12, opacity: 0 }}
             transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-center gap-2 bg-gradient-to-r from-[#111827] via-[#172033] to-[#0f172a] px-4 py-2.5 text-[11px] font-bold tracking-widest text-blue-100 uppercase">
-              <span className="h-2 w-2 rounded-full bg-emerald-400" />
+            <div className="flex items-center justify-center gap-2 bg-gradient-to-r from-[#2b2340] via-[#211a35] to-[#171225] px-4 py-2.5 text-[11px] font-bold tracking-widest text-[#e9ddf5] uppercase">
+              <span className="h-2 w-2 rounded-full bg-[#6da296]" />
               Progresso salvo com segurança
             </div>
 
@@ -115,7 +115,7 @@ export function ExitIntentBackRedirect({
               <button
                 type="button"
                 onClick={close}
-                className="mt-2 w-full cursor-pointer rounded-[14px] bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-[15px] text-[15px] font-extrabold text-white shadow-lg shadow-blue-600/25 transition-all hover:-translate-y-0.5 active:translate-y-0"
+                className="mt-2 w-full cursor-pointer rounded-[14px] bg-gradient-to-r from-[#67508f] to-[#49356f] px-6 py-[15px] text-[15px] font-extrabold text-white shadow-lg shadow-[#5d4786]/25 transition-all hover:-translate-y-0.5 active:translate-y-0"
               >
                 {stayCta}
               </button>

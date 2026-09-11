@@ -46,14 +46,8 @@ export function WhatsAppContactModal({
 
   // Montagem do texto personalizado para o WhatsApp
   const buildWhatsAppMessage = (): string => {
-    let statusTexto = "";
-    if (donationChoice === "already_donated") {
-      statusTexto = "✅ *Contribuição da Vela:* Já realizada com amor (vou enviar o comprovante)";
-    } else if (donationChoice === "want_to_donate") {
-      statusTexto = "🕯️ *Contribuição da Vela:* Ainda não realizei, desejo a chave PIX para acender a vela sagrada";
-    } else {
-      statusTexto = "🤍 *Modalidade:* Atendimento fraterno gratuito e caritativo da casa";
-    }
+    const realizouContribuicao = donationChoice === "already_donated";
+    const statusTexto = `• *Contribuição realizada:* ${realizouContribuicao ? "SIM ✅" : "NÃO"}`;
 
     const temasTexto = temas && temas.length > 0 ? `\n• *Intenções da Carta:* ${temas.join(", ")}` : "";
     const mensagemTexto = mensagemPreview ? `\n\n📜 *Mensagem do Coração:*\n"${mensagemPreview}"` : "";
@@ -69,7 +63,7 @@ export function WhatsAppContactModal({
       `• *Vínculo de Amor:* ${grauParentesco}\n` +
       `• *Data:* ${dataAtual}\n` +
       (horario ? `• *Previsão no Oratório:* ${horario}\n` : "") +
-      `${statusTexto}` +
+      `${statusTexto}\n` +
       `${temasTexto}` +
       `━━━━━━━━━━━━━━━━━━━━` +
       `${mensagemTexto}\n\n` +
@@ -145,7 +139,7 @@ export function WhatsAppContactModal({
 
         {/* Topo Acolhedor com Ícone de WhatsApp & Bênção */}
         <div className="flex items-center gap-3 pr-8 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-900/20">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#4b8b7e] to-[#2d665e] text-white shadow-md shadow-[#39776c]/20">
             {/* Logo WhatsApp SVG Oficial */}
             <svg
               className="w-7 h-7 text-white"
@@ -158,7 +152,7 @@ export function WhatsAppContactModal({
             </svg>
           </div>
           <div>
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-blue-700 block">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#5d4786] block">
               Canal de atendimento
             </span>
             <h3 id="modal-whatsapp-title" className="font-display text-[18px] font-black text-slate-950 leading-tight">
@@ -168,7 +162,7 @@ export function WhatsAppContactModal({
         </div>
 
         {/* Resumo de continuidade */}
-        <div className="mt-4 p-3.5 rounded-2xl bg-blue-50 border border-blue-100 text-[12.5px] leading-relaxed text-slate-700">
+        <div className="mt-4 p-3.5 rounded-2xl bg-[#f2eef8] border border-[#e1d8ec] text-[12.5px] leading-relaxed text-slate-700">
           <p className="font-semibold">
             Olá, <strong>{primeiroNome}</strong>. Sua intenção para {primeiroEnte} foi organizada com cuidado.
           </p>
@@ -188,8 +182,8 @@ export function WhatsAppContactModal({
             onClick={() => setDonationChoice("already_donated")}
             className={`p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer flex items-start gap-3 ${
               donationChoice === "already_donated"
-                ? "border-blue-500 bg-blue-50 shadow-sm ring-4 ring-blue-500/10"
-                : "border-slate-200 bg-white hover:border-blue-300 hover:bg-blue-50/30"
+                ? "border-[#6f5aa0] bg-[#f2eef8] shadow-sm ring-4 ring-[#6f5aa0]/10"
+                : "border-slate-200 bg-white hover:border-[#b9a8cf] hover:bg-[#f7f4fa]"
             }`}
           >
             <input
@@ -214,8 +208,8 @@ export function WhatsAppContactModal({
             onClick={() => setDonationChoice("want_to_donate")}
             className={`p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer flex items-start gap-3 ${
               donationChoice === "want_to_donate"
-                ? "border-blue-500 bg-blue-50 shadow-sm ring-4 ring-blue-500/10"
-                : "border-slate-200 bg-white hover:border-blue-300 hover:bg-blue-50/30"
+                ? "border-[#6f5aa0] bg-[#f2eef8] shadow-sm ring-4 ring-[#6f5aa0]/10"
+                : "border-slate-200 bg-white hover:border-[#b9a8cf] hover:bg-[#f7f4fa]"
             }`}
           >
             <input
@@ -257,8 +251,8 @@ export function WhatsAppContactModal({
             onClick={() => setDonationChoice("free_charity")}
             className={`p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer flex items-start gap-3 ${
               donationChoice === "free_charity"
-                ? "border-blue-500 bg-blue-50 shadow-sm ring-4 ring-blue-500/10"
-                : "border-slate-200 bg-white hover:border-blue-300 hover:bg-blue-50/30"
+                ? "border-[#6f5aa0] bg-[#f2eef8] shadow-sm ring-4 ring-[#6f5aa0]/10"
+                : "border-slate-200 bg-white hover:border-[#b9a8cf] hover:bg-[#f7f4fa]"
             }`}
           >
             <input
@@ -295,7 +289,7 @@ export function WhatsAppContactModal({
           <button
             type="button"
             onClick={handleOpenWhatsApp}
-            className="w-full cursor-pointer rounded-[14px] bg-gradient-to-r from-blue-600 to-indigo-600 py-3.5 px-4 text-center font-extrabold text-white text-[14px] shadow-lg shadow-blue-700/25 transition-all duration-200 hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 flex items-center justify-center gap-2.5"
+            className="w-full cursor-pointer rounded-[14px] bg-gradient-to-r from-[#4b8b7e] via-[#39776c] to-[#2d665e] py-3.5 px-4 text-center font-extrabold text-white text-[14px] shadow-lg shadow-[#39776c]/25 transition-all duration-200 hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 flex items-center justify-center gap-2.5"
           >
             <svg
               className="w-5 h-5 text-white"

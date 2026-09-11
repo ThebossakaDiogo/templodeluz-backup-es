@@ -78,7 +78,7 @@ export function Card({ children, className = "" }: Readonly<{ children: ReactNod
 
 export function SectionLabel({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <p className="mb-2 text-[11px] font-bold tracking-[0.16em] text-blue-700 uppercase">
+    <p className="mb-2 text-[11px] font-bold tracking-[0.16em] text-[#5d4786] uppercase">
       {children}
     </p>
   );
@@ -104,13 +104,13 @@ export function Footer() {
       <p className="text-[12px] text-slate-500">
         Contato:{" "}
         <a
-          className="font-semibold text-blue-700 hover:underline"
+          className="font-semibold text-[#5d4786] hover:underline"
           href="mailto:tempodaluz@gmail.com"
         >
           tempodaluz@gmail.com
         </a>{" "}
         ·{" "}
-        <a className="font-semibold text-blue-700 hover:underline" href="tel:+5519998316353">
+        <a className="font-semibold text-[#5d4786] hover:underline" href="tel:+5519998316353">
           (19) 99831-6353
         </a>
       </p>

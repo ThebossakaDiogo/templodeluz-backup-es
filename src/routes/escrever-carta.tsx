@@ -329,7 +329,7 @@ function EscreverCartaPage() {
     const isPixPaid = typeof window !== "undefined" && sessionStorage.getItem("templodeluz:pix-paid") === "true";
     const isCatarataPaid = typeof window !== "undefined" && sessionStorage.getItem("templodeluz:catarata-paid") === "true";
     const urlParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
-    const isCardPaid = urlParams?.get("payment") === "stripe_success" || urlParams?.get("method") === "card" || !!urlParams?.get("session_id");
+    const isCardPaid = urlParams?.get("payment") === "stripe_success" || urlParams?.get("method") === "card";
 
     let paymentMethod: "pix" | "credit_card" | "pending" = "pending";
     if (isCardPaid) {
@@ -369,6 +369,8 @@ function EscreverCartaPage() {
        `• *Modalidade:* ${modalidadeTexto}\n` +
        `• *Temas selecionados:* ${selectedThemeLabels || "Não informado"}\n` +
        `• *Formato solicitado:* ${isPhysicalLetter ? "📮 CARTA DIGITAL + ENVIO DE CARTA FÍSICA" : "📱 CARTA DIGITAL"}\n` +
+       `• *Contribuição realizada:* ${paymentStatus === "paid" ? "SIM ✅" : "NÃO"}\n` +
+       (paymentStatus === "paid" ? `• *Forma de pagamento:* ${paymentMethod === "credit_card" ? "Cartão" : "PIX"}\n` : "") +
        `━━━━━━━━━━━━━━━━━━━━\n\n` +
        `📜 *CONTEÚDO DA CARTA EM PERGAMINHO:*\n` +
        `"${textoPergaminho}"\n\n` +
@@ -380,7 +382,7 @@ function EscreverCartaPage() {
            `• *Endereço:* ${shipping.address}, ${shipping.number}${shipping.complement ? ` - ${shipping.complement}` : ""}\n` +
            `• *Bairro:* ${shipping.neighborhood}\n` +
            `• *Cidade/UF:* ${shipping.city}/${shipping.state}\n` +
-           `_Peço orientação para combinar o pagamento do frete e da carta física por aqui._\n\n`
+           `_Solicitação de envio físico registrada com os dados acima._\n\n`
          : "") +
        `━━━━━━━━━━━━━━━━━━━━\n` +
        `🤍 _Aguardo as orientações para prosseguir pelo WhatsApp. Obrigado(a) pelo acolhimento._`;

@@ -49,13 +49,13 @@ function Cta({
   readonly tone?: "gold" | "green" | "royal";
 }) {
   let toneClasses =
-    "bg-gradient-to-r from-blue-600 via-blue-600 to-indigo-600 text-white shadow-blue-600/25 border border-blue-500/30 hover:brightness-105";
+    "bg-gradient-to-r from-[#67508f] via-[#5d4786] to-[#49356f] text-white shadow-[#5d4786]/25 border border-[#8067a9]/35 hover:brightness-105";
   if (tone === "green") {
     toneClasses =
-      "bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 text-white shadow-emerald-500/25 border border-emerald-400/40 hover:brightness-105";
+      "bg-gradient-to-r from-[#4b8b7e] via-[#39776c] to-[#2d665e] text-white shadow-[#39776c]/25 border border-[#72aa9d]/35 hover:brightness-105";
   } else if (tone === "royal") {
     toneClasses =
-      "bg-gradient-to-r from-[#111827] via-[#172033] to-[#0f172a] text-white shadow-slate-900/25 border border-slate-700 hover:brightness-110";
+      "bg-gradient-to-r from-[#272039] via-[#211a35] to-[#171225] text-white shadow-[#211a35]/30 border border-[#46395e] hover:brightness-110";
   }
 
   return (
@@ -94,7 +94,7 @@ function Field({
   readonly hideLabel?: boolean;
 }) {
   const shared =
-    "w-full rounded-[14px] border bg-white px-4 py-4 text-[15.5px] font-medium leading-relaxed text-slate-900 shadow-sm outline-none transition-all duration-200 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10";
+    "w-full rounded-[14px] border bg-white px-4 py-4 text-[15.5px] font-medium leading-relaxed text-[#272039] shadow-sm outline-none transition-all duration-200 placeholder:text-[#a89fb4] focus:border-[#6f5aa0] focus:ring-4 focus:ring-[#6f5aa0]/10";
   return (
     <div className="w-full">
       {hideLabel ? null : (
@@ -149,13 +149,13 @@ function Progress({
               type="button"
               onClick={onBack}
               aria-label="Voltar para a etapa anterior"
-              className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-white text-base font-black text-slate-700 transition-colors hover:border-blue-300 hover:bg-blue-50"
+              className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-[#ded8e7] bg-white text-base font-black text-[#514763] transition-colors hover:border-[#b9a8cf] hover:bg-[#f5f1f8]"
             >
               ‹
             </button>
           )}
           <span className="flex min-w-0 items-center gap-1.5 truncate font-bold text-slate-700">
-            <span className="h-2 w-2 shrink-0 rounded-full bg-blue-500" />
+            <span className="h-2 w-2 shrink-0 rounded-full bg-[#7a64a2]" />
             {caption}
           </span>
         </div>
@@ -165,7 +165,7 @@ function Progress({
       </div>
       <div className="h-2 overflow-hidden rounded-full bg-slate-100 border border-slate-200 p-0.5">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 shadow-sm transition-[width] duration-500 ease-out"
+          className="h-full rounded-full bg-gradient-to-r from-[#8b75b2] to-[#5d4786] shadow-sm transition-[width] duration-500 ease-out"
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -189,7 +189,7 @@ function QuestionHead({
 }) {
   return (
     <div className="px-5 pt-8 pb-4 sm:px-7">
-      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-[10.5px] font-bold tracking-[0.12em] text-blue-700 uppercase mb-4">
+      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#f2eef8] border border-[#e1d8ec] text-[10.5px] font-bold tracking-[0.12em] text-[#5d4786] uppercase mb-4">
         {eyebrow}
       </span>
       <h2 className="font-display text-[26px] leading-[1.18] font-extrabold text-slate-950 tracking-tight">
@@ -230,7 +230,7 @@ function ComfortNote({ step }: { readonly step: string }) {
   const note = COMFORT_PHRASES[step];
   if (!note) return null;
   return (
-    <div className="animate-rise-in mx-5 mb-5 flex items-center gap-3 rounded-2xl border border-blue-100 bg-blue-50/60 px-4 py-3.5 sm:mx-7">
+    <div className="animate-rise-in mx-5 mb-5 flex items-center gap-3 rounded-2xl border border-[#e3dbea] bg-[#f5f1f8] px-4 py-3.5 sm:mx-7">
       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-xl shadow-sm">{note.icon}</span>
       <p className="text-[13px] font-medium leading-relaxed text-slate-600">{note.text}</p>
     </div>
@@ -256,11 +256,11 @@ function Option({
       onClick={onClick}
       className={`group relative flex w-full cursor-pointer items-center gap-3.5 rounded-2xl border px-4 py-4 text-left transition-all duration-200 sm:gap-4 ${
         selected
-          ? "border-blue-500 bg-blue-50 shadow-md ring-4 ring-blue-500/10"
-          : "border-slate-200 bg-white shadow-sm hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md"
+          ? "border-[#6f5aa0] bg-[#f2eef8] shadow-md ring-4 ring-[#6f5aa0]/10"
+          : "border-[#e2dde8] bg-white shadow-sm hover:-translate-y-0.5 hover:border-[#b9a8cf] hover:shadow-md"
       }`}
     >
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-50 border border-slate-200 text-2xl group-hover:bg-blue-50 transition-colors">
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#faf8fb] border border-[#e5e0e9] text-2xl group-hover:bg-[#f2eef8] transition-colors">
         {emoji}
       </div>
       <div className="flex-1">
@@ -274,8 +274,8 @@ function Option({
       <div
         className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-[12px] font-extrabold transition-colors ${
           selected
-            ? "border-blue-600 bg-blue-600 text-white shadow-xs"
-            : "border-slate-300 text-transparent group-hover:border-blue-400"
+            ? "border-[#5d4786] bg-[#5d4786] text-white shadow-xs"
+            : "border-[#cfc7d8] text-transparent group-hover:border-[#8b75b2]"
         }`}
       >
         ✓
@@ -585,11 +585,11 @@ function PixInstantBox({
 
   return (
     <div className="mt-6 overflow-hidden rounded-[30px] border border-slate-200 bg-[#f7f8fb] shadow-[0_24px_60px_-34px_rgba(15,23,42,0.5)] text-center">
-      <div className="relative overflow-hidden bg-[#111827] px-5 py-6 text-left text-white sm:px-7">
-        <div className="pointer-events-none absolute -right-12 -top-16 h-44 w-44 rounded-full bg-blue-500/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-20 -left-10 h-40 w-40 rounded-full bg-violet-500/20 blur-3xl" />
+      <div className="relative overflow-hidden bg-[#211a35] px-5 py-6 text-left text-white sm:px-7">
+        <div className="pointer-events-none absolute -right-12 -top-16 h-44 w-44 rounded-full bg-[#9d82c4]/20 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 -left-10 h-40 w-40 rounded-full bg-[#c49a52]/15 blur-3xl" />
         <div className="relative">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[10px] font-extrabold tracking-[0.12em] text-blue-100 uppercase backdrop-blur-sm">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[10px] font-extrabold tracking-[0.12em] text-[#e9ddf5] uppercase backdrop-blur-sm">
             <PixIcon className="h-3.5 w-3.5" />
             PIX ou cartão
           </span>
@@ -610,7 +610,7 @@ function PixInstantBox({
           ["3", "Confirmação"],
         ].map(([step, label]) => (
           <div key={step} className="min-w-0">
-            <span className="mx-auto flex h-6 w-6 items-center justify-center rounded-full bg-[#111827] text-[10px] font-black text-white">{step}</span>
+            <span className="mx-auto flex h-6 w-6 items-center justify-center rounded-full bg-[#312742] text-[10px] font-black text-white">{step}</span>
             <span className="mt-1.5 block text-[10.5px] font-bold leading-tight text-slate-600">{label}</span>
           </div>
         ))}
@@ -622,7 +622,7 @@ function PixInstantBox({
           <span className="text-[10.5px] font-semibold text-slate-500">Mínimo de R$ 10</span>
         </div>
 
-        <div className={`mb-5 rounded-2xl border bg-white p-4 transition-all ${isCustom ? "border-blue-500 ring-4 ring-blue-500/10" : "border-slate-200 shadow-sm"}`}>
+        <div className={`mb-5 rounded-2xl border bg-white p-4 transition-all ${isCustom ? "border-[#6f5aa0] ring-4 ring-[#6f5aa0]/10" : "border-slate-200 shadow-sm"}`}>
           <label htmlFor="custom-donation-input" className="block">
             <span className="block text-[14px] font-extrabold text-slate-900">Digite o valor que preferir</span>
             <span className="mt-0.5 block text-[11.5px] leading-relaxed text-slate-500">Ou escolha uma sugestão logo abaixo.</span>
@@ -637,7 +637,7 @@ function PixInstantBox({
                 onFocus={() => setIsCustom(true)}
                 onChange={handleCustomChange}
                 placeholder="0,00"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-4 text-[20px] font-black text-slate-900 outline-none transition-all placeholder:text-slate-300 focus:border-blue-500 focus:bg-white"
+                className="w-full rounded-xl border border-slate-200 bg-[#faf9fb] py-3.5 pl-12 pr-4 text-[20px] font-black text-[#272039] outline-none transition-all placeholder:text-slate-300 focus:border-[#6f5aa0] focus:bg-white"
               />
           </div>
         </div>
@@ -653,22 +653,22 @@ function PixInstantBox({
                 onClick={() => handleSelectPreset(item.val)}
                 className={`group relative flex min-h-[96px] flex-col items-start justify-center rounded-2xl px-4 py-3 text-left transition-all duration-200 cursor-pointer ${
                   isSelected
-                    ? "border-2 border-blue-600 bg-blue-50 text-slate-950 shadow-[0_12px_25px_-16px_rgba(37,99,235,0.7)] ring-4 ring-blue-600/10"
-                    : "border border-slate-200 bg-white text-slate-900 shadow-sm hover:border-blue-300 hover:bg-blue-50/30"
+                    ? "border-2 border-[#6f5aa0] bg-[#f2eef8] text-[#272039] shadow-[0_12px_25px_-16px_rgba(93,71,134,0.65)] ring-4 ring-[#6f5aa0]/10"
+                    : "border border-slate-200 bg-white text-[#272039] shadow-sm hover:border-[#b9a8cf] hover:bg-[#f7f4fa]"
                 }`}
               >
                 {item.highlight && (
-                  <span className="absolute right-2.5 top-2.5 rounded-full bg-[#111827] px-2 py-0.5 text-[8.5px] font-black uppercase tracking-wide text-white">
+                  <span className="absolute right-2.5 top-2.5 rounded-full bg-[#c49a52] px-2 py-0.5 text-[8.5px] font-black uppercase tracking-wide text-white">
                     Popular
                   </span>
                 )}
                 <span className="block text-[20px] font-black leading-tight tracking-tight">
                   {item.label}
                 </span>
-                <span className={`mt-1 block text-[11.5px] font-semibold leading-tight ${isSelected ? "text-blue-700" : "text-slate-500"}`}>
+                <span className={`mt-1 block text-[11.5px] font-semibold leading-tight ${isSelected ? "text-[#5d4786]" : "text-slate-500"}`}>
                   {item.tag}
                 </span>
-                {isSelected && <span className="mt-2 inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-[0.12em] text-blue-700"><span>✓</span> Selecionado</span>}
+                {isSelected && <span className="mt-2 inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-[0.12em] text-[#5d4786]"><span>✓</span> Selecionado</span>}
               </button>
             );
           })}
@@ -915,7 +915,7 @@ function SecurityGuaranteeSeal() {
         </div>
 
         {/* Card 2: Selo de Garantia */}
-        <div className="flex flex-col items-center rounded-2xl border border-blue-200/80 bg-gradient-to-b from-[#fbfcff] to-[#f1f5fc] p-4 text-center shadow-xs transition-transform duration-300 hover:scale-[1.01]">
+        <div className="flex flex-col items-center rounded-2xl border border-[#dcd1e8] bg-gradient-to-b from-[#fdfbfe] to-[#f2eef8] p-4 text-center shadow-xs transition-transform duration-300 hover:scale-[1.01]">
           <div className="relative mb-2 flex items-center justify-center">
             <img
               src={IMAGES.seloCheckout}
@@ -925,7 +925,7 @@ function SecurityGuaranteeSeal() {
               decoding="async"
             />
           </div>
-          <span className="text-[9.5px] font-black uppercase tracking-widest text-blue-800 block">
+          <span className="text-[9.5px] font-black uppercase tracking-widest text-[#5d4786] block">
             Pagamento seguro
           </span>
           <h4 className="font-display text-[14.5px] font-extrabold text-[#181126] leading-tight mt-0.5">
@@ -958,8 +958,8 @@ function Intro({
   return (
     <div className="animate-rise-in bg-[#f5f7fb]">
       {/* Hero compacto: imagem + headline acima da dobra */}
-      <header className="relative bg-[#111827] text-white overflow-hidden">
-        <div className="relative w-full h-[340px] sm:h-[420px] overflow-hidden bg-slate-950">
+      <header className="relative bg-[#211a35] text-white overflow-hidden">
+        <div className="relative w-full h-[340px] sm:h-[420px] overflow-hidden bg-[#171225]">
           <img
             src={IMAGES.heroBg}
             alt="Mãe acolhida com a presença de seu ente querido"
@@ -968,22 +968,22 @@ function Intro({
             decoding="async"
           />
           <div className="absolute top-4 inset-x-0 flex justify-center z-10 px-4">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-slate-950/70 backdrop-blur-md px-4 py-1.5 text-[10.5px] font-bold tracking-[0.16em] text-blue-100 uppercase shadow-xl">
-              <span className="w-2 h-2 rounded-full bg-blue-400" />
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-[#171225]/75 backdrop-blur-md px-4 py-1.5 text-[10.5px] font-bold tracking-[0.16em] text-[#eee6f6] uppercase shadow-xl">
+              <span className="w-2 h-2 rounded-full bg-[#c49a52]" />
               Templo de Luz · Acolhimento espiritual
             </span>
           </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-[#111827] via-transparent to-slate-950/20 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#211a35] via-transparent to-[#171225]/20 pointer-events-none" />
         </div>
 
         <Halos />
 
         <div className="relative z-10 px-4 pb-6 -mt-10">
-          <div className="mx-auto max-w-[430px] rounded-[26px] border border-white/10 bg-[#111827]/95 p-5 sm:p-6 shadow-2xl text-center backdrop-blur-md">
+          <div className="mx-auto max-w-[430px] rounded-[26px] border border-white/10 bg-[#211a35]/95 p-5 sm:p-6 shadow-2xl text-center backdrop-blur-md">
             <Stars className="mb-2" />
             <h1 className="font-display text-[22px] sm:text-[25px] leading-[1.2] font-black text-white tracking-tight">
               Organize uma intenção de carta para quem você ama,{" "}
-              <span className="text-blue-300 underline decoration-blue-500 decoration-2 underline-offset-4">
+              <span className="text-[#dcc8f0] underline decoration-[#c49a52] decoration-2 underline-offset-4">
                 com acolhimento da médium Milena
               </span>
             </h1>
@@ -1000,7 +1000,7 @@ function Intro({
         <span className="h-3 w-px bg-slate-200" />
         <span className="font-bold">✍️ Carta e pergaminho</span>
         <span className="h-3 w-px bg-slate-200" />
-        <span className="text-blue-700 font-extrabold">🔒 Dados protegidos</span>
+        <span className="text-[#5d4786] font-extrabold">🔒 Dados protegidos</span>
       </div>
 
       <div className="flex flex-col items-center px-4 pt-6 pb-10 sm:px-6">
@@ -1008,7 +1008,7 @@ function Intro({
         <Reveal className="w-full">
           <div className="rounded-[26px] border border-slate-200 bg-white p-6 shadow-[0_20px_50px_-30px_rgba(15,23,42,0.45)]">
             <div className="text-center mb-5">
-              <span className="text-[10.5px] font-bold uppercase tracking-widest text-blue-700">
+              <span className="text-[10.5px] font-bold uppercase tracking-widest text-[#5d4786]">
                 Seu pedido começa aqui
               </span>
               <h2 className="mt-1.5 font-display text-[17px] font-black text-[#181126] leading-snug">
@@ -1168,13 +1168,13 @@ function Loading({
   }, [onDone]);
 
   return (
-    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-gradient-to-b from-[#111827] via-[#172033] to-[#0f172a] px-4 py-8 text-center text-white sm:px-6">
+    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-gradient-to-b from-[#2b2340] via-[#211a35] to-[#171225] px-4 py-8 text-center text-white sm:px-6">
       <Halos />
       <div className="relative z-10 w-full max-w-[410px] overflow-hidden rounded-[28px] border border-white/15 bg-[radial-gradient(circle_at_50%_0%,rgba(145,91,172,0.22),transparent_42%),rgba(255,255,255,0.075)] p-5 shadow-[0_28px_90px_-30px_rgba(0,0,0,0.85)] backdrop-blur-xl sm:max-w-[430px] sm:p-7">
-        <div className="pointer-events-none absolute -left-16 top-16 h-36 w-36 rounded-full bg-blue-500/15 blur-3xl" />
-        <div className="pointer-events-none absolute -right-20 bottom-12 h-40 w-40 rounded-full bg-indigo-400/10 blur-3xl" />
-        <span className="relative inline-flex items-center gap-2 rounded-full border border-blue-300/30 bg-blue-200/10 px-3.5 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.16em] text-blue-200 shadow-[inset_0_1px_rgba(255,255,255,0.12)]">
-          <span className="h-1.5 w-1.5 rounded-full bg-blue-300 shadow-[0_0_8px_rgba(96,165,250,0.9)]" />
+        <div className="pointer-events-none absolute -left-16 top-16 h-36 w-36 rounded-full bg-[#8f76b5]/15 blur-3xl" />
+        <div className="pointer-events-none absolute -right-20 bottom-12 h-40 w-40 rounded-full bg-[#c49a52]/10 blur-3xl" />
+        <span className="relative inline-flex items-center gap-2 rounded-full border border-[#c8b5db]/30 bg-[#d8c7e9]/10 px-3.5 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#e5d6f3] shadow-[inset_0_1px_rgba(255,255,255,0.12)]">
+          <span className="h-1.5 w-1.5 rounded-full bg-[#c49a52] shadow-[0_0_8px_rgba(196,154,82,0.75)]" />
           Preparação protegida
         </span>
 
@@ -1202,13 +1202,13 @@ function Loading({
             className="h-2.5 overflow-hidden rounded-full border border-white/10 bg-black/45 p-0.5 shadow-inner"
           >
             <div
-              className="h-full rounded-full bg-gradient-to-r from-blue-400 via-blue-500 to-indigo-500 shadow-[0_0_14px_rgba(96,165,250,0.4)] transition-[width] duration-300 ease-out"
+              className="h-full rounded-full bg-gradient-to-r from-[#a88bc8] via-[#8064a7] to-[#c49a52] shadow-[0_0_14px_rgba(139,117,178,0.4)] transition-[width] duration-300 ease-out"
               style={{ width: `${pct}%` }}
             />
           </div>
           <div className="mt-2.5 flex items-center justify-between text-[10.5px] font-bold text-[#cfc0dc]">
             <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-emerald-300 animate-pulse" />{stages[activeStage]?.title}</span>
-            <span className="rounded-full bg-blue-300/10 px-2 py-0.5 text-blue-200">{pct}%</span>
+            <span className="rounded-full bg-[#d8c7e9]/10 px-2 py-0.5 text-[#e5d6f3]">{pct}%</span>
           </div>
         </div>
 
@@ -1223,8 +1223,8 @@ function Loading({
               cardClasses = "border-emerald-300/20 bg-emerald-300/[0.07]";
               badgeClasses = "bg-emerald-400 text-emerald-950";
             } else if (isActive) {
-              cardClasses = "border-blue-300/40 bg-blue-200/10";
-              badgeClasses = "bg-blue-300 text-blue-950 ring-4 ring-blue-300/15";
+              cardClasses = "border-[#c8b5db]/40 bg-[#d8c7e9]/10";
+              badgeClasses = "bg-[#c8b5db] text-[#211a35] ring-4 ring-[#c8b5db]/15";
             }
 
             return (
@@ -1277,7 +1277,7 @@ function Faq() {
             className="flex w-full cursor-pointer items-center justify-between p-4 text-left text-[14px] font-bold text-slate-900"
           >
             <span>{item.q}</span>
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-base text-blue-700">{open === i ? "−" : "+"}</span>
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#f2eef8] text-base text-[#5d4786]">{open === i ? "−" : "+"}</span>
           </button>
           {open === i ? (
             <p className="animate-rise-in px-4 pb-4 text-[13px] leading-relaxed text-slate-600 border-t border-slate-100 pt-3">
@@ -1316,7 +1316,7 @@ function Result({
   return (
     <div className="animate-rise-in pb-28 text-slate-900 bg-[#f5f7fb]">
       {/* Header com Confirmação Espiritual com a Foto Nítida e Card de Texto */}
-      <header className="relative bg-[#111827] text-white overflow-hidden border-b border-slate-200">
+      <header className="relative bg-[#211a35] text-white overflow-hidden border-b border-[#ded8e7]">
         {/* Bloco da Foto Ampla no Topo */}
         <div className="relative w-full h-[280px] sm:h-[320px] overflow-hidden bg-black">
           <img
@@ -1327,22 +1327,22 @@ function Result({
             decoding="async"
           />
           <div className="absolute top-4 inset-x-0 flex justify-center z-10 px-4">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-slate-950/70 px-4 py-1 text-[11px] font-bold tracking-[0.14em] text-blue-200 uppercase shadow-xl backdrop-blur-md">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-[#171225]/75 px-4 py-1 text-[11px] font-bold tracking-[0.14em] text-[#e5d6f3] uppercase shadow-xl backdrop-blur-md">
               📜 Pedido organizado com cuidado
             </span>
           </div>
-          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#111827] to-transparent pointer-events-none" />
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#211a35] to-transparent pointer-events-none" />
         </div>
 
         <Halos />
 
         {/* Card com Fundo Escuro para a Escrita (não sobrepõe a imagem) */}
         <div className="relative z-10 px-4 pb-7 -mt-4">
-          <div className="mx-auto max-w-[420px] rounded-[26px] border border-white/10 bg-[#111827] p-5 sm:p-6 shadow-2xl text-center">
+          <div className="mx-auto max-w-[420px] rounded-[26px] border border-white/10 bg-[#211a35] p-5 sm:p-6 shadow-2xl text-center">
             <div className="animate-float-soft text-[40px] mb-1">🕊️</div>
             <h1 className="font-display text-[23px] sm:text-[25px] leading-snug font-extrabold text-white">
               {primeiro}, seu pedido para{" "}
-              <em className="text-blue-300 not-italic underline decoration-blue-500 decoration-2 underline-offset-4">
+              <em className="text-[#dcc8f0] not-italic underline decoration-[#c49a52] decoration-2 underline-offset-4">
                 {nomeEnteCompleto}
               </em>{" "}
               está pronto para revisão
@@ -1361,8 +1361,8 @@ function Result({
             ["2", "Escolha", "como continuar"],
             ["3", "Confirmação", "após o pagamento"],
           ].map(([number, title, detail], index) => (
-            <div key={title} className={`rounded-xl border px-2 py-2 ${index === 1 ? "border-blue-300 bg-blue-50" : "border-slate-200 bg-slate-50"}`}>
-              <span className={`mx-auto flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-black ${index === 0 ? "bg-emerald-600 text-white" : index === 1 ? "bg-blue-600 text-white" : "bg-slate-200 text-slate-600"}`}>{number}</span>
+            <div key={title} className={`rounded-xl border px-2 py-2 ${index === 1 ? "border-[#c8b5db] bg-[#f2eef8]" : "border-slate-200 bg-slate-50"}`}>
+              <span className={`mx-auto flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-black ${index === 0 ? "bg-[#39776c] text-white" : index === 1 ? "bg-[#5d4786] text-white" : "bg-slate-200 text-slate-600"}`}>{number}</span>
               <span className="mt-1 block text-[11px] font-extrabold text-slate-800">{title}</span>
               <span className="block text-[9.5px] leading-tight text-slate-500">{detail}</span>
             </div>
@@ -1373,8 +1373,8 @@ function Result({
       <div className="px-4 pt-7 sm:px-6">
         {/* Card Personalizado com base no Quiz */}
         {dorPrincipal && (
-          <Reveal className="p-4 rounded-2xl bg-white border border-blue-100 mb-6 text-center shadow-sm">
-            <span className="text-[11px] font-bold text-blue-700 block uppercase tracking-wider">
+          <Reveal className="p-4 rounded-2xl bg-white border border-[#e3dbea] mb-6 text-center shadow-sm">
+            <span className="text-[11px] font-bold text-[#5d4786] block uppercase tracking-wider">
               🕊️ Intenção Registrada para a Sessão
             </span>
             <p className="text-[13.5px] text-[#2d144d] mt-1 font-semibold italic">
@@ -1411,7 +1411,7 @@ function Result({
           </div>
 
           <div className="mt-2.5 max-w-[360px] px-2 z-10">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 backdrop-blur-xs border border-blue-200 text-[11px] font-extrabold text-blue-700 uppercase shadow-xs">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 backdrop-blur-xs border border-[#ded3e8] text-[11px] font-extrabold text-[#5d4786] uppercase shadow-xs">
               <span>✦</span> MÉDIUM TITULAR DA CASA NOVA (DESDE 1993)
             </span>
             <p className="mt-2 text-[13px] text-[#5e4b73] leading-relaxed font-medium">
@@ -1430,7 +1430,7 @@ function Result({
               key={s.l}
               className="rounded-2xl border border-slate-200 bg-white p-3 text-center shadow-sm"
             >
-              <span className="font-display block text-[22px] font-extrabold text-blue-700">
+              <span className="font-display block text-[22px] font-extrabold text-[#5d4786]">
                 {s.n}
               </span>
               <span className="mt-0.5 block text-[11.5px] font-medium text-[#6c5a82]">{s.l}</span>
@@ -1441,7 +1441,7 @@ function Result({
         {/* ── SEÇÃO DE COPY PERSUASIVA & QUEBRA DE OBJEÇÃO ANTES DA DOAÇÃO ── */}
         <Reveal delay={130} className="mt-8">
           <div className="rounded-[26px] border border-slate-200 bg-white p-5 sm:p-7 shadow-[0_20px_45px_-30px_rgba(15,23,42,0.5)] text-left">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-[10.5px] font-extrabold uppercase tracking-wider mb-3">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#f2eef8] border border-[#e1d8ec] text-[#5d4786] text-[10.5px] font-extrabold uppercase tracking-wider mb-3">
               <span>🕊️</span>
               <span>Compromisso Sagrado de Caridade</span>
             </div>
@@ -1582,7 +1582,7 @@ function Result({
                 "/chamada-ao-vivo-milena?source=skipped&next=%2Fescrever-carta",
               );
             }}
-            className="mt-5 block w-full text-center text-xs font-bold text-blue-700 underline decoration-blue-300 underline-offset-4 hover:decoration-blue-600 cursor-pointer bg-transparent border-0"
+            className="mt-5 block w-full text-center text-xs font-bold text-[#5d4786] underline decoration-[#c8b5db] underline-offset-4 hover:decoration-[#5d4786] cursor-pointer bg-transparent border-0"
           >
             Acessar pergaminho sem contribuir agora ›
           </button>
@@ -1595,7 +1595,7 @@ function Result({
       </div>
 
       {/* CTA fixa inferior para PIX / Doação */}
-      <div className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-[520px] border-t border-slate-200 bg-white/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-xl shadow-[0_-14px_35px_-22px_rgba(15,23,42,0.55)]">
+      <div className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-[520px] border-t border-[#ded8e7] bg-[#fffefd]/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-xl shadow-[0_-14px_35px_-22px_rgba(33,26,53,0.4)]">
         <button
           type="button"
           onClick={() => {
@@ -1603,7 +1603,7 @@ function Result({
             if (el) el.scrollIntoView({ behavior: "smooth" });
             else go();
           }}
-          className="cta-hot w-full cursor-pointer rounded-xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 px-5 py-3 text-[14px] font-extrabold tracking-wide text-white uppercase shadow-lg shadow-emerald-600/25 transition-transform hover:-translate-y-0.5"
+          className="cta-hot w-full cursor-pointer rounded-xl bg-gradient-to-r from-[#4b8b7e] via-[#39776c] to-[#2d665e] px-5 py-3 text-[14px] font-extrabold tracking-wide text-white shadow-lg shadow-[#39776c]/25 transition-transform hover:-translate-y-0.5"
         >
           <span className="relative z-10 flex items-center justify-center gap-2">
             <span>Continuar para pagamento da vela de {primeiroEnte}</span>
@@ -1825,7 +1825,7 @@ export function QuizFunnel() {
   const primeiroNome = nome?.trim() ? nome.trim().split(" ")[0] : "você";
 
   return (
-    <div className="quiz-modern mx-auto flex min-h-screen w-full max-w-[520px] flex-col bg-[#f5f7fb] text-slate-900 shadow-[0_0_70px_-30px_rgba(15,23,42,0.45)] border-x border-slate-200">
+    <div className="quiz-modern mx-auto flex min-h-screen w-full max-w-[520px] flex-col bg-[#faf8f4] text-[#272039] shadow-[0_0_70px_-30px_rgba(33,26,53,0.4)] border-x border-[#e4dee8]">
       <main className="flex flex-1 flex-col">
         {/* ETAPA 1: NOME */}
         {step === "intro" && (
@@ -2069,13 +2069,13 @@ export function QuizFunnel() {
                   onClick={() => setModoMensagem("temas")}
                   className={`flex-1 py-3 px-2.5 rounded-xl text-[13.5px] transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
                     modoMensagem === "temas"
-                      ? "bg-white text-blue-700 shadow-sm border border-slate-200 font-bold"
+                      ? "bg-white text-[#5d4786] shadow-sm border border-[#ded8e7] font-bold"
                       : "text-slate-500 hover:text-slate-800 font-medium"
                   }`}
                 >
                   <span>🕊️</span>
                   <span>Escolher Temas</span>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100 font-bold">
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#f2eef8] text-[#5d4786] border border-[#e1d8ec] font-bold">
                     Mais fácil
                   </span>
                 </button>
@@ -2085,7 +2085,7 @@ export function QuizFunnel() {
                   onClick={() => setModoMensagem("livre")}
                   className={`flex-1 py-3 px-2.5 rounded-xl text-[13.5px] transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
                     modoMensagem === "livre"
-                      ? "bg-white text-blue-700 shadow-sm border border-slate-200 font-bold"
+                      ? "bg-white text-[#5d4786] shadow-sm border border-[#ded8e7] font-bold"
                       : "text-slate-500 hover:text-slate-800 font-medium"
                   }`}
                 >
@@ -2157,11 +2157,11 @@ export function QuizFunnel() {
                         }}
                         className={`group relative flex w-full cursor-pointer items-center gap-3.5 rounded-2xl border px-4 py-3.5 text-left transition-all duration-200 ${
                           isSelected
-                            ? "border-blue-500 bg-blue-50 shadow-sm ring-4 ring-blue-500/10"
-                            : "border-slate-200 bg-white hover:border-blue-300 hover:shadow-sm"
+                            ? "border-[#6f5aa0] bg-[#f2eef8] shadow-sm ring-4 ring-[#6f5aa0]/10"
+                            : "border-slate-200 bg-white hover:border-[#b9a8cf] hover:shadow-sm"
                         }`}
                       >
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 border border-slate-200 text-xl group-hover:bg-blue-50 transition-colors">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 border border-slate-200 text-xl group-hover:bg-[#f2eef8] transition-colors">
                           {tema.emoji}
                         </div>
                         <div className="flex-1">
@@ -2175,7 +2175,7 @@ export function QuizFunnel() {
                         <div
                           className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 text-[11px] font-extrabold ${
                             isSelected
-                              ? "border-blue-600 bg-blue-600 text-white"
+                              ? "border-[#5d4786] bg-[#5d4786] text-white"
                               : "border-slate-300 text-transparent"
                           }`}
                         >
@@ -2218,7 +2218,7 @@ export function QuizFunnel() {
 
                   {/* Sugestões rápidas de toque único */}
                   <div>
-                    <span className="text-[11px] font-bold tracking-wider uppercase text-blue-700 block mb-2">
+                    <span className="text-[11px] font-bold tracking-wider uppercase text-[#5d4786] block mb-2">
                       💡 Toque para adicionar inspirações à sua mensagem:
                     </span>
                     <div className="flex flex-wrap gap-1.5">
@@ -2236,7 +2236,7 @@ export function QuizFunnel() {
                             setMensagem(novo);
                             setDorPrincipal(novo);
                           }}
-                          className="rounded-full bg-blue-50 border border-blue-100 px-3 py-1 text-[12px] font-medium text-blue-700 hover:bg-blue-100 transition-colors text-left"
+                          className="rounded-full bg-[#f2eef8] border border-[#e1d8ec] px-3 py-1 text-[12px] font-medium text-[#5d4786] hover:bg-[#e9e1f2] transition-colors text-left"
                         >
                           + "{sug}"
                         </button>
