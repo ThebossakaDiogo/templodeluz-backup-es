@@ -114,6 +114,21 @@ function inferTrafficSource(params: URLSearchParams, tracking: TrackingParameter
   }
 }
 
+function completeMetaTracking(params: URLSearchParams, tracking: TrackingParameters) {
+  const source = (tracking.utm_source || "").trim().toLowerCase();
+  const isMetaTraffic = /^(facebook|fb|instagram|ig)(?:$|[^a-z])/.test(source);
+  if (!isMetaTraffic) return;
+
+  const fbclid = cleanTrackingValue(params.get("fbclid"));
+  if (fbclid && !tracking.sck) tracking.sck = fbclid;
+  tracking.src ||= "meta";
+
+  // Não inventa IDs de campanha: sinaliza explicitamente quando o anúncio não os forneceu.
+  tracking.utm_campaign ||= "meta_campaign_not_provided";
+  tracking.utm_content ||= "meta_adset_not_provided";
+  tracking.utm_term ||= "meta_ad_not_provided";
+}
+
 /**
  * Captura a URL atual e a mescla ao primeiro clique já salvo. Nunca remove uma
  * origem anterior só porque a URL atual perdeu os parâmetros num redirecionamento.
@@ -149,6 +164,7 @@ export function captureAndStoreUtms(): TrackingParameters {
       }
     }
     inferTrafficSource(urlParams, tracking);
+    completeMetaTracking(urlParams, tracking);
 
     localStorage.setItem(STORAGE_KEY_UTMS, JSON.stringify(tracking));
     return tracking;

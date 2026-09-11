@@ -85,6 +85,18 @@ function isTikTokTraffic(tracking: Record<string, unknown>) {
   return Boolean(getTrackingValue(tracking.ttclid)) || /^(tiktok|tt|tik)(?:$|[^a-z])/.test(source);
 }
 
+function normalizeMetaTracking(tracking: Record<string, unknown>) {
+  const source = getTrackingValue(tracking.utm_source).toLowerCase();
+  if (!/^(facebook|fb|instagram|ig)(?:$|[^a-z])/.test(source)) return tracking;
+  return {
+    ...tracking,
+    src: getTrackingValue(tracking.src) || 'meta',
+    utm_campaign: getTrackingValue(tracking.utm_campaign) || 'meta_campaign_not_provided',
+    utm_content: getTrackingValue(tracking.utm_content) || 'meta_adset_not_provided',
+    utm_term: getTrackingValue(tracking.utm_term) || 'meta_ad_not_provided',
+  };
+}
+
 function getCustomerValue(value: unknown, maximumLength: number) {
   return typeof value === 'string' ? value.trim().replace(/\s+/g, ' ').slice(0, maximumLength) : '';
 }
@@ -108,6 +120,60 @@ function catalogProductId(productId: string) {
 function displayProductName(productId: string, catalogName: unknown) {
   if (productId === 'chamada_ao_vivo_milena') return 'Chamada Ao Vivo com Milena';
   return String(catalogName);
+}
+
+function formatUtmifyDate(value = new Date()) {
+  const pad = (part: number) => String(part).padStart(2, '0');
+  return `${value.getUTCFullYear()}-${pad(value.getUTCMonth() + 1)}-${pad(value.getUTCDate())} ${pad(value.getUTCHours())}:${pad(value.getUTCMinutes())}:${pad(value.getUTCSeconds())}`;
+}
+
+function sendStripeWaitingPaymentToUtmify(input: {
+  sessionId: string;
+  productId: string;
+  productName: string;
+  amountCents: number;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  tracking: Record<string, unknown>;
+}) {
+  const token = Deno.env.get('UTMIFY_API_TOKEN');
+  if (!token) return;
+  const trackingParameters = Object.fromEntries(
+    ['src', 'sck', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term']
+      .map((key) => [key, getTrackingValue(input.tracking[key]) || null]),
+  );
+  const delivery = fetch('https://api.utmify.com.br/api-credentials/orders', {
+    method: 'POST',
+    signal: AbortSignal.timeout(10_000),
+    headers: { 'Content-Type': 'application/json', 'x-api-token': token },
+    body: JSON.stringify({
+      orderId: input.sessionId,
+      platform: 'TemploDeLuzMeta',
+      paymentMethod: 'credit_card',
+      status: 'waiting_payment',
+      createdAt: formatUtmifyDate(),
+      approvedDate: null,
+      refundedAt: null,
+      customer: {
+        name: input.customerName || 'Consulente Templo de Luz',
+        email: input.customerEmail || 'contato@templodeluz.com',
+        phone: input.customerPhone || null,
+        document: null,
+        country: 'BR',
+      },
+      products: [{ id: input.productId, name: input.productName, planId: null, planName: null, quantity: 1, priceInCents: input.amountCents }],
+      trackingParameters,
+      commission: { totalPriceInCents: input.amountCents, gatewayFeeInCents: 0, userCommissionInCents: input.amountCents, currency: 'BRL' },
+      isTest: false,
+    }),
+  }).then(async (response) => {
+    if (!response.ok) console.warn('[STRIPE CHECKOUT] UTMify waiting payment failed', response.status, (await response.text()).slice(0, 300));
+  }).catch((error) => console.warn('[STRIPE CHECKOUT] UTMify waiting payment failed', error instanceof Error ? error.message : error));
+
+  const edgeRuntime = (globalThis as any).EdgeRuntime;
+  if (edgeRuntime?.waitUntil) edgeRuntime.waitUntil(delivery);
+  else void delivery;
 }
 
 Deno.serve(async (req) => {
@@ -176,7 +242,9 @@ Deno.serve(async (req) => {
     const amountCents = productId === 'chamada_ao_vivo_milena'
       ? Number(input?.amountCents)
       : resolveAmount(product, input?.amountCents);
-    if (amountCents === null || !Number.isInteger(amountCents) || (productId === 'chamada_ao_vivo_milena' && amountCents !== 15000)) {
+    const isValidLiveCallAmount = productId !== 'chamada_ao_vivo_milena'
+      || [15000, 25000, 50000].includes(amountCents);
+    if (amountCents === null || !Number.isInteger(amountCents) || !isValidLiveCallAmount) {
       return json(origin, { error: 'Valor inválido para este produto.' }, 400);
     }
 
@@ -201,7 +269,7 @@ Deno.serve(async (req) => {
     }
     if (/^\S+@\S+\.\S+$/.test(customerEmail)) params.append('customer_email', customerEmail);
 
-    const trackingParams = (input?.trackingParameters || {}) as Record<string, unknown>;
+    const trackingParams = normalizeMetaTracking((input?.trackingParameters || {}) as Record<string, unknown>);
     if (isTikTokTraffic(trackingParams)) {
       return json(origin, { error: 'Use o quiz TikTok para concluir este checkout.' }, 400);
     }
@@ -232,6 +300,17 @@ Deno.serve(async (req) => {
       console.error('Stripe session creation failed', stripeResponse.status, session?.error?.type ?? 'unknown');
       return json(origin, { error: 'Falha ao criar sessão na Stripe.' }, 502);
     }
+
+    sendStripeWaitingPaymentToUtmify({
+      sessionId: session.id,
+      productId,
+      productName: displayProductName(productId, product.name),
+      amountCents,
+      customerName,
+      customerEmail,
+      customerPhone,
+      tracking: trackingParams,
+    });
 
     return json(origin, { url: session.url, sessionId: session.id });
   } catch (error) {

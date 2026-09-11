@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { deliverMetaUtmifyWaitingPaymentOrder, runUtmifyInBackground } from '../_shared/utmify.ts';
 import { digits, isUuid, isValidCpf, resolveChargeAmount } from '../_shared/pix.ts';
 
 const QUIZ_ORIGIN = 'original';
@@ -93,6 +94,18 @@ function eventSourceUrl(value: unknown, requestOrigin: string) {
 function isTikTokTraffic(utms: Record<string, unknown>) {
   const source = String(utms.utm_source ?? '').trim().toLowerCase();
   return Boolean(String(utms.ttclid ?? '').trim()) || /^(tiktok|tt|tik)(?:$|[^a-z])/.test(source);
+}
+
+function normalizeMetaTracking(utms: Record<string, unknown>) {
+  const source = String(utms.utm_source ?? '').trim().toLowerCase();
+  if (!/^(facebook|fb|instagram|ig)(?:$|[^a-z])/.test(source)) return utms;
+  return {
+    ...utms,
+    src: utms.src || 'meta',
+    utm_campaign: utms.utm_campaign || 'meta_campaign_not_provided',
+    utm_content: utms.utm_content || 'meta_adset_not_provided',
+    utm_term: utms.utm_term || 'meta_ad_not_provided',
+  };
 }
 
 function chargeResponse(order: Record<string, unknown>, statusToken: string) {
@@ -226,7 +239,8 @@ Deno.serve(async (req) => {
     const sessionId = typeof input?.sessionId === 'string' ? input.sessionId.trim() : null;
     const enteQuerido = typeof input?.enteQuerido === 'string' ? input.enteQuerido.trim() : null;
     const grauParentesco = typeof input?.grauParentesco === 'string' ? input.grauParentesco.trim() : null;
-    const utmParams = (typeof input?.utms === 'object' && input.utms !== null ? input.utms : {}) as Record<string, unknown>;
+    const rawUtmParams = (typeof input?.utms === 'object' && input.utms !== null ? input.utms : {}) as Record<string, unknown>;
+    const utmParams = normalizeMetaTracking(rawUtmParams);
     if (isTikTokTraffic(utmParams)) {
       return json(origin, { error: 'Use o quiz TikTok para concluir este checkout.' }, 400);
     }
@@ -391,6 +405,11 @@ Deno.serve(async (req) => {
       p_expires_at: expiresAt,
     });
     if (updateError || !completedOrder) throw updateError ?? new Error('ORDER_UPDATE_FAILED');
+
+    runUtmifyInBackground(
+      deliverMetaUtmifyWaitingPaymentOrder(supabase, completedOrder),
+      'UTMIFY WAITING PAYMENT DELIVERY',
+    );
 
     // InitiateCheckout é enviado no clique que abre o modal, antes de qualquer PIX ser criado.
     // O banco legou uma outbox de IC vinculada ao pedido; ela não representa este estágio do funil.
