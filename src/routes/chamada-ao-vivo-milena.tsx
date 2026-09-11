@@ -5,6 +5,7 @@ import { PixCheckout } from "@/components/funnel/PixCheckout";
 import { recordInput } from "@/lib/auto-capture";
 import { verifyStripeCheckoutSession } from "@/lib/stripe";
 import milenaLiveCallImage from "../../images-elements/medium-milena-BduzfpAk.webp_202609071752.jpeg";
+import milenaLiveCallAudio from "../../Feedbacks/milena-chamada.mp3";
 
 export const Route = createFileRoute("/chamada-ao-vivo-milena")({
   head: () => ({
@@ -195,6 +196,35 @@ function ChamadaAoVivoMilenaPage() {
                 Atendimento por videochamada
               </figcaption>
             </figure>
+            <div className="mt-4 w-full overflow-hidden rounded-2xl border border-[#f5d285]/30 bg-white/[0.08] p-3.5 text-left shadow-[0_14px_32px_rgba(0,0,0,0.22)] backdrop-blur-md">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#f5d285]/45 bg-[#f5d285]/15 text-lg shadow-inner">
+                  🎙️
+                </div>
+                <div className="min-w-0">
+                  <span className="block text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#f5d285]">
+                    Mensagem da Milena
+                  </span>
+                  <span className="mt-0.5 block text-[12px] font-semibold leading-snug text-white/85">
+                    Entenda a chamada antes de decidir
+                  </span>
+                </div>
+              </div>
+              <div className="mt-3 rounded-xl border border-white/10 bg-black/20 px-3 py-2.5">
+                <audio
+                  controls
+                  preload="none"
+                  aria-label="Áudio de Milena Medeiros explicando a chamada ao vivo"
+                  className="w-full accent-[#f5d285]"
+                >
+                  <source src={milenaLiveCallAudio} type="audio/mpeg" />
+                  Seu navegador não oferece suporte à reprodução deste áudio.
+                </audio>
+              </div>
+              <p className="mt-3 text-center text-[12.5px] font-semibold leading-relaxed text-[#fff3cc]">
+                ▶️ Ouça a Milena explicar pessoalmente como será sua chamada.
+              </p>
+            </div>
             <h1 className="font-display mt-3 text-[25px] leading-tight font-black text-white">
               Chamada Ao Vivo com Milena
             </h1>

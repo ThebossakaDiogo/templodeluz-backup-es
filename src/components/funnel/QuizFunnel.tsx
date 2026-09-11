@@ -1,18 +1,23 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearch, useNavigate } from "@tanstack/react-router";
 import { CHECKOUT_URL, FAQ, IMAGES, STEPS_HOW } from "./data";
 import { Footer, Halos, Reveal, SectionLabel, Stars } from "./Shell";
-import { LetterZoomModal } from "./LetterZoomModal";
-import { PixCheckout } from "./PixCheckout";
-import { SocialProofSection } from "./SocialProofSection";
-import { MilenaAudioMessage } from "./MilenaAudioMessage";
-import { SacredCandle } from "./SacredCandle";
-import { WhatsAppContactModal } from "./WhatsAppContactModal";
 import { recordInput } from "@/lib/auto-capture";
 import { trackQuizStep } from "@/lib/metaPixel";
 import { trackQuizStep as trackQuizTelemetry } from "@/lib/funnel-telemetry";
 import { useCandlesGoalSimulation } from "@/lib/donation-simulation";
 import { parseBrazilianCurrency, sanitizeBrazilianCurrencyInput } from "@/lib/currency";
+
+const LetterZoomModal = lazy(() => import("./LetterZoomModal").then(({ LetterZoomModal: Component }) => ({ default: Component })));
+const PixCheckout = lazy(() => import("./PixCheckout").then(({ PixCheckout: Component }) => ({ default: Component })));
+const SocialProofSection = lazy(() => import("./SocialProofSection").then(({ SocialProofSection: Component }) => ({ default: Component })));
+const MilenaAudioMessage = lazy(() => import("./MilenaAudioMessage").then(({ MilenaAudioMessage: Component }) => ({ default: Component })));
+const SacredCandle = lazy(() => import("./SacredCandle").then(({ SacredCandle: Component }) => ({ default: Component })));
+const WhatsAppContactModal = lazy(() => import("./WhatsAppContactModal").then(({ WhatsAppContactModal: Component }) => ({ default: Component })));
+
+function DeferredFallback() {
+  return <div className="mx-auto my-4 h-16 w-full max-w-md animate-pulse rounded-2xl bg-slate-100" aria-hidden="true" />;
+}
 
 /* ─────────── helpers ─────────── */
 
@@ -44,22 +49,23 @@ function Cta({
   readonly tone?: "gold" | "green" | "royal";
 }) {
   let toneClasses =
-    "bg-gradient-to-r from-[#f59e0b] via-[#d97706] to-[#b45309] text-white shadow-amber-500/25 border border-amber-400/50 hover:brightness-105";
+    "bg-gradient-to-r from-blue-600 via-blue-600 to-indigo-600 text-white shadow-blue-600/25 border border-blue-500/30 hover:brightness-105";
   if (tone === "green") {
     toneClasses =
       "bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 text-white shadow-emerald-500/25 border border-emerald-400/40 hover:brightness-105";
   } else if (tone === "royal") {
     toneClasses =
-      "bg-gradient-to-r from-[#2d144d] via-[#3b1c63] to-[#1f0c36] text-white shadow-[#2d144d]/30 border border-[#4b267d]/40 hover:brightness-110";
+      "bg-gradient-to-r from-[#111827] via-[#172033] to-[#0f172a] text-white shadow-slate-900/25 border border-slate-700 hover:brightness-110";
   }
 
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`animate-pulse-cta w-full cursor-pointer rounded-2xl px-6 py-[18px] text-[15.5px] font-extrabold tracking-[0.02em] uppercase transition-all duration-300 hover:scale-[1.015] active:scale-[0.985] shadow-lg ${toneClasses}`}
+      className={`group relative w-full overflow-hidden cursor-pointer rounded-[14px] px-6 py-[17px] text-[15px] font-extrabold tracking-[0.01em] transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 shadow-lg ${toneClasses}`}
     >
-      <span className="flex items-center justify-center gap-2 drop-shadow-xs font-bold">
+      <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-1000 group-hover:translate-x-full" />
+      <span className="relative flex items-center justify-center gap-2 drop-shadow-xs font-bold">
         {children}
       </span>
     </button>
@@ -88,11 +94,11 @@ function Field({
   readonly hideLabel?: boolean;
 }) {
   const shared =
-    "w-full rounded-2xl border bg-white px-4 py-4 text-[15.5px] font-medium leading-relaxed text-[#181126] shadow-2xs outline-none transition-all duration-200 placeholder:text-[#9583a6] focus:border-[#f59e0b] focus:ring-2 focus:ring-[#f59e0b]/20";
+    "w-full rounded-[14px] border bg-white px-4 py-4 text-[15.5px] font-medium leading-relaxed text-slate-900 shadow-sm outline-none transition-all duration-200 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10";
   return (
     <div className="w-full">
       {hideLabel ? null : (
-        <label className="mb-2 block text-[12px] font-bold tracking-[0.14em] text-[#2d144d] uppercase">
+        <label className="mb-2 block text-[12px] font-bold tracking-[0.1em] text-slate-700 uppercase">
           {label}
         </label>
       )}
@@ -103,7 +109,7 @@ function Field({
           placeholder={placeholder}
           aria-label={label}
           onChange={(e) => onChange(e.target.value)}
-          className={`${shared} min-h-[130px] resize-y ${error ? "border-destructive ring-1 ring-destructive" : "border-[#e5daf0]"}`}
+          className={`${shared} min-h-[130px] resize-y ${error ? "border-destructive ring-1 ring-destructive" : "border-slate-200"}`}
         />
       ) : (
         <input
@@ -114,7 +120,7 @@ function Field({
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && onEnter?.()}
           aria-label={label}
-          className={`${shared} ${error ? "border-destructive ring-1 ring-destructive" : "border-[#e5daf0]"}`}
+          className={`${shared} ${error ? "border-destructive ring-1 ring-destructive" : "border-slate-200"}`}
         />
       )}
       {error ? <p className="mt-2 text-xs font-bold text-destructive">{error}</p> : null}
@@ -135,7 +141,7 @@ function Progress({
 }) {
   const pct = (step / total) * 100;
   return (
-    <div className="sticky top-0 z-30 border-b border-[#ece4f4] bg-white/95 px-4 pt-3.5 pb-3 backdrop-blur-md shadow-xs sm:px-6">
+    <div className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 px-4 pt-3.5 pb-3 backdrop-blur-xl shadow-sm sm:px-6">
       <div className="mb-2 flex items-center justify-between text-xs">
         <div className="flex min-w-0 items-center gap-2">
           {onBack && (
@@ -143,30 +149,30 @@ function Progress({
               type="button"
               onClick={onBack}
               aria-label="Voltar para a etapa anterior"
-              className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-[#e5daf0] bg-[#f9f6fc] text-base font-black text-[#2d144d] transition-colors hover:bg-[#f0e8f7]"
+              className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-white text-base font-black text-slate-700 transition-colors hover:border-blue-300 hover:bg-blue-50"
             >
               ‹
             </button>
           )}
-          <span className="flex min-w-0 items-center gap-1.5 truncate font-bold text-[#2d144d]">
-            <span className="h-2 w-2 shrink-0 rounded-full bg-[#f59e0b] animate-pulse" />
+          <span className="flex min-w-0 items-center gap-1.5 truncate font-bold text-slate-700">
+            <span className="h-2 w-2 shrink-0 rounded-full bg-blue-500" />
             {caption}
           </span>
         </div>
-        <span className="font-bold px-2.5 py-0.5 rounded-full bg-[#f6f0fc] text-[#2d144d] border border-[#e5daf0] text-[11px]">
+        <span className="font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 text-[11px]">
           Etapa {step} de {total}
         </span>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-[#f0e8f7] border border-[#ece4f4] p-0.5">
+      <div className="h-2 overflow-hidden rounded-full bg-slate-100 border border-slate-200 p-0.5">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-[#f59e0b] via-[#d97706] to-[#b45309] shadow-sm transition-[width] duration-500 ease-out"
+          className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 shadow-sm transition-[width] duration-500 ease-out"
           style={{ width: `${pct}%` }}
         />
       </div>
-      <p className="mt-2 text-center text-[11px] font-semibold italic text-[#b45309]">
+      <p className="mt-2 text-center text-[11px] font-medium text-slate-500">
         {step < total
-          ? "✨ O amor que une vocês está guiando o caminho — continue"
-          : "✨ A sua carta já está sendo preparada no plano espiritual"}
+          ? "Suas respostas ficam salvas neste aparelho. Você pode voltar e ajustar quando quiser."
+          : "Revise com calma: seu pedido será encaminhado somente no próximo passo."}
       </p>
     </div>
   );
@@ -182,15 +188,15 @@ function QuestionHead({
   readonly subtitle?: string;
 }) {
   return (
-    <div className="px-4 pt-7 pb-3 sm:px-6">
-      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#fef3c7] border border-[#fde68a] text-[11px] font-bold tracking-[0.14em] text-[#92400e] uppercase mb-3 shadow-2xs">
+    <div className="px-5 pt-8 pb-4 sm:px-7">
+      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-[10.5px] font-bold tracking-[0.12em] text-blue-700 uppercase mb-4">
         {eyebrow}
       </span>
-      <h2 className="font-display text-[25px] leading-[1.25] font-extrabold text-[#181126] tracking-tight">
+      <h2 className="font-display text-[26px] leading-[1.18] font-extrabold text-slate-950 tracking-tight">
         {title}
       </h2>
       {subtitle && (
-        <p className="mt-2 text-[14.5px] text-[#5e4b73] leading-relaxed font-normal">{subtitle}</p>
+        <p className="mt-3 text-[14px] text-slate-600 leading-relaxed font-normal">{subtitle}</p>
       )}
     </div>
   );
@@ -200,23 +206,23 @@ function QuestionHead({
 const COMFORT_PHRASES: Record<string, { icon: string; text: string }> = {
   ente: {
     icon: "🕊️",
-    text: "Que lindo poder honrar a memória de quem você ama. Respire fundo: este é um espaço seguro, cheio de amor e respeito.",
+    text: "Que bonito honrar a memória de quem você ama. Respire fundo: este é um espaço de acolhimento, respeito e privacidade.",
   },
   relacao: {
     icon: "💞",
-    text: "Todo laço de amor é eterno. O que vocês viveram continua vivo dentro do seu coração.",
+    text: "Cada vínculo tem uma história própria. Essa informação ajuda a personalizar o acolhimento e a sua carta.",
   },
   tempo: {
     icon: "🌿",
-    text: "A saudade é a prova de que o amor nunca partiu. Estamos aqui com você, segurando a sua mão.",
+    text: "Não há resposta certa nem pressa. Escolha apenas o que representa a sua história hoje.",
   },
   mensagem: {
     icon: "💌",
-    text: "Falar com o coração alivia a alma. Escreva com calma, sem pressa — cada palavra é ouvida no plano espiritual.",
+    text: "Você pode escrever, escolher temas ou deixar a orientação livre. Todas as opções seguem para revisão antes do contato.",
   },
   confirma: {
     icon: "✨",
-    text: "A sua fé trouxe você até aqui. Falta muito pouco para o reencontro de palavras que o seu coração espera.",
+    text: "Você chegou à revisão final. No próximo passo, verá com clareza as formas de continuar o atendimento.",
   },
 };
 
@@ -224,9 +230,9 @@ function ComfortNote({ step }: { readonly step: string }) {
   const note = COMFORT_PHRASES[step];
   if (!note) return null;
   return (
-    <div className="animate-rise-in mx-4 mb-4 flex items-center gap-3 rounded-2xl border border-[#ece4f4] bg-[#f6f0fc] px-4 py-3 shadow-2xs sm:mx-6">
-      <span className="text-2xl shrink-0">{note.icon}</span>
-      <p className="text-[13px] font-medium italic leading-relaxed text-[#5e4b73]">{note.text}</p>
+    <div className="animate-rise-in mx-5 mb-5 flex items-center gap-3 rounded-2xl border border-blue-100 bg-blue-50/60 px-4 py-3.5 sm:mx-7">
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-xl shadow-sm">{note.icon}</span>
+      <p className="text-[13px] font-medium leading-relaxed text-slate-600">{note.text}</p>
     </div>
   );
 }
@@ -248,19 +254,19 @@ function Option({
     <button
       type="button"
       onClick={onClick}
-      className={`group relative flex w-full cursor-pointer items-center gap-3 rounded-2xl border-2 px-3.5 py-4 text-left transition-all duration-200 sm:gap-4 sm:px-4 ${
+      className={`group relative flex w-full cursor-pointer items-center gap-3.5 rounded-2xl border px-4 py-4 text-left transition-all duration-200 sm:gap-4 ${
         selected
-          ? "border-[#f59e0b] bg-gradient-to-r from-[#fffdfa] via-[#fffbeb] to-[#fef8ea] shadow-md ring-1 ring-[#f59e0b]/30 scale-[1.01]"
-          : "border-[#ece4f4] bg-white hover:border-[#f59e0b]/50 hover:bg-[#faf7fc] shadow-2xs"
+          ? "border-blue-500 bg-blue-50 shadow-md ring-4 ring-blue-500/10"
+          : "border-slate-200 bg-white shadow-sm hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md"
       }`}
     >
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#f6f0fc] border border-[#ece4f4] text-2xl group-hover:scale-110 transition-transform">
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-50 border border-slate-200 text-2xl group-hover:bg-blue-50 transition-colors">
         {emoji}
       </div>
       <div className="flex-1">
-        <span className="block text-[15.5px] font-bold text-[#181126] leading-snug">{label}</span>
+        <span className="block text-[15px] font-bold text-slate-900 leading-snug">{label}</span>
         {hint ? (
-          <span className="mt-0.5 block text-[12.5px] text-[#6c5a82] leading-normal font-normal">
+          <span className="mt-1 block text-[12.5px] text-slate-500 leading-normal font-normal">
             {hint}
           </span>
         ) : null}
@@ -268,8 +274,8 @@ function Option({
       <div
         className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-[12px] font-extrabold transition-colors ${
           selected
-            ? "border-[#f59e0b] bg-[#f59e0b] text-white shadow-xs"
-            : "border-[#d8caea] text-transparent group-hover:border-[#9583a6]"
+            ? "border-blue-600 bg-blue-600 text-white shadow-xs"
+            : "border-slate-300 text-transparent group-hover:border-blue-400"
         }`}
       >
         ✓
@@ -288,13 +294,13 @@ function ObjectionBuster({
   readonly text: string;
 }) {
   return (
-    <div className="mx-4 mt-6 flex items-start gap-3.5 rounded-2xl border border-[#fde68a] bg-[#fefaf3] p-4 text-left shadow-2xs sm:mx-6">
-      <span className="text-2xl shrink-0 p-1.5 bg-white rounded-xl border border-[#fde68a]">
+    <div className="mx-5 mt-6 flex items-start gap-3.5 rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm sm:mx-7">
+      <span className="text-xl shrink-0 p-2 bg-slate-50 rounded-xl border border-slate-200">
         {icon}
       </span>
       <div>
-        <strong className="block text-[13px] font-bold text-[#92400e]">{title}</strong>
-        <p className="text-[12.5px] text-[#6e5984] leading-relaxed mt-0.5 font-normal">{text}</p>
+        <strong className="block text-[13px] font-bold text-slate-800">{title}</strong>
+        <p className="text-[12.5px] text-slate-500 leading-relaxed mt-1 font-normal">{text}</p>
       </div>
     </div>
   );
@@ -569,57 +575,75 @@ function PixInstantBox({
   };
 
   const presets = [
-    { val: 10, label: "R$ 10", tag: "Vela no Altar" },
-    { val: 15, label: "R$ 15", tag: "Vela & Papel" },
-    { val: 20, label: "R$ 20", tag: "Mais Escolhido", highlight: true },
+    { val: 10, label: "R$ 10", tag: "Vela" },
+    { val: 15, label: "R$ 15", tag: "Vela + papel" },
+    { val: 20, label: "R$ 20", tag: "Vela + pergaminho", highlight: true },
     { val: 35, label: "R$ 35", tag: "Consagração" },
-    { val: 50, label: "R$ 50", tag: "Luz & Obras" },
-    { val: 100, label: "R$ 100", tag: "Protetor do Templo" },
+    { val: 50, label: "R$ 50", tag: "Luz da casa" },
+    { val: 100, label: "R$ 100", tag: "Apoio à casa" },
   ];
 
   return (
-    <div className="mt-6 rounded-3xl border border-slate-200/80 bg-white p-5 sm:p-7 shadow-xl text-center">
-      {/* Header Limpo e Confiável */}
-      <div className="flex items-center justify-center gap-2 mb-2">
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-extrabold tracking-wider uppercase">
-          <PixIcon className="w-3.5 h-3.5 text-emerald-600" />
-           <span>Pagamento simples e seguro</span>
-        </span>
+    <div className="mt-6 overflow-hidden rounded-[30px] border border-slate-200 bg-[#f7f8fb] shadow-[0_24px_60px_-34px_rgba(15,23,42,0.5)] text-center">
+      <div className="relative overflow-hidden bg-[#111827] px-5 py-6 text-left text-white sm:px-7">
+        <div className="pointer-events-none absolute -right-12 -top-16 h-44 w-44 rounded-full bg-blue-500/20 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 -left-10 h-40 w-40 rounded-full bg-violet-500/20 blur-3xl" />
+        <div className="relative">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[10px] font-extrabold tracking-[0.12em] text-blue-100 uppercase backdrop-blur-sm">
+            <PixIcon className="h-3.5 w-3.5" />
+            PIX ou cartão
+          </span>
+          <h3 className="mt-4 max-w-[360px] font-display text-[24px] font-extrabold leading-[1.15] text-white">
+            Escolha como deseja apoiar esta sessão
+          </h3>
+          <p className="mt-2 max-w-[370px] text-[13px] leading-relaxed text-slate-300">
+            A psicografia é gratuita. Sua contribuição voluntária ajuda a manter os materiais e o acolhimento da casa para {primeiroEnte}.
+          </p>
+        </div>
       </div>
 
-      <h3 className="font-display text-[23px] font-extrabold text-[#1c1033] leading-tight">
-        Escolha o valor para a sessão de {primeiroEnte}
-      </h3>
-      <p className="text-[14px] text-[#5e4b73] mt-2 leading-relaxed max-w-md mx-auto">
-        A psicografia é gratuita. Sua contribuição voluntária mantém a vela, o pergaminho e o acolhimento do oratório.
-      </p>
-
-      <div className="mt-4 grid grid-cols-3 gap-2 rounded-2xl border border-[#e5daf0] bg-[#faf8fc] p-3 text-left">
+      <div className="p-4 sm:p-6">
+      <div className="grid grid-cols-3 gap-2 rounded-2xl border border-slate-200 bg-white p-3 text-center shadow-sm">
         {[
           ["1", "Escolha o valor"],
           ["2", "PIX ou cartão"],
           ["3", "Confirmação"],
         ].map(([step, label]) => (
           <div key={step} className="min-w-0">
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#2d144d] text-[10px] font-black text-white">{step}</span>
-            <span className="mt-1 block text-[10.5px] font-bold leading-tight text-[#4a3b60]">{label}</span>
+            <span className="mx-auto flex h-6 w-6 items-center justify-center rounded-full bg-[#111827] text-[10px] font-black text-white">{step}</span>
+            <span className="mt-1.5 block text-[10.5px] font-bold leading-tight text-slate-600">{label}</span>
           </div>
         ))}
       </div>
 
-      {/* Seletor de Valores em Grade Limpa e Moderna */}
-      <div className="mt-6 text-left">
-        <div className="flex items-center justify-between mb-2.5">
-          <span className="text-[11.5px] font-extrabold tracking-wider text-[#786445] uppercase">
-            Escolha o valor da contribuição:
-          </span>
-          <span className="text-[11px] text-emerald-700 font-bold flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Confirmação em segundos</span>
-          </span>
+      <div className="mt-5 text-left">
+        <div className="mb-3 flex items-center justify-between gap-3 px-1">
+          <span className="text-[12px] font-extrabold tracking-[0.08em] text-slate-700 uppercase">Defina o valor</span>
+          <span className="text-[10.5px] font-semibold text-slate-500">Mínimo de R$ 10</span>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <div className={`mb-5 rounded-2xl border bg-white p-4 transition-all ${isCustom ? "border-blue-500 ring-4 ring-blue-500/10" : "border-slate-200 shadow-sm"}`}>
+          <label htmlFor="custom-donation-input" className="block">
+            <span className="block text-[14px] font-extrabold text-slate-900">Digite o valor que preferir</span>
+            <span className="mt-0.5 block text-[11.5px] leading-relaxed text-slate-500">Ou escolha uma sugestão logo abaixo.</span>
+          </label>
+          <div className="relative mt-3 w-full">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[14px] font-black text-slate-700">R$</span>
+              <input
+                id="custom-donation-input"
+                type="text"
+                inputMode="decimal"
+                value={customInput}
+                onFocus={() => setIsCustom(true)}
+                onChange={handleCustomChange}
+                placeholder="0,00"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-4 text-[20px] font-black text-slate-900 outline-none transition-all placeholder:text-slate-300 focus:border-blue-500 focus:bg-white"
+              />
+          </div>
+        </div>
+
+        <div className="mb-3 px-1 text-[11px] font-extrabold uppercase tracking-[0.08em] text-slate-500">Valores sugeridos</div>
+        <div className="grid grid-cols-2 gap-3">
           {presets.map((item) => {
             const isSelected = !isCustom && selectedAmount === item.val;
             return (
@@ -627,65 +651,31 @@ function PixInstantBox({
                 key={item.val}
                 type="button"
                 onClick={() => handleSelectPreset(item.val)}
-                className={`group relative flex min-h-[98px] flex-col justify-center rounded-2xl px-3 py-3.5 text-center transition-all duration-200 cursor-pointer ${
+                className={`group relative flex min-h-[96px] flex-col items-start justify-center rounded-2xl px-4 py-3 text-left transition-all duration-200 cursor-pointer ${
                   isSelected
-                    ? "border-2 border-emerald-600 bg-emerald-50/60 text-emerald-950 shadow-md ring-2 ring-emerald-600/20 scale-[1.02]"
-                    : "border border-slate-200 bg-slate-50/50 text-[#1f1035] hover:border-slate-300 hover:bg-white"
+                    ? "border-2 border-blue-600 bg-blue-50 text-slate-950 shadow-[0_12px_25px_-16px_rgba(37,99,235,0.7)] ring-4 ring-blue-600/10"
+                    : "border border-slate-200 bg-white text-slate-900 shadow-sm hover:border-blue-300 hover:bg-blue-50/30"
                 }`}
               >
                 {item.highlight && (
-                  <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-amber-500 px-3 py-0.5 text-[10px] font-black text-white uppercase tracking-wide whitespace-nowrap shadow-xs">
-                    Mais Escolhido
+                  <span className="absolute right-2.5 top-2.5 rounded-full bg-[#111827] px-2 py-0.5 text-[8.5px] font-black uppercase tracking-wide text-white">
+                    Popular
                   </span>
                 )}
-                <span className="block text-[19px] font-black leading-tight tracking-tight">
+                <span className="block text-[20px] font-black leading-tight tracking-tight">
                   {item.label}
                 </span>
-                <span className={`mt-1 block min-h-[2.5em] text-[12px] font-semibold leading-tight ${isSelected ? "text-emerald-800" : "text-[#786445]"}`}>
+                <span className={`mt-1 block text-[11.5px] font-semibold leading-tight ${isSelected ? "text-blue-700" : "text-slate-500"}`}>
                   {item.tag}
                 </span>
+                {isSelected && <span className="mt-2 inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-[0.12em] text-blue-700"><span>✓</span> Selecionado</span>}
               </button>
             );
           })}
 
-          {/* Botão de Outro Valor */}
-          <button
-            type="button"
-            onClick={() => {
-              setIsCustom(true);
-              if (!customInput) setCustomInput("25");
-            }}
-            className={`col-span-2 sm:col-span-3 py-3 px-3 rounded-2xl text-center transition-all duration-200 border cursor-pointer flex items-center justify-center gap-2 ${
-              isCustom
-                ? "border-2 border-emerald-600 bg-emerald-50/60 text-emerald-950 shadow-sm ring-2 ring-emerald-600/20"
-                : "border-dashed border-slate-300 bg-slate-50/40 text-[#4a3b60] hover:border-slate-400 hover:bg-white"
-            }`}
-          >
-            <span className="text-[14px] font-bold">✍️ Digitar Outro Valor Personalizado</span>
-          </button>
         </div>
       </div>
-
-      {/* Input de Valor Personalizado */}
-      {isCustom && (
-        <div className="mt-4 p-4 rounded-2xl bg-slate-50 border border-slate-200 text-left animate-rise-in">
-          <label htmlFor="custom-donation-input" className="block text-[11.5px] font-bold text-[#1f1035] mb-1.5">
-            Digite o valor que deseja doar (mínimo de R$ 10):
-          </label>
-          <div className="relative flex items-center">
-            <span className="absolute left-4 text-base font-black text-[#1f1035]">R$</span>
-            <input
-              id="custom-donation-input"
-              type="text"
-              inputMode="decimal"
-              value={customInput}
-              onChange={handleCustomChange}
-              placeholder="Ex: 25 ou 19,90"
-              className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-slate-200 focus:border-emerald-600 bg-white text-[17px] font-black text-[#1f1035] outline-hidden shadow-2xs"
-            />
-          </div>
-        </div>
-      )}
+      </div>
 
       {/* Card de Impacto Espiritual Refinado */}
       <div
@@ -714,16 +704,18 @@ function PixInstantBox({
       </div>
 
       {impact.isValid ? (
-        <PixCheckout
-          productId="carta_sagrada"
-          amountCents={Math.round(activeAmount * 100)}
-          initialCustomerName={nomeCompleto || primeiroNome}
-          enteQuerido={enteCompleto || primeiroEnte}
-          grauParentesco={relacao}
-          mensagemPreview={mensagem}
-          successPath="/chamada-ao-vivo-milena?source=paid&next=%2Fobrigado"
-          includePaymentParams={false}
-        />
+        <Suspense fallback={<DeferredFallback />}>
+          <PixCheckout
+            productId="carta_sagrada"
+            amountCents={Math.round(activeAmount * 100)}
+            initialCustomerName={nomeCompleto || primeiroNome}
+            enteQuerido={enteCompleto || primeiroEnte}
+            grauParentesco={relacao}
+            mensagemPreview={mensagem}
+            successPath="/chamada-ao-vivo-milena?source=paid&next=%2Fobrigado"
+            includePaymentParams={false}
+          />
+        </Suspense>
       ) : (
         <div className="mt-5 p-4 rounded-2xl bg-zinc-100 border border-zinc-200 text-zinc-600 text-xs font-semibold">
           Por favor, selecione ou digite um valor a partir de R$ 10 para gerar o código PIX.
@@ -791,7 +783,7 @@ function PixInstantBox({
         </button>
       </div>
 
-      <WhatsAppContactModal
+      <Suspense fallback={null}><WhatsAppContactModal
         isOpen={whatsAppModalOpen}
         onClose={() => setWhatsAppModalOpen(false)}
         nomeConsulente={nomeCompleto || primeiroNome}
@@ -807,7 +799,7 @@ function PixInstantBox({
             pixSection.scrollIntoView({ behavior: "smooth" });
           }
         }}
-      />
+      /></Suspense>
 
       {/* Box Nobre do Pergaminho: Elegante, Espaçoso e Acolhedor */}
       <div className="mt-5 pt-4 border-t border-slate-200/70">
@@ -892,10 +884,10 @@ function SecurityGuaranteeSeal() {
       {/* Título da Seção dos Selos */}
       <div className="text-center">
         <span className="text-[10.5px] font-extrabold uppercase tracking-[0.18em] text-[#b45309]">
-          ✦ Compromisso e Segurança ✦
+          ✦ Atendimento e segurança ✦
         </span>
         <h3 className="font-display text-[16px] font-extrabold text-[#181126] mt-0.5">
-          Sua Contribuição Protegida e Abençoada
+          Transparência em cada etapa
         </h3>
       </div>
 
@@ -918,7 +910,7 @@ function SecurityGuaranteeSeal() {
             Selo de Paz Espiritual
           </h4>
           <p className="mt-1 text-[11.5px] text-[#786445] leading-relaxed">
-            Consagração com oração e vela sagrada acesa no oratório para o seu ente querido.
+            Sua intenção é registrada com cuidado para o atendimento e a oração da casa.
           </p>
         </div>
 
@@ -934,13 +926,13 @@ function SecurityGuaranteeSeal() {
             />
           </div>
           <span className="text-[9.5px] font-black uppercase tracking-widest text-blue-800 block">
-            100% Protegido
+            Pagamento seguro
           </span>
           <h4 className="font-display text-[14.5px] font-extrabold text-[#181126] leading-tight mt-0.5">
-            Selo de Garantia de 7 Dias
+            Processamento protegido
           </h4>
           <p className="mt-1 text-[11.5px] text-[#5e4b73] leading-relaxed">
-            Se a mensagem não trouxer paz ao seu coração, devolvemos 100% da sua contribuição.
+            PIX e cartão são processados por provedores de pagamento; você vê o método antes de confirmar.
           </p>
         </div>
       </div>
@@ -964,10 +956,10 @@ function Intro({
   const [letterModalOpen, setLetterModalOpen] = useState(false);
 
   return (
-    <div className="animate-rise-in bg-[#fbf9f5]">
+    <div className="animate-rise-in bg-[#f5f7fb]">
       {/* Hero compacto: imagem + headline acima da dobra */}
-      <header className="relative bg-[#180829] text-white overflow-hidden">
-        <div className="relative w-full h-[380px] sm:h-[460px] overflow-hidden bg-black">
+      <header className="relative bg-[#111827] text-white overflow-hidden">
+        <div className="relative w-full h-[340px] sm:h-[420px] overflow-hidden bg-slate-950">
           <img
             src={IMAGES.heroBg}
             alt="Mãe acolhida com a presença de seu ente querido"
@@ -976,56 +968,54 @@ function Intro({
             decoding="async"
           />
           <div className="absolute top-4 inset-x-0 flex justify-center z-10 px-4">
-            <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/80 bg-black/65 backdrop-blur-md px-4 py-1.5 text-[11px] font-bold tracking-[0.2em] text-amber-300 uppercase shadow-2xl">
-              <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping shadow-xs shadow-amber-400" />
-              {" "}🕊️ Templo de Luz · Desde 1977
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-slate-950/70 backdrop-blur-md px-4 py-1.5 text-[10.5px] font-bold tracking-[0.16em] text-blue-100 uppercase shadow-xl">
+              <span className="w-2 h-2 rounded-full bg-blue-400" />
+              Templo de Luz · Acolhimento espiritual
             </span>
           </div>
-          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#180829] to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#111827] via-transparent to-slate-950/20 pointer-events-none" />
         </div>
 
         <Halos />
 
         <div className="relative z-10 px-4 pb-6 -mt-10">
-          <div className="mx-auto max-w-[430px] rounded-3xl border border-amber-400/35 bg-[#1a082e]/90 p-5 sm:p-6 shadow-2xl text-center backdrop-blur-sm">
+          <div className="mx-auto max-w-[430px] rounded-[26px] border border-white/10 bg-[#111827]/95 p-5 sm:p-6 shadow-2xl text-center backdrop-blur-md">
             <Stars className="mb-2" />
             <h1 className="font-display text-[22px] sm:text-[25px] leading-[1.2] font-black text-white tracking-tight">
-              Receba hoje a carta de quem você ama,{" "}
-              <span className="text-[#fde68a] underline decoration-amber-400 decoration-2 underline-offset-4">
-                escrita à mão pela médium Milena
+              Organize uma intenção de carta para quem você ama,{" "}
+              <span className="text-blue-300 underline decoration-blue-500 decoration-2 underline-offset-4">
+                com acolhimento da médium Milena
               </span>
             </h1>
             <p className="mt-2.5 text-[13px] leading-relaxed text-zinc-200 font-normal">
-              Uma mensagem do seu ente querido — com a letra, a assinatura e lembranças que só vocês
-              dois conhecem.
+              Um espaço de acolhimento para registrar sua história, sua saudade e o que deseja expressar.
             </p>
           </div>
         </div>
       </header>
 
       {/* Faixa de Prova Social */}
-      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 bg-[#f6f0fc] border-b border-[#ece4f4] px-4 py-3 text-[11.5px] text-[#2d144d] sm:text-[12.5px]">
-        <span className="font-bold">💌 +12.400 acolhidos</span>
-        <span className="h-3 w-px bg-[#d8caea]" />
-        <span className="font-bold">✍️ 100% Manuscrita</span>
-        <span className="h-3 w-px bg-[#d8caea]" />
-        <span className="text-[#b45309] font-extrabold">★★★★★ 4,9/5</span>
+      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 bg-white border-b border-slate-200 px-4 py-3 text-[11.5px] text-slate-600 sm:text-[12.5px]">
+        <span className="font-bold">💌 Atendimento acolhedor</span>
+        <span className="h-3 w-px bg-slate-200" />
+        <span className="font-bold">✍️ Carta e pergaminho</span>
+        <span className="h-3 w-px bg-slate-200" />
+        <span className="text-blue-700 font-extrabold">🔒 Dados protegidos</span>
       </div>
 
       <div className="flex flex-col items-center px-4 pt-6 pb-10 sm:px-6">
         {/* Formulário + CTA imediatamente (micro-compromisso acima da dobra) */}
         <Reveal className="w-full">
-          <div className="rounded-3xl border border-[#ece4f4] bg-white p-6 shadow-xl">
+          <div className="rounded-[26px] border border-slate-200 bg-white p-6 shadow-[0_20px_50px_-30px_rgba(15,23,42,0.45)]">
             <div className="text-center mb-5">
-              <span className="text-[11px] font-bold uppercase tracking-widest text-[#b45309]">
-                Sua Conexão Espiritual
+              <span className="text-[10.5px] font-bold uppercase tracking-widest text-blue-700">
+                Seu pedido começa aqui
               </span>
               <h2 className="mt-1.5 font-display text-[17px] font-black text-[#181126] leading-snug">
-                Descubra a mensagem que seu ente querido guarda para você
+                Comece pelo que você deseja guardar nesta carta
               </h2>
               <p className="mt-1.5 text-[13px] leading-relaxed text-[#5e4b73] font-normal">
-                Responda a poucas perguntas para a médium sintonizar a frequência certa.{" "}
-                <strong className="text-[#181126] font-bold">Leva menos de 1 minuto.</strong>
+                Responda a poucas perguntas, no seu ritmo. Você poderá revisar sua intenção antes de seguir para o atendimento.
               </p>
             </div>
 
@@ -1039,13 +1029,13 @@ function Intro({
             />
 
             <div className="mt-5">
-              <Cta onClick={next}>💫 Revelar Minha Carta</Cta>
+              <Cta onClick={next}>💫 Começar meu pedido</Cta>
             </div>
 
             <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-[11.5px] font-medium text-[#786445]">
-              <span>🔒 Sigilo sagrado absoluto</span>
-              <span>✍️ Sem computadores</span>
-              <span>🛡️ Garantia de 7 dias</span>
+              <span>🔒 Privacidade</span>
+              <span>↩️ Você pode revisar</span>
+              <span>💬 Atendimento humano</span>
             </div>
           </div>
         </Reveal>
@@ -1053,8 +1043,7 @@ function Intro({
         {/* Depoimento curto */}
         <Reveal delay={80} className="mt-6 w-full">
           <p className="font-display mx-auto max-w-[310px] text-center text-[14px] italic text-[#4a365f] leading-relaxed font-medium">
-            🥹 “Quando abri o envelope e li a primeira linha, reconheci a letra exata da minha
-            mãe... Chorei de pura paz.”
+            “Pude colocar em palavras o que estava guardado no coração e fui acolhida com muito respeito.”
           </p>
         </Reveal>
 
@@ -1083,11 +1072,11 @@ function Intro({
           </button>
         </Reveal>
 
-        <LetterZoomModal
+        <Suspense fallback={null}><LetterZoomModal
           isOpen={letterModalOpen}
           onClose={() => setLetterModalOpen(false)}
           onCtaClick={next}
-        />
+        /></Suspense>
 
         {/* Como funciona */}
         <Reveal className="mt-10 w-full">
@@ -1179,18 +1168,18 @@ function Loading({
   }, [onDone]);
 
   return (
-    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-gradient-to-b from-[#281044] via-[#19092b] to-[#0f0619] px-4 py-8 text-center text-white sm:px-6">
+    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-gradient-to-b from-[#111827] via-[#172033] to-[#0f172a] px-4 py-8 text-center text-white sm:px-6">
       <Halos />
       <div className="relative z-10 w-full max-w-[410px] overflow-hidden rounded-[28px] border border-white/15 bg-[radial-gradient(circle_at_50%_0%,rgba(145,91,172,0.22),transparent_42%),rgba(255,255,255,0.075)] p-5 shadow-[0_28px_90px_-30px_rgba(0,0,0,0.85)] backdrop-blur-xl sm:max-w-[430px] sm:p-7">
-        <div className="pointer-events-none absolute -left-16 top-16 h-36 w-36 rounded-full bg-[#8f55ae]/15 blur-3xl" />
-        <div className="pointer-events-none absolute -right-20 bottom-12 h-40 w-40 rounded-full bg-amber-400/10 blur-3xl" />
-        <span className="relative inline-flex items-center gap-2 rounded-full border border-amber-300/35 bg-amber-200/10 px-3.5 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.16em] text-amber-200 shadow-[inset_0_1px_rgba(255,255,255,0.12)]">
-          <span className="h-1.5 w-1.5 rounded-full bg-amber-300 shadow-[0_0_8px_rgba(251,191,36,0.9)]" />
+        <div className="pointer-events-none absolute -left-16 top-16 h-36 w-36 rounded-full bg-blue-500/15 blur-3xl" />
+        <div className="pointer-events-none absolute -right-20 bottom-12 h-40 w-40 rounded-full bg-indigo-400/10 blur-3xl" />
+        <span className="relative inline-flex items-center gap-2 rounded-full border border-blue-300/30 bg-blue-200/10 px-3.5 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.16em] text-blue-200 shadow-[inset_0_1px_rgba(255,255,255,0.12)]">
+          <span className="h-1.5 w-1.5 rounded-full bg-blue-300 shadow-[0_0_8px_rgba(96,165,250,0.9)]" />
           Preparação protegida
         </span>
 
         <div className="relative mt-1 flex justify-center">
-          <SacredCandle />
+          <Suspense fallback={<DeferredFallback />}><SacredCandle /></Suspense>
         </div>
 
         <h2 className="relative mx-auto max-w-[330px] font-display text-[25px] font-black leading-[1.12] text-white sm:max-w-none sm:text-[27px]">
@@ -1213,13 +1202,13 @@ function Loading({
             className="h-2.5 overflow-hidden rounded-full border border-white/10 bg-black/45 p-0.5 shadow-inner"
           >
             <div
-              className="h-full rounded-full bg-gradient-to-r from-amber-300 via-amber-400 to-orange-400 shadow-[0_0_14px_rgba(251,191,36,0.45)] transition-[width] duration-300 ease-out"
+              className="h-full rounded-full bg-gradient-to-r from-blue-400 via-blue-500 to-indigo-500 shadow-[0_0_14px_rgba(96,165,250,0.4)] transition-[width] duration-300 ease-out"
               style={{ width: `${pct}%` }}
             />
           </div>
           <div className="mt-2.5 flex items-center justify-between text-[10.5px] font-bold text-[#cfc0dc]">
             <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-emerald-300 animate-pulse" />{stages[activeStage]?.title}</span>
-            <span className="rounded-full bg-amber-300/10 px-2 py-0.5 text-amber-200">{pct}%</span>
+            <span className="rounded-full bg-blue-300/10 px-2 py-0.5 text-blue-200">{pct}%</span>
           </div>
         </div>
 
@@ -1234,8 +1223,8 @@ function Loading({
               cardClasses = "border-emerald-300/20 bg-emerald-300/[0.07]";
               badgeClasses = "bg-emerald-400 text-emerald-950";
             } else if (isActive) {
-              cardClasses = "border-amber-300/40 bg-amber-200/10";
-              badgeClasses = "bg-amber-300 text-amber-950 ring-4 ring-amber-300/15";
+              cardClasses = "border-blue-300/40 bg-blue-200/10";
+              badgeClasses = "bg-blue-300 text-blue-950 ring-4 ring-blue-300/15";
             }
 
             return (
@@ -1280,39 +1269,24 @@ function Faq() {
       {FAQ.map((item, i) => (
         <div
           key={item.q}
-          className="rounded-2xl border border-[#ece4f4] bg-white overflow-hidden shadow-2xs"
+          className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm"
         >
           <button
             type="button"
             onClick={() => setOpen(open === i ? null : i)}
-            className="flex w-full cursor-pointer items-center justify-between p-4 text-left text-[14px] font-bold text-[#181126]"
+            className="flex w-full cursor-pointer items-center justify-between p-4 text-left text-[14px] font-bold text-slate-900"
           >
             <span>{item.q}</span>
-            <span className="text-lg text-[#f59e0b]">{open === i ? "−" : "+"}</span>
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-base text-blue-700">{open === i ? "−" : "+"}</span>
           </button>
           {open === i ? (
-            <p className="animate-rise-in px-4 pb-4 text-[13px] leading-relaxed text-[#5e4b73] border-t border-[#ece4f4] pt-3">
+            <p className="animate-rise-in px-4 pb-4 text-[13px] leading-relaxed text-slate-600 border-t border-slate-100 pt-3">
               {item.a}
             </p>
           ) : null}
         </div>
       ))}
     </div>
-  );
-}
-
-function Countdown({ minutes }: { readonly minutes: number }) {
-  const [left, setLeft] = useState(minutes * 60);
-  useEffect(() => {
-    const iv = setInterval(() => setLeft((s) => (s > 0 ? s - 1 : 0)), 1000);
-    return () => clearInterval(iv);
-  }, []);
-  const mm = String(Math.floor(left / 60)).padStart(2, "0");
-  const ss = String(left % 60).padStart(2, "0");
-  return (
-    <span className="font-extrabold tabular-nums bg-amber-100 px-2 py-0.5 rounded-md text-[#92400e] border border-amber-300">
-      {mm}:{ss}
-    </span>
   );
 }
 
@@ -1340,9 +1314,9 @@ function Result({
   const horarioExibicao: string = horario?.trim() || horarioAgendamento();
 
   return (
-    <div className="animate-rise-in pb-28 text-[#181126] bg-[#fbf9f5]">
+    <div className="animate-rise-in pb-28 text-slate-900 bg-[#f5f7fb]">
       {/* Header com Confirmação Espiritual com a Foto Nítida e Card de Texto */}
-      <header className="relative bg-[#180829] text-white overflow-hidden border-b border-[#ece4f4]">
+      <header className="relative bg-[#111827] text-white overflow-hidden border-b border-slate-200">
         {/* Bloco da Foto Ampla no Topo */}
         <div className="relative w-full h-[280px] sm:h-[320px] overflow-hidden bg-black">
           <img
@@ -1353,49 +1327,54 @@ function Result({
             decoding="async"
           />
           <div className="absolute top-4 inset-x-0 flex justify-center z-10 px-4">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/80 bg-black/65 px-4 py-1 text-[11px] font-bold tracking-[0.16em] text-amber-300 uppercase shadow-2xl backdrop-blur-md">
-              📅 Sintonia Espiritual Reservada
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-slate-950/70 px-4 py-1 text-[11px] font-bold tracking-[0.14em] text-blue-200 uppercase shadow-xl backdrop-blur-md">
+              📜 Pedido organizado com cuidado
             </span>
           </div>
-          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#180829] to-transparent pointer-events-none" />
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#111827] to-transparent pointer-events-none" />
         </div>
 
         <Halos />
 
         {/* Card com Fundo Escuro para a Escrita (não sobrepõe a imagem) */}
         <div className="relative z-10 px-4 pb-7 -mt-4">
-          <div className="mx-auto max-w-[420px] rounded-3xl border border-amber-400/35 bg-[#1a082e] p-5 sm:p-6 shadow-2xl text-center">
+          <div className="mx-auto max-w-[420px] rounded-[26px] border border-white/10 bg-[#111827] p-5 sm:p-6 shadow-2xl text-center">
             <div className="animate-float-soft text-[40px] mb-1">🕊️</div>
             <h1 className="font-display text-[23px] sm:text-[25px] leading-snug font-extrabold text-white">
-              {primeiro}, a psicografia de{" "}
-              <em className="text-[#fde68a] not-italic underline decoration-amber-400 decoration-2 underline-offset-4">
+              {primeiro}, seu pedido para{" "}
+              <em className="text-blue-300 not-italic underline decoration-blue-500 decoration-2 underline-offset-4">
                 {nomeEnteCompleto}
               </em>{" "}
-              foi agendada para{" "}
-              <span className="inline-block whitespace-nowrap text-[#fde68a] underline decoration-amber-400 decoration-2 underline-offset-4 drop-shadow-sm">
-                {horarioExibicao}
-              </span>
+              está pronto para revisão
             </h1>
             <p className="mx-auto mt-3 text-[13.5px] leading-relaxed text-zinc-200 font-normal">
-              Guarde este momento em prece no coração: é quando a médium Milena Medeiros entra em recolhimento
-              sagrado no oratório para sintonizar a presença e psicografar a mensagem de {primeiroEnte} ({relacao || "ente querido"}) para
-              você.
+              Revise sua intenção, conheça o atendimento e escolha com calma como deseja continuar. Nada é confirmado até você concluir o próximo passo.
             </p>
           </div>
         </div>
       </header>
 
-      {/* Banner de Urgência Espiritual */}
-      <div className="bg-[#f6f0fc] border-b border-[#ece4f4] px-5 py-3.5 text-center text-xs text-[#2d144d] flex items-center justify-center gap-2 font-medium">
-        <span>⏳ Vela sagrada e horário reservados no oratório por</span>
-        <Countdown minutes={15} />
+      <div className="border-b border-slate-200 bg-white px-4 py-3.5">
+        <div className="mx-auto grid max-w-[460px] grid-cols-3 gap-2 text-center">
+          {[
+            ["✓", "Intenção", "organizada"],
+            ["2", "Escolha", "como continuar"],
+            ["3", "Confirmação", "após o pagamento"],
+          ].map(([number, title, detail], index) => (
+            <div key={title} className={`rounded-xl border px-2 py-2 ${index === 1 ? "border-blue-300 bg-blue-50" : "border-slate-200 bg-slate-50"}`}>
+              <span className={`mx-auto flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-black ${index === 0 ? "bg-emerald-600 text-white" : index === 1 ? "bg-blue-600 text-white" : "bg-slate-200 text-slate-600"}`}>{number}</span>
+              <span className="mt-1 block text-[11px] font-extrabold text-slate-800">{title}</span>
+              <span className="block text-[9.5px] leading-tight text-slate-500">{detail}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="px-4 pt-7 sm:px-6">
         {/* Card Personalizado com base no Quiz */}
         {dorPrincipal && (
-          <Reveal className="p-4 rounded-2xl bg-white border border-[#fde68a] mb-6 text-center shadow-sm">
-            <span className="text-[11px] font-bold text-[#b45309] block uppercase tracking-wider">
+          <Reveal className="p-4 rounded-2xl bg-white border border-blue-100 mb-6 text-center shadow-sm">
+            <span className="text-[11px] font-bold text-blue-700 block uppercase tracking-wider">
               🕊️ Intenção Registrada para a Sessão
             </span>
             <p className="text-[13.5px] text-[#2d144d] mt-1 font-semibold italic">
@@ -1404,7 +1383,7 @@ function Result({
           </Reveal>
         )}
 
-        <SocialProofSection />
+        <Suspense fallback={<DeferredFallback />}><SocialProofSection /></Suspense>
 
         <Reveal>
           <SectionLabel>A médium responsável</SectionLabel>
@@ -1432,7 +1411,7 @@ function Result({
           </div>
 
           <div className="mt-2.5 max-w-[360px] px-2 z-10">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 backdrop-blur-xs border border-amber-300/80 text-[11px] font-extrabold text-[#92400e] uppercase shadow-xs">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 backdrop-blur-xs border border-blue-200 text-[11px] font-extrabold text-blue-700 uppercase shadow-xs">
               <span>✦</span> MÉDIUM TITULAR DA CASA NOVA (DESDE 1993)
             </span>
             <p className="mt-2 text-[13px] text-[#5e4b73] leading-relaxed font-medium">
@@ -1449,9 +1428,9 @@ function Result({
           ].map((s) => (
             <div
               key={s.l}
-              className="rounded-2xl border border-[#ece4f4] bg-white p-3 text-center shadow-2xs"
+              className="rounded-2xl border border-slate-200 bg-white p-3 text-center shadow-sm"
             >
-              <span className="font-display block text-[22px] font-extrabold text-[#b45309]">
+              <span className="font-display block text-[22px] font-extrabold text-blue-700">
                 {s.n}
               </span>
               <span className="mt-0.5 block text-[11.5px] font-medium text-[#6c5a82]">{s.l}</span>
@@ -1461,8 +1440,8 @@ function Result({
 
         {/* ── SEÇÃO DE COPY PERSUASIVA & QUEBRA DE OBJEÇÃO ANTES DA DOAÇÃO ── */}
         <Reveal delay={130} className="mt-8">
-          <div className="rounded-3xl border border-amber-300/70 bg-gradient-to-b from-[#fffef9] via-[#fffcf4] to-[#fbf7eb] p-5 sm:p-7 shadow-lg text-left">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100/80 border border-amber-300 text-amber-950 text-[10.5px] font-extrabold uppercase tracking-wider mb-3 shadow-2xs">
+          <div className="rounded-[26px] border border-slate-200 bg-white p-5 sm:p-7 shadow-[0_20px_45px_-30px_rgba(15,23,42,0.5)] text-left">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-[10.5px] font-extrabold uppercase tracking-wider mb-3">
               <span>🕊️</span>
               <span>Compromisso Sagrado de Caridade</span>
             </div>
@@ -1549,7 +1528,7 @@ function Result({
         </Reveal>
 
         <Reveal delay={135}>
-          <MilenaAudioMessage />
+          <Suspense fallback={<DeferredFallback />}><MilenaAudioMessage /></Suspense>
         </Reveal>
 
         {/* ── META DE MATERIAIS DO ORATÓRIO (APÓS A EXPLICAÇÃO) ── */}
@@ -1603,7 +1582,7 @@ function Result({
                 "/chamada-ao-vivo-milena?source=skipped&next=%2Fescrever-carta",
               );
             }}
-            className="mt-5 block w-full text-center text-xs font-bold text-[#b45309] underline decoration-[#f59e0b]/40 underline-offset-4 hover:decoration-[#f59e0b] cursor-pointer bg-transparent border-0"
+            className="mt-5 block w-full text-center text-xs font-bold text-blue-700 underline decoration-blue-300 underline-offset-4 hover:decoration-blue-600 cursor-pointer bg-transparent border-0"
           >
             Acessar pergaminho sem contribuir agora ›
           </button>
@@ -1616,7 +1595,7 @@ function Result({
       </div>
 
       {/* CTA fixa inferior para PIX / Doação */}
-      <div className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-[480px] border-t border-[#ece4f4] bg-white/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md shadow-2xl">
+      <div className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-[520px] border-t border-slate-200 bg-white/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-xl shadow-[0_-14px_35px_-22px_rgba(15,23,42,0.55)]">
         <button
           type="button"
           onClick={() => {
@@ -1641,7 +1620,7 @@ function Result({
               "/chamada-ao-vivo-milena?source=skipped&next=%2Fescrever-carta",
             );
           }}
-          className="block w-full mt-1.5 text-center text-[11px] font-bold text-amber-900 hover:text-amber-950 underline decoration-amber-400 underline-offset-2 cursor-pointer bg-transparent border-0"
+          className="block w-full mt-1.5 text-center text-[11px] font-bold text-slate-500 hover:text-slate-800 underline decoration-slate-300 underline-offset-2 cursor-pointer bg-transparent border-0"
         >
           Acessar pergaminho sem contribuir agora ›
         </button>
@@ -1846,7 +1825,7 @@ export function QuizFunnel() {
   const primeiroNome = nome?.trim() ? nome.trim().split(" ")[0] : "você";
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-[480px] flex-col bg-[#fbf9f5] text-[#181126] shadow-2xl border-x border-[#ece4f4]">
+    <div className="quiz-modern mx-auto flex min-h-screen w-full max-w-[520px] flex-col bg-[#f5f7fb] text-slate-900 shadow-[0_0_70px_-30px_rgba(15,23,42,0.45)] border-x border-slate-200">
       <main className="flex flex-1 flex-col">
         {/* ETAPA 1: NOME */}
         {step === "intro" && (
@@ -1872,7 +1851,7 @@ export function QuizFunnel() {
             <Progress
               step={2}
               total={6}
-              caption="Sua conexão espiritual"
+              caption="Seu pedido"
               onBack={() => goto("intro")}
             />
             <QuestionHead
@@ -1932,7 +1911,7 @@ export function QuizFunnel() {
             <Progress
               step={3}
               total={6}
-              caption="Sua conexão espiritual"
+              caption="Seu pedido"
               onBack={() => goto("ente")}
             />
             <QuestionHead
@@ -2005,7 +1984,7 @@ export function QuizFunnel() {
             <Progress
               step={4}
               total={6}
-              caption="Sua conexão espiritual"
+              caption="Seu pedido"
               onBack={() => goto("relacao")}
             />
             <QuestionHead
@@ -2072,7 +2051,7 @@ export function QuizFunnel() {
             <Progress
               step={5}
               total={6}
-              caption="Sua conexão espiritual"
+              caption="Seu pedido"
               onBack={() => goto("tempo")}
             />
             <QuestionHead
@@ -2084,19 +2063,19 @@ export function QuizFunnel() {
 
             <div className="px-6 pb-16">
               {/* 2 Abas Modernas Luminous & Intuitive */}
-              <div className="flex rounded-2xl bg-[#f6f0fc] p-1.5 border border-[#e5daf0] mb-5 shadow-2xs">
+              <div className="grid grid-cols-2 gap-1.5 rounded-2xl bg-slate-100 p-1.5 border border-slate-200 mb-5">
                 <button
                   type="button"
                   onClick={() => setModoMensagem("temas")}
                   className={`flex-1 py-3 px-2.5 rounded-xl text-[13.5px] transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
                     modoMensagem === "temas"
-                      ? "bg-white text-[#2d144d] shadow-sm border border-[#e5daf0] font-bold"
-                      : "text-[#6c5a82] hover:text-[#2d144d] font-medium"
+                      ? "bg-white text-blue-700 shadow-sm border border-slate-200 font-bold"
+                      : "text-slate-500 hover:text-slate-800 font-medium"
                   }`}
                 >
                   <span>🕊️</span>
                   <span>Escolher Temas</span>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#fef3c7] text-[#92400e] border border-[#fde68a] font-bold">
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100 font-bold">
                     Mais fácil
                   </span>
                 </button>
@@ -2106,8 +2085,8 @@ export function QuizFunnel() {
                   onClick={() => setModoMensagem("livre")}
                   className={`flex-1 py-3 px-2.5 rounded-xl text-[13.5px] transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
                     modoMensagem === "livre"
-                      ? "bg-white text-[#2d144d] shadow-sm border border-[#e5daf0] font-bold"
-                      : "text-[#6c5a82] hover:text-[#2d144d] font-medium"
+                      ? "bg-white text-blue-700 shadow-sm border border-slate-200 font-bold"
+                      : "text-slate-500 hover:text-slate-800 font-medium"
                   }`}
                 >
                   <span>✍️</span>
@@ -2176,13 +2155,13 @@ export function QuizFunnel() {
                             0,
                           );
                         }}
-                        className={`group relative flex w-full cursor-pointer items-center gap-3.5 rounded-2xl border-2 px-4 py-3.5 text-left transition-all duration-200 ${
+                        className={`group relative flex w-full cursor-pointer items-center gap-3.5 rounded-2xl border px-4 py-3.5 text-left transition-all duration-200 ${
                           isSelected
-                            ? "border-[#f59e0b] bg-gradient-to-r from-[#fffdfa] via-[#fffbeb] to-[#fef8ea] shadow-xs ring-1 ring-[#f59e0b]/30"
-                            : "border-[#ece4f4] bg-white hover:border-[#f59e0b]/40 hover:bg-[#faf7fc]"
+                            ? "border-blue-500 bg-blue-50 shadow-sm ring-4 ring-blue-500/10"
+                            : "border-slate-200 bg-white hover:border-blue-300 hover:shadow-sm"
                         }`}
                       >
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#f6f0fc] border border-[#ece4f4] text-xl group-hover:scale-105 transition-transform">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 border border-slate-200 text-xl group-hover:bg-blue-50 transition-colors">
                           {tema.emoji}
                         </div>
                         <div className="flex-1">
@@ -2196,8 +2175,8 @@ export function QuizFunnel() {
                         <div
                           className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 text-[11px] font-extrabold ${
                             isSelected
-                              ? "border-[#f59e0b] bg-[#f59e0b] text-white"
-                              : "border-[#d8caea] text-transparent"
+                              ? "border-blue-600 bg-blue-600 text-white"
+                              : "border-slate-300 text-transparent"
                           }`}
                         >
                           ✓
@@ -2239,7 +2218,7 @@ export function QuizFunnel() {
 
                   {/* Sugestões rápidas de toque único */}
                   <div>
-                    <span className="text-[11px] font-bold tracking-wider uppercase text-[#b45309] block mb-2">
+                    <span className="text-[11px] font-bold tracking-wider uppercase text-blue-700 block mb-2">
                       💡 Toque para adicionar inspirações à sua mensagem:
                     </span>
                     <div className="flex flex-wrap gap-1.5">
@@ -2257,7 +2236,7 @@ export function QuizFunnel() {
                             setMensagem(novo);
                             setDorPrincipal(novo);
                           }}
-                          className="rounded-full bg-[#fef9ed] border border-[#fde68a] px-3 py-1 text-[12px] font-medium text-[#92400e] hover:bg-[#fef3c7] transition-colors text-left"
+                          className="rounded-full bg-blue-50 border border-blue-100 px-3 py-1 text-[12px] font-medium text-blue-700 hover:bg-blue-100 transition-colors text-left"
                         >
                           + "{sug}"
                         </button>
@@ -2307,27 +2286,27 @@ export function QuizFunnel() {
             <Progress
               step={6}
               total={6}
-              caption="Sua conexão espiritual"
+              caption="Seu pedido"
               onBack={() => goto("mensagem")}
             />
             <QuestionHead
-              eyebrow="✨ O Momento da Conexão"
-              title={`Você está pronto(a) para a médium Milena realizar o recolhimento para ${primeiroEnte} ainda hoje?`}
-              subtitle="Reservaremos uma vaga no oratório para que a psicografia seja realizada com dedicação exclusiva."
+              eyebrow="✨ Revisão final do pedido"
+              title={`Deseja encaminhar seu pedido para ${primeiroEnte} agora?`}
+              subtitle="Você verá os detalhes do acolhimento, exemplos e formas de continuar antes de qualquer contribuição."
             />
             <ComfortNote step="confirma" />
             <div className="flex flex-col gap-3 px-6 pb-6">
               <Option
                 emoji="💌"
-                label="Sim, meu coração precisa dessa paz e dessa resposta hoje"
-                hint="A médium reservará o próximo horário livre no oratório para você"
+                label="Quero encaminhar meu pedido agora"
+                hint="Você seguirá para a página de revisão, relatos e opções de continuidade"
                 selected={false}
                 onClick={() => {
                   const h = horarioAgendamento();
                   setHorario(h);
                   recordInput(
                     "deseja_receber_hoje",
-                    "Sim, meu coração precisa dessa resposta hoje",
+                    "Quero encaminhar meu pedido agora",
                     {
                       userName: nome,
                       metadata: { ente, relacao, tempo, dorPrincipal, horario: h },
@@ -2340,15 +2319,15 @@ export function QuizFunnel() {
               />
               <Option
                 emoji="🕊️"
-                label="Sim, mas quero conhecer a médium e ver os relatos antes"
-                hint="Você verá todos os detalhes e depoimentos reais na próxima tela"
+                label="Quero conhecer os detalhes antes de continuar"
+                hint="Você verá a apresentação da médium, relatos e o resumo do pedido"
                 selected={false}
                 onClick={() => {
                   const h = horarioAgendamento();
                   setHorario(h);
                   recordInput(
                     "deseja_receber_hoje",
-                    "Sim, mas quero entender melhor antes",
+                    "Quero conhecer os detalhes antes de continuar",
                     {
                       userName: nome,
                       metadata: { ente, relacao, tempo, dorPrincipal, horario: h },
@@ -2364,8 +2343,8 @@ export function QuizFunnel() {
             <div className="pb-16">
               <ObjectionBuster
                 icon="🛡️"
-                title="Garantia Sagrada de 7 Dias"
-                text="Se a carta não trouxer consolo genuíno ou se você não reconhecer o seu ente querido nas palavras, devolvemos 100% da sua contribuição solidária."
+                title="Você continua no seu ritmo"
+                text="Na próxima tela, você poderá revisar sua intenção, ver como funciona o atendimento e escolher livremente a melhor forma de seguir."
               />
             </div>
           </div>

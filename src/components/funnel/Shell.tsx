@@ -69,7 +69,7 @@ export function Halos() {
 export function Card({ children, className = "" }: Readonly<{ children: ReactNode; className?: string }>) {
   return (
     <div
-      className={`rounded-2xl border border-[#ece4f4] bg-white p-5 shadow-sm text-[#181126] ${className}`}
+      className={`rounded-2xl border border-slate-200 bg-white p-5 shadow-sm text-slate-900 ${className}`}
     >
       {children}
     </div>
@@ -78,7 +78,7 @@ export function Card({ children, className = "" }: Readonly<{ children: ReactNod
 
 export function SectionLabel({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <p className="mb-2 text-[11px] font-bold tracking-[0.2em] text-[#b45309] uppercase">
+    <p className="mb-2 text-[11px] font-bold tracking-[0.16em] text-blue-700 uppercase">
       {children}
     </p>
   );
@@ -86,36 +86,36 @@ export function SectionLabel({ children }: Readonly<{ children: ReactNode }>) {
 
 export function Footer() {
   return (
-    <footer className="mt-10 border-t border-[#ece4f4] bg-[#f5effa] px-6 py-9 text-center text-[12px] leading-relaxed text-[#6c5a82] font-normal">
-      <div className="font-display text-base text-[#2d144d] font-bold tracking-tight">
+    <footer className="mt-10 border-t border-slate-200 bg-white px-6 py-9 text-center text-[12px] leading-relaxed text-slate-500 font-normal">
+      <div className="font-display text-base text-slate-900 font-bold tracking-tight">
         🕊️ Templo de Luz
       </div>
-      <p className="mt-2.5 max-w-[360px] mx-auto text-[#5e4b73] leading-relaxed">
+      <p className="mt-2.5 max-w-[360px] mx-auto text-slate-500 leading-relaxed">
         Templo de Luz é um projeto de Centro Espírita Casa Nova — associação privada sem fins
         lucrativos.
       </p>
-      <div className="mt-2 text-[11.5px] text-[#786445] font-medium space-y-0.5">
+      <div className="mt-2 text-[11.5px] text-slate-500 font-medium space-y-0.5">
         <p>CNPJ 61.566.220/0001-71</p>
         <p>Rua José Gonçalves Gomide, 144 — Vila Guilherme, São Paulo/SP — CEP 02075-001</p>
       </div>
 
-      <div className="mx-auto my-4 h-px w-20 bg-[#d8caea]" />
+      <div className="mx-auto my-4 h-px w-20 bg-slate-200" />
 
-      <p className="text-[12px] text-[#5e4b73]">
+      <p className="text-[12px] text-slate-500">
         Contato:{" "}
         <a
-          className="font-semibold text-[#2d144d] hover:underline"
+          className="font-semibold text-blue-700 hover:underline"
           href="mailto:tempodaluz@gmail.com"
         >
           tempodaluz@gmail.com
         </a>{" "}
         ·{" "}
-        <a className="font-semibold text-[#2d144d] hover:underline" href="tel:+5519998316353">
+        <a className="font-semibold text-blue-700 hover:underline" href="tel:+5519998316353">
           (19) 99831-6353
         </a>
       </p>
 
-      <div className="mt-4 flex justify-center items-center gap-4 text-[12px] text-[#786445] font-medium">
+      <div className="mt-4 flex justify-center items-center gap-4 text-[12px] text-slate-500 font-medium">
         <Link
           to="/privacidade"
           className="hover:text-[#2d144d] underline decoration-[#d8caea] underline-offset-4 transition-colors"

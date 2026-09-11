@@ -4,9 +4,8 @@ import { AnimatePresence, motion } from "framer-motion";
 /**
  * Exit-Intent de Retenção — notificação persuasiva (sem mídia).
  *
- * Dispara quando o usuário tenta sair da página (mouse saindo pelo topo no
- * desktop, ou troca de aba no mobile) e exibe um aviso exclusivo e urgente
- * para convencê-lo a continuar o quiz — sem bloqueio forçado.
+ * Dispara uma única vez quando o usuário tenta sair, oferecendo continuidade
+ * sem bloquear a navegação ou criar urgência artificial.
  */
 
 const SESSION_FLAG_KEY = "templodeluz:exit-intent:shown";
@@ -20,10 +19,10 @@ interface ExitIntentBackRedirectProps {
 }
 
 export function ExitIntentBackRedirect({
-  stayTitle = "Espere! Sua conexão espiritual ainda não terminou",
-  stayBody = "A médium Milena já começou a sintonizar a frequência do seu ente querido no oratório sagrado. Se você sair agora, a sua vaga de hoje será liberada para outra pessoa.",
-  stayCta = "Continuar meu Quiz Sagrado",
-  leaveLabel = "Não quero receber minha carta hoje",
+  stayTitle = "Sua intenção ficou salva",
+  stayBody = "Você pode continuar agora ou voltar mais tarde neste mesmo aparelho. Seus dados do quiz permanecem disponíveis para revisão.",
+  stayCta = "Continuar com minha intenção",
+  leaveLabel = "Fechar por enquanto",
   enabled = true,
 }: Readonly<ExitIntentBackRedirectProps>) {
   const [visible, setVisible] = useState(false);
@@ -83,10 +82,9 @@ export function ExitIntentBackRedirect({
             transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Faixa de urgência */}
-            <div className="flex items-center justify-center gap-2 bg-gradient-to-r from-[#2d144d] via-[#3b1c63] to-[#1f0c36] px-4 py-2.5 text-[11px] font-bold tracking-widest text-amber-300 uppercase">
-              <span className="h-2 w-2 rounded-full bg-amber-400 animate-ping" />
-              Oportunidade de hoje · vagas limitadas
+            <div className="flex items-center justify-center gap-2 bg-gradient-to-r from-[#111827] via-[#172033] to-[#0f172a] px-4 py-2.5 text-[11px] font-bold tracking-widest text-blue-100 uppercase">
+              <span className="h-2 w-2 rounded-full bg-emerald-400" />
+              Progresso salvo com segurança
             </div>
 
             <div className="flex flex-col items-center gap-3 px-6 py-7 text-center">
@@ -101,23 +99,23 @@ export function ExitIntentBackRedirect({
 
               <h2
                 id="exit-intent-title"
-                className="font-display text-[22px] font-black leading-tight text-[#181126]"
+                className="font-display text-[22px] font-black leading-tight text-slate-950"
               >
                 {stayTitle}
               </h2>
 
-              <p className="text-[14px] leading-relaxed text-[#5e4b73]">{stayBody}</p>
+              <p className="text-[14px] leading-relaxed text-slate-600">{stayBody}</p>
 
-              <div className="mt-1 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[11px] font-semibold text-[#786445]">
-                <span>🔒 Sigilo absoluto</span>
-                <span>🛡️ Garantia de 7 dias</span>
-                <span>✍️ 100% manuscrita</span>
+              <div className="mt-1 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[11px] font-semibold text-slate-500">
+                <span>🔒 Privacidade</span>
+                <span>↩️ Você pode revisar</span>
+                <span>💬 Atendimento humano</span>
               </div>
 
               <button
                 type="button"
                 onClick={close}
-                className="mt-2 w-full cursor-pointer rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 px-6 py-[15px] text-[15px] font-extrabold uppercase tracking-wide text-white shadow-lg shadow-emerald-600/30 transition-transform hover:scale-[1.01] active:scale-[0.99]"
+                className="mt-2 w-full cursor-pointer rounded-[14px] bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-[15px] text-[15px] font-extrabold text-white shadow-lg shadow-blue-600/25 transition-all hover:-translate-y-0.5 active:translate-y-0"
               >
                 {stayCta}
               </button>
@@ -125,7 +123,7 @@ export function ExitIntentBackRedirect({
               <button
                 type="button"
                 onClick={close}
-                className="cursor-pointer text-[12.5px] font-semibold text-[#9a8bb5] underline-offset-4 hover:text-[#6c5a82] hover:underline"
+                className="cursor-pointer text-[12.5px] font-semibold text-slate-400 underline-offset-4 hover:text-slate-700 hover:underline"
               >
                 {leaveLabel}
               </button>

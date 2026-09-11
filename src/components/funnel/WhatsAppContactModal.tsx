@@ -132,7 +132,7 @@ export function WhatsAppContactModal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="relative w-full max-w-[440px] rounded-3xl bg-gradient-to-b from-[#fffefc] via-[#fbf8f3] to-[#f7f2ea] p-5 sm:p-6 text-left shadow-2xl border border-amber-200/80 animate-rise-in max-h-[92vh] overflow-y-auto">
+      <div className="relative w-full max-w-[440px] rounded-[28px] bg-[#f8fafc] p-5 sm:p-6 text-left shadow-[0_30px_80px_-20px_rgba(15,23,42,0.55)] border border-slate-200 animate-rise-in max-h-[92vh] overflow-y-auto">
         {/* Botão de Fechar */}
         <button
           type="button"
@@ -144,8 +144,8 @@ export function WhatsAppContactModal({
         </button>
 
         {/* Topo Acolhedor com Ícone de WhatsApp & Bênção */}
-        <div className="flex items-center gap-3 pr-8">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700 text-white shadow-md shadow-emerald-900/20">
+        <div className="flex items-center gap-3 pr-8 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-900/20">
             {/* Logo WhatsApp SVG Oficial */}
             <svg
               className="w-7 h-7 text-white"
@@ -158,38 +158,38 @@ export function WhatsAppContactModal({
             </svg>
           </div>
           <div>
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#92400e] block">
-              ✦ Atendimento Direto ✦
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-blue-700 block">
+              Canal de atendimento
             </span>
-            <h3 id="modal-whatsapp-title" className="font-display text-[17px] font-black text-[#181126] leading-tight">
-              Falar com Médium Milena
+            <h3 id="modal-whatsapp-title" className="font-display text-[18px] font-black text-slate-950 leading-tight">
+              Seu pedido está pronto para o WhatsApp
             </h3>
           </div>
         </div>
 
-        {/* Mensagem Acolhedora de Gratidão */}
-        <div className="mt-4 p-3.5 rounded-2xl bg-amber-50/90 border border-amber-200/70 text-[12.5px] leading-relaxed text-[#78350f]">
+        {/* Resumo de continuidade */}
+        <div className="mt-4 p-3.5 rounded-2xl bg-blue-50 border border-blue-100 text-[12.5px] leading-relaxed text-slate-700">
           <p className="font-semibold">
-            Que a paz de Deus envolva seu coração, <strong>{primeiroNome}</strong>! 🕊️✨
+            Olá, <strong>{primeiroNome}</strong>. Sua intenção para {primeiroEnte} foi organizada com cuidado.
           </p>
-          <p className="mt-1 text-[#854d0e] text-[12px]">
-            Agradecemos imensamente pelo seu amor e dedicação ao solicitar a carta sagrada de <strong>{primeiroEnte}</strong>. Para organizarmos seu atendimento com todo carinho, por favor selecione sua situação abaixo:
+          <p className="mt-1 text-slate-500 text-[12px]">
+            Escolha como deseja continuar para que a conversa comece com as informações certas.
           </p>
         </div>
 
         {/* Seleção de Situação da Doação (Caixinhas Interativas) */}
         <div className="mt-4 space-y-2">
           <label className="block text-[11.5px] font-extrabold text-[#181126] uppercase tracking-wider">
-            Como você deseja prosseguir no WhatsApp?
+            Como você deseja continuar?
           </label>
 
           {/* Opção 1: Já doei */}
           <div
             onClick={() => setDonationChoice("already_donated")}
-            className={`p-3 rounded-2xl border-2 transition-all duration-200 cursor-pointer flex items-start gap-3 ${
+            className={`p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer flex items-start gap-3 ${
               donationChoice === "already_donated"
-                ? "border-emerald-600 bg-emerald-50/70 shadow-xs ring-1 ring-emerald-600/30"
-                : "border-slate-200/80 bg-white hover:border-emerald-500/40 hover:bg-emerald-50/20"
+                ? "border-blue-500 bg-blue-50 shadow-sm ring-4 ring-blue-500/10"
+                : "border-slate-200 bg-white hover:border-blue-300 hover:bg-blue-50/30"
             }`}
           >
             <input
@@ -201,10 +201,10 @@ export function WhatsAppContactModal({
             />
             <div className="flex-1 min-w-0">
               <span className="block text-[13px] font-extrabold text-emerald-950 leading-tight">
-                ✨ Já realizei minha contribuição da vela
+                  Já realizei minha contribuição
               </span>
               <span className="block text-[11px] text-emerald-800/90 mt-0.5 leading-normal">
-                Vou enviar o comprovante diretamente no WhatsApp para que a vela seja inscrita.
+                  Vou enviar o comprovante diretamente no WhatsApp.
               </span>
             </div>
           </div>
@@ -212,10 +212,10 @@ export function WhatsAppContactModal({
           {/* Opção 2: Ainda não doei, mas quero doar agora */}
           <div
             onClick={() => setDonationChoice("want_to_donate")}
-            className={`p-3 rounded-2xl border-2 transition-all duration-200 cursor-pointer flex items-start gap-3 ${
+            className={`p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer flex items-start gap-3 ${
               donationChoice === "want_to_donate"
-                ? "border-amber-500 bg-amber-50/70 shadow-xs ring-1 ring-amber-500/30"
-                : "border-slate-200/80 bg-white hover:border-amber-500/40 hover:bg-amber-50/20"
+                ? "border-blue-500 bg-blue-50 shadow-sm ring-4 ring-blue-500/10"
+                : "border-slate-200 bg-white hover:border-blue-300 hover:bg-blue-50/30"
             }`}
           >
             <input
@@ -228,14 +228,14 @@ export function WhatsAppContactModal({
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between gap-1">
                 <span className="block text-[13px] font-extrabold text-[#78350f] leading-tight">
-                  🕯️ Desejo contribuir para acender a vela
+                  Desejo escolher uma contribuição
                 </span>
                 <span className="rounded-full bg-amber-200/80 text-[#78350f] font-black text-[9.5px] px-2 py-0.5 uppercase">
                   Recomendado
                 </span>
               </div>
               <span className="block text-[11px] text-[#92400e]/90 mt-0.5 leading-normal">
-                Quero consagrar a vela de 7 dias com o nome de {primeiroEnte} para iluminar a sessão.
+                  Quero ver PIX e cartão antes de iniciar a conversa.
               </span>
               {donationChoice === "want_to_donate" && (
                 <button
@@ -255,10 +255,10 @@ export function WhatsAppContactModal({
           {/* Opção 3: Atendimento caritativo sem doação agora */}
           <div
             onClick={() => setDonationChoice("free_charity")}
-            className={`p-3 rounded-2xl border-2 transition-all duration-200 cursor-pointer flex items-start gap-3 ${
+            className={`p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer flex items-start gap-3 ${
               donationChoice === "free_charity"
-                ? "border-purple-600 bg-purple-50/70 shadow-xs ring-1 ring-purple-600/30"
-                : "border-slate-200/80 bg-white hover:border-purple-500/40 hover:bg-purple-50/20"
+                ? "border-blue-500 bg-blue-50 shadow-sm ring-4 ring-blue-500/10"
+                : "border-slate-200 bg-white hover:border-blue-300 hover:bg-blue-50/30"
             }`}
           >
             <input
@@ -270,10 +270,10 @@ export function WhatsAppContactModal({
             />
             <div className="flex-1 min-w-0">
               <span className="block text-[13px] font-extrabold text-[#2d144d] leading-tight">
-                🤍 Não posso doar agora (quero apenas atendimento caritativo)
+                  Quero falar com a equipe primeiro
               </span>
               <span className="block text-[11px] text-[#5b21b6]/90 mt-0.5 leading-normal">
-                Você será acolhido(a) com respeito e a médium receberá suas intenções de qualquer forma.
+                  Minha intenção será enviada para acolhimento e orientação.
               </span>
             </div>
           </div>
@@ -295,7 +295,7 @@ export function WhatsAppContactModal({
           <button
             type="button"
             onClick={handleOpenWhatsApp}
-            className="w-full cursor-pointer rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-700 py-3.5 px-4 text-center font-extrabold text-white uppercase tracking-wider text-[14px] shadow-lg shadow-emerald-700/25 transition-all duration-200 hover:brightness-105 active:scale-[0.985] flex items-center justify-center gap-2.5"
+            className="w-full cursor-pointer rounded-[14px] bg-gradient-to-r from-blue-600 to-indigo-600 py-3.5 px-4 text-center font-extrabold text-white text-[14px] shadow-lg shadow-blue-700/25 transition-all duration-200 hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 flex items-center justify-center gap-2.5"
           >
             <svg
               className="w-5 h-5 text-white"
@@ -306,7 +306,7 @@ export function WhatsAppContactModal({
               <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.694.062-1.107-.07-.251-.08-.574-.188-.988-.369-1.758-.767-2.903-2.545-2.991-2.663-.088-.118-.718-.956-.718-1.822 0-.866.453-1.293.614-1.469.161-.177.351-.221.468-.221.117 0 .234.001.336.006.107.005.251-.041.393.298.146.351.498 1.214.542 1.303.044.088.073.192.015.308-.059.117-.088.19-.176.293-.088.103-.186.23-.265.31-.088.088-.18.184-.078.36.103.176.458.756.983 1.224.676.602 1.246.789 1.422.877.176.088.279.074.382-.044.103-.117.439-.512.556-.688.117-.176.235-.147.396-.088.161.059 1.026.484 1.202.572.176.088.293.132.337.206.044.074.044.43-.1 1.035z" />
               <path d="M12 2C6.477 2 2 6.477 2 12c0 1.891.523 3.664 1.435 5.186L2.1 22l4.98-1.306A9.958 9.958 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18.2c-1.635 0-3.15-.494-4.414-1.343l-.316-.214-2.95.774.787-2.876-.234-.336A8.163 8.163 0 0 1 3.8 12c0-4.521 3.679-8.2 8.2-8.2 4.521 0 8.2 3.679 8.2 8.2 0 4.521-3.679 8.2-8.2 8.2z" />
             </svg>
-            <span>Conversar no WhatsApp da Milena 🕊️</span>
+            <span>Abrir conversa no WhatsApp</span>
           </button>
 
           <p className="text-center text-[10.5px] text-[#786445]">

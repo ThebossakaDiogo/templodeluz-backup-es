@@ -154,6 +154,26 @@ body [class*="text-[11px]"] { font-size: 0.86rem !important; }
 body [class*="text-[11.5px]"] { font-size: 0.88rem !important; }
 body [class*="text-[12px]"] { font-size: 0.9rem !important; }
 
+.quiz-modern {
+  background:
+    radial-gradient(circle at 100% 0%, rgb(59 130 246 / 0.08), transparent 28rem),
+    radial-gradient(circle at 0% 45%, rgb(99 102 241 / 0.06), transparent 26rem),
+    #f5f7fb;
+}
+
+.quiz-modern input,
+.quiz-modern textarea,
+.quiz-modern button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.quiz-modern button:focus-visible,
+.quiz-modern input:focus-visible,
+.quiz-modern textarea:focus-visible {
+  outline: 3px solid rgb(59 130 246 / 0.22);
+  outline-offset: 2px;
+}
+
 @media (max-width: 640px) {
   html { font-size: 17px; }
   button:not([aria-label]) { min-height: 2.85rem; }
