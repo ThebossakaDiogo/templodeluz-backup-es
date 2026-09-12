@@ -243,7 +243,7 @@ Deno.serve(async (req) => {
       ? Number(input?.amountCents)
       : resolveAmount(product, input?.amountCents);
     const isValidLiveCallAmount = productId !== 'chamada_ao_vivo_milena'
-      || [15000, 25000, 50000].includes(amountCents);
+      || [6000, 10000, 15000].includes(amountCents);
     if (amountCents === null || !Number.isInteger(amountCents) || !isValidLiveCallAmount) {
       return json(origin, { error: 'Valor inválido para este produto.' }, 400);
     }

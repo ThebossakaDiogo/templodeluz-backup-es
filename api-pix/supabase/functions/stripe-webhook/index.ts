@@ -99,7 +99,7 @@ Deno.serve(async (req) => {
     const idempotencyKey = cleanString(session?.metadata?.orderIdempotencyKey, 64);
     const amountCents = Number(session?.amount_total);
     const isValidLiveCallAmount = productId !== 'chamada_ao_vivo_milena'
-      || [15000, 25000, 50000].includes(amountCents);
+      || [6000, 10000, 15000].includes(amountCents);
     if (!['carta_sagrada', 'cirurgia_milena', 'chamada_ao_vivo_milena'].includes(productId) || !/^[0-9a-f-]{36}$/i.test(idempotencyKey) || !Number.isInteger(amountCents) || amountCents < 100 || !isValidLiveCallAmount) {
       throw new Error('INVALID_STRIPE_SESSION_METADATA');
     }

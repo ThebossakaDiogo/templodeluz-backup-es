@@ -6,7 +6,7 @@ import { PixCheckout } from "@/components/funnel/PixCheckout";
 import { recordInput } from "@/lib/auto-capture";
 import { verifyStripeCheckoutSession } from "@/lib/stripe";
 import milenaLiveCallImage from "../../images-elements/medium-milena-BduzfpAk.webp_202609071752.jpeg";
-import milenaLiveCallAudio from "../../Feedbacks/milena-chamada-oferta.mp3";
+import milenaLiveCallAudio from "../../Feedbacks/milena-chamada-convite.mp3";
 
 export const Route = createFileRoute("/chamada-ao-vivo-milena")({
   head: () => ({
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/chamada-ao-vivo-milena")({
       {
         name: "description",
         content:
-          "Agende uma chamada de video ao vivo com a medium Milena Medeiros. Contrato digital, horario a partir de 2 horas e atendimento exclusivo.",
+          "Conversa particular por videochamada com Milena Medeiros, com opções de acolhimento, aprofundamento e acompanhamento espiritual.",
       },
     ],
   }),
@@ -27,25 +27,31 @@ type PeriodPreference = "day" | "night";
 const LIVE_CALL_PACKAGES = [
   {
     id: "chamada_2h",
-    hours: 2,
-    amountCents: 15000,
-    title: "Chamada individual de 2 horas",
-    description: "Uma conversa particular, com tempo para escuta, dúvidas e orientação fraterna.",
+    hours: 1,
+    amountCents: 6000,
+    title: "Conversa particular",
+    heading: "1 hora com Milena",
+    description: "Para quem gostaria de conversar diretamente com Milena e ter um momento reservado para ser ouvido.",
+    includes: ["1 hora de videochamada individual", "Escuta e acolhimento da sua história", "Espaço para perguntas e dúvidas", "Conversa sobre sua carta e sua saudade", "Orientação espiritual e fraterna", "Momento de oração ou reflexão, se desejar"],
   },
   {
     id: "acolhimento_4h",
-    hours: 4,
-    amountCents: 25000,
-    title: "Acolhimento espiritual focado de 4 horas",
-    description: "Mais tempo para organizar intenções, momentos de prece e uma orientação espiritual mais detalhada.",
+    hours: 2,
+    amountCents: 10000,
+    title: "Acolhimento aprofundado",
+    heading: "2 horas, com mais tempo para conversar",
+    description: "Para quem sente que existe muita coisa para contar e não quer ficar olhando para o relógio quando começar a falar sobre o que importa.",
+    includes: ["2 horas de videochamada individual", "Tudo do atendimento de 1 hora", "Mais tempo para aprofundar sua história", "Orientação espiritual mais detalhada", "Momento de oração e reflexão", "Orientação de prática pessoal para realizar após a conversa, quando apropriado"],
     popular: true,
   },
   {
-    id: "acompanhamento_100_dias",
-    hours: 0,
-    amountCents: 50000,
-    title: "Acompanhamento espiritual semanal por 100 dias",
-    description: "Acompanhamento semanal fraterno, alinhado com a Milena pelo WhatsApp e sem substituir cuidados médicos ou terapêuticos.",
+    id: "renovacao_3_dias",
+    hours: 2,
+    amountCents: 15000,
+    title: "3 dias de renovação",
+    heading: "A chamada termina. O acolhimento não.",
+    description: "Uma conversa inicial com Milena e três dias de acompanhamento espiritual pelo WhatsApp.",
+    includes: ["2 horas de videochamada particular", "3 dias de acompanhamento pelo WhatsApp", "Orientações pessoais durante o período", "Momentos de oração e reflexão", "Prática simbólica orientada, quando apropriado", "Encerramento do acompanhamento no terceiro dia"],
   },
 ] as const;
 
@@ -258,7 +264,7 @@ function ChamadaAoVivoMilenaPage() {
                   </span>
                 </div>
               </div>
-              <div className="mt-3 rounded-xl border border-white/10 bg-black/20 px-3 py-2.5">
+               <div className="mt-3 rounded-xl border border-white/10 bg-black/20 px-3 py-2.5">
                 <audio
                   controls
                   preload="none"
@@ -268,17 +274,26 @@ function ChamadaAoVivoMilenaPage() {
                   <source src={milenaLiveCallAudio} type="audio/mpeg" />
                   Seu navegador não oferece suporte à reprodução deste áudio.
                 </audio>
-              </div>
-              <p className="mt-3 text-center text-[12.5px] font-semibold leading-relaxed text-[#fff3cc]">
-                ▶️ Ouça a Milena explicar pessoalmente como será sua chamada.
-              </p>
+               </div>
+               <div className="relative mt-3 flex items-center justify-center">
+                 <svg aria-hidden="true" viewBox="0 0 120 34" className="absolute -left-2 -top-4 h-9 w-24 rotate-[8deg] text-[#f5d285] opacity-85">
+                   <path d="M6 4c30 0 25 23 63 21 18-1 24-9 39-15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeDasharray="2 3" />
+                   <path d="m102 6 7 4-7 5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                 </svg>
+                 <p className="relative z-10 rounded-full bg-[#2d144d]/75 px-4 py-2 text-center text-[12.5px] font-semibold leading-relaxed text-[#fff3cc]">
+                   ▶️ Ouça a Milena explicar pessoalmente como será sua chamada.
+                 </p>
+                 <svg aria-hidden="true" viewBox="0 0 120 34" className="absolute -right-2 -top-4 h-9 w-24 -rotate-[8deg] scale-x-[-1] text-[#f5d285] opacity-85">
+                   <path d="M6 4c30 0 25 23 63 21 18-1 24-9 39-15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeDasharray="2 3" />
+                   <path d="m102 6 7 4-7 5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                 </svg>
+               </div>
             </div>
-            <h1 className="font-display mt-3 text-[25px] leading-tight font-black text-white">
-              Chamada Ao Vivo com Milena
+            <h1 className="font-display mt-4 text-[25px] leading-tight font-black text-white">
+              Talvez tenha ficado coisa demais no coração para colocar em uma carta.
             </h1>
             <p className="mt-3.5 max-w-[340px] text-[13.5px] leading-relaxed text-white/80 font-light">
-              Antes de continuar sua carta, você pode reservar uma conversa particular com a médium
-              Milena Medeiros.
+              {quizFirstName ? `${quizFirstName}, ` : ""}Milena gostaria de abrir para você a possibilidade de uma conversa particular por videochamada. Sua carta continua normalmente; esse atendimento é opcional.
             </p>
           </div>
         </header>
@@ -288,16 +303,16 @@ function ChamadaAoVivoMilenaPage() {
             <div className="px-6 pt-8 pb-4">
               <div className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-center text-[11.5px] font-bold leading-relaxed text-emerald-900">
                 {source === "paid"
-                  ? "Sua contribuição foi confirmada. Se desejar, você pode acrescentar uma conversa individual antes de continuar."
-                  : "Você pode continuar sua carta normalmente. Se desejar, escolha uma conversa individual com a Milena."}
+                  ? "Sua contribuição foi confirmada. Esta conversa é um espaço adicional e opcional para quem desejar acolhimento individual."
+                  : "Sua carta continua normalmente. A conversa abaixo é opcional para quem deseja um espaço individual com a Milena."}
               </div>
               <div className="rounded-3xl border-2 border-[#d4af37]/40 bg-gradient-to-br from-[#fbf8ee] via-white to-[#f7f2e4] p-5 shadow-xl text-center space-y-4">
                 <span className="text-4xl">🕯️</span>
                 <h2 className="font-display text-xl font-black text-[#1a082c] leading-snug">
-                  Conversa ao Vivo com Milena
+                  Um espaço só seu com a Milena
                 </h2>
                 <p className="text-xs text-[#6d5488] leading-relaxed">
-                  {personalizedOffer}
+                  {personalizedOffer} Você não precisa preparar nada: pode falar sobre sua história, sobre quem partiu, sobre a saudade, a carta e perguntas que ainda ficaram.
                 </p>
 
                 <div className="grid grid-cols-1 gap-3 pt-2">
@@ -305,10 +320,10 @@ function ChamadaAoVivoMilenaPage() {
                     <span className="text-lg shrink-0">📹</span>
                     <div className="text-left">
                       <span className="block text-xs font-black text-[#1a082c]">
-                        Videochamada Exclusiva
+                        Ao vivo e particular
                       </span>
                       <span className="block text-[11px] text-[#6d5488]">
-                        Atendimento ao vivo, particular e acolhedor
+                        A conversa acontece diretamente com Milena por videochamada.
                       </span>
                     </div>
                   </div>
@@ -316,10 +331,10 @@ function ChamadaAoVivoMilenaPage() {
                     <span className="text-lg shrink-0">📄</span>
                     <div className="text-left">
                       <span className="block text-xs font-black text-[#1a082c]">
-                        Contrato Digital
+                        No seu tempo
                       </span>
                       <span className="block text-[11px] text-[#6d5488]">
-                        Termo de confidencialidade e agendamento
+                        Um espaço reservado para falar sem resumir sua história em mensagens.
                       </span>
                     </div>
                   </div>
@@ -327,17 +342,17 @@ function ChamadaAoVivoMilenaPage() {
                     <span className="text-lg shrink-0">📅</span>
                     <div className="text-left">
                       <span className="block text-xs font-black text-[#1a082c]">
-                        Escolha Antes de Pagar
+                        Com privacidade
                       </span>
                       <span className="block text-[11px] text-[#6d5488]">
-                        Defina período, data e horário de preferência
+                        Atendimento individual e confidencial.
                       </span>
                     </div>
                   </div>
                 </div>
 
                 <div className="rounded-2xl border border-[#d9c6a3] bg-white/85 px-4 py-3.5 shadow-sm">
-                  <span className="text-[10px] font-black uppercase tracking-[0.14em] text-[#b45309]">Sessão escolhida</span>
+                  <span className="text-[10px] font-black uppercase tracking-[0.14em] text-[#b45309]">Atendimento escolhido</span>
                   <AnimatePresence mode="wait" initial={false}>
                     <motion.span
                       key={selectedPackage.id}
@@ -359,20 +374,21 @@ function ChamadaAoVivoMilenaPage() {
                       transition={{ duration: 0.18, ease: "easeOut" }}
                       className="mt-1 block text-[11.5px] font-bold leading-relaxed text-[#6d5488]"
                     >
-                      {selectedPackage.title}
+                      {selectedPackage.heading}
                     </motion.span>
                   </AnimatePresence>
                 </div>
 
                 <div className="rounded-2xl border border-[#d4af37]/30 bg-white/90 p-3 text-left">
-                  <span className="text-[10.5px] font-bold uppercase tracking-wider text-[#786445]">Quantas horas você prefere?</span>
+                  <span className="text-[10.5px] font-bold uppercase tracking-wider text-[#786445]">Como você gostaria de ser acolhido?</span>
+                  <p className="mt-1 text-[11px] leading-relaxed text-[#6d5488]">Não existe uma opção certa. Escolha apenas o tipo de atendimento que fizer mais sentido para o seu momento.</p>
                   <div className="mt-2 grid gap-2">
                     {LIVE_CALL_PACKAGES.map((item) => {
                       const isSelected = selectedPackageId === item.id;
                       return (
                       <button key={item.id} type="button" onClick={() => setSelectedPackageId(item.id)} className={`relative rounded-2xl border-2 p-3.5 text-left transition-all duration-300 ${isSelected ? "z-10 scale-[1.035] border-[#5d4786] bg-[#f6f0fc] ring-4 ring-[#5d4786]/15 shadow-[0_18px_32px_-20px_rgba(45,20,77,0.75)]" : "scale-100 border-[#e5daf0] bg-white hover:border-[#b9a8cf] hover:bg-[#fcfaff]"}`}>
                         <span className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3">
-                          <strong className="text-[15.5px] font-black leading-snug text-[#1a082c]">{item.title}</strong>
+                          <strong className="text-[15.5px] font-black leading-snug text-[#1a082c]">{item.heading}</strong>
                           <span className={`shrink-0 text-right font-black ${isSelected ? "text-[18px] text-[#2d144d]" : "text-[15px] text-[#5d4786]"}`}>R$ {(item.amountCents / 100).toFixed(0)},00</span>
                           <span className="col-span-2 mt-1.5 text-[11px] leading-relaxed text-[#6d5488]">{item.description}</span>
                           <span className="col-span-2 mt-2 flex items-center justify-between gap-2">
@@ -383,7 +399,13 @@ function ChamadaAoVivoMilenaPage() {
                       </button>
                     )})}
                   </div>
-                  <p className="mt-3 rounded-xl border border-[#e3dbea] bg-[#f5f1f8] px-3 py-2 text-[11px] leading-relaxed text-[#514763]"><strong>{selectedPackage.title}:</strong> {selectedPackage.description}</p>
+                  <div className="mt-3 rounded-xl border border-[#e3dbea] bg-[#f5f1f8] px-3 py-3 text-left">
+                    <strong className="text-[12px] text-[#2d144d]">{selectedPackage.title}</strong>
+                    <p className="mt-1 text-[11px] leading-relaxed text-[#514763]">{selectedPackage.description}</p>
+                    <ul className="mt-2 space-y-1 text-[10.5px] leading-relaxed text-[#514763]">
+                      {selectedPackage.includes.map((item) => <li key={item} className="flex gap-1.5"><span className="text-[#39776c]">•</span><span>{item}</span></li>)}
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
@@ -398,7 +420,7 @@ function ChamadaAoVivoMilenaPage() {
                 className="group relative w-full cursor-pointer overflow-hidden rounded-2xl bg-gradient-to-r from-[#57a698] via-[#39776c] to-[#285e56] px-6 py-4 text-sm font-black text-white uppercase tracking-wider shadow-[0_16px_30px_-14px_rgba(40,94,86,0.8)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_38px_-14px_rgba(40,94,86,0.9)] active:translate-y-0"
               >
                 <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-1000 group-hover:translate-x-full" />
-                <span className="relative flex items-center justify-center gap-2">Continuar <span className="rounded-full bg-white/18 px-2.5 py-1 text-[13px] tracking-normal">R$ {(callAmountCents / 100).toFixed(2).replace(".", ",")}</span></span>
+                <span className="relative flex items-center justify-center gap-2">Continuar e escolher horário <span className="rounded-full bg-white/18 px-2.5 py-1 text-[13px] tracking-normal">R$ {(callAmountCents / 100).toFixed(2).replace(".", ",")}</span></span>
               </button>
               <button
                 type="button"

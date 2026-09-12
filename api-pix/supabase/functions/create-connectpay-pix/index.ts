@@ -270,6 +270,9 @@ Deno.serve(async (req) => {
     if (amountCents === null) {
       return json(origin, { error: 'Valor da cobranca PIX invalido.' }, 400);
     }
+    if (productId === 'chamada_ao_vivo_milena' && ![6000, 10000, 15000].includes(amountCents)) {
+      return json(origin, { error: 'Selecione um dos pacotes disponíveis para a chamada ao vivo.' }, 400);
+    }
 
     const orderInsertPayload: Record<string, unknown> = {
       idempotency_key: idempotencyKey,
