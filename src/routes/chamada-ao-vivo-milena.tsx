@@ -90,6 +90,7 @@ function ChamadaAoVivoMilenaPage() {
   const [source, setSource] = useState("skipped");
   const [isVerifyingCardPayment, setIsVerifyingCardPayment] = useState(false);
   const [cardPaymentError, setCardPaymentError] = useState("");
+  const [isInvitationAudioPlaying, setIsInvitationAudioPlaying] = useState(false);
   const [quizProfile, setQuizProfile] = useState<{ nome?: string; ente?: string; relacao?: string; dorPrincipal?: string }>({});
   const selectedPackage = LIVE_CALL_PACKAGES.find((item) => item.id === selectedPackageId) ?? LIVE_CALL_PACKAGES[0];
   const callAmountCents = selectedPackage.amountCents;
@@ -264,10 +265,13 @@ function ChamadaAoVivoMilenaPage() {
                   </span>
                 </div>
               </div>
-               <div className="mt-3 rounded-xl border border-white/10 bg-black/20 px-3 py-2.5">
+              <div className={`mt-3 rounded-xl border bg-black/20 px-3 py-2.5 transition-all duration-300 ${isInvitationAudioPlaying ? "border-[#f5d285] shadow-[0_0_22px_rgba(245,210,133,0.38)] animate-pulse" : "border-white/10"}`}>
                 <audio
                   controls
                   preload="none"
+                  onPlay={() => setIsInvitationAudioPlaying(true)}
+                  onPause={() => setIsInvitationAudioPlaying(false)}
+                  onEnded={() => setIsInvitationAudioPlaying(false)}
                   aria-label="Áudio de Milena Medeiros explicando a chamada ao vivo"
                   className="w-full accent-[#f5d285]"
                 >
@@ -275,17 +279,17 @@ function ChamadaAoVivoMilenaPage() {
                   Seu navegador não oferece suporte à reprodução deste áudio.
                 </audio>
                </div>
-               <div className="relative mt-3 flex items-center justify-center">
-                 <svg aria-hidden="true" viewBox="0 0 120 34" className="absolute -left-2 -top-4 h-9 w-24 rotate-[8deg] text-[#f5d285] opacity-85">
-                   <path d="M6 4c30 0 25 23 63 21 18-1 24-9 39-15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeDasharray="2 3" />
-                   <path d="m102 6 7 4-7 5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+               <div className="mt-3 grid grid-cols-[50px_1fr_50px] items-center gap-1">
+                 <svg aria-hidden="true" viewBox="0 0 72 44" className="h-11 w-full rotate-[8deg] text-[#f5d285] drop-shadow-[0_1px_4px_rgba(245,210,133,0.6)]">
+                   <path d="M4 7c19 1 14 27 43 25 8-1 13-5 19-10" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                   <path d="m59 15 8 7-10 4" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                  </svg>
-                 <p className="relative z-10 rounded-full bg-[#2d144d]/75 px-4 py-2 text-center text-[12.5px] font-semibold leading-relaxed text-[#fff3cc]">
+                 <p className="rounded-2xl border border-[#f5d285]/35 bg-[#2d144d]/85 px-3 py-2 text-center text-[12.5px] font-black leading-relaxed text-[#fff3cc] shadow-inner">
                    ▶️ Ouça a Milena explicar pessoalmente como será sua chamada.
                  </p>
-                 <svg aria-hidden="true" viewBox="0 0 120 34" className="absolute -right-2 -top-4 h-9 w-24 -rotate-[8deg] scale-x-[-1] text-[#f5d285] opacity-85">
-                   <path d="M6 4c30 0 25 23 63 21 18-1 24-9 39-15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeDasharray="2 3" />
-                   <path d="m102 6 7 4-7 5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                 <svg aria-hidden="true" viewBox="0 0 72 44" className="h-11 w-full -rotate-[8deg] scale-x-[-1] text-[#f5d285] drop-shadow-[0_1px_4px_rgba(245,210,133,0.6)]">
+                   <path d="M4 7c19 1 14 27 43 25 8-1 13-5 19-10" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                   <path d="m59 15 8 7-10 4" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                  </svg>
                </div>
             </div>
@@ -385,15 +389,16 @@ function ChamadaAoVivoMilenaPage() {
                   <div className="mt-2 grid gap-2">
                     {LIVE_CALL_PACKAGES.map((item) => {
                       const isSelected = selectedPackageId === item.id;
+                      const isRecommended = item.amountCents === 10000;
                       return (
-                      <button key={item.id} type="button" onClick={() => setSelectedPackageId(item.id)} className={`relative rounded-2xl border-2 p-3.5 text-left transition-all duration-300 ${isSelected ? "z-10 scale-[1.035] border-[#5d4786] bg-[#f6f0fc] ring-4 ring-[#5d4786]/15 shadow-[0_18px_32px_-20px_rgba(45,20,77,0.75)]" : "scale-100 border-[#e5daf0] bg-white hover:border-[#b9a8cf] hover:bg-[#fcfaff]"}`}>
+                      <button key={item.id} type="button" onClick={() => setSelectedPackageId(item.id)} className={`relative rounded-2xl border-2 p-3.5 text-left transition-all duration-300 ${isSelected && isRecommended ? "z-10 scale-[1.065] border-[#c49a52] bg-[#fff9eb] ring-4 ring-[#c49a52]/20 shadow-[0_22px_38px_-20px_rgba(196,154,82,0.82)]" : isSelected ? "z-10 scale-[1.035] border-[#5d4786] bg-[#f6f0fc] ring-4 ring-[#5d4786]/15 shadow-[0_18px_32px_-20px_rgba(45,20,77,0.75)]" : "scale-100 border-[#e5daf0] bg-white hover:border-[#b9a8cf] hover:bg-[#fcfaff]"}`}>
                         <span className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3">
                           <strong className="text-[15.5px] font-black leading-snug text-[#1a082c]">{item.heading}</strong>
-                          <span className={`shrink-0 text-right font-black ${isSelected ? "text-[18px] text-[#2d144d]" : "text-[15px] text-[#5d4786]"}`}>R$ {(item.amountCents / 100).toFixed(0)},00</span>
+                          <span className={`shrink-0 text-right font-black ${isSelected && isRecommended ? "text-[21px] text-[#a66f14]" : isSelected ? "text-[18px] text-[#2d144d]" : "text-[15px] text-[#5d4786]"}`}>R$ {(item.amountCents / 100).toFixed(0)},00</span>
                           <span className="col-span-2 mt-1.5 text-[11px] leading-relaxed text-[#6d5488]">{item.description}</span>
                           <span className="col-span-2 mt-2 flex items-center justify-between gap-2">
                             <span className={`text-[9.5px] font-black uppercase tracking-wide ${isSelected ? "text-[#2d144d]" : "text-[#8a779f]"}`}>{isSelected ? "✓ Selecionado" : "Selecionar pacote"}</span>
-                            {item.popular && <span className="rounded-full bg-[#c49a52] px-2 py-0.5 text-[8px] font-black uppercase tracking-wide text-white">Mais escolhida</span>}
+                            {item.popular && <span className="rounded-full bg-[#c49a52] px-2.5 py-0.5 text-[8px] font-black uppercase tracking-wide text-white shadow-sm">Recomendado</span>}
                           </span>
                         </span>
                       </button>
