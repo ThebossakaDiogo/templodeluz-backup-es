@@ -792,7 +792,6 @@ function PixInstantBox({
     { val: 35, label: "R$ 35", tag: "Sessão completa", highlight: true },
     { val: 40, label: "R$ 40", tag: "Carta física incluída", physicalIncluded: true },
     { val: 60, label: "R$ 60", tag: "Luz da casa" },
-    { val: 100, label: "R$ 100", tag: "Apoio à casa" },
   ];
 
   return (
