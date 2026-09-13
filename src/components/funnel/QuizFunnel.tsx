@@ -13,6 +13,7 @@ import insumoVelaImage from "../../../images-elements/insumo-vela.png";
 import insumoCartaImage from "../../../images-elements/insumo-carta.png";
 import insumoSopaImage from "../../../images-elements/insumo-sopa.png";
 import milenaLoaderImage from "../../../images-elements/milena-loader.jpeg";
+import milenaDonationAudio from "../../../Feedbacks/milena-doacao-templo.mp3";
 
 const LetterZoomModal = lazy(() => import("./LetterZoomModal").then(({ LetterZoomModal: Component }) => ({ default: Component })));
 const PixCheckout = lazy(() => import("./PixCheckout").then(({ PixCheckout: Component }) => ({ default: Component })));
@@ -813,6 +814,17 @@ function PixInstantBox({
       </div>
 
       <div className="p-4 sm:p-6">
+      <div className="mb-4 flex items-center gap-3 rounded-2xl border border-[#ded3e8] bg-white p-3 text-left shadow-sm">
+        <img src={IMAGES.medium} alt="Milena Medeiros" className="h-14 w-14 shrink-0 rounded-2xl border-2 border-[#d8cae5] object-cover object-top shadow-sm" loading="lazy" decoding="async" />
+        <div className="min-w-0 flex-1">
+          <span className="block text-[10px] font-black uppercase tracking-[0.12em] text-[#5d4786]">Mensagem da Milena</span>
+          <span className="mt-0.5 block text-[13px] font-extrabold text-[#272039]">Escute antes de doar</span>
+          <audio controls preload="none" aria-label="Mensagem da Milena antes da contribuição" className="mt-2 w-full accent-[#5d4786]">
+            <source src={milenaDonationAudio} type="audio/mpeg" />
+            Seu navegador não oferece suporte à reprodução deste áudio.
+          </audio>
+        </div>
+      </div>
       <div className="grid grid-cols-3 gap-2 rounded-2xl border border-slate-200 bg-white p-3 text-center shadow-sm">
         {[
           ["1", "Escolha o valor"],
