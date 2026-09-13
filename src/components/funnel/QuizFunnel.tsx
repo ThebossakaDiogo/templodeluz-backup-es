@@ -860,7 +860,7 @@ function PixInstantBox({
                 value={customInput}
                 onFocus={() => setIsCustom(true)}
                 onChange={handleCustomChange}
-                placeholder="Ex.: 35,00"
+                placeholder="Ex.: 50,00"
                 className="w-full rounded-xl border border-[#d8cae5] bg-[#faf9fb] py-4 pl-12 pr-4 text-[22px] font-black text-[#272039] outline-none transition-all placeholder:text-slate-300 focus:border-[#6f5aa0] focus:bg-white"
             />
           </div>
@@ -879,7 +879,7 @@ function PixInstantBox({
               <button
                 key={item.val}
                 type="button"
-                onClick={() => handleSelectPreset(item.val, item.physicalIncluded)}
+                onClick={() => handleSelectPreset(item.val, item.val >= 40)}
                 className={`group relative flex min-h-[96px] flex-col items-start justify-center rounded-2xl px-4 py-3 text-left transition-all duration-200 cursor-pointer ${item.highlight ? "col-span-2 min-h-[112px]" : ""} ${
                   isSelected
                     ? "border-2 border-[#6f5aa0] bg-[#f2eef8] text-[#272039] shadow-[0_16px_30px_-16px_rgba(93,71,134,0.72)] ring-4 ring-[#6f5aa0]/10"
