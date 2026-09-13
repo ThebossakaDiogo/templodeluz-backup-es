@@ -408,14 +408,14 @@ function getDonationPsychologicalImpact(
   primeiroEnte: string,
   primeiroNome: string,
 ) {
-  if (amount < 20) {
+  if (amount < 10) {
     return {
       tier: "invalid",
       icon: "⚠️",
-      badge: "Insumos Físicos Mínimos",
-      title: "Contribuição mínima de R$ 20",
+      badge: "Valor abaixo do mínimo",
+      title: "Escolha um valor para continuar",
       description:
-        `A carta e o acolhimento são gratuitos. O mínimo de R$ 20 ajuda a preparar a vela de 7 dias e o pergaminho para ${primeiroEnte}.`,
+        `A carta e o acolhimento são gratuitos. A contribuição voluntária ajuda a preparar a vela e o pergaminho para ${primeiroEnte}.`,
       badgeColor: "bg-red-50 text-red-800 border-red-200",
       cardBorder: "border-red-200 bg-red-50/30",
       isValid: false,
@@ -829,14 +829,14 @@ function PixInstantBox({
       <div className="mt-5 text-left">
         <div className="mb-3 flex items-center justify-between gap-3 px-1">
           <span className="text-[12px] font-extrabold tracking-[0.08em] text-slate-700 uppercase">Defina o valor</span>
-          <span className="text-[10.5px] font-semibold text-slate-500">Mínimo de R$ 20</span>
+          <span className="text-[10.5px] font-semibold text-slate-500">Escolha livre</span>
         </div>
 
         <div className={`mb-5 rounded-2xl border-2 bg-white p-4 shadow-[0_14px_28px_-20px_rgba(93,71,134,0.6)] transition-all ${isCustom ? "border-[#6f5aa0] ring-4 ring-[#6f5aa0]/10" : "border-[#cfc2df]"}`}>
           <label htmlFor="custom-donation-input" className="block">
             <span className="inline-flex rounded-full bg-[#f2eef8] px-2 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-[#5d4786]">Valor livre</span>
             <span className="mt-2 block text-[15px] font-extrabold text-slate-900">Escolha o valor que fizer sentido para você</span>
-            <span className="mt-0.5 block text-[11.5px] leading-relaxed text-slate-500">Você pode digitar qualquer valor a partir de R$20 ou usar uma sugestão abaixo.</span>
+            <span className="mt-0.5 block text-[11.5px] leading-relaxed text-slate-500">Você pode digitar o valor que preferir ou usar uma sugestão abaixo.</span>
           </label>
           <div className="relative mt-3 w-full">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[14px] font-black text-slate-700">R$</span>
@@ -849,8 +849,13 @@ function PixInstantBox({
                 onChange={handleCustomChange}
                 placeholder="Ex.: 40,00"
                 className="w-full rounded-xl border border-[#d8cae5] bg-[#faf9fb] py-4 pl-12 pr-4 text-[22px] font-black text-[#272039] outline-none transition-all placeholder:text-slate-300 focus:border-[#6f5aa0] focus:bg-white"
-              />
+            />
           </div>
+          {isCustom && customInput.length > 0 && activeAmount < 10 && (
+            <p className="mt-2 rounded-xl bg-amber-50 px-3 py-2 text-[11px] font-semibold leading-relaxed text-amber-900">
+              Esse valor não cobre os materiais mínimos da vela e do pergaminho. Ajuste para pelo menos R$10 para continuar.
+            </p>
+          )}
         </div>
 
         <div className="mb-3 px-1 text-[11px] font-extrabold uppercase tracking-[0.08em] text-slate-500">Valores sugeridos</div>
@@ -935,9 +940,9 @@ function PixInstantBox({
         <h4 className="text-[13.5px] font-extrabold text-[#181126] leading-snug">{impact.title}</h4>
         <p className="text-[12px] text-[#5e4b73] mt-1 leading-relaxed">{impact.description}</p>
 
-        {activeAmount < 20 && (
+        {activeAmount < 10 && (
           <div className="mt-2.5 p-2.5 rounded-xl bg-red-100/80 border border-red-200 text-red-900 text-[11.5px] font-bold leading-tight">
-            O valor mínimo de R$20 ajuda a cobrir a vela de 7 dias e o pergaminho físico.
+            O valor mínimo de R$10 ajuda a cobrir a vela de 7 dias e o pergaminho físico.
           </div>
         )}
       </div>
@@ -1264,16 +1269,12 @@ function Intro({
                 onEnter={next}
                 highlight
               />
-              <div className="pointer-events-none -mt-1 flex items-center gap-2 px-2 text-[11px] font-bold text-[#5d4786]">
-                <svg aria-hidden="true" viewBox="0 0 64 32" className="h-7 w-14 -rotate-[8deg] text-[#c49a52] drop-shadow-sm">
-                  <path d="M4 5c18 2 14 20 42 19 5 0 9-2 13-5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-                  <path d="m51 15 8 4-7 5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                <span>Comece preenchendo seu nome</span>
-              </div>
             </div>
 
             <div className="mt-5">
+              <div className="mb-2 flex justify-center">
+                <span className="rounded-full bg-[#f2eef8] px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-[#5d4786]">Próxima etapa · leva poucos segundos</span>
+              </div>
               <Cta onClick={next} pulse>💫 Começar meu pedido</Cta>
             </div>
 
@@ -1420,8 +1421,8 @@ function Loading({
           Preparando seu pedido
         </span>
 
-        <div className="mx-auto mt-5 overflow-hidden rounded-2xl border border-[#d8c7e9]/25 bg-[#171225] shadow-[0_12px_28px_-16px_rgba(0,0,0,0.7)]">
-          <img src={milenaLoaderImage} alt="Milena Medeiros" className="h-28 w-full object-contain object-center" loading="eager" decoding="async" />
+        <div className="mx-auto mt-5 w-full overflow-hidden rounded-2xl border border-[#d8c7e9]/25 bg-[#171225] shadow-[0_12px_28px_-16px_rgba(0,0,0,0.7)]">
+          <img src={milenaLoaderImage} alt="Milena Medeiros" className="block h-auto w-full object-contain" loading="eager" decoding="async" />
         </div>
 
         <h2 className="relative mx-auto max-w-[330px] font-display text-[25px] font-black leading-[1.12] text-white sm:max-w-none sm:text-[27px]">
