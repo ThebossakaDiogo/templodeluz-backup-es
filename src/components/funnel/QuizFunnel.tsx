@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearch, useNavigate } from "@tanstack/react-router";
 import { CHECKOUT_URL, FAQ, IMAGES, STEPS_HOW } from "./data";
-import { Footer, Halos, Reveal, SectionLabel, Stars } from "./Shell";
+import { Footer, Reveal, SectionLabel, Stars } from "./Shell";
 import { recordInput } from "@/lib/auto-capture";
 import { trackQuizStep } from "@/lib/metaPixel";
 import { trackQuizStep as trackQuizTelemetry } from "@/lib/funnel-telemetry";
@@ -17,7 +17,6 @@ const LetterZoomModal = lazy(() => import("./LetterZoomModal").then(({ LetterZoo
 const PixCheckout = lazy(() => import("./PixCheckout").then(({ PixCheckout: Component }) => ({ default: Component })));
 const SocialProofSection = lazy(() => import("./SocialProofSection").then(({ SocialProofSection: Component }) => ({ default: Component })));
 const MilenaAudioMessage = lazy(() => import("./MilenaAudioMessage").then(({ MilenaAudioMessage: Component }) => ({ default: Component })));
-const SacredCandle = lazy(() => import("./SacredCandle").then(({ SacredCandle: Component }) => ({ default: Component })));
 const WhatsAppContactModal = lazy(() => import("./WhatsAppContactModal").then(({ WhatsAppContactModal: Component }) => ({ default: Component })));
 
 function DeferredFallback() {
@@ -48,10 +47,12 @@ function Cta({
   children,
   onClick,
   tone = "gold",
+  pulse = false,
 }: {
   readonly children: React.ReactNode;
   readonly onClick: () => void;
   readonly tone?: "gold" | "green" | "royal";
+  readonly pulse?: boolean;
 }) {
   let toneClasses =
     "bg-gradient-to-r from-[#67508f] via-[#5d4786] to-[#49356f] text-white shadow-[#5d4786]/25 border border-[#8067a9]/35 hover:brightness-105";
@@ -67,7 +68,7 @@ function Cta({
     <button
       type="button"
       onClick={onClick}
-      className={`group relative w-full overflow-hidden cursor-pointer rounded-[14px] px-6 py-[17px] text-[15px] font-extrabold tracking-[0.01em] transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 shadow-lg ${toneClasses}`}
+      className={`group relative w-full overflow-hidden cursor-pointer rounded-[14px] px-6 py-[17px] text-[15px] font-extrabold tracking-[0.01em] transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 shadow-lg ${pulse ? "quiz-cta-pulse" : ""} ${toneClasses}`}
     >
       <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-1000 group-hover:translate-x-full" />
       <span className="relative flex items-center justify-center gap-2 drop-shadow-xs font-bold">
@@ -87,6 +88,7 @@ function Field({
   autoFocus,
   onEnter,
   hideLabel,
+  highlight = false,
 }: {
   readonly label: string;
   readonly value: string;
@@ -97,6 +99,7 @@ function Field({
   readonly autoFocus?: boolean;
   readonly onEnter?: () => void;
   readonly hideLabel?: boolean;
+  readonly highlight?: boolean;
 }) {
   const shared =
     "w-full rounded-[14px] border bg-white px-4 py-4 text-[15.5px] font-medium leading-relaxed text-[#272039] shadow-sm outline-none transition-all duration-200 placeholder:text-[#a89fb4] focus:border-[#6f5aa0] focus:ring-4 focus:ring-[#6f5aa0]/10";
@@ -114,7 +117,7 @@ function Field({
           placeholder={placeholder}
           aria-label={label}
           onChange={(e) => onChange(e.target.value)}
-          className={`${shared} min-h-[130px] resize-y ${error ? "border-destructive ring-1 ring-destructive" : "border-slate-200"}`}
+          className={`${shared} min-h-[130px] resize-y ${error ? "border-destructive ring-1 ring-destructive" : highlight ? "border-[#7a64a2] ring-4 ring-[#7a64a2]/15" : "border-slate-200"}`}
         />
       ) : (
         <input
@@ -125,7 +128,7 @@ function Field({
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && onEnter?.()}
           aria-label={label}
-          className={`${shared} ${error ? "border-destructive ring-1 ring-destructive" : "border-slate-200"}`}
+          className={`${shared} ${error ? "border-destructive ring-1 ring-destructive" : highlight ? "border-[#7a64a2] ring-4 ring-[#7a64a2]/15" : "border-slate-200"}`}
         />
       )}
       {error ? <p className="mt-2 text-xs font-bold text-destructive">{error}</p> : null}
@@ -404,20 +407,20 @@ function getDonationPsychologicalImpact(
   primeiroEnte: string,
   primeiroNome: string,
 ) {
-  if (amount < 15) {
+  if (amount < 20) {
     return {
       tier: "invalid",
       icon: "⚠️",
       badge: "Insumos Físicos Mínimos",
-      title: "Contribuição mínima de R$ 15",
+      title: "Contribuição mínima de R$ 20",
       description:
-        `O acolhimento espiritual é gratuito. O mínimo de R$ 15 ajuda a custear a vela de 7 dias e o pergaminho preparado para ${primeiroEnte}.`,
+        `A carta e o acolhimento são gratuitos. O mínimo de R$ 20 ajuda a preparar a vela de 7 dias e o pergaminho para ${primeiroEnte}.`,
       badgeColor: "bg-red-50 text-red-800 border-red-200",
       cardBorder: "border-red-200 bg-red-50/30",
       isValid: false,
     };
   }
-  if (amount < 20) {
+  if (amount < 30) {
     return {
       tier: "basic",
       icon: "🕯️",
@@ -429,7 +432,7 @@ function getDonationPsychologicalImpact(
       isValid: true,
     };
   }
-  if (amount < 30) {
+  if (amount < 40) {
     return {
       tier: "paper",
       icon: "📜",
@@ -441,11 +444,11 @@ function getDonationPsychologicalImpact(
       isValid: true,
     };
   }
-  if (amount < 40) {
+  if (amount < 60) {
     return {
       tier: "heart",
       icon: "✨",
-      badge: "⭐ Mais Escolhido pelo Coração",
+      badge: "⭐ Recomendado para a sessão completa",
       title: `Consagração Completa & Vigília para ${primeiroEnte}`,
       description: `A escolha mais comum das famílias. Cobre a vela sagrada de 7 dias, o pergaminho físico e inclui o nome de ${primeiroEnte} na vigília de preces do templo.`,
       badgeColor: "bg-amber-100 text-amber-950 border-amber-300",
@@ -453,7 +456,7 @@ function getDonationPsychologicalImpact(
       isValid: true,
     };
   }
-  if (amount < 60) {
+  if (amount < 100) {
     return {
       tier: "light",
       icon: "🌟",
@@ -465,7 +468,7 @@ function getDonationPsychologicalImpact(
       isValid: true,
     };
   }
-  if (amount < 100) {
+  if (amount < 150) {
     return {
       tier: "guardian",
       icon: "🕊️",
@@ -717,7 +720,7 @@ function PixInstantBox({
   readonly temas?: string[];
   readonly horario?: string;
 }) {
-  const [selectedAmount, setSelectedAmount] = useState<number>(30);
+  const [selectedAmount, setSelectedAmount] = useState<number>(40);
   const [customInput, setCustomInput] = useState<string>("");
   const [isCustom, setIsCustom] = useState<boolean>(false);
   const [whatsAppModalOpen, setWhatsAppModalOpen] = useState<boolean>(false);
@@ -779,10 +782,9 @@ function PixInstantBox({
   };
 
   const presets = [
-    { val: 15, label: "R$ 15", tag: "Vela + papel" },
-    { val: 20, label: "R$ 20", tag: "Vela + pergaminho" },
-    { val: 30, label: "R$ 30", tag: "Apoio completo", highlight: true },
-    { val: 40, label: "R$ 40", tag: "Consagração" },
+    { val: 40, label: "R$ 40", tag: "Sessão completa", highlight: true },
+    { val: 20, label: "R$ 20", tag: "Vela + papel" },
+    { val: 30, label: "R$ 30", tag: "Vela + pergaminho" },
     { val: 60, label: "R$ 60", tag: "Luz da casa" },
     { val: 100, label: "R$ 100", tag: "Apoio à casa" },
   ];
@@ -798,10 +800,10 @@ function PixInstantBox({
             PIX ou cartão
           </span>
           <h3 className="mt-4 max-w-[360px] font-display text-[24px] font-extrabold leading-[1.15] text-white">
-            Escolha como deseja apoiar esta sessão
+            Sua carta é gratuita. Escolha como apoiar os materiais da sessão.
           </h3>
           <p className="mt-2 max-w-[370px] text-[13px] leading-relaxed text-slate-300">
-            A psicografia é gratuita. Sua contribuição voluntária ajuda a manter os materiais e o acolhimento da casa para {primeiroEnte}.
+            A partir de R$20, sua contribuição voluntária ajuda a preparar vela, pergaminho e o acolhimento da casa para {primeiroEnte}.
           </p>
         </div>
       </div>
@@ -823,13 +825,14 @@ function PixInstantBox({
       <div className="mt-5 text-left">
         <div className="mb-3 flex items-center justify-between gap-3 px-1">
           <span className="text-[12px] font-extrabold tracking-[0.08em] text-slate-700 uppercase">Defina o valor</span>
-          <span className="text-[10.5px] font-semibold text-slate-500">Mínimo de R$ 15</span>
+          <span className="text-[10.5px] font-semibold text-slate-500">Mínimo de R$ 20</span>
         </div>
 
-        <div className={`mb-5 rounded-2xl border bg-white p-4 transition-all ${isCustom ? "border-[#6f5aa0] ring-4 ring-[#6f5aa0]/10" : "border-slate-200 shadow-sm"}`}>
+        <div className={`mb-5 rounded-2xl border-2 bg-white p-4 shadow-[0_14px_28px_-20px_rgba(93,71,134,0.6)] transition-all ${isCustom ? "border-[#6f5aa0] ring-4 ring-[#6f5aa0]/10" : "border-[#cfc2df]"}`}>
           <label htmlFor="custom-donation-input" className="block">
-            <span className="block text-[14px] font-extrabold text-slate-900">Digite o valor que preferir</span>
-            <span className="mt-0.5 block text-[11.5px] leading-relaxed text-slate-500">Ou escolha uma sugestão logo abaixo.</span>
+            <span className="inline-flex rounded-full bg-[#f2eef8] px-2 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-[#5d4786]">Valor livre</span>
+            <span className="mt-2 block text-[15px] font-extrabold text-slate-900">Escolha o valor que fizer sentido para você</span>
+            <span className="mt-0.5 block text-[11.5px] leading-relaxed text-slate-500">Você pode digitar qualquer valor a partir de R$20 ou usar uma sugestão abaixo.</span>
           </label>
           <div className="relative mt-3 w-full">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[14px] font-black text-slate-700">R$</span>
@@ -840,8 +843,8 @@ function PixInstantBox({
                 value={customInput}
                 onFocus={() => setIsCustom(true)}
                 onChange={handleCustomChange}
-                placeholder="0,00"
-                className="w-full rounded-xl border border-slate-200 bg-[#faf9fb] py-3.5 pl-12 pr-4 text-[20px] font-black text-[#272039] outline-none transition-all placeholder:text-slate-300 focus:border-[#6f5aa0] focus:bg-white"
+                placeholder="Ex.: 40,00"
+                className="w-full rounded-xl border border-[#d8cae5] bg-[#faf9fb] py-4 pl-12 pr-4 text-[22px] font-black text-[#272039] outline-none transition-all placeholder:text-slate-300 focus:border-[#6f5aa0] focus:bg-white"
               />
           </div>
         </div>
@@ -855,21 +858,21 @@ function PixInstantBox({
                 key={item.val}
                 type="button"
                 onClick={() => handleSelectPreset(item.val)}
-                className={`group relative flex min-h-[96px] flex-col items-start justify-center rounded-2xl px-4 py-3 text-left transition-all duration-200 cursor-pointer ${
+                className={`group relative flex min-h-[96px] flex-col items-start justify-center rounded-2xl px-4 py-3 text-left transition-all duration-200 cursor-pointer ${item.highlight ? "col-span-2 min-h-[112px]" : ""} ${
                   isSelected
-                    ? "border-2 border-[#6f5aa0] bg-[#f2eef8] text-[#272039] shadow-[0_12px_25px_-16px_rgba(93,71,134,0.65)] ring-4 ring-[#6f5aa0]/10"
+                    ? "border-2 border-[#6f5aa0] bg-[#f2eef8] text-[#272039] shadow-[0_16px_30px_-16px_rgba(93,71,134,0.72)] ring-4 ring-[#6f5aa0]/10"
                     : "border border-slate-200 bg-white text-[#272039] shadow-sm hover:border-[#b9a8cf] hover:bg-[#f7f4fa]"
                 }`}
               >
                 {item.highlight && (
-                  <span className="absolute right-2.5 top-2.5 rounded-full bg-[#c49a52] px-2 py-0.5 text-[8.5px] font-black uppercase tracking-wide text-white">
-                    Popular
+                  <span className="absolute right-3 top-3 rounded-full bg-[#c49a52] px-2.5 py-1 text-[9px] font-black uppercase tracking-wide text-white shadow-sm">
+                    Recomendado
                   </span>
                 )}
-                <span className="block text-[20px] font-black leading-tight tracking-tight">
+                <span className={`block font-black leading-tight tracking-tight ${item.highlight ? "text-[26px]" : "text-[20px]"}`}>
                   {item.label}
                 </span>
-                <span className={`mt-1 block text-[11.5px] font-semibold leading-tight ${isSelected ? "text-[#5d4786]" : "text-slate-500"}`}>
+                <span className={`mt-1 block font-semibold leading-tight ${item.highlight ? "text-[13px]" : "text-[11.5px]"} ${isSelected ? "text-[#5d4786]" : "text-slate-500"}`}>
                   {item.tag}
                 </span>
                 {isSelected && <span className="mt-2 inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-[0.12em] text-[#5d4786]"><span>✓</span> Selecionado</span>}
@@ -928,9 +931,9 @@ function PixInstantBox({
         <h4 className="text-[13.5px] font-extrabold text-[#181126] leading-snug">{impact.title}</h4>
         <p className="text-[12px] text-[#5e4b73] mt-1 leading-relaxed">{impact.description}</p>
 
-        {activeAmount < 15 && (
+        {activeAmount < 20 && (
           <div className="mt-2.5 p-2.5 rounded-xl bg-red-100/80 border border-red-200 text-red-900 text-[11.5px] font-bold leading-tight">
-            O valor mínimo de R$ 15 ajuda a cobrir a vela de 7 dias e o pergaminho físico.
+            O valor mínimo de R$20 ajuda a cobrir a vela de 7 dias e o pergaminho físico.
           </div>
         )}
       </div>
@@ -1247,17 +1250,27 @@ function Intro({
               </p>
             </div>
 
-            <Field
-              label="Como podemos chamar você? (Seu nome)"
-              value={nome}
-              onChange={setNome}
-              placeholder="Digite seu nome completo"
-              error={error}
-              onEnter={next}
-            />
+            <div className="relative">
+              <Field
+                label="Como podemos chamar você? (Seu nome)"
+                value={nome}
+                onChange={setNome}
+                placeholder="Digite seu nome completo"
+                error={error}
+                onEnter={next}
+                highlight
+              />
+              <div className="pointer-events-none -mt-1 flex items-center gap-2 px-2 text-[11px] font-bold text-[#5d4786]">
+                <svg aria-hidden="true" viewBox="0 0 64 32" className="h-7 w-14 -rotate-[8deg] text-[#c49a52] drop-shadow-sm">
+                  <path d="M4 5c18 2 14 20 42 19 5 0 9-2 13-5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                  <path d="m51 15 8 4-7 5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span>Comece preenchendo seu nome</span>
+              </div>
+            </div>
 
             <div className="mt-5">
-              <Cta onClick={next}>💫 Começar meu pedido</Cta>
+              <Cta onClick={next} pulse>💫 Começar meu pedido</Cta>
             </div>
 
             <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-[11.5px] font-medium text-[#786445]">
@@ -1396,18 +1409,15 @@ function Loading({
   }, [onDone]);
 
   return (
-    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-gradient-to-b from-[#2b2340] via-[#211a35] to-[#171225] px-4 py-8 text-center text-white sm:px-6">
-      <Halos />
-      <div className="relative z-10 w-full max-w-[410px] overflow-hidden rounded-[28px] border border-white/15 bg-[radial-gradient(circle_at_50%_0%,rgba(145,91,172,0.22),transparent_42%),rgba(255,255,255,0.075)] p-5 shadow-[0_28px_90px_-30px_rgba(0,0,0,0.85)] backdrop-blur-xl sm:max-w-[430px] sm:p-7">
-        <div className="pointer-events-none absolute -left-16 top-16 h-36 w-36 rounded-full bg-[#8f76b5]/15 blur-3xl" />
-        <div className="pointer-events-none absolute -right-20 bottom-12 h-40 w-40 rounded-full bg-[#c49a52]/10 blur-3xl" />
-        <span className="relative inline-flex items-center gap-2 rounded-full border border-[#c8b5db]/30 bg-[#d8c7e9]/10 px-3.5 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#e5d6f3] shadow-[inset_0_1px_rgba(255,255,255,0.12)]">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#c49a52] shadow-[0_0_8px_rgba(196,154,82,0.75)]" />
-          Preparação protegida
+    <div className="flex min-h-[100dvh] items-center justify-center bg-[#211a35] px-4 py-8 text-center text-white sm:px-6">
+      <div className="w-full max-w-[390px] rounded-[26px] border border-white/12 bg-[#29213b] p-6 shadow-[0_24px_60px_-30px_rgba(0,0,0,0.8)] sm:p-7">
+        <span className="inline-flex items-center gap-2 rounded-full border border-[#c8b5db]/30 bg-white/5 px-3.5 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#e5d6f3]">
+          <span className="h-1.5 w-1.5 rounded-full bg-[#c49a52]" />
+          Preparando seu pedido
         </span>
 
-        <div className="relative mt-1 flex justify-center">
-          <Suspense fallback={<DeferredFallback />}><SacredCandle /></Suspense>
+        <div className="mx-auto mt-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-[#d8c7e9]/25 bg-[#211a35] text-3xl shadow-inner">
+          🕯️
         </div>
 
         <h2 className="relative mx-auto max-w-[330px] font-display text-[25px] font-black leading-[1.12] text-white sm:max-w-none sm:text-[27px]">
@@ -1418,7 +1428,7 @@ function Loading({
           cuidado.
         </p>
 
-        <div className="relative mt-5 rounded-2xl border border-white/10 bg-black/15 p-3.5">
+        <div className="mt-5 rounded-2xl border border-white/10 bg-black/15 p-3.5 text-left">
           <progress
             value={pct}
             max={100}
@@ -1438,48 +1448,7 @@ function Loading({
             <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-emerald-300 animate-pulse" />{stages[activeStage]?.title}</span>
             <span className="rounded-full bg-[#d8c7e9]/10 px-2 py-0.5 text-[#e5d6f3]">{pct}%</span>
           </div>
-        </div>
-
-        <div className="relative mt-5 space-y-2 text-left">
-          {stages.map((stage, index) => {
-            const isComplete = index < activeStage || pct === 100;
-            const isActive = index === activeStage && pct < 100;
-
-            let cardClasses = "border-white/10 bg-black/10";
-            let badgeClasses = "bg-white/10 text-white/45";
-            if (isComplete) {
-              cardClasses = "border-emerald-300/20 bg-emerald-300/[0.07]";
-              badgeClasses = "bg-emerald-400 text-emerald-950";
-            } else if (isActive) {
-              cardClasses = "border-[#c8b5db]/40 bg-[#d8c7e9]/10";
-              badgeClasses = "bg-[#c8b5db] text-[#211a35] ring-4 ring-[#c8b5db]/15";
-            }
-
-            return (
-              <div
-                key={stage.title}
-                className={`flex items-start gap-3 rounded-2xl border px-3.5 py-3 transition-colors duration-300 ${cardClasses}`}
-              >
-                <span
-                  className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-black ${badgeClasses}`}
-                >
-                  {isComplete ? "✓" : index + 1}
-                </span>
-                <div>
-                  <strong
-                    className={`block text-[12px] ${isActive || isComplete ? "text-white" : "text-white/50"}`}
-                  >
-                    {stage.title}
-                  </strong>
-                  {(isActive || isComplete) && (
-                    <p className="mt-0.5 text-[10.5px] leading-relaxed text-[#cfc0dc]">
-                      {stage.detail}
-                    </p>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+          <p className="mt-2 text-[11px] leading-relaxed text-[#cfc0dc]">{stages[activeStage]?.detail}</p>
         </div>
 
         <p className="mt-4 text-[10.5px] font-semibold text-[#bba9ca]">

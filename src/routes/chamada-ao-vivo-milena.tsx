@@ -279,18 +279,9 @@ function ChamadaAoVivoMilenaPage() {
                   Seu navegador não oferece suporte à reprodução deste áudio.
                 </audio>
                </div>
-               <div className="mt-3 grid grid-cols-[50px_1fr_50px] items-center gap-1">
-                 <svg aria-hidden="true" viewBox="0 0 72 44" className="h-11 w-full rotate-[8deg] text-[#f5d285] drop-shadow-[0_1px_4px_rgba(245,210,133,0.6)]">
-                   <path d="M4 7c19 1 14 27 43 25 8-1 13-5 19-10" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-                   <path d="m59 15 8 7-10 4" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                 </svg>
-                 <p className="rounded-2xl border border-[#f5d285]/35 bg-[#2d144d]/85 px-3 py-2 text-center text-[12.5px] font-black leading-relaxed text-[#fff3cc] shadow-inner">
-                   ▶️ Ouça a Milena explicar pessoalmente como será sua chamada.
-                 </p>
-                 <svg aria-hidden="true" viewBox="0 0 72 44" className="h-11 w-full -rotate-[8deg] scale-x-[-1] text-[#f5d285] drop-shadow-[0_1px_4px_rgba(245,210,133,0.6)]">
-                   <path d="M4 7c19 1 14 27 43 25 8-1 13-5 19-10" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-                   <path d="m59 15 8 7-10 4" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                 </svg>
+               <div className="mt-3 flex items-center gap-2 rounded-2xl border border-[#f5d285]/35 bg-[#2d144d]/85 px-3 py-2.5 text-[#fff3cc] shadow-inner">
+                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f5d285] text-sm text-[#2d144d]">▶</span>
+                 <p className="text-[12px] font-black leading-snug">Ouça o convite da Milena antes de escolher sua sessão.</p>
                </div>
             </div>
             <h1 className="font-display mt-4 text-[25px] leading-tight font-black text-white">

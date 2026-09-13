@@ -35,7 +35,7 @@ export const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "Por que é solicitada uma contribuição fraterna se a psicografia é gratuita?",
-    a: "O acolhimento e a mensagem espiritual são gratuitos. A contribuição fraterna livre, a partir de R$ 15, ajuda a cobrir os materiais físicos usados no oratório, como a vela de 7 dias, as folhas especiais e os itens de preparação, além de apoiar as ações assistenciais da casa.",
+    a: "O acolhimento e a mensagem espiritual são gratuitos. A contribuição fraterna livre, a partir de R$20, ajuda a cobrir os materiais físicos usados no oratório, como a vela de 7 dias, as folhas especiais e os itens de preparação, além de apoiar as ações assistenciais da casa.",
   },
   {
     q: "E se a carta não tocar o meu coração ou não fizer sentido?",
