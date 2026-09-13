@@ -12,6 +12,7 @@ import milenaCartaImage from "../../../images-elements/medium-milena-carta.jpeg"
 import insumoVelaImage from "../../../images-elements/insumo-vela.png";
 import insumoCartaImage from "../../../images-elements/insumo-carta.png";
 import insumoSopaImage from "../../../images-elements/insumo-sopa.png";
+import milenaLoaderImage from "../../../images-elements/milena-loader.jpeg";
 
 const LetterZoomModal = lazy(() => import("./LetterZoomModal").then(({ LetterZoomModal: Component }) => ({ default: Component })));
 const PixCheckout = lazy(() => import("./PixCheckout").then(({ PixCheckout: Component }) => ({ default: Component })));
@@ -435,12 +436,12 @@ function getDonationPsychologicalImpact(
   if (amount < 40) {
     return {
       tier: "paper",
-      icon: "📜",
-      badge: "Vela & Papel de Algodão",
-      title: `Materiais de Escrita Manuscrita para ${primeiroEnte}`,
-      description: `Cobre a vela de 7 dias e a folha especial de algodão puro onde as palavras e memórias de ${primeiroEnte} serão vertidas à mão pela médium.`,
-      badgeColor: "bg-amber-50 text-amber-900 border-amber-200",
-      cardBorder: "border-amber-200 bg-amber-50/30",
+      icon: "⭐",
+      badge: "Mais escolhido pelas famílias",
+      title: `Sessão completa para ${primeiroEnte}`,
+      description: `Inclui a vela de 7 dias, o pergaminho físico e os materiais preparados para o acolhimento de ${primeiroEnte}.`,
+      badgeColor: "bg-[#f2eef8] text-[#5d4786] border-[#d8cae5]",
+      cardBorder: "border-[#d8cae5] bg-[#f5f1f8]",
       isValid: true,
     };
   }
@@ -448,9 +449,9 @@ function getDonationPsychologicalImpact(
     return {
       tier: "heart",
       icon: "✨",
-      badge: "⭐ Recomendado para a sessão completa",
-      title: `Consagração Completa & Vigília para ${primeiroEnte}`,
-      description: `A escolha mais comum das famílias. Cobre a vela sagrada de 7 dias, o pergaminho físico e inclui o nome de ${primeiroEnte} na vigília de preces do templo.`,
+      badge: "⭐ Escolha mais feita pelas famílias",
+      title: `Sessão completa + carta física para ${primeiroEnte}`,
+      description: `Inclui os materiais da sessão e a taxa de envio da carta física, além de ampliar o apoio às ações fraternas mantidas pela casa.`,
       badgeColor: "bg-amber-100 text-amber-950 border-amber-300",
       cardBorder: "border-amber-300 bg-amber-50/50",
       isValid: true,
@@ -726,23 +727,19 @@ function PixInstantBox({
   const [whatsAppModalOpen, setWhatsAppModalOpen] = useState<boolean>(false);
   const [physicalLetterRequested, setPhysicalLetterRequested] = useState(() => {
     if (typeof window === "undefined") return false;
-    return localStorage.getItem("templodeluz:physical-letter-selected") === "true";
+    const storedPreference = localStorage.getItem("templodeluz:physical-letter-selected");
+    return storedPreference === null || storedPreference === "true";
   });
 
   const activeAmount = isCustom ? parseBrazilianCurrency(customInput) : selectedAmount;
-  const physicalLetterFee = physicalLetterRequested ? 15 : 0;
+  const physicalLetterFee = physicalLetterRequested && (isCustom || selectedAmount !== 40) ? 15 : 0;
   const checkoutAmount = activeAmount + physicalLetterFee;
   const impact = getDonationPsychologicalImpact(activeAmount, primeiroEnte, primeiroNome);
-
-  const handleSelectPreset = (val: number) => {
-    setSelectedAmount(val);
-    setIsCustom(false);
-    setCustomInput("");
-  };
 
   const handleCustomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIsCustom(true);
     setCustomInput(sanitizeBrazilianCurrencyInput(e.target.value));
+    handlePhysicalLetterPreference(false);
   };
 
   const handlePhysicalLetterPreference = (checked: boolean) => {
@@ -758,6 +755,13 @@ function PixInstantBox({
     } catch {
       // A escolha continua ativa durante a sessão atual.
     }
+  };
+
+  const handleSelectPreset = (val: number, includesPhysical = false) => {
+    setSelectedAmount(val);
+    setIsCustom(false);
+    setCustomInput("");
+    handlePhysicalLetterPreference(includesPhysical);
   };
 
   const handleIrParaPergaminho = (e?: React.MouseEvent) => {
@@ -782,9 +786,9 @@ function PixInstantBox({
   };
 
   const presets = [
-    { val: 40, label: "R$ 40", tag: "Sessão completa", highlight: true },
     { val: 20, label: "R$ 20", tag: "Vela + papel" },
     { val: 30, label: "R$ 30", tag: "Vela + pergaminho" },
+    { val: 40, label: "R$ 40", tag: "Carta física incluída", highlight: true, physicalIncluded: true },
     { val: 60, label: "R$ 60", tag: "Luz da casa" },
     { val: 100, label: "R$ 100", tag: "Apoio à casa" },
   ];
@@ -857,7 +861,7 @@ function PixInstantBox({
               <button
                 key={item.val}
                 type="button"
-                onClick={() => handleSelectPreset(item.val)}
+                onClick={() => handleSelectPreset(item.val, item.physicalIncluded)}
                 className={`group relative flex min-h-[96px] flex-col items-start justify-center rounded-2xl px-4 py-3 text-left transition-all duration-200 cursor-pointer ${item.highlight ? "col-span-2 min-h-[112px]" : ""} ${
                   isSelected
                     ? "border-2 border-[#6f5aa0] bg-[#f2eef8] text-[#272039] shadow-[0_16px_30px_-16px_rgba(93,71,134,0.72)] ring-4 ring-[#6f5aa0]/10"
@@ -866,7 +870,7 @@ function PixInstantBox({
               >
                 {item.highlight && (
                   <span className="absolute right-3 top-3 rounded-full bg-[#c49a52] px-2.5 py-1 text-[9px] font-black uppercase tracking-wide text-white shadow-sm">
-                    Recomendado
+                    Mais escolhida
                   </span>
                 )}
                 <span className={`block font-black leading-tight tracking-tight ${item.highlight ? "text-[26px]" : "text-[20px]"}`}>
@@ -892,12 +896,12 @@ function PixInstantBox({
           className="mt-0.5 h-5 w-5 shrink-0 accent-[#5d4786]"
         />
         <span className="min-w-0 flex-1">
-          <span className="flex flex-wrap items-center gap-2 text-[13px] font-extrabold text-[#272039]">
-            Quero receber a carta física
-            <span className="rounded-full bg-[#fffefd] px-2 py-0.5 text-[10px] font-black text-[#5d4786] ring-1 ring-[#d8cae5]">+ R$ 15</span>
+            <span className="flex flex-wrap items-center gap-2 text-[13px] font-extrabold text-[#272039]">
+              Quero receber a carta física
+            <span className="rounded-full bg-[#fffefd] px-2 py-0.5 text-[10px] font-black text-[#5d4786] ring-1 ring-[#d8cae5]">{!isCustom && selectedAmount === 40 ? "INCLUÍDA NO R$ 40" : "+ R$ 15"}</span>
           </span>
           <span className="mt-1 block text-[11.5px] leading-relaxed text-slate-500">
-            R$15 serão incluídos no total do PIX/cartão. Na próxima página, você informa apenas o endereço de entrega.
+            {!isCustom && selectedAmount === 40 ? "A taxa já está incluída neste valor. Na próxima página, você informa apenas o endereço." : "R$15 serão incluídos no total do PIX/cartão. Na próxima página, você informa apenas o endereço de entrega."}
           </span>
         </span>
       </label>
@@ -1416,17 +1420,22 @@ function Loading({
           Preparando seu pedido
         </span>
 
-        <div className="mx-auto mt-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-[#d8c7e9]/25 bg-[#211a35] text-3xl shadow-inner">
-          🕯️
+        <div className="mx-auto mt-5 overflow-hidden rounded-2xl border border-[#d8c7e9]/25 bg-[#171225] shadow-[0_12px_28px_-16px_rgba(0,0,0,0.7)]">
+          <img src={milenaLoaderImage} alt="Milena Medeiros" className="h-28 w-full object-contain object-center" loading="eager" decoding="async" />
         </div>
 
         <h2 className="relative mx-auto max-w-[330px] font-display text-[25px] font-black leading-[1.12] text-white sm:max-w-none sm:text-[27px]">
           Estamos preparando seu pedido, {primeiroNome}
         </h2>
         <p className="relative mx-auto mt-2.5 max-w-[330px] text-[13px] leading-relaxed text-[#d9cce7]">
-          Aguarde alguns instantes enquanto organizamos as informações de {primeiroEnte} com
-          cuidado.
+          “Respire com calma. Estou esperando você com carinho para este momento.” — Milena
         </p>
+
+        <div className="mx-auto mt-4 flex w-fit flex-col items-center">
+          <span className="block h-7 w-4 rounded-[50%_50%_45%_45%] bg-gradient-to-t from-[#f59e0b] via-[#fde68a] to-white shadow-[0_-4px_14px_rgba(251,191,36,0.8)]" />
+          <span className="block h-12 w-7 rounded-t-[10px] bg-[#f8f3e6] shadow-[0_8px_16px_rgba(0,0,0,0.25)]" />
+          <span className="block h-2 w-16 rounded-full bg-black/25 blur-[1px]" />
+        </div>
 
         <div className="mt-5 rounded-2xl border border-white/10 bg-black/15 p-3.5 text-left">
           <progress

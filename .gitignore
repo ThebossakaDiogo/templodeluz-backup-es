@@ -59,3 +59,6 @@ CONNECTPAY-E-SECRETS.txt
 
 # Arquivo morto local (entulho arquivado fora do git)
 .archive/
+
+.vercel
+.env*
