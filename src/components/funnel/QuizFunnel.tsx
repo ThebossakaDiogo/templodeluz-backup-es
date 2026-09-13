@@ -733,14 +733,15 @@ function PixInstantBox({
   });
 
   const activeAmount = isCustom ? parseBrazilianCurrency(customInput) : selectedAmount;
-  const physicalLetterFee = physicalLetterRequested && (isCustom || selectedAmount !== 40) ? 15 : 0;
+  const physicalLetterFee = physicalLetterRequested && activeAmount < 40 ? 15 : 0;
   const checkoutAmount = activeAmount + physicalLetterFee;
   const impact = getDonationPsychologicalImpact(activeAmount, primeiroEnte, primeiroNome);
 
   const handleCustomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIsCustom(true);
-    setCustomInput(sanitizeBrazilianCurrencyInput(e.target.value));
-    handlePhysicalLetterPreference(false);
+    const nextValue = sanitizeBrazilianCurrencyInput(e.target.value);
+    setCustomInput(nextValue);
+    if (parseBrazilianCurrency(nextValue) > 0) handlePhysicalLetterPreference(true);
   };
 
   const handlePhysicalLetterPreference = (checked: boolean) => {
@@ -915,10 +916,10 @@ function PixInstantBox({
         <span className="min-w-0 flex-1">
             <span className="flex flex-wrap items-center gap-2 text-[13px] font-extrabold text-[#272039]">
               Quero receber a carta física
-            <span className="rounded-full bg-[#fffefd] px-2 py-0.5 text-[10px] font-black text-[#5d4786] ring-1 ring-[#d8cae5]">{!isCustom && selectedAmount === 40 ? "INCLUÍDA NO R$ 40" : "+ R$ 15"}</span>
+            <span className="rounded-full bg-[#fffefd] px-2 py-0.5 text-[10px] font-black text-[#5d4786] ring-1 ring-[#d8cae5]">{physicalLetterFee === 0 ? "INCLUÍDA NO VALOR" : "+ R$ 15"}</span>
           </span>
           <span className="mt-1 block text-[11.5px] leading-relaxed text-slate-500">
-            {!isCustom && selectedAmount === 40 ? "A taxa já está incluída neste valor. Na próxima página, você informa apenas o endereço." : "R$15 serão incluídos no total do PIX/cartão. Na próxima página, você informa apenas o endereço de entrega."}
+            {physicalLetterFee === 0 ? "A taxa já está incluída neste valor. Na próxima página, você informa apenas o endereço." : "R$15 serão incluídos automaticamente no total do PIX/cartão. Na próxima página, você informa apenas o endereço de entrega."}
           </span>
         </span>
       </label>
@@ -1417,8 +1418,8 @@ function Loading({
   const activeStage = Math.min(Math.floor(pct / 25), stages.length - 1);
 
   useEffect(() => {
-    const iv = setInterval(() => setPct((p) => Math.min(p + 2, 100)), 110);
-    const done = setTimeout(onDone, 5700);
+    const iv = setInterval(() => setPct((p) => Math.min(p + 5, 100)), 55);
+    const done = setTimeout(onDone, 1800);
     return () => {
       clearInterval(iv);
       clearTimeout(done);
@@ -2030,7 +2031,7 @@ export function QuizFunnel() {
   const goto = (s: Step) => {
     setStep(s);
     navigate({ search: { step: s }, replace: true });
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "auto" });
   };
 
   const primeiroEnte = ente?.trim() ? ente.trim().split(" ")[0] : "seu ente querido";
@@ -2174,7 +2175,7 @@ export function QuizFunnel() {
                       },
                       0,
                     );
-                    setTimeout(() => goto("tempo"), 280);
+                    setTimeout(() => goto("tempo"), 80);
                   }}
                 />
               ))}
@@ -2241,7 +2242,7 @@ export function QuizFunnel() {
                       },
                       0,
                     );
-                    setTimeout(() => goto("mensagem"), 280);
+                    setTimeout(() => goto("mensagem"), 80);
                   }}
                 />
               ))}
