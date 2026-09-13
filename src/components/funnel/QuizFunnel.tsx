@@ -409,7 +409,7 @@ function getDonationPsychologicalImpact(
   primeiroEnte: string,
   primeiroNome: string,
 ) {
-  if (amount < 10) {
+  if (amount < 15) {
     return {
       tier: "invalid",
       icon: "⚠️",
@@ -722,14 +722,13 @@ function PixInstantBox({
   readonly temas?: string[];
   readonly horario?: string;
 }) {
-  const [selectedAmount, setSelectedAmount] = useState<number>(40);
+  const [selectedAmount, setSelectedAmount] = useState<number>(35);
   const [customInput, setCustomInput] = useState<string>("");
   const [isCustom, setIsCustom] = useState<boolean>(false);
   const [whatsAppModalOpen, setWhatsAppModalOpen] = useState<boolean>(false);
   const [physicalLetterRequested, setPhysicalLetterRequested] = useState(() => {
     if (typeof window === "undefined") return false;
-    const storedPreference = localStorage.getItem("templodeluz:physical-letter-selected");
-    return storedPreference === null || storedPreference === "true";
+    return localStorage.getItem("templodeluz:physical-letter-selected") === "true";
   });
 
   const activeAmount = isCustom ? parseBrazilianCurrency(customInput) : selectedAmount;
@@ -790,7 +789,8 @@ function PixInstantBox({
   const presets = [
     { val: 20, label: "R$ 20", tag: "Vela + papel" },
     { val: 30, label: "R$ 30", tag: "Vela + pergaminho" },
-    { val: 40, label: "R$ 40", tag: "Carta física incluída", highlight: true, physicalIncluded: true },
+    { val: 35, label: "R$ 35", tag: "Sessão completa", highlight: true },
+    { val: 40, label: "R$ 40", tag: "Carta física incluída", physicalIncluded: true },
     { val: 60, label: "R$ 60", tag: "Luz da casa" },
     { val: 100, label: "R$ 100", tag: "Apoio à casa" },
   ];
@@ -849,7 +849,7 @@ function PixInstantBox({
           <label htmlFor="custom-donation-input" className="block">
             <span className="inline-flex rounded-full bg-[#f2eef8] px-2 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-[#5d4786]">Valor livre</span>
             <span className="mt-2 block text-[15px] font-extrabold text-slate-900">Escolha o valor que fizer sentido para você</span>
-            <span className="mt-0.5 block text-[11.5px] leading-relaxed text-slate-500">Você pode digitar o valor que preferir ou usar uma sugestão abaixo.</span>
+            <span className="mt-0.5 block text-[11.5px] leading-relaxed text-slate-500">Você pode digitar o valor que preferir a partir de R$15 ou usar uma sugestão abaixo.</span>
           </label>
           <div className="relative mt-3 w-full">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[14px] font-black text-slate-700">R$</span>
@@ -860,13 +860,13 @@ function PixInstantBox({
                 value={customInput}
                 onFocus={() => setIsCustom(true)}
                 onChange={handleCustomChange}
-                placeholder="Ex.: 40,00"
+                placeholder="Ex.: 35,00"
                 className="w-full rounded-xl border border-[#d8cae5] bg-[#faf9fb] py-4 pl-12 pr-4 text-[22px] font-black text-[#272039] outline-none transition-all placeholder:text-slate-300 focus:border-[#6f5aa0] focus:bg-white"
             />
           </div>
-          {isCustom && customInput.length > 0 && activeAmount < 10 && (
+          {isCustom && customInput.length > 0 && activeAmount < 15 && (
             <p className="mt-2 rounded-xl bg-amber-50 px-3 py-2 text-[11px] font-semibold leading-relaxed text-amber-900">
-              Esse valor não cobre os materiais mínimos da vela e do pergaminho. Ajuste para pelo menos R$10 para continuar.
+              Esse valor não cobre os materiais mínimos da vela e do pergaminho. Ajuste para pelo menos R$15 para continuar.
             </p>
           )}
         </div>
@@ -953,9 +953,9 @@ function PixInstantBox({
         <h4 className="text-[13.5px] font-extrabold text-[#181126] leading-snug">{impact.title}</h4>
         <p className="text-[12px] text-[#5e4b73] mt-1 leading-relaxed">{impact.description}</p>
 
-        {activeAmount < 10 && (
+        {activeAmount < 15 && (
           <div className="mt-2.5 p-2.5 rounded-xl bg-red-100/80 border border-red-200 text-red-900 text-[11.5px] font-bold leading-tight">
-            O valor mínimo de R$10 ajuda a cobrir a vela de 7 dias e o pergaminho físico.
+            O valor mínimo de R$15 ajuda a cobrir a vela de 7 dias e o pergaminho físico.
           </div>
         )}
       </div>
