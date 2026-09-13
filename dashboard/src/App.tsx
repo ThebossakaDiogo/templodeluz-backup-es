@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo, useRef } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef, type MouseEvent as ReactMouseEvent } from "react";
 import {
   LayoutGrid,
   Activity,
@@ -619,7 +619,33 @@ export function App() {
     localStorage.setItem(THEME_STORAGE_KEY, theme);
   }, [theme]);
 
-  const toggleTheme = () => setTheme((t) => (t === "light" ? "dark" : "light"));
+  const toggleTheme = (event?: ReactMouseEvent<HTMLButtonElement>) => {
+    const nextTheme = theme === "light" ? "dark" : "light";
+    const root = document.documentElement;
+    const x = event?.clientX ?? window.innerWidth / 2;
+    const y = event?.clientY ?? window.innerHeight / 2;
+    root.style.setProperty("--theme-click-x", `${x}px`);
+    root.style.setProperty("--theme-click-y", `${y}px`);
+
+    const applyTheme = () => {
+      root.dataset.theme = nextTheme;
+      localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+      setTheme(nextTheme);
+    };
+    const viewTransition = (document as Document & {
+      startViewTransition?: (callback: () => void) => { ready: Promise<void> };
+    }).startViewTransition;
+
+    if (!viewTransition) {
+      root.classList.add("dashboard-theme-fade");
+      applyTheme();
+      window.setTimeout(() => root.classList.remove("dashboard-theme-fade"), 450);
+      return;
+    }
+
+    const transition = viewTransition.call(document, applyTheme);
+    void transition.ready.catch(() => undefined);
+  };
 
   const activeDashboardProfile = useMemo(
     () => getDashboardProfileConfig(dashboardProfile),

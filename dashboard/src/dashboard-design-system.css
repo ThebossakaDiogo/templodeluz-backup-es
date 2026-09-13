@@ -102,6 +102,27 @@
   background: var(--app-bg);
 }
 
+/* Theme switch: circular reveal starts exactly at the clicked theme control. */
+html.dashboard-theme-fade,
+html.dashboard-theme-fade * {
+  transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease !important;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-new(root) {
+  animation: dashboard-theme-reveal 0.58s cubic-bezier(0.2, 0.9, 0.4, 1);
+}
+
+@keyframes dashboard-theme-reveal {
+  from { clip-path: circle(0 at var(--theme-click-x, 50%) var(--theme-click-y, 50%)); }
+  to { clip-path: circle(150vmax at var(--theme-click-x, 50%) var(--theme-click-y, 50%)); }
+}
+
 [data-theme="dark"] .dashboard-root,
 [data-theme="dark"] .date-dialog-backdrop,
 [data-theme="dark"] .mobile-more-backdrop,

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type MouseEvent as ReactMouseEvent } from "react";
 import {
   Sun,
   Moon,
@@ -18,7 +18,7 @@ import type { PaymentOrder, Lead } from "@/types";
 
 interface TopbarProps {
   readonly theme: "light" | "dark";
-  readonly onToggleTheme: () => void;
+  readonly onToggleTheme: (event: ReactMouseEvent<HTMLButtonElement>) => void;
   readonly onRefresh: () => void;
   readonly loading: boolean;
   readonly lastUpdate: Date | null;
