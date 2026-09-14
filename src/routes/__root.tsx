@@ -140,7 +140,7 @@ export const Route = createRootRouteWithContext<Record<string, never>>()({
                 postalCode: "02075-001",
                 addressCountry: "BR",
               },
-              telephone: "+5519998316353",
+              telephone: "+5511960746285",
               email: "tempodaluz@gmail.com",
             },
             {

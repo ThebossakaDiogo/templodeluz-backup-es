@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import { trackWhatsAppEvent } from "@/lib/whatsapp-telemetry";
 
-const WHATSAPP_NUMBER = "5519998316353"; // Médium Milena Medeiros - Templo de Luz
+const WHATSAPP_NUMBER = "5511960746285"; // Médium Milena Medeiros - Templo de Luz
 
 export type DonationChoice = "already_donated" | "want_to_donate" | "free_charity";
 

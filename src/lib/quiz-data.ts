@@ -1,6 +1,6 @@
 /**
  * Dados e Schemas do Quiz Play & Win
- * Baseado rigorosamente no schema.json e nas especificações visuais de design.json
+ * Baseado rigorosamente em docs/reference/schema.json e nas especificações visuais de docs/reference/design.json
  */
 
 export interface OptionItem {

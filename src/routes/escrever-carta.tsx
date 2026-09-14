@@ -61,7 +61,7 @@ const TEMAS_GUIADOS = [
   },
 ];
 
-const WHATSAPP_NUMBER = "5519998316353"; // +55 19 99831-6353 - Milena Medeiros - Templo Da Luz
+const WHATSAPP_NUMBER = "5511960746285"; // +55 11 96074-6285 - Milena Medeiros - Templo da Luz
 
 function normalizeThemeIds(values: unknown): string[] {
   if (!Array.isArray(values)) return [];

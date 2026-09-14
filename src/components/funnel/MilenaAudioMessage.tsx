@@ -1,4 +1,4 @@
-import milenaAudio from "../../../Feedbacks/audio-milena.mp3";
+import milenaAudio from "../../assets/media/audio/audio-milena.mp3";
 import { IMAGES } from "./data";
 
 const transcript = [

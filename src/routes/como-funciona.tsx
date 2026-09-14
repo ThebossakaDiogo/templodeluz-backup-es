@@ -34,7 +34,7 @@ const ETAPAS_WHATSAPP = [
     titulo: "Enviar os Dados no WhatsApp Oficial da Médium",
     subtitulo: "Basta 1 toque no botão verde para enviar diretamente à Médium Milena",
     descricao:
-      "Ao concluir sua carta, você clica no botão do WhatsApp (+55 19 99831-6353). A mensagem já vai pré-escrita com todos os dados. Se você realizou a doação da vela e insumos, basta enviar também o comprovante na mesma conversa para que a vela seja inscrita com o nome.",
+      "Ao concluir sua carta, você clica no botão do WhatsApp (+55 11 96074-6285). A mensagem já vai pré-escrita com todos os dados. Se você realizou a doação da vela e insumos, basta enviar também o comprovante na mesma conversa para que a vela seja inscrita com o nome.",
     dica: "📲 Sua mensagem é acolhida imediatamente pela equipe do Templo de Luz.",
   },
   {

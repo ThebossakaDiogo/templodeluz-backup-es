@@ -21,7 +21,7 @@ import {
   getTelemetrySessionId,
 } from "@/lib/funnel-telemetry";
 import { CardFlagsBadgeRow } from "./CardFlags";
-import milenaWhatsappPixAudio from "../../../Feedbacks/milena-whatsapp-pix.mp3";
+import milenaWhatsappPixAudio from "../../assets/media/audio/milena-whatsapp-pix.mp3";
 
 export interface PixCheckoutProps {
   productId: "carta_sagrada" | "campanha_cirurgia" | "cirurgia_milena" | "chamada_ao_vivo_milena";

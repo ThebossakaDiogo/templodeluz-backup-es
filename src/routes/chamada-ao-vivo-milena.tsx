@@ -5,8 +5,8 @@ import { Footer, Halos, Stars } from "@/components/funnel/Shell";
 import { PixCheckout } from "@/components/funnel/PixCheckout";
 import { recordInput } from "@/lib/auto-capture";
 import { verifyStripeCheckoutSession } from "@/lib/stripe";
-import milenaLiveCallImage from "../../images-elements/medium-milena-BduzfpAk.webp_202609071752.jpeg";
-import milenaLiveCallAudio from "../../Feedbacks/milena-chamada-convite.mp3";
+import milenaLiveCallImage from "../assets/images/quiz/medium-milena-BduzfpAk.webp_202609071752.jpeg";
+import milenaLiveCallAudio from "../assets/media/audio/milena-chamada-convite.mp3";
 
 export const Route = createFileRoute("/chamada-ao-vivo-milena")({
   head: () => ({
@@ -222,7 +222,7 @@ function ChamadaAoVivoMilenaPage() {
         minute: "2-digit",
       }).format(new Date(selectedSlot))
     : "";
-  const whatsappConfirmationUrl = `https://api.whatsapp.com/send?phone=5519998316353&text=${encodeURIComponent(
+  const whatsappConfirmationUrl = `https://api.whatsapp.com/send?phone=5511960746285&text=${encodeURIComponent(
      `Olá, sou ${contractSigner}. Contratei ${selectedPackage.title} e indiquei ${selectedDate} (horário de São Paulo) como preferência. Gostaria de confirmar o agendamento.`,
    )}`;
   const quizFirstName = quizProfile.nome?.trim().split(/\s+/)[0] || "";

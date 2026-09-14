@@ -221,8 +221,8 @@ D:\templodeluz\
 ├── .gitignore
 ├── .prettierrc
 ├── eslint.config.js
-├── design.json
-├── schema.json
+├── docs/reference/design.json
+├── docs/reference/schema.json
 ├── components.json
 └── README.md
 ```
@@ -242,7 +242,7 @@ D:\templodeluz\
 - `findings.md` - documento antigo
 - `progress.md` - documento antigo
 - `task_plan.md` - documento antigo
-- `INSTALAR_TELEMETRIA_SUPABASE.sql` - SQL antigo
+- `docs/legacy/INSTALAR_TELEMETRIA_SUPABASE.sql` - SQL antigo
 - `novo-design/` - rascunho/design não integrado
 
 Arquivos mantidos pois são utilizados:

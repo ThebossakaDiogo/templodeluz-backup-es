@@ -8,12 +8,12 @@ import { trackQuizStep as trackQuizTelemetry } from "@/lib/funnel-telemetry";
 import { useCandlesGoalSimulation } from "@/lib/donation-simulation";
 import { parseBrazilianCurrency, sanitizeBrazilianCurrencyInput } from "@/lib/currency";
 import { PIX_CONFIG_ORIGINAL, pixFunctionHeaders } from "@/lib/pix-config";
-import milenaCartaImage from "../../../images-elements/medium-milena-carta.jpeg";
-import insumoVelaImage from "../../../images-elements/insumo-vela.png";
-import insumoCartaImage from "../../../images-elements/insumo-carta.png";
-import insumoSopaImage from "../../../images-elements/insumo-sopa.png";
-import milenaLoaderImage from "../../../images-elements/milena-loader.jpeg";
-import milenaDonationAudio from "../../../Feedbacks/milena-doacao-templo.mp3";
+import milenaCartaImage from "../../assets/images/quiz/medium-milena-carta.jpeg";
+import insumoVelaImage from "../../assets/images/quiz/insumo-vela.png";
+import insumoCartaImage from "../../assets/images/quiz/insumo-carta.png";
+import insumoSopaImage from "../../assets/images/quiz/insumo-sopa.png";
+import milenaLoaderImage from "../../assets/images/quiz/milena-loader.jpeg";
+import milenaDonationAudio from "../../assets/media/audio/milena-doacao-templo.mp3";
 
 const LetterZoomModal = lazy(() => import("./LetterZoomModal").then(({ LetterZoomModal: Component }) => ({ default: Component })));
 const PixCheckout = lazy(() => import("./PixCheckout").then(({ PixCheckout: Component }) => ({ default: Component })));

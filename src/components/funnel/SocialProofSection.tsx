@@ -1,9 +1,9 @@
-import feedbackOne from "../../../Feedbacks/Feedback.webp";
-import feedbackTwo from "../../../Feedbacks/Feedback2.webp";
-import feedbackVideo from "../../../Feedbacks/Feedback3.mp4";
-import feedbackVideoTwo from "../../../Feedbacks/Feedback4.mp4";
-import feedbackVideoTwoPoster from "../../../Feedbacks/Feedback4-poster.webp";
-import feedbackVideoPoster from "../../../Feedbacks/Feedback3-poster.webp";
+import feedbackOne from "../../assets/media/feedbacks/Feedback.webp";
+import feedbackTwo from "../../assets/media/feedbacks/Feedback2.webp";
+import feedbackVideo from "../../assets/media/feedbacks/Feedback3.mp4";
+import feedbackVideoTwo from "../../assets/media/feedbacks/Feedback4.mp4";
+import feedbackVideoTwoPoster from "../../assets/media/feedbacks/Feedback4-poster.webp";
+import feedbackVideoPoster from "../../assets/media/feedbacks/Feedback3-poster.webp";
 import { Reveal } from "./Shell";
 
 const feedbackImages = [
