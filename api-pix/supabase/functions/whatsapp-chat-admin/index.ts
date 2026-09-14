@@ -1,10 +1,11 @@
 // @ts-nocheck
 import {
   chatClient, cleanPhone, cleanText, cors, evolutionMessageId, isDashboardOrigin,
-  json, requestProfile, requireDashboardAdmin, sendEvolutionMessage,
+  ensureEvolutionInstance, evolutionConnectionStatus, json, projectChatProfile, requestProfile,
+  requireDashboardAdmin, sendEvolutionMessage,
 } from '../_shared/whatsapp-chat.ts';
 
-const PROFILE_ORIGIN = 'original';
+const PROFILE_ORIGIN = projectChatProfile();
 
 async function callGemini(payload: Record<string, unknown>) {
   const url = Deno.env.get('SUPABASE_URL')?.replace(/\/$/, '');
@@ -77,6 +78,17 @@ Deno.serve(async (request) => {
     if (!input || !requestProfile(input, PROFILE_ORIGIN)) return json(origin, { error: 'Perfil nao autorizado.' }, 403);
     const action = cleanText(input.action, 64);
     const supabase = chatClient();
+
+    if (action === 'evolution_status') {
+      try {
+        return json(origin, { data: await evolutionConnectionStatus() });
+      } catch (error) {
+        return json(origin, { data: { configured: false, connected: false, state: 'configuration_missing', error: error instanceof Error ? error.message : 'EVOLUTION_STATUS_FAILED' } });
+      }
+    }
+    if (action === 'evolution_connect') {
+      return json(origin, { data: await ensureEvolutionInstance() });
+    }
 
     // Compatibility contract consumed by the dashboard inbox.
     if (action === 'list_messages') {

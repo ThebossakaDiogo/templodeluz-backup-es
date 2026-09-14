@@ -1,22 +1,20 @@
-import { EVOLUTION_MANAGER_URL, getEvolutionLocalStatus } from "./evolution-local-bridge";
-
 export interface EvolutionConfig {
   apiUrl: string;
   apiKey: string;
   instanceName: string;
 }
 
-const LOCAL_CONFIG: EvolutionConfig = {
-  apiUrl: EVOLUTION_MANAGER_URL.replace(/\/manager$/, ""),
+const CLOUD_CONFIG: EvolutionConfig = {
+  apiUrl: "",
   apiKey: "",
-  instanceName: "dipefy-drop",
+  instanceName: "",
 };
 
 export function getEvolutionConfig(): EvolutionConfig {
-  return LOCAL_CONFIG;
+  return CLOUD_CONFIG;
 }
 
-/** Credentials are managed exclusively by C:\evolution-local\.env. */
+/** Credentials are managed exclusively by Supabase Secrets. */
 export function saveEvolutionConfig(_config: EvolutionConfig): void {
   // Kept as a compatibility no-op while older dashboard panels are migrated.
 }
@@ -34,32 +32,11 @@ export interface ConnectionStateResponse {
 }
 
 export async function testEvolutionConnection(): Promise<ConnectionStateResponse> {
-  try {
-    const status = await getEvolutionLocalStatus();
-    if (status.whatsapp.connected) {
-      return { success: true, state: "open", message: "WhatsApp conectado na instância dipefy-drop." };
-    }
-    if (status.evolution.online) {
-      return {
-        success: false,
-        state: status.whatsapp.state || "close",
-        message: "Evolution online. Abra o Manager para conectar o WhatsApp.",
-      };
-    }
-    return {
-      success: false,
-      state: status.status.toLowerCase(),
-      message: status.docker.available
-        ? "Evolution API está offline. Use o controle local para iniciar."
-        : "Docker Desktop não está disponível neste computador.",
-    };
-  } catch {
-    return {
-      success: false,
-      state: "network_error",
-      message: "Serviço local da Evolution não encontrado.",
-    };
-  }
+  return {
+    success: false,
+    state: "cloud_managed",
+    message: "Consulte o status da Evolution Railway na página WhatsApp Chat.",
+  };
 }
 
 export interface EvolutionQRCodeData {
@@ -75,7 +52,7 @@ export interface EvolutionQRCodeData {
 const managerOnlyResult = (): EvolutionQRCodeData => ({
   success: false,
   state: "close",
-  message: `Por segurança, conecte a instância diretamente no Evolution Manager: ${EVOLUTION_MANAGER_URL}`,
+  message: "Conecte a instância pela página WhatsApp Chat. A API key permanece protegida no Supabase.",
 });
 
 export async function getEvolutionQRCode(): Promise<EvolutionQRCodeData> {
@@ -89,7 +66,7 @@ export async function createEvolutionInstance(): Promise<EvolutionQRCodeData> {
 export async function logoutEvolutionInstance(): Promise<{ success: boolean; message: string }> {
   return {
     success: false,
-    message: "A desconexão deve ser feita diretamente no Evolution Manager local.",
+    message: "Gerencie a instância pela página WhatsApp Chat.",
   };
 }
 
@@ -109,7 +86,7 @@ export interface SendMessageResult {
 export async function sendProductDeliveryMessage(_params: ProductDeliveryParams): Promise<SendMessageResult> {
   return {
     success: false,
-    error: "Envio direto desativado para proteger a API key. Use o Evolution Manager ou WhatsApp Web.",
+    error: "Use a página WhatsApp Chat para enviar pela Evolution Railway.",
   };
 }
 
@@ -119,7 +96,7 @@ export async function sendEvolutionTextMessage(phone: string, _text: string): Pr
   }
   return {
     success: false,
-    error: "Envio direto desativado para proteger a API key. Use o Evolution Manager ou WhatsApp Web.",
+    error: "Use a página WhatsApp Chat para enviar pela Evolution Railway.",
   };
 }
 

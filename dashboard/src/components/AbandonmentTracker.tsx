@@ -385,7 +385,7 @@ export function AbandonmentTracker({ leads }: AbandonmentTrackerProps) {
               </span>
             </div>
             <p style={{ fontSize: "11.5px", color: "var(--text-muted)", margin: "3px 0 0" }}>
-              {connectionMsg || "Status consultado com segurança pelo Evolution Local Bridge."}
+              {connectionMsg || "Status consultado com segurança pela Evolution Railway via Supabase."}
             </p>
           </div>
         </div>

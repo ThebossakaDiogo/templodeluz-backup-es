@@ -8,6 +8,16 @@ export const DASHBOARD_DEFAULT_ORIGINS = new Set([
   'http://127.0.0.1:3011',
 ]);
 
+const META_PROJECT_REF = 'opftmzegcvfyoinjfmcj';
+const TIKTOK_PROJECT_REF = 'yfpiqfytonuhigwkssio';
+
+export function projectChatProfile() {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+  if (supabaseUrl.includes(META_PROJECT_REF)) return 'original';
+  if (supabaseUrl.includes(TIKTOK_PROJECT_REF)) return 'mirrored';
+  throw new Error('WHATSAPP_CHAT_PROJECT_NOT_ALLOWED');
+}
+
 export function serviceRoleKey() {
   const legacy = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
   if (legacy) return legacy;
@@ -123,6 +133,81 @@ export async function sendEvolutionMessage(phone: string, body: string, mediaUrl
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(`EVOLUTION_HTTP_${response.status}`);
   return payload as Record<string, unknown>;
+}
+
+export function evolutionInstance() {
+  const instance = Deno.env.get('EVOLUTION_INSTANCE')?.trim();
+  if (!instance) throw new Error('EVOLUTION_INSTANCE_MISSING');
+  return instance;
+}
+
+export async function evolutionRequest(path: string, init: RequestInit = {}) {
+  const baseUrl = Deno.env.get('EVOLUTION_API_URL')?.replace(/\/$/, '');
+  const apiKey = Deno.env.get('EVOLUTION_API_KEY');
+  if (!baseUrl || !apiKey) throw new Error('EVOLUTION_CONFIGURATION_MISSING');
+  const response = await fetch(`${baseUrl}${path}`, {
+    ...init,
+    signal: AbortSignal.timeout(25_000),
+    headers: { apikey: apiKey, 'Content-Type': 'application/json', ...(init.headers ?? {}) },
+  });
+  const payload = await response.json().catch(() => ({}));
+  return { ok: response.ok, status: response.status, payload: payload as Record<string, unknown> };
+}
+
+export async function evolutionConnectionStatus() {
+  const instance = evolutionInstance();
+  const result = await evolutionRequest(`/instance/connectionState/${encodeURIComponent(instance)}`);
+  const instancePayload = result.payload?.instance && typeof result.payload.instance === 'object'
+    ? result.payload.instance as Record<string, unknown>
+    : {};
+  const state = cleanText(instancePayload.state ?? result.payload?.state, 32).toLowerCase();
+  return {
+    instance,
+    configured: true,
+    connected: state === 'open' || state === 'connected',
+    state: state || (result.status === 404 ? 'not_created' : 'unknown'),
+  };
+}
+
+export async function ensureEvolutionInstance() {
+  const instance = evolutionInstance();
+  const current = await evolutionConnectionStatus();
+  if (current.state === 'not_created') {
+    const created = await evolutionRequest('/instance/create', {
+      method: 'POST',
+      body: JSON.stringify({ instanceName: instance, qrcode: true, integration: 'WHATSAPP-BAILEYS' }),
+    });
+    if (!created.ok && created.status !== 409) throw new Error(`EVOLUTION_CREATE_HTTP_${created.status}`);
+  }
+
+  const webhookToken = Deno.env.get('EVOLUTION_WEBHOOK_TOKEN');
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')?.replace(/\/$/, '');
+  if (!webhookToken || !supabaseUrl) throw new Error('EVOLUTION_WEBHOOK_CONFIGURATION_MISSING');
+  const webhookUrl = `${supabaseUrl}/functions/v1/whatsapp-chat-webhook?token=${encodeURIComponent(webhookToken)}`;
+  const webhook = await evolutionRequest(`/webhook/set/${encodeURIComponent(instance)}`, {
+    method: 'POST',
+    body: JSON.stringify({
+      webhook: {
+        enabled: true,
+        url: webhookUrl,
+        webhookByEvents: false,
+        webhookBase64: false,
+        events: ['MESSAGES_UPSERT'],
+      },
+    }),
+  });
+  if (!webhook.ok) throw new Error(`EVOLUTION_WEBHOOK_HTTP_${webhook.status}`);
+
+  const connected = await evolutionConnectionStatus();
+  if (connected.connected) return { ...connected, base64: null, code: null, pairingCode: null };
+  const qr = await evolutionRequest(`/instance/connect/${encodeURIComponent(instance)}`);
+  if (!qr.ok) throw new Error(`EVOLUTION_CONNECT_HTTP_${qr.status}`);
+  return {
+    ...connected,
+    base64: cleanText(qr.payload?.base64, 1_000_000) || null,
+    code: cleanText(qr.payload?.code, 20_000) || null,
+    pairingCode: cleanText(qr.payload?.pairingCode, 64) || null,
+  };
 }
 
 export function evolutionMessageId(payload: Record<string, unknown>) {

@@ -1,9 +1,9 @@
 // @ts-nocheck
 import {
-  chatClient, cleanText, evolutionMessageId, requestProfile, sendEvolutionMessage, timingSafeEqual,
+  chatClient, cleanText, evolutionMessageId, projectChatProfile, requestProfile, sendEvolutionMessage, timingSafeEqual,
 } from '../_shared/whatsapp-chat.ts';
 
-const PROFILE_ORIGIN = 'original';
+const PROFILE_ORIGIN = projectChatProfile();
 const DEFAULT_GEMINI_MODEL = 'gemini-3.0-flash';
 
 function internalAuthorized(request: Request) {

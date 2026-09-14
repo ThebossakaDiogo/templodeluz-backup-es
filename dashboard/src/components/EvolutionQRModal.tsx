@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X } from "lucide-react";
-import { EvolutionLocalControl } from "./EvolutionLocalControl";
+import { Cloud, ExternalLink, X } from "lucide-react";
 
 interface EvolutionQRModalProps {
   readonly isOpen: boolean;
@@ -37,15 +36,20 @@ export function EvolutionQRModal({ isOpen, onClose, onConnectionChange }: Evolut
         <section className="evolution-control-dialog" role="dialog" aria-modal="true" aria-labelledby="evolution-dialog-title">
           <header>
             <div>
-              <span className="section-kicker">Controle local seguro</span>
-              <h2 id="evolution-dialog-title">Evolution Local</h2>
-              <p>O QR Code e a configuração da instância ficam no Manager local.</p>
+              <span className="section-kicker">Conexão em nuvem</span>
+              <h2 id="evolution-dialog-title">Evolution Railway</h2>
+              <p>O QR Code e o status agora ficam no WhatsApp Chat, disponíveis de qualquer lugar.</p>
             </div>
             <button type="button" className="btn topbar-icon-button" onClick={onClose} aria-label="Fechar controle Evolution">
               <X size={18} />
             </button>
           </header>
-          <EvolutionLocalControl onConnectionChange={onConnectionChange} />
+          <section className="card p-5 text-center">
+            <Cloud className="mx-auto text-emerald-500" size={32} />
+            <h3 className="mt-3 text-base font-black">Não é mais necessário abrir o Docker local</h3>
+            <p className="mx-auto mt-2 max-w-md text-xs leading-relaxed text-[var(--text-muted)]">Abra a página WhatsApp Chat, escolha o perfil Meta ou TikTok e conecte o número correspondente.</p>
+            <a href="/whatsapp" className="btn btn-emerald mt-4 inline-flex" onClick={() => { onConnectionChange?.(false); onClose(); }}>Abrir WhatsApp Chat <ExternalLink size={14} /></a>
+          </section>
         </section>
       </div>
     </div>,

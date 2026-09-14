@@ -15,10 +15,11 @@ import {
   Send,
   Sparkles,
   Upload,
+  Wifi,
   X,
 } from "lucide-react";
 import type { DashboardProfileId } from "@/lib/dashboard-profiles";
-import { createWhatsAppChatClient } from "@/services/whatsapp-chat";
+import { createWhatsAppChatClient, type WhatsAppEvolutionConnect, type WhatsAppEvolutionStatus } from "@/services/whatsapp-chat";
 import type {
   WhatsAppAiRun,
   WhatsAppAiSettings,
@@ -97,6 +98,9 @@ export function WhatsAppChat({ profile, accessToken, onUnreadCountChange }: What
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [evolutionStatus, setEvolutionStatus] = useState<WhatsAppEvolutionStatus | null>(null);
+  const [evolutionQr, setEvolutionQr] = useState<WhatsAppEvolutionConnect | null>(null);
+  const [connectingEvolution, setConnectingEvolution] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messageListRef = useRef<HTMLDivElement>(null);
 
@@ -135,6 +139,9 @@ export function WhatsAppChat({ profile, accessToken, onUnreadCountChange }: What
       onUnreadCountChange?.(threadResult.threads.filter((thread) => thread.unread_count > 0).length);
       setMaterials(nextMaterials);
       setAiSettings(nextAiSettings);
+      void client.getEvolutionStatus().then(setEvolutionStatus).catch(() => {
+        setEvolutionStatus({ configured: false, connected: false, state: "unavailable" });
+      });
       setSelectedThread((current) => {
         if (preserveSelection && current) {
           return threadResult.threads.find((thread) => thread.id === current.id) ?? null;
@@ -150,6 +157,22 @@ export function WhatsAppChat({ profile, accessToken, onUnreadCountChange }: What
       setLoading(false);
     }
   }, [client, onUnreadCountChange]);
+
+  const handleConnectEvolution = async () => {
+    if (connectingEvolution) return;
+    setConnectingEvolution(true);
+    setError(null);
+    try {
+      const result = await client.connectEvolution();
+      setEvolutionStatus(result);
+      setEvolutionQr(result);
+      if (result.connected) setNotice(`WhatsApp conectado na instância ${result.instance}.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Não foi possível conectar o WhatsApp na nuvem.");
+    } finally {
+      setConnectingEvolution(false);
+    }
+  };
 
   useEffect(() => {
     void reload(false);
@@ -297,11 +320,13 @@ export function WhatsAppChat({ profile, accessToken, onUnreadCountChange }: What
           <p>Conversas e materiais ficam isolados no perfil selecionado.</p>
         </div>
         <div className="whatsapp-chat-header-actions">
+          <div className="whatsapp-chat-stat"><strong><Wifi size={15} /> {evolutionStatus?.connected ? "Online" : "Offline"}</strong><span>{evolutionStatus?.instance || `Instância ${profileLabel}`}</span></div>
           <div className="whatsapp-chat-stat"><strong>{openThreads}</strong><span>abertas</span></div>
           <div className="whatsapp-chat-stat"><strong>{unreadThreads}</strong><span>não lidas</span></div>
           <button type="button" className="btn whatsapp-chat-refresh" onClick={() => void reload()} disabled={loading} aria-label="Atualizar inbox">
             <RefreshCw className={loading ? "spinning" : ""} />
           </button>
+          {!evolutionStatus?.connected && <button type="button" className="btn btn-emerald" onClick={() => void handleConnectEvolution()} disabled={connectingEvolution}>{connectingEvolution ? <RefreshCw className="spinning" /> : <Wifi />} Conectar</button>}
           <label className="whatsapp-ai-toggle">
             <input type="checkbox" checked={aiSettings.enabled} onChange={() => void handleToggleAutomation()} />
             <span aria-hidden="true" />
@@ -315,6 +340,12 @@ export function WhatsAppChat({ profile, accessToken, onUnreadCountChange }: What
       )}
       {error && <div className="whatsapp-chat-error" role="alert"><CircleAlert /> {error}<button type="button" onClick={() => setError(null)} aria-label="Fechar aviso"><X /></button></div>}
       {notice && <div className="whatsapp-chat-notice"><Check /> {notice}<button type="button" onClick={() => setNotice(null)} aria-label="Fechar aviso"><X /></button></div>}
+      {evolutionQr && !evolutionStatus?.connected && (
+        <section className="card whatsapp-cloud-qr" aria-label="Conectar WhatsApp na nuvem">
+          <div><span className="section-kicker">Evolution Railway</span><h3>Conecte {evolutionQr.instance}</h3><p>No WhatsApp: Configurações → Aparelhos conectados → Conectar aparelho.</p>{evolutionQr.pairingCode && <strong>Código: {evolutionQr.pairingCode}</strong>}</div>
+          {evolutionQr.base64 ? <img src={evolutionQr.base64.startsWith("data:") ? evolutionQr.base64 : `data:image/png;base64,${evolutionQr.base64}`} alt={`QR Code da instância ${evolutionQr.instance}`} /> : <code>{evolutionQr.code || "QR Code sendo preparado. Clique em atualizar em alguns segundos."}</code>}
+        </section>
+      )}
 
       <div className="whatsapp-chat-workspace card">
         <aside className={`whatsapp-thread-list${selectedThread ? " has-selection" : ""}`} aria-label="Lista de conversas">
@@ -392,7 +423,7 @@ export function WhatsAppChat({ profile, accessToken, onUnreadCountChange }: What
           </aside>
         )}
       </div>
-      <p className="whatsapp-chat-footnote"><Clock3 /> Envios são autorizados pelo endpoint administrativo do perfil {profileLabel}; o dashboard não recebe chaves Evolution ou Gemini.</p>
+      <p className="whatsapp-chat-footnote"><Clock3 /> Evolution 24/7 no Railway. Envios passam pelo Supabase do perfil {profileLabel}; o dashboard não recebe chaves Evolution ou Gemini.</p>
     </section>
   );
 }

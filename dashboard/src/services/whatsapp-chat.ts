@@ -1,5 +1,4 @@
 import { supabase } from "@/lib/supabase";
-import { sendEvolutionLocalMedia, sendEvolutionLocalText } from "@/services/evolution-local-bridge";
 import {
   invokeTikTokDashboardFunction,
   type DashboardProfileId,
@@ -67,6 +66,22 @@ export interface WhatsAppChatClient {
   listAiRuns(threadId: string): Promise<WhatsAppAiRun[]>;
   sendText(input: { thread: WhatsAppChatThread; content: string }): Promise<void>;
   sendMaterial(input: { thread: WhatsAppChatThread; material: WhatsAppMaterial }): Promise<void>;
+  getEvolutionStatus(): Promise<WhatsAppEvolutionStatus>;
+  connectEvolution(): Promise<WhatsAppEvolutionConnect>;
+}
+
+export interface WhatsAppEvolutionStatus {
+  instance?: string;
+  configured: boolean;
+  connected: boolean;
+  state: string;
+  error?: string;
+}
+
+export interface WhatsAppEvolutionConnect extends WhatsAppEvolutionStatus {
+  base64: string | null;
+  code: string | null;
+  pairingCode: string | null;
 }
 
 function mapThread(row: AdminThreadRow): WhatsAppChatThread {
@@ -187,13 +202,17 @@ export function createWhatsAppChatClient(
       return result.runs ?? [];
     },
     async sendText({ thread, content }) {
-      const result = await sendEvolutionLocalText(profile, thread.customer_phone, content);
-      await invoke("record_outgoing", { threadId: thread.id, content, message_type: "text", remote_message_id: result.remote_message_id });
+      await invoke("send_message", { threadId: thread.id, body: content, messageType: "text" });
     },
     async sendMaterial({ thread, material }) {
       const prepared = await invoke<{ signed_url: string; caption: string }>("prepare_material", { material_id: material.id });
-      const result = await sendEvolutionLocalMedia(profile, thread.customer_phone, prepared.signed_url, prepared.caption, material.mime_type);
-      await invoke("record_outgoing", { threadId: thread.id, content: prepared.caption, message_type: material.mime_type.startsWith("image/") ? "image" : "document", media_url: prepared.signed_url, material_id: material.id, remote_message_id: result.remote_message_id });
+      await invoke("send_message", { threadId: thread.id, body: prepared.caption, messageType: material.mime_type.startsWith("image/") ? "image" : "document", mediaUrl: prepared.signed_url });
+    },
+    async getEvolutionStatus() {
+      return invoke<WhatsAppEvolutionStatus>("evolution_status");
+    },
+    async connectEvolution() {
+      return invoke<WhatsAppEvolutionConnect>("evolution_connect");
     },
   };
 }

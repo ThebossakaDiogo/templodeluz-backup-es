@@ -1,9 +1,9 @@
 // @ts-nocheck
 import {
-  chatClient, cleanPhone, cleanText, evolutionMessageId, requestProfile, timingSafeEqual,
+  chatClient, cleanPhone, cleanText, evolutionMessageId, projectChatProfile, requestProfile, timingSafeEqual,
 } from '../_shared/whatsapp-chat.ts';
 
-const PROFILE_ORIGIN = 'original';
+const PROFILE_ORIGIN = projectChatProfile();
 
 function webhookToken(request: Request) {
   return request.headers.get('x-evolution-webhook-token')

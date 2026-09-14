@@ -22,8 +22,6 @@ import { PaymentMethodsPieChart } from "@/components/PaymentMethodsPieChart";
 import { ConversionOverview } from "@/components/ConversionOverview";
 import { ConsulentesTelemetryTable } from "@/components/ConsulentesTelemetryTable";
 import { TodayHeroMetric } from "@/components/TodayHeroMetric";
-import { EvolutionLocalControl } from "@/components/EvolutionLocalControl";
-import { EvolutionGuide } from "@/components/EvolutionGuide";
 import { WhatsAppChat } from "@/components/WhatsAppChat";
 import { AbandonmentTracker } from "@/components/AbandonmentTracker";
 import { ProfileView } from "@/components/ProfileView";
@@ -1095,16 +1093,18 @@ export function App() {
                 loading={loading}
               />
 
-              {/* Seção 2 — Conexão do WhatsApp (setup guiado) */}
+              {/* Seção 2 — Conexão do WhatsApp 24/7 */}
               <div className="dashboard-section-head">
                 <span className="section-kicker">Configuração</span>
-                <h2>Conecte seu WhatsApp</h2>
-                <p>Siga os 3 passos para a médium enviar as cartas pelo WhatsApp.</p>
+                <h2>WhatsApp online 24/7</h2>
+                <p>A Evolution fica hospedada no Railway e funciona sem depender deste computador.</p>
               </div>
-
-              <EvolutionLocalControl />
-
-              <EvolutionGuide />
+              <section className="card p-5">
+                <span className="section-kicker">Evolution Railway</span>
+                <h3 className="mt-1 text-base font-black">Conexão gerenciada no WhatsApp Chat</h3>
+                <p className="mt-1 text-xs text-[var(--text-muted)]">Selecione Meta ou TikTok, abra o WhatsApp Chat e conecte a instância correspondente pelo QR Code seguro.</p>
+                <button type="button" className="btn btn-emerald mt-4" onClick={() => setSection("whatsapp")}>Abrir WhatsApp Chat</button>
+              </section>
 
               {/* Seção 3 — Detalhes do período (o que aconteceu) */}
               <div className="dashboard-section-head">
