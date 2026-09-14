@@ -1,14 +1,18 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Bot,
+  CalendarClock,
   Check,
   CheckCheck,
   ChevronLeft,
   CircleAlert,
+  ClipboardCheck,
   Clock3,
+  CreditCard,
   FileText,
   Image,
   MessageCircle,
+  PackageCheck,
   Paperclip,
   RefreshCw,
   Search,
@@ -73,6 +77,45 @@ function initials(name: string | null): string {
 
 function materialIcon(mimeType: string) {
   return mimeType.startsWith("image/") ? <Image /> : <FileText />;
+}
+
+function quickReplies(thread: WhatsAppChatThread) {
+  const firstName = thread.customer_name?.trim().split(/\s+/)[0] || "tudo bem";
+  const ente = thread.ente_querido ? ` sobre ${thread.ente_querido}` : "";
+  return [
+    {
+      title: "Boas-vindas",
+      description: "Receber e acolher",
+      icon: <MessageCircle />,
+      content: `Olá, ${firstName}! Aqui é a equipe da Milena. Recebemos sua mensagem${ente} e vamos acompanhar você por aqui com todo cuidado.`,
+    },
+    {
+      title: "Próximos passos",
+      description: "Orientar o atendimento",
+      icon: <ClipboardCheck />,
+      content: `Olá, ${firstName}. Para seguirmos com seu atendimento, confirme por favor seu nome completo e o nome da pessoa homenageada. Em seguida, orientaremos os próximos passos.`,
+    },
+    {
+      title: "Pagamento",
+      description: thread.payment_status === "paid" ? "Confirmado" : "Solicitar comprovante",
+      icon: <CreditCard />,
+      content: thread.payment_status === "paid"
+        ? `Olá, ${firstName}! Seu pagamento está confirmado. Vamos dar continuidade ao atendimento e manter você informado(a) por este WhatsApp.`
+        : `Olá, ${firstName}. Quando concluir o pagamento, envie o comprovante por aqui para conferirmos e continuarmos seu atendimento.`,
+    },
+    {
+      title: "Entrega da carta",
+      description: "Confirmar preparação",
+      icon: <PackageCheck />,
+      content: `Olá, ${firstName}! Sua solicitação de carta está em acompanhamento. Assim que a preparação avançar, enviaremos a atualização e as orientações de entrega por aqui.`,
+    },
+    {
+      title: "Agendamento",
+      description: "Combinar data e horário",
+      icon: <CalendarClock />,
+      content: `Olá, ${firstName}! Vamos organizar seu atendimento com a Milena. Informe os melhores dias e se prefere horário durante o dia ou à noite.`,
+    },
+  ];
 }
 
 export function WhatsAppChat({ profile, accessToken, onUnreadCountChange }: WhatsAppChatProps) {
@@ -196,6 +239,31 @@ export function WhatsAppChat({ profile, accessToken, onUnreadCountChange }: What
     const interval = window.setInterval(refreshInbox, 12_000);
     return () => window.clearInterval(interval);
   }, [loadSelectedThread, reload, selectedThread]);
+
+  useEffect(() => {
+    if (!evolutionQr || evolutionStatus?.connected) return;
+    let cancelled = false;
+    const checkConnection = async () => {
+      try {
+        const next = await client.getEvolutionStatus();
+        if (cancelled) return;
+        setEvolutionStatus(next);
+        if (next.connected) {
+          setEvolutionQr(null);
+          setNotice(`WhatsApp conectado na instância ${next.instance}. O inbox já está pronto.`);
+          void reload();
+        }
+      } catch {
+        // O QR permanece visível e uma nova tentativa ocorre automaticamente.
+      }
+    };
+    const interval = window.setInterval(() => void checkConnection(), 3_000);
+    void checkConnection();
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [client, evolutionQr, evolutionStatus?.connected, reload]);
 
   const handleSelectThread = (thread: WhatsAppChatThread) => {
     setSelectedThread(thread);
@@ -342,8 +410,8 @@ export function WhatsAppChat({ profile, accessToken, onUnreadCountChange }: What
       {notice && <div className="whatsapp-chat-notice"><Check /> {notice}<button type="button" onClick={() => setNotice(null)} aria-label="Fechar aviso"><X /></button></div>}
       {evolutionQr && !evolutionStatus?.connected && (
         <section className="card whatsapp-cloud-qr" aria-label="Conectar WhatsApp na nuvem">
-          <div><span className="section-kicker">Evolution Railway</span><h3>Conecte {evolutionQr.instance}</h3><p>No WhatsApp: Configurações → Aparelhos conectados → Conectar aparelho.</p>{evolutionQr.pairingCode && <strong>Código: {evolutionQr.pairingCode}</strong>}</div>
-          {evolutionQr.base64 ? <img src={evolutionQr.base64.startsWith("data:") ? evolutionQr.base64 : `data:image/png;base64,${evolutionQr.base64}`} alt={`QR Code da instância ${evolutionQr.instance}`} /> : <code>{evolutionQr.code || "QR Code sendo preparado. Clique em atualizar em alguns segundos."}</code>}
+          <div className="whatsapp-cloud-qr-copy"><span className="section-kicker">Evolution Railway · 24/7</span><h3>Conecte {evolutionQr.instance}</h3><ol><li>Abra o WhatsApp no celular.</li><li>Entre em <b>Aparelhos conectados</b>.</li><li>Toque em <b>Conectar aparelho</b> e escaneie.</li></ol><p><RefreshCw className="spinning" /> A conexão será detectada automaticamente.</p>{evolutionQr.pairingCode && <strong>Código: {evolutionQr.pairingCode}</strong>}</div>
+          <div className="whatsapp-cloud-qr-code">{evolutionQr.base64 ? <img src={evolutionQr.base64.startsWith("data:") ? evolutionQr.base64 : `data:image/png;base64,${evolutionQr.base64}`} alt={`QR Code da instância ${evolutionQr.instance}`} /> : <code>{evolutionQr.code || "QR Code sendo preparado. Clique em atualizar em alguns segundos."}</code>}<small>Mantenha esta tela aberta até aparecer “Online”.</small></div>
         </section>
       )}
 
@@ -398,6 +466,9 @@ export function WhatsAppChat({ profile, accessToken, onUnreadCountChange }: What
                 ))}
               </div>
               {aiRuns.length > 0 && <div className="whatsapp-ai-run"><Bot /><span>Gemini: {aiRuns[0].status === "failed" ? aiRuns[0].error || "falha registrada" : aiRuns[0].summary || "execução registrada"}</span></div>}
+              <div className="whatsapp-quick-strip" aria-label="Mensagens prontas">
+                {quickReplies(selectedThread).map((reply) => <button type="button" key={reply.title} onClick={() => setComposer(reply.content)}>{reply.icon}<span>{reply.title}</span></button>)}
+              </div>
               <div className="whatsapp-composer">
                 <div className="whatsapp-composer-actions">
                   <button type="button" className="btn" onClick={() => setMaterialsOpen(true)} disabled={sending}><Paperclip /> Material</button>
@@ -409,6 +480,36 @@ export function WhatsAppChat({ profile, accessToken, onUnreadCountChange }: What
             </>
           )}
         </main>
+
+        {selectedThread && (
+          <aside className="whatsapp-context-panel" aria-label="Dados e mensagens prontas">
+            <section className="whatsapp-customer-card">
+              <span className="whatsapp-thread-avatar large">{initials(selectedThread.customer_name)}</span>
+              <div><span className="section-kicker">Cliente selecionado</span><h3>{selectedThread.customer_name || selectedThread.customer_phone}</h3><p>{selectedThread.customer_phone}</p></div>
+              <dl>
+                <div><dt>Status</dt><dd>{selectedThread.status === "resolved" ? "Resolvida" : selectedThread.status === "opted_out" ? "Opt-out" : "Em atendimento"}</dd></div>
+                <div><dt>Pagamento</dt><dd className={selectedThread.payment_status === "paid" ? "is-paid" : ""}>{selectedThread.payment_status === "paid" ? "Pago" : selectedThread.payment_status === "pending" ? "Pendente" : "Não informado"}</dd></div>
+                {selectedThread.ente_querido && <div><dt>Ente querido</dt><dd>{selectedThread.ente_querido}</dd></div>}
+              </dl>
+            </section>
+
+            <section className="whatsapp-ready-messages">
+              <header><div><span className="section-kicker">Atalhos</span><h3>Mensagens prontas</h3></div><small>Clique para editar</small></header>
+              <div>
+                {quickReplies(selectedThread).map((reply) => (
+                  <button type="button" key={reply.title} onClick={() => { setComposer(reply.content); setNotice(`${reply.title} inserida. Revise antes de enviar.`); }}>
+                    <span>{reply.icon}</span><b>{reply.title}</b><small>{reply.description}</small>
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            <section className="whatsapp-side-actions">
+              <button type="button" className="btn" onClick={() => setMaterialsOpen(true)}><Paperclip /> Biblioteca de materiais</button>
+              <button type="button" className="btn" onClick={() => void handleGenerateDraft()} disabled={generatingDraft}><Sparkles /> Criar resposta com Gemini</button>
+            </section>
+          </aside>
+        )}
 
         {materialsOpen && (
           <aside className="whatsapp-materials-panel" aria-label="Biblioteca de materiais">
