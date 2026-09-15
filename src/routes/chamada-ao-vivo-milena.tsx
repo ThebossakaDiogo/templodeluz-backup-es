@@ -7,6 +7,8 @@ import { recordInput } from "@/lib/auto-capture";
 import { verifyStripeCheckoutSession } from "@/lib/stripe";
 import milenaLiveCallImage from "../assets/images/quiz/medium-milena-BduzfpAk.webp_202609071752.jpeg";
 import milenaLiveCallAudio from "../assets/media/audio/milena-chamada-convite.mp3";
+import feedbackOne from "../assets/media/feedbacks/Feedback.webp";
+import feedbackTwo from "../assets/media/feedbacks/Feedback2.webp";
 
 export const Route = createFileRoute("/chamada-ao-vivo-milena")({
   head: () => ({
@@ -82,7 +84,7 @@ function ChamadaAoVivoMilenaPage() {
   const [step, setStep] = useState<Step>("offer");
   const [contractAccepted, setContractAccepted] = useState(false);
   const [contractSigner, setContractSigner] = useState("");
-  const [selectedPackageId, setSelectedPackageId] = useState<(typeof LIVE_CALL_PACKAGES)[number]["id"]>("chamada_2h");
+  const [selectedPackageId, setSelectedPackageId] = useState<(typeof LIVE_CALL_PACKAGES)[number]["id"]>("acolhimento_4h");
   const [periodPreference, setPeriodPreference] = useState<PeriodPreference>("day");
   const [selectedDateKey, setSelectedDateKey] = useState("");
   const [selectedSlot, setSelectedSlot] = useState<string>("");
@@ -225,6 +227,9 @@ function ChamadaAoVivoMilenaPage() {
   const whatsappConfirmationUrl = `https://api.whatsapp.com/send?phone=5511960746285&text=${encodeURIComponent(
      `Olá, sou ${contractSigner}. Contratei ${selectedPackage.title} e indiquei ${selectedDate} (horário de São Paulo) como preferência. Gostaria de confirmar o agendamento.`,
    )}`;
+  const whatsappCheckoutUrl = `https://api.whatsapp.com/send?phone=5511960746285&text=${encodeURIComponent(
+    `Olá! ${quizFirstName ? `Sou ${quizFirstName} e ` : ""}gostaria de finalizar pelo WhatsApp o atendimento “${selectedPackage.heading}” no valor de R$ ${(callAmountCents / 100).toFixed(2).replace(".", ",")}. ${quizProfile.ente ? `Meu pedido está relacionado a ${quizProfile.ente}. ` : ""}Gostaria de receber orientação para escolher data e horário.`,
+  )}`;
   const quizFirstName = quizProfile.nome?.trim().split(/\s+/)[0] || "";
   const personalizedOffer = quizFirstName && quizProfile.ente
     ? `${quizFirstName}, pelo que você compartilhou sobre ${quizProfile.ente}${quizProfile.relacao ? ` (${quizProfile.relacao})` : ""}, escolha o formato de conversa que mais respeita o seu momento.`
@@ -402,6 +407,23 @@ function ChamadaAoVivoMilenaPage() {
                       {selectedPackage.includes.map((item) => <li key={item} className="flex gap-1.5"><span className="text-[#39776c]">•</span><span>{item}</span></li>)}
                     </ul>
                   </div>
+                  <section className="mt-4 rounded-2xl border border-[#e5daf0] bg-white p-4 text-left shadow-sm">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <span className="text-[9.5px] font-black uppercase tracking-[0.12em] text-[#5d4786]">Relatos compartilhados</span>
+                        <h3 className="mt-1 text-[14px] font-black text-[#1a082c]">Famílias que receberam acolhimento</h3>
+                      </div>
+                      <span className="rounded-full bg-[#f2eef8] px-2.5 py-1 text-[8.5px] font-black uppercase tracking-wide text-[#5d4786]">Privacidade</span>
+                    </div>
+                    <div className="mt-3 grid grid-cols-2 gap-2">
+                      {[feedbackOne, feedbackTwo].map((feedback, index) => (
+                        <figure key={feedback} className="overflow-hidden rounded-xl border border-[#e5daf0] bg-[#fbf9fd]">
+                          <img src={feedback} alt={`Relato compartilhado por uma família acolhida ${index + 1}`} loading="lazy" decoding="async" className="block h-auto w-full object-contain" />
+                        </figure>
+                      ))}
+                    </div>
+                    <p className="mt-3 text-[10.5px] leading-relaxed text-[#6d5488]">Relatos recebidos após atendimentos individuais. Cada experiência é pessoal e não representa promessa de resultado.</p>
+                  </section>
                 </div>
               </div>
             </div>
@@ -418,6 +440,9 @@ function ChamadaAoVivoMilenaPage() {
                 <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-1000 group-hover:translate-x-full" />
                 <span className="relative flex items-center justify-center gap-2">Continuar e escolher horário <span className="rounded-full bg-white/18 px-2.5 py-1 text-[13px] tracking-normal">R$ {(callAmountCents / 100).toFixed(2).replace(".", ",")}</span></span>
               </button>
+              <a href={whatsappCheckoutUrl} target="_blank" rel="noreferrer" className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-[#d8caea] bg-white px-4 py-3 text-xs font-bold text-[#5d4786] transition-colors hover:bg-[#f6f0fc]">
+                Prefiro finalizar pelo WhatsApp
+              </a>
               <button
                 type="button"
                 onClick={continueFlow}

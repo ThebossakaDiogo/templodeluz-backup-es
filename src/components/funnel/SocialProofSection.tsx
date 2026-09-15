@@ -4,6 +4,8 @@ import feedbackVideo from "../../assets/media/feedbacks/Feedback3.mp4";
 import feedbackVideoTwo from "../../assets/media/feedbacks/Feedback4.mp4";
 import feedbackVideoTwoPoster from "../../assets/media/feedbacks/Feedback4-poster.webp";
 import feedbackVideoPoster from "../../assets/media/feedbacks/Feedback3-poster.webp";
+import feedbackVideoThree from "../../assets/media/feedbacks/Feedback5.mp4";
+import feedbackVideoThreePoster from "../../assets/media/feedbacks/Feedback5-poster.webp";
 import { Reveal } from "./Shell";
 
 const feedbackImages = [
@@ -34,19 +36,16 @@ export function SocialProofSection() {
         </div>
 
         <div className="p-4 sm:p-6">
-          <div className="rounded-3xl border border-amber-200 bg-gradient-to-b from-[#fffaf0] to-white p-3 shadow-sm sm:p-4">
-            <div className="mb-3 flex items-center justify-between gap-3 px-1 text-left">
+          <div className="rounded-3xl border border-[#e5daf0] bg-white p-3 shadow-sm sm:p-4">
+            <div className="mb-3 px-1 text-left">
               <div>
-                <span className="block text-[10px] font-extrabold uppercase tracking-[0.15em] text-[#b45309]">
-                  Depoimento em vídeo
+                <span className="block text-[10px] font-extrabold uppercase tracking-[0.15em] text-[#5d4786]">
+                  Relato em vídeo
                 </span>
                 <strong className="mt-0.5 block text-sm text-[#241535]">
-                  Um relato que chegou até o Templo de Luz
+                  Uma experiência compartilhada com o Templo
                 </strong>
               </div>
-              <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-extrabold text-emerald-800 ring-1 ring-emerald-200">
-                12 segundos
-              </span>
             </div>
 
             <div className="relative mx-auto max-w-[330px] overflow-hidden rounded-2xl bg-black shadow-[0_20px_50px_-22px_rgba(0,0,0,0.72)] ring-1 ring-black/10">
@@ -69,20 +68,30 @@ export function SocialProofSection() {
             </p>
           </div>
 
-          <div className="mt-4 rounded-3xl border border-[#e5daf0] bg-white p-3 shadow-sm sm:p-4">
-            <div className="mb-3 px-1 text-left">
-              <span className="block text-[10px] font-extrabold uppercase tracking-[0.15em] text-[#6b21a8]">
-                Novo depoimento em vídeo
-              </span>
-              <strong className="mt-0.5 block text-sm text-[#241535]">
-                Mais um relato compartilhado com o Templo
-              </strong>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <div className="rounded-3xl border border-[#e5daf0] bg-white p-3 shadow-sm">
+              <div className="mb-3 px-1 text-left">
+                <span className="block text-[10px] font-extrabold uppercase tracking-[0.15em] text-[#5d4786]">Relato em vídeo</span>
+                <strong className="mt-0.5 block text-sm text-[#241535]">Mensagem compartilhada por uma família</strong>
+              </div>
+              <div className="relative mx-auto aspect-[3/4] max-w-[270px] overflow-hidden rounded-2xl bg-black ring-1 ring-black/10">
+                <video controls playsInline preload="none" poster={feedbackVideoTwoPoster} controlsList="nodownload" aria-label="Relato em vídeo de uma família acolhida" className="block h-full w-full bg-black object-cover">
+                  <source src={feedbackVideoTwo} type="video/mp4" />
+                  Seu navegador não oferece suporte à reprodução deste vídeo.
+                </video>
+              </div>
             </div>
-            <div className="relative mx-auto aspect-[3/4] max-w-[270px] overflow-hidden rounded-2xl bg-black shadow-[0_20px_50px_-22px_rgba(0,0,0,0.72)] ring-1 ring-black/10">
-              <video controls playsInline preload="none" poster={feedbackVideoTwoPoster} controlsList="nodownload" aria-label="Segundo depoimento em vídeo de uma família acolhida" className="block h-full w-full bg-black object-cover">
-                <source src={feedbackVideoTwo} type="video/mp4" />
-                Seu navegador não oferece suporte à reprodução deste vídeo.
-              </video>
+            <div className="rounded-3xl border border-[#e5daf0] bg-white p-3 shadow-sm">
+              <div className="mb-3 px-1 text-left">
+                <span className="block text-[10px] font-extrabold uppercase tracking-[0.15em] text-[#5d4786]">Relato em vídeo</span>
+                <strong className="mt-0.5 block text-sm text-[#241535]">Mais uma história recebida pelo Templo</strong>
+              </div>
+              <div className="relative mx-auto aspect-video w-full overflow-hidden rounded-2xl bg-black ring-1 ring-black/10">
+                <video controls playsInline preload="none" poster={feedbackVideoThreePoster} controlsList="nodownload" aria-label="Novo relato em vídeo de uma família acolhida" className="block h-full w-full bg-black object-contain">
+                  <source src={feedbackVideoThree} type="video/mp4" />
+                  Seu navegador não oferece suporte à reprodução deste vídeo.
+                </video>
+              </div>
             </div>
           </div>
 
