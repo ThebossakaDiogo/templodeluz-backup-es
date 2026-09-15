@@ -173,17 +173,40 @@ Deno.serve(async (req) => {
       return json(origin, { error: 'Dados do checkout PIX invalidos.' }, 400);
     }
 
-    const ipHash = await sha256(clientIp(req));
-    const { data: allowed, error: rateError } = await supabase.rpc('consume_pix_rate_limit', {
+    const authorization = req.headers.get('authorization') ?? '';
+    const accessToken = authorization.replace(/^Bearer\s+/i, '');
+    const requestApiKey = req.headers.get('apikey') ?? '';
+    // Chamadas públicas do checkout usam a chave anon/publishable. Consultar
+    // auth.getUser com ela não retorna usuário e só adiciona latência ao QR.
+    const userAccessToken = accessToken && accessToken !== requestApiKey ? accessToken : '';
+
+    const ipHashPromise = sha256(clientIp(req));
+    const rateLimitPromise = ipHashPromise.then((ipHash) => supabase!.rpc('consume_pix_rate_limit', {
       p_bucket: `pix-create:${ipHash}`,
       p_limit: 10,
       p_window_seconds: 3600,
-    });
+    }));
+    const productPromise = supabase
+      .from('pix_products')
+      .select('id, name, description, amount_cents, allow_custom_amount, minimum_amount_cents, maximum_amount_cents, customer_email, customer_cpf, customer_phone')
+      .eq('id', productId)
+      .eq('active', true)
+      .maybeSingle();
+    const authPromise = userAccessToken
+      ? supabase.auth.getUser(userAccessToken)
+      : Promise.resolve({ data: { user: null } });
+    const [ipHash, statusTokenHash, accountFingerprint, rateResult, authResult, productResult] = await Promise.all([
+      ipHashPromise,
+      sha256(statusToken),
+      sha256(apiSecret).then((fingerprint) => fingerprint.slice(0, 24)),
+      rateLimitPromise,
+      authPromise,
+      productPromise,
+    ]);
+    const { data: allowed, error: rateError } = rateResult;
     if (rateError) throw rateError;
     if (!allowed) return json(origin, { error: 'Muitas tentativas. Aguarde antes de gerar outro PIX.' }, 429);
 
-    const statusTokenHash = await sha256(statusToken);
-    const accountFingerprint = (await sha256(apiSecret)).slice(0, 24);
     const { data: existing, error: existingError } = await supabase
       .from('pix_orders')
       .select('id, status, status_token_hash, connectpay_transaction_id, pix_payload, qr_code_base64, expires_at, quiz_origin, pix_account_key, pix_account_fingerprint')
@@ -203,21 +226,6 @@ Deno.serve(async (req) => {
       return json(origin, { error: 'Esta cobranca ainda esta sendo processada. Tente novamente.' }, 409);
     }
 
-    const authorization = req.headers.get('authorization') ?? '';
-    const accessToken = authorization.replace(/^Bearer\s+/i, '');
-
-    // Paraleliza a resolução do usuário e a busca do produto (economiza ~2 round-trips)
-    const [authResult, productResult] = await Promise.all([
-      accessToken
-        ? supabase.auth.getUser(accessToken)
-        : Promise.resolve({ data: { user: null } }),
-      supabase
-        .from('pix_products')
-        .select('id, name, description, amount_cents, allow_custom_amount, minimum_amount_cents, maximum_amount_cents, customer_email, customer_cpf, customer_phone')
-        .eq('id', productId)
-        .eq('active', true)
-        .maybeSingle(),
-    ]);
     const auth = authResult.data;
     const { data: product, error: productError } = productResult;
     if (productError) throw productError;

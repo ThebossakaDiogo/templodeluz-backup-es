@@ -627,6 +627,16 @@ function PixFormView({
         <p className="mt-2 text-left text-xs font-bold text-red-700">{error}</p>
       )}
 
+      {loading && (
+        <div className="mt-4 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-left text-emerald-950">
+          <span className="h-8 w-8 shrink-0 animate-spin rounded-full border-2 border-emerald-200 border-t-emerald-600" />
+          <div>
+            <strong className="block text-[12px]">Gerando seu QR Code seguro...</strong>
+            <span className="block text-[10.5px] text-emerald-800">Sua cobrança está sendo criada na ConnectPay.</span>
+          </div>
+        </div>
+      )}
+
       <button
         type="button"
         onClick={onGeneratePix}
@@ -1056,6 +1066,7 @@ export function PixCheckout({
   const paidCompletionRef = useRef(false);
   const autoCheckoutStartedRef = useRef(false);
   const autoPixGenerationRef = useRef(false);
+  const pixGenerationInFlightRef = useRef(false);
 
   const resolvedEnte = enteQuerido || initial.ente || undefined;
   const resolvedGrau = grauParentesco || initial.relacao || undefined;
@@ -1084,6 +1095,7 @@ export function PixCheckout({
     paidCompletionRef.current = false;
     autoCheckoutStartedRef.current = false;
     autoPixGenerationRef.current = false;
+    pixGenerationInFlightRef.current = false;
   }, [amountCents, productId, autoOpen]);
 
   const handleOpenCheckout = () => {
@@ -1153,6 +1165,19 @@ export function PixCheckout({
       window.removeEventListener("keydown", closeOnEscape);
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || charge) return;
+    const controller = new AbortController();
+    // Acorda a Edge Function enquanto o visitante termina o WhatsApp.
+    // O QR continua sendo criado só após os dados mínimos estarem válidos.
+    void fetch(`${config.supabaseUrl.replace(/\/$/, "")}/functions/v1/create-connectpay-pix`, {
+      method: "OPTIONS",
+      headers: pixFunctionHeaders(config),
+      signal: controller.signal,
+    }).catch(() => undefined);
+    return () => controller.abort();
+  }, [isOpen, charge]);
 
   // Confirmação instantânea do PIX (long-polling + re-cheque ao voltar para a aba)
   useEffect(() => {
@@ -1248,6 +1273,7 @@ export function PixCheckout({
   }, [status, amountCents, customerName, customerPhone, productId, prodName, charge?.orderId, resolvedEnte, resolvedGrau, mensagemPreview, initial.mensagem, successPath, includePaymentParams, onPaymentConfirmed]);
 
   const generatePix = async () => {
+    if (pixGenerationInFlightRef.current || charge) return;
     if (customerName.trim().length < 2) {
       setError("Informe o nome do titular com pelo menos 2 letras para gerar o PIX.");
       return;
@@ -1258,6 +1284,7 @@ export function PixCheckout({
       return;
     }
     setError("");
+    pixGenerationInFlightRef.current = true;
     setLoading(true);
     paidCompletionRef.current = false;
     try {
@@ -1297,6 +1324,7 @@ export function PixCheckout({
     } catch (err: any) {
       setError(err?.message || "Não foi possível gerar a chave PIX. Tente novamente.");
     } finally {
+      pixGenerationInFlightRef.current = false;
       setLoading(false);
     }
   };
@@ -1351,6 +1379,7 @@ export function PixCheckout({
     clearStoredPixCharge(productId, amountCents);
     pixAttemptRef.current = null;
     autoPixGenerationRef.current = false;
+    pixGenerationInFlightRef.current = false;
     setCharge(null);
     setStatus("creating");
     setCopied(false);
