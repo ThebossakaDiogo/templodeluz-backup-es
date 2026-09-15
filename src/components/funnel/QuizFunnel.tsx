@@ -91,6 +91,7 @@ function Field({
   onEnter,
   hideLabel,
   highlight = false,
+  theme = "light",
 }: {
   readonly label: string;
   readonly value: string;
@@ -102,13 +103,14 @@ function Field({
   readonly onEnter?: () => void;
   readonly hideLabel?: boolean;
   readonly highlight?: boolean;
+  readonly theme?: "light" | "dark";
 }) {
   const shared =
     "w-full rounded-[14px] border bg-white px-4 py-4 text-[15.5px] font-medium leading-relaxed text-[#272039] shadow-sm outline-none transition-all duration-200 placeholder:text-[#a89fb4] focus:border-[#6f5aa0] focus:ring-4 focus:ring-[#6f5aa0]/10";
   return (
     <div className="w-full">
       {hideLabel ? null : (
-        <label className="mb-2 block text-[12px] font-bold tracking-[0.1em] text-slate-700 uppercase">
+        <label className={`mb-2 block text-[12px] font-bold tracking-[0.1em] uppercase ${theme === "dark" ? "text-[#eee6f6]" : "text-slate-700"}`}>
           {label}
         </label>
       )}
@@ -1223,29 +1225,30 @@ function Intro({
   const [letterModalOpen, setLetterModalOpen] = useState(false);
 
   return (
-    <div className="animate-rise-in bg-[#f5f7fb]">
+    <div className="animate-rise-in min-h-screen bg-[#171225]">
        {/* Foto completa da Milena, sem elementos sobrepostos */}
-       <header className="relative bg-[#211a35] text-white overflow-hidden">
-        <div className="w-full bg-[#171225] p-3 sm:p-4">
+       <header className="relative overflow-hidden bg-[radial-gradient(circle_at_50%_-20%,#5d4786_0%,#2b2340_38%,#171225_82%)] text-white">
+        <div className="w-full p-3 sm:p-4">
           <img
             src={milenaCartaImage}
             alt="Milena Medeiros escrevendo uma carta no oratório"
-            className="mx-auto block h-auto w-full max-w-[620px] rounded-2xl object-contain"
+            className="mx-auto block h-auto w-full max-w-[620px] rounded-2xl border border-[#d8c7e9]/30 object-contain shadow-[0_18px_42px_-24px_rgba(0,0,0,0.9)]"
             fetchPriority="high"
             decoding="async"
           />
         </div>
 
         <div className="relative z-10 px-4 pb-6 pt-5">
-          <div className="mx-auto max-w-[430px] rounded-[26px] border border-white/10 bg-[#211a35]/95 p-5 sm:p-6 shadow-2xl text-center backdrop-blur-md">
-            <Stars className="mb-2" />
-            <h1 className="font-display text-[22px] sm:text-[25px] leading-[1.2] font-black text-white tracking-tight">
+          <div className="mx-auto max-w-[430px] rounded-[26px] border border-[#d8c7e9]/25 bg-[#211a35]/90 p-5 sm:p-6 shadow-[0_24px_56px_-28px_rgba(0,0,0,0.9)] text-center backdrop-blur-md">
+            <Stars className="mb-3" />
+            <span className="mb-3 inline-flex rounded-full border border-[#c49a52]/35 bg-[#c49a52]/10 px-3 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-[#f5d285]">Templo de Luz · Acolhimento privado</span>
+            <h1 className="font-display text-[23px] sm:text-[26px] leading-[1.16] font-black text-white tracking-tight">
               Organize uma intenção de carta para quem você ama,{" "}
               <span className="text-[#dcc8f0] underline decoration-[#c49a52] decoration-2 underline-offset-4">
                 com acolhimento da médium Milena
               </span>
             </h1>
-            <p className="mt-2.5 text-[13px] leading-relaxed text-zinc-200 font-normal">
+            <p className="mt-3 text-[13px] leading-relaxed text-[#e9e0f1] font-normal">
               Um espaço de acolhimento para registrar sua história, sua saudade e o que deseja expressar.
             </p>
           </div>
@@ -1253,26 +1256,26 @@ function Intro({
       </header>
 
       {/* Faixa de Prova Social */}
-      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 bg-white border-b border-slate-200 px-4 py-3 text-[11.5px] text-slate-600 sm:text-[12.5px]">
+      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 border-y border-white/10 bg-[#211a35] px-4 py-3 text-[11.5px] text-[#e9e0f1] sm:text-[12.5px]">
         <span className="font-bold">💌 Atendimento acolhedor</span>
-        <span className="h-3 w-px bg-slate-200" />
+        <span className="h-3 w-px bg-white/20" />
         <span className="font-bold">✍️ Carta e pergaminho</span>
-        <span className="h-3 w-px bg-slate-200" />
-        <span className="text-[#5d4786] font-extrabold">🔒 Dados protegidos</span>
+        <span className="h-3 w-px bg-white/20" />
+        <span className="text-[#f5d285] font-extrabold">🔒 Dados protegidos</span>
       </div>
 
       <div className="flex flex-col items-center px-4 pt-6 pb-10 sm:px-6">
         {/* Formulário + CTA imediatamente (micro-compromisso acima da dobra) */}
         <Reveal className="w-full">
-          <div className="rounded-[26px] border border-slate-200 bg-white p-6 shadow-[0_20px_50px_-30px_rgba(15,23,42,0.45)]">
+          <div className="rounded-[26px] border border-[#d8c7e9]/25 bg-[#29213b] p-6 shadow-[0_22px_50px_-28px_rgba(0,0,0,0.8)]">
             <div className="text-center mb-5">
-              <span className="text-[10.5px] font-bold uppercase tracking-widest text-[#5d4786]">
+              <span className="text-[10.5px] font-bold uppercase tracking-widest text-[#d8c7e9]">
                 Seu pedido começa aqui
               </span>
-              <h2 className="mt-1.5 font-display text-[17px] font-black text-[#181126] leading-snug">
+              <h2 className="mt-1.5 font-display text-[19px] font-black text-white leading-snug">
                 Comece pelo que você deseja guardar nesta carta
               </h2>
-              <p className="mt-1.5 text-[13px] leading-relaxed text-[#5e4b73] font-normal">
+              <p className="mt-1.5 text-[13px] leading-relaxed text-[#d9cce7] font-normal">
                 Responda a poucas perguntas, no seu ritmo. Você poderá revisar sua intenção antes de seguir para o atendimento.
               </p>
             </div>
@@ -1286,17 +1289,18 @@ function Intro({
                 error={error}
                 onEnter={next}
                 highlight
+                theme="dark"
               />
             </div>
 
             <div className="mt-5">
               <div className="mb-2 flex justify-center">
-                <span className="rounded-full bg-[#f2eef8] px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-[#5d4786]">Próxima etapa · leva poucos segundos</span>
+                <span className="rounded-full border border-[#c49a52]/30 bg-[#c49a52]/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-[#f5d285]">Próxima etapa · leva poucos segundos</span>
               </div>
-              <Cta onClick={next} pulse>💫 Começar meu pedido</Cta>
+              <Cta onClick={next} tone="green" pulse>💫 Começar meu pedido</Cta>
             </div>
 
-            <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-[11.5px] font-medium text-[#786445]">
+            <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-[11.5px] font-medium text-[#d9cce7]">
               <span>🔒 Privacidade</span>
               <span>↩️ Você pode revisar</span>
               <span>💬 Atendimento humano</span>
@@ -1306,7 +1310,7 @@ function Intro({
 
         {/* Depoimento curto */}
         <Reveal delay={80} className="mt-6 w-full">
-          <p className="font-display mx-auto max-w-[310px] text-center text-[14px] italic text-[#4a365f] leading-relaxed font-medium">
+          <p className="font-display mx-auto max-w-[310px] text-center text-[14px] italic text-[#d8c7e9] leading-relaxed font-medium">
             “Pude colocar em palavras o que estava guardado no coração e fui acolhida com muito respeito.”
           </p>
         </Reveal>
