@@ -1055,6 +1055,7 @@ export function PixCheckout({
   const pixAttemptRef = useRef<PixAttempt | null>(null);
   const paidCompletionRef = useRef(false);
   const autoCheckoutStartedRef = useRef(false);
+  const autoPixGenerationRef = useRef(false);
 
   const resolvedEnte = enteQuerido || initial.ente || undefined;
   const resolvedGrau = grauParentesco || initial.relacao || undefined;
@@ -1082,6 +1083,7 @@ export function PixCheckout({
     pixAttemptRef.current = null;
     paidCompletionRef.current = false;
     autoCheckoutStartedRef.current = false;
+    autoPixGenerationRef.current = false;
   }, [amountCents, productId, autoOpen]);
 
   const handleOpenCheckout = () => {
@@ -1328,10 +1330,27 @@ export function PixCheckout({
     if (autoGeneratePix) void generatePix();
   }, [autoOpen, autoGeneratePix, charge, loading, customerName, customerPhone]);
 
+  useEffect(() => {
+    const cleanPhone = customerPhone.replace(/\D/g, "");
+    if (
+      !isOpen
+      || activeTab !== "pix"
+      || autoPixGenerationRef.current
+      || charge
+      || loading
+      || customerName.trim().length < 2
+      || cleanPhone.length < 10
+    ) return;
+
+    autoPixGenerationRef.current = true;
+    void generatePix();
+  }, [isOpen, activeTab, customerName, customerPhone, charge, loading]);
+
   const regeneratePix = () => {
     clearPixAttempt(productId, amountCents);
     clearStoredPixCharge(productId, amountCents);
     pixAttemptRef.current = null;
+    autoPixGenerationRef.current = false;
     setCharge(null);
     setStatus("creating");
     setCopied(false);
