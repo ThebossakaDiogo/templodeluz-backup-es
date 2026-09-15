@@ -926,8 +926,8 @@ function PixInstantBox({
           </p>
           {physicalLetterRequested && (
             <div className="mt-4 border-t border-[#d8cae5] pt-4">
-              <div className="flex justify-center rounded-2xl bg-white px-5 py-3 shadow-sm ring-1 ring-[#e1d8ec]">
-                <img src={correiosLogo} alt="Correios" className="h-10 w-auto max-w-[190px] object-contain" loading="lazy" decoding="async" />
+              <div className="flex h-20 justify-center overflow-hidden rounded-2xl bg-white px-5 shadow-sm ring-1 ring-[#e1d8ec]">
+                <img src={correiosLogo} alt="Correios" className="h-16 w-full scale-[2.35] object-contain" loading="lazy" decoding="async" />
               </div>
               <div className="mt-3 text-left">
                 <span className="block text-[12px] font-black text-[#2d144d]">Envio pelos Correios</span>
