@@ -41,8 +41,8 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --font-display: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
-  --font-sans: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  --font-display: "Satoshi", "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  --font-sans: "Satoshi", "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
   --font-handwriting: "Caveat", cursive;
   --font-cursive: "Dancing Script", cursive;
 }
@@ -161,6 +161,31 @@ body [class*="text-[12px]"] { font-size: 0.9rem !important; }
     #faf8f4;
 }
 
+.jungle-intro {
+  font-family: "Satoshi", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(196, 154, 82, .6) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 78% 7%, rgba(216, 199, 233, .8) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 88% 72%, rgba(196, 154, 82, .55) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 20% 86%, rgba(216, 199, 233, .6) 0 1px, transparent 1.5px),
+    linear-gradient(180deg, #201832 0%, #120d20 100%);
+}
+
+.jungle-intro .font-display { font-family: "Satoshi", "Plus Jakarta Sans", sans-serif; }
+
+.jungle-quiz.quiz-modern {
+  background-color: #171225;
+  background-image:
+    radial-gradient(circle at 14% 12%, rgba(245, 210, 133, .95) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 82% 22%, rgba(216, 199, 233, .8) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 38% 63%, rgba(196, 154, 82, .7) 0 .8px, transparent 1.4px),
+    radial-gradient(circle at 70% 78%, rgba(216, 199, 233, .65) 0 .8px, transparent 1.4px),
+    radial-gradient(circle at 50% -10%, rgba(93, 71, 134, .55), transparent 44%),
+    linear-gradient(180deg, #211a35 0%, #171225 62%, #110d1d 100%);
+}
+.jungle-quiz main > .animate-rise-in:not(.jungle-intro) { background: rgba(248, 248, 246, 0.96); }
+.jungle-quiz .animate-rise-in { animation: none; }
+
 .quiz-modern input,
 .quiz-modern textarea,
 .quiz-modern button {
@@ -184,6 +209,7 @@ body [class*="text-[12px]"] { font-size: 0.9rem !important; }
 @media (prefers-reduced-motion: reduce) {
   .quiz-cta-pulse { animation: none; }
 }
+
 
 
 @media (max-width: 640px) {

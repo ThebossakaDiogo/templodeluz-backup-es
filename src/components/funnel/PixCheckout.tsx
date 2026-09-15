@@ -21,6 +21,7 @@ import {
   getTelemetrySessionId,
 } from "@/lib/funnel-telemetry";
 import { CardFlagsBadgeRow } from "./CardFlags";
+import "./PixCheckout.css";
 import milenaWhatsappPixAudio from "../../assets/media/audio/milena-whatsapp-pix.mp3";
 
 export interface PixCheckoutProps {
@@ -538,7 +539,6 @@ interface PixFormViewProps {
   readonly onNameChange: (value: string) => void;
   readonly onPhoneChange: (value: string) => void;
   readonly onPhoneBlur: () => void;
-  readonly onGeneratePix: () => void;
 }
 
 function PixFormView({
@@ -551,16 +551,23 @@ function PixFormView({
   onNameChange,
   onPhoneChange,
   onPhoneBlur,
-  onGeneratePix,
 }: Readonly<PixFormViewProps>) {
   const isLiveCall = productId === "chamada_ao_vivo_milena";
   const hasValidName = customerName.trim().length >= 2;
 
   if (loading) {
     return (
-      <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-center" aria-live="polite" aria-busy="true">
-        <strong className="block text-sm font-black text-emerald-950">Quase pronto.</strong>
-        <p className="mt-1 text-xs leading-relaxed text-emerald-800">Estamos criando seu PIX seguro de R$ {formattedAmount}.</p>
+      <div className="pix-fintech-loader" aria-live="polite" aria-busy="true">
+        <div className="pix-fintech-orb" aria-hidden="true">
+          <span className="pix-fintech-orb-ring pix-fintech-orb-ring--outer" />
+          <span className="pix-fintech-orb-ring pix-fintech-orb-ring--inner" />
+          <span className="pix-fintech-orb-core"><PixIcon className="h-7 w-7" /></span>
+        </div>
+        <div>
+          <strong>Preparando seu QR Code PIX</strong>
+          <p>Estamos criando sua cobrança segura de R$ {formattedAmount}.</p>
+        </div>
+        <span className="pix-fintech-loader-status"><i /> Conexão segura com a instituição de pagamento</span>
       </div>
     );
   }
@@ -641,18 +648,6 @@ function PixFormView({
 
       {error && (
         <p className="mt-2 text-left text-xs font-bold text-red-700">{error}</p>
-      )}
-
-      {hasValidName && (
-        <button
-          type="button"
-          onClick={onGeneratePix}
-          disabled={loading}
-          className="mt-4 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 px-6 py-4 text-[14px] font-extrabold uppercase text-white shadow-lg shadow-emerald-600/25 transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:cursor-wait disabled:opacity-70"
-        >
-          <PixIcon className="w-5 h-5 text-white" />
-          <span>{`Gerar PIX de R$ ${formattedAmount}`}</span>
-        </button>
       )}
 
       <div className="mt-3 flex items-center justify-center gap-1.5 text-[10.5px] text-[#5c4a70]">
@@ -1057,7 +1052,7 @@ export function PixCheckout({
 }: Readonly<PixCheckoutProps>) {
   const initial = getInitialCapturedData();
   const [isOpen, setIsOpen] = useState(() => autoOpen || Boolean(getStoredPixCharge(productId, amountCents)));
-  const [activeTab, setActiveTab] = useState<"pix" | "card">("pix");
+  const [activeTab, setActiveTab] = useState<"pix" | "card" | null>(null);
   const [customerName, setCustomerName] = useState(() => initialCustomerName || initial.name);
   const [customerEmail] = useState(() => initialCustomerEmail || initial.email);
   const [customerPhone, setCustomerPhone] = useState(() => initialCustomerPhone || initial.phone);
@@ -1097,14 +1092,14 @@ export function PixCheckout({
     setCheckingManual(false);
     setManualCheckNotice("");
     setIsOpen(autoOpen || Boolean(storedCharge));
-    setActiveTab("pix");
+    setActiveTab(showCard ? null : "pix");
     initiateCheckoutEventIdRef.current = null;
     pixAttemptRef.current = null;
     paidCompletionRef.current = false;
     autoCheckoutStartedRef.current = false;
     autoPixGenerationRef.current = false;
     pixGenerationInFlightRef.current = false;
-  }, [amountCents, productId, autoOpen]);
+  }, [amountCents, productId, autoOpen, showCard]);
 
   const handleOpenCheckout = () => {
     if (charge) {
@@ -1488,6 +1483,8 @@ export function PixCheckout({
     syncLeadPhoneImmediate(customerPhone, customerName);
   };
 
+  const hasCompleteIdentity = customerName.trim().length >= 2 && customerPhone.replace(/\D/g, "").length >= 10;
+
   return (
     <>
       {/* Botão Gatilho com Suporte a PIX e Cartão */}
@@ -1569,14 +1566,14 @@ export function PixCheckout({
                 </button>
               </div>
 
-              {!charge && showCard && (
+              {!charge && (
                 <p className="mb-4 rounded-xl bg-[#f8f5fc] px-3 py-2 text-left text-[11.5px] leading-relaxed text-[#5e4b73]">
-                  Escolha a forma de pagamento abaixo. PIX confirma em segundos; cartão é processado pelo Stripe.
+                  Primeiro informe seus dados. Em seguida, escolha PIX ou cartão para continuar.
                 </p>
               )}
 
               {/* Seletor de Abas: PIX vs Cartão Stripe */}
-              {!charge && showCard && (
+              {!charge && showCard && hasCompleteIdentity && (
                 <div className="mb-5 flex rounded-xl border border-[#d8caea] bg-[#f8f5fc] p-1 gap-1">
                   <button
                     type="button"
@@ -1613,7 +1610,7 @@ export function PixCheckout({
               )}
 
               {/* Conteúdo da Aba PIX */}
-              {activeTab === "pix" && (
+              {activeTab !== "card" && (
                 <>
                   {!charge ? (
                     <PixFormView
@@ -1629,7 +1626,6 @@ export function PixCheckout({
                       }}
                       onPhoneChange={handlePhoneChange}
                       onPhoneBlur={handlePhoneBlur}
-                      onGeneratePix={generatePix}
                     />
                   ) : (
                     <>

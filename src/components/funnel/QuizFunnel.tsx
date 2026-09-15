@@ -14,6 +14,7 @@ import insumoCartaImage from "../../assets/images/quiz/insumo-carta.png";
 import insumoSopaImage from "../../assets/images/quiz/insumo-sopa.png";
 import milenaLoaderImage from "../../assets/images/quiz/milena-loader.jpeg";
 import milenaDonationAudio from "../../assets/media/audio/milena-doacao-templo.mp3";
+import correiosLogo from "../../assets/images/quiz/correios-logo.png";
 
 const LetterZoomModal = lazy(() => import("./LetterZoomModal").then(({ LetterZoomModal: Component }) => ({ default: Component })));
 const PixCheckout = lazy(() => import("./PixCheckout").then(({ PixCheckout: Component }) => ({ default: Component })));
@@ -738,6 +739,7 @@ function PixInstantBox({
   const checkoutAmount = activeAmount + physicalLetterFee;
   const impact = getDonationPsychologicalImpact(activeAmount, primeiroEnte, primeiroNome);
 
+
   const handleCustomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIsCustom(true);
     const nextValue = sanitizeBrazilianCurrencyInput(e.target.value);
@@ -880,7 +882,7 @@ function PixInstantBox({
               <button
                 key={item.val}
                 type="button"
-                onClick={() => handleSelectPreset(item.val, item.val >= 40)}
+                onClick={() => handleSelectPreset(item.val, true)}
                 className={`group relative flex min-h-[96px] flex-col items-start justify-center rounded-2xl px-4 py-3 text-left transition-all duration-200 cursor-pointer ${item.highlight ? "col-span-2 min-h-[112px]" : ""} ${
                   isSelected
                     ? "border-2 border-[#6f5aa0] bg-[#f2eef8] text-[#272039] shadow-[0_16px_30px_-16px_rgba(93,71,134,0.72)] ring-4 ring-[#6f5aa0]/10"
@@ -907,22 +909,33 @@ function PixInstantBox({
       </div>
       </div>
 
-      <label className={`mt-4 flex cursor-pointer items-start gap-3 rounded-2xl border p-3.5 text-left transition-all ${physicalLetterRequested ? "border-[#6f5aa0] bg-[#f2eef8] ring-4 ring-[#6f5aa0]/10" : "border-slate-200 bg-white hover:border-[#b9a8cf]"}`}>
+      <label className={`mt-4 flex cursor-pointer items-start gap-3 rounded-2xl border p-4 text-left transition-all ${physicalLetterRequested ? "border-[#6f5aa0] bg-[#f2eef8] ring-4 ring-[#6f5aa0]/10" : "border-slate-200 bg-white hover:border-[#b9a8cf]"}`}>
         <input
           type="checkbox"
           checked={physicalLetterRequested}
           onChange={(event) => handlePhysicalLetterPreference(event.target.checked)}
           className="mt-0.5 h-5 w-5 shrink-0 accent-[#5d4786]"
         />
-        <span className="min-w-0 flex-1">
-            <span className="flex flex-wrap items-center gap-2 text-[13px] font-extrabold text-[#272039]">
-              Quero receber a carta física
+        <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2 text-[14px] font-extrabold text-[#272039]">
+              <span>Quero receber a carta física</span>
             <span className="rounded-full bg-[#fffefd] px-2 py-0.5 text-[10px] font-black text-[#5d4786] ring-1 ring-[#d8cae5]">{physicalLetterFee === 0 ? "INCLUÍDA NO VALOR" : "+ R$ 15"}</span>
-          </span>
-          <span className="mt-1 block text-[11.5px] leading-relaxed text-slate-500">
+          </div>
+          <p className="mt-1 text-[11.5px] leading-relaxed text-slate-500">
             {physicalLetterFee === 0 ? "A taxa já está incluída neste valor. Na próxima página, você informa apenas o endereço." : "R$15 serão incluídos automaticamente no total do PIX/cartão. Na próxima página, você informa apenas o endereço de entrega."}
-          </span>
-        </span>
+          </p>
+          {physicalLetterRequested && (
+            <div className="mt-3 grid grid-cols-[130px_1fr] items-center gap-3 border-t border-[#d8cae5] pt-3">
+              <div className="flex h-14 items-center justify-center rounded-xl bg-white px-3 shadow-sm ring-1 ring-[#e1d8ec]">
+                <img src={correiosLogo} alt="Correios" className="h-10 w-full object-contain" loading="lazy" decoding="async" />
+              </div>
+              <div>
+                <span className="block text-[11.5px] font-black text-[#2d144d]">Envio pelos Correios</span>
+                <span className="mt-0.5 block text-[10.5px] leading-relaxed text-[#6b6175]">Postagem estimada em 2–3 dias úteis após confirmar o endereço. Prazo final depende do CEP.</span>
+              </div>
+            </div>
+          )}
+        </div>
       </label>
 
       {physicalLetterRequested && impact.isValid && (
@@ -1225,30 +1238,29 @@ function Intro({
   const [letterModalOpen, setLetterModalOpen] = useState(false);
 
   return (
-    <div className="animate-rise-in min-h-screen bg-[#171225]">
-       {/* Foto completa da Milena, sem elementos sobrepostos */}
-       <header className="relative overflow-hidden bg-[radial-gradient(circle_at_50%_-20%,#5d4786_0%,#2b2340_38%,#171225_82%)] text-white">
+    <div className="jungle-intro animate-rise-in min-h-screen bg-[#120d20]">
+       <header className="overflow-hidden bg-[#171225]">
         <div className="w-full p-3 sm:p-4">
           <img
             src={milenaCartaImage}
             alt="Milena Medeiros escrevendo uma carta no oratório"
-            className="mx-auto block h-auto w-full max-w-[620px] rounded-2xl border border-[#d8c7e9]/30 object-contain shadow-[0_18px_42px_-24px_rgba(0,0,0,0.9)]"
+            className="mx-auto block h-auto w-full max-w-[620px] rounded-2xl object-contain"
             fetchPriority="high"
             decoding="async"
           />
         </div>
 
-        <div className="relative z-10 px-4 pb-6 pt-5">
-          <div className="mx-auto max-w-[430px] rounded-[26px] border border-[#d8c7e9]/25 bg-[#211a35]/90 p-5 sm:p-6 shadow-[0_24px_56px_-28px_rgba(0,0,0,0.9)] text-center backdrop-blur-md">
+        <div className="px-4 pb-6 pt-5">
+          <div className="mx-auto max-w-[680px] rounded-[26px] border border-[#c49a52]/35 bg-[#211a35] p-5 shadow-[0_24px_56px_-28px_rgba(0,0,0,0.9)] text-center sm:p-7">
             <Stars className="mb-3" />
-            <span className="mb-3 inline-flex rounded-full border border-[#c49a52]/35 bg-[#c49a52]/10 px-3 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-[#f5d285]">Templo de Luz · Acolhimento privado</span>
-            <h1 className="font-display text-[23px] sm:text-[26px] leading-[1.16] font-black text-white tracking-tight">
+            <span className="mb-3 inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-[#eee6f6]">Templo de Luz · Acolhimento privado</span>
+            <h1 className="font-display text-[25px] sm:text-[32px] leading-[1.12] font-medium text-white tracking-[-0.03em]">
               Organize uma intenção de carta para quem você ama,{" "}
-              <span className="text-[#dcc8f0] underline decoration-[#c49a52] decoration-2 underline-offset-4">
+              <span className="text-[#5d4786] underline decoration-[#c49a52] decoration-2 underline-offset-4">
                 com acolhimento da médium Milena
               </span>
             </h1>
-            <p className="mt-3 text-[13px] leading-relaxed text-[#e9e0f1] font-normal">
+            <p className="mt-3 text-[14px] leading-relaxed text-[#e9e0f1] font-normal">
               Um espaço de acolhimento para registrar sua história, sua saudade e o que deseja expressar.
             </p>
           </div>
@@ -1256,7 +1268,7 @@ function Intro({
       </header>
 
       {/* Faixa de Prova Social */}
-      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 border-y border-white/10 bg-[#211a35] px-4 py-3 text-[11.5px] text-[#e9e0f1] sm:text-[12.5px]">
+      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 border-y border-white/10 bg-[#1b142d] px-4 py-3 text-[11.5px] text-[#f5effa] sm:text-[12.5px]">
         <span className="font-bold">💌 Atendimento acolhedor</span>
         <span className="h-3 w-px bg-white/20" />
         <span className="font-bold">✍️ Carta e pergaminho</span>
@@ -1267,15 +1279,15 @@ function Intro({
       <div className="flex flex-col items-center px-4 pt-6 pb-10 sm:px-6">
         {/* Formulário + CTA imediatamente (micro-compromisso acima da dobra) */}
         <Reveal className="w-full">
-          <div className="rounded-[26px] border border-[#d8c7e9]/25 bg-[#29213b] p-6 shadow-[0_22px_50px_-28px_rgba(0,0,0,0.8)]">
+          <div className="rounded-[26px] border border-[#f0d79b] bg-[#fffdf8] p-6 shadow-[0_26px_55px_-30px_rgba(0,0,0,0.72)]">
             <div className="text-center mb-5">
-              <span className="text-[10.5px] font-bold uppercase tracking-widest text-[#d8c7e9]">
+              <span className="inline-flex rounded-full bg-[#f6ead0] px-3 py-1 text-[10px] font-black uppercase tracking-[0.13em] text-[#7b5717]">
                 Seu pedido começa aqui
               </span>
-              <h2 className="mt-1.5 font-display text-[19px] font-black text-white leading-snug">
+              <h2 className="mt-3 font-display text-[22px] font-bold text-[#171225] leading-snug">
                 Comece pelo que você deseja guardar nesta carta
               </h2>
-              <p className="mt-1.5 text-[13px] leading-relaxed text-[#d9cce7] font-normal">
+              <p className="mt-2 text-[13px] leading-relaxed text-[#5a5263] font-normal">
                 Responda a poucas perguntas, no seu ritmo. Você poderá revisar sua intenção antes de seguir para o atendimento.
               </p>
             </div>
@@ -1289,18 +1301,18 @@ function Intro({
                 error={error}
                 onEnter={next}
                 highlight
-                theme="dark"
+                theme="light"
               />
             </div>
 
             <div className="mt-5">
               <div className="mb-2 flex justify-center">
-                <span className="rounded-full border border-[#c49a52]/30 bg-[#c49a52]/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-[#f5d285]">Próxima etapa · leva poucos segundos</span>
+                <span className="rounded-full border border-[#39776c]/20 bg-[#e7f5ef] px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-[#286254]">Etapa 1 de 6 · leva poucos segundos</span>
               </div>
               <Cta onClick={next} tone="green" pulse>💫 Começar meu pedido</Cta>
             </div>
 
-            <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-[11.5px] font-medium text-[#d9cce7]">
+            <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-[11.5px] font-medium text-[#5a5263]">
               <span>🔒 Privacidade</span>
               <span>↩️ Você pode revisar</span>
               <span>💬 Atendimento humano</span>
@@ -1310,7 +1322,7 @@ function Intro({
 
         {/* Depoimento curto */}
         <Reveal delay={80} className="mt-6 w-full">
-          <p className="font-display mx-auto max-w-[310px] text-center text-[14px] italic text-[#d8c7e9] leading-relaxed font-medium">
+          <p className="font-display mx-auto max-w-[310px] text-center text-[14px] italic text-[#e9e0f1] leading-relaxed font-medium">
             “Pude colocar em palavras o que estava guardado no coração e fui acolhida com muito respeito.”
           </p>
         </Reveal>
@@ -1348,21 +1360,21 @@ function Intro({
 
         {/* Como funciona */}
         <Reveal className="mt-10 w-full">
-          <SectionLabel>Como acontece o reencontro</SectionLabel>
+          <p className="mb-3 text-[11px] font-black uppercase tracking-[0.16em] text-[#f5d285]">Como acontece o reencontro</p>
           <div className="flex flex-col gap-3.5">
             {STEPS_HOW.map((s, i) => (
               <div
                 key={s.title}
-                className="flex items-start gap-4 p-4 rounded-2xl bg-white border border-[#ece4f4] shadow-2xs"
+                className="flex items-start gap-4 rounded-2xl border border-[#e6d8bc] bg-[#fffdf8] p-4 shadow-[0_14px_28px_-22px_rgba(0,0,0,0.65)]"
               >
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#f6f0fc] border border-[#e5daf0] text-xl">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#ecd69f] bg-[#fbf2d9] text-xl shadow-sm">
                   {s.icon}
                 </span>
                 <div>
-                  <span className="block text-[14.5px] font-bold text-[#181126]">
+                  <span className="block text-[14.5px] font-bold text-[#211a35]">
                     {i + 1}. {s.title}
                   </span>
-                  <span className="mt-0.5 block text-[13px] leading-relaxed text-[#5e4b73] font-normal">
+                  <span className="mt-0.5 block text-[13px] leading-relaxed text-[#665c70] font-normal">
                     {s.text}
                   </span>
                 </div>
@@ -1372,7 +1384,7 @@ function Intro({
         </Reveal>
 
         <Reveal delay={120} className="mt-8 w-full">
-          <Cta onClick={next}>💫 Iniciar Psicografia com a Médium</Cta>
+          <Cta onClick={next} tone="green">💫 Iniciar Psicografia com a Médium</Cta>
         </Reveal>
       </div>
     </div>
@@ -1541,6 +1553,21 @@ function Result({
   const primeiroEnte: string = (ente?.trim() ? ente.trim().split(" ")[0] : "seu ente querido") || "seu ente querido";
   const nomeEnteCompleto: string = ente?.trim() || "seu ente querido";
   const horarioExibicao: string = horario?.trim() || horarioAgendamento();
+  const scrollToMaterials = () => {
+    document.getElementById("materiais-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+  const hopeMessages = [
+    "Você não precisa atravessar esse momento sozinho(a).",
+    "Cada história merece tempo, cuidado e respeito.",
+    "Sua carta continua gratuita; você escolhe como seguir.",
+    "Seu pedido pode ser revisado antes de qualquer confirmação.",
+  ];
+  const [hopeMessageIndex, setHopeMessageIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setHopeMessageIndex((index) => (index + 1) % hopeMessages.length), 4_500);
+    return () => window.clearInterval(timer);
+  }, []);
 
   return (
     <div className="animate-rise-in pb-28 text-slate-900 bg-[#f5f7fb]">
@@ -1592,6 +1619,11 @@ function Result({
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="border-b border-[#e5daf0] bg-[#f8f5fb] px-4 py-2.5 text-center">
+        <span className="text-[10px] font-black uppercase tracking-[0.14em] text-[#5d4786]">Uma mensagem para você</span>
+        <p key={hopeMessageIndex} className="mt-1 animate-rise-in text-[12.5px] font-semibold text-[#3e3450]">{hopeMessages[hopeMessageIndex]}</p>
       </div>
 
       <div className="px-4 pt-7 sm:px-6">
@@ -1662,9 +1694,21 @@ function Result({
           ))}
         </Reveal>
 
+        <div className="mt-5 text-center">
+          <button
+            type="button"
+            onClick={scrollToMaterials}
+            className="group inline-flex items-center gap-3 rounded-2xl border border-[#d8cae5] bg-gradient-to-r from-[#fffefd] via-[#f7f2fb] to-[#fffefd] px-5 py-3 text-[14px] font-black text-[#432d68] shadow-[0_14px_26px_-18px_rgba(93,71,134,0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#a98cc8] hover:shadow-[0_18px_30px_-16px_rgba(93,71,134,0.8)]"
+          >
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#5d4786] text-base text-white shadow-sm">📜</span>
+            <span>Ver como a carta é preparada</span>
+            <span className="text-lg transition-transform duration-300 group-hover:translate-y-0.5">↓</span>
+          </button>
+        </div>
+
         {/* ── SEÇÃO DE COPY PERSUASIVA & QUEBRA DE OBJEÇÃO ANTES DA DOAÇÃO ── */}
         <Reveal delay={130} className="mt-8">
-          <div className="rounded-[26px] border border-slate-200 bg-white p-5 sm:p-7 shadow-[0_20px_45px_-30px_rgba(15,23,42,0.5)] text-left">
+          <div id="materiais-section" className="scroll-mt-24 rounded-[26px] border border-slate-200 bg-white p-5 sm:p-7 shadow-[0_20px_45px_-30px_rgba(15,23,42,0.5)] text-left">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#f2eef8] border border-[#e1d8ec] text-[#5d4786] text-[10.5px] font-extrabold uppercase tracking-wider mb-3">
               <span>🕊️</span>
               <span>Compromisso Sagrado de Caridade</span>
@@ -1793,21 +1837,6 @@ function Result({
           {/* Selo de Garantia Sagrada e Segurança Premium */}
           <SecurityGuaranteeSeal />
 
-          {/* Link para o simulador de carta em pergaminho */}
-          <button
-            type="button"
-            onClick={() => {
-              if (typeof window !== "undefined") {
-                sessionStorage.setItem("templodeluz:initial-payment-skipped", "true");
-              }
-              redirectWithParams(
-                "/chamada-ao-vivo-milena?source=skipped&next=%2Fescrever-carta",
-              );
-            }}
-            className="mt-5 block w-full text-center text-xs font-bold text-[#5d4786] underline decoration-[#c8b5db] underline-offset-4 hover:decoration-[#5d4786] cursor-pointer bg-transparent border-0"
-          >
-            Acessar pergaminho sem contribuir agora ›
-          </button>
         </Reveal>
 
         <Reveal className="mt-10">
@@ -1821,31 +1850,15 @@ function Result({
         <button
           type="button"
           onClick={() => {
-            const el = document.getElementById("pix-section");
-            if (el) el.scrollIntoView({ behavior: "smooth" });
-            else go();
+            scrollToMaterials();
           }}
           className="cta-hot w-full cursor-pointer rounded-xl bg-gradient-to-r from-[#4b8b7e] via-[#39776c] to-[#2d665e] px-5 py-3 text-[14px] font-extrabold tracking-wide text-white shadow-lg shadow-[#39776c]/25 transition-transform hover:-translate-y-0.5"
         >
           <span className="relative z-10 flex items-center justify-center gap-2">
-            <span>Continuar para pagamento da vela de {primeiroEnte}</span>
+            <span>Ver como a carta é preparada</span>
           </span>
         </button>
 
-        <button
-          type="button"
-          onClick={() => {
-            if (typeof window !== "undefined") {
-              sessionStorage.setItem("templodeluz:initial-payment-skipped", "true");
-            }
-            redirectWithParams(
-              "/chamada-ao-vivo-milena?source=skipped&next=%2Fescrever-carta",
-            );
-          }}
-          className="block w-full mt-1.5 text-center text-[11px] font-bold text-slate-500 hover:text-slate-800 underline decoration-slate-300 underline-offset-2 cursor-pointer bg-transparent border-0"
-        >
-          Acessar pergaminho sem contribuir agora ›
-        </button>
       </div>
     </div>
   );
@@ -2047,8 +2060,8 @@ export function QuizFunnel() {
   const primeiroNome = nome?.trim() ? nome.trim().split(" ")[0] : "você";
 
   return (
-    <div className="quiz-modern mx-auto flex min-h-screen w-full max-w-[520px] flex-col bg-[#faf8f4] text-[#272039] shadow-[0_0_70px_-30px_rgba(33,26,53,0.4)] border-x border-[#e4dee8]">
-      <main className="flex flex-1 flex-col">
+    <div className="jungle-quiz quiz-modern relative isolate mx-auto flex min-h-screen w-full max-w-[520px] flex-col overflow-hidden bg-[#171225] text-[#272039] shadow-[0_0_70px_-30px_rgba(33,26,53,0.4)] border-x border-[#3d3152]">
+      <main className="relative z-10 flex flex-1 flex-col">
         {/* ETAPA 1: NOME */}
         {step === "intro" && (
           <Intro
@@ -2574,17 +2587,17 @@ export function QuizFunnel() {
       </main>
 
       {step === "loading" && (
-        <Loading
+        <div className="relative z-10"><Loading
           nome={nome}
           ente={ente}
           relacao={relacao}
           dorPrincipal={dorPrincipal}
           onDone={() => goto("result")}
-        />
+        /></div>
       )}
 
       {step === "result" && (
-        <Result
+        <div className="relative z-10"><Result
           nome={nome}
           ente={ente}
           relacao={relacao}
@@ -2592,10 +2605,10 @@ export function QuizFunnel() {
           horario={horario}
           mensagem={mensagem}
           temasEscolhidos={temasEscolhidos}
-        />
+        /></div>
       )}
 
-      {step !== "loading" && <Footer />}
+      {step !== "loading" && <div className="relative z-10"><Footer /></div>}
     </div>
   );
 }

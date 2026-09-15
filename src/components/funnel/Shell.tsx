@@ -86,7 +86,7 @@ export function SectionLabel({ children }: Readonly<{ children: ReactNode }>) {
 
 export function Footer() {
   return (
-    <footer className="mt-10 border-t border-slate-200 bg-white px-6 py-9 text-center text-[12px] leading-relaxed text-slate-500 font-normal">
+    <footer className="mt-0 border-t border-slate-200 bg-white px-6 py-9 text-center text-[12px] leading-relaxed text-slate-500 font-normal">
       <div className="font-display text-base text-slate-900 font-bold tracking-tight">
         🕊️ Templo de Luz
       </div>
