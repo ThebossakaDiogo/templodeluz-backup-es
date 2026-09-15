@@ -555,6 +555,20 @@ function PixFormView({
 }: Readonly<PixFormViewProps>) {
   const isLiveCall = productId === "chamada_ao_vivo_milena";
 
+  if (loading) {
+    return (
+      <div className="pix-qr-loader" aria-live="polite" aria-busy="true">
+        <div className="pix-qr-loader-orbit"><div className="pix-qr-loader-grid"><span /><span /><span /></div></div>
+        <div className="pix-qr-loader-copy">
+          <span className="pix-qr-loader-kicker">Checkout protegido</span>
+          <strong>Preparando seu QR Code PIX</strong>
+          <p>Estamos criando sua cobrança segura de R$ {formattedAmount}.</p>
+        </div>
+        <div className="pix-qr-loader-status"><span /> Conexão segura com a instituição de pagamento</div>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="mb-4 rounded-2xl border border-[#e2d5f1] bg-gradient-to-br from-[#faf7fc] to-[#f4edfa] p-4 text-left shadow-sm">
@@ -625,16 +639,6 @@ function PixFormView({
 
       {error && (
         <p className="mt-2 text-left text-xs font-bold text-red-700">{error}</p>
-      )}
-
-      {loading && (
-        <div className="mt-4 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-left text-emerald-950">
-          <span className="h-8 w-8 shrink-0 animate-spin rounded-full border-2 border-emerald-200 border-t-emerald-600" />
-          <div>
-            <strong className="block text-[12px]">Gerando seu QR Code seguro...</strong>
-            <span className="block text-[10.5px] text-emerald-800">Sua cobrança está sendo criada na ConnectPay.</span>
-          </div>
-        </div>
       )}
 
       <button
