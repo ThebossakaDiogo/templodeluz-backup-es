@@ -206,7 +206,7 @@ function EscreverCartaPage() {
   const [letterValidationError, setLetterValidationError] = useState("");
   const [letterFormat, setLetterFormat] = useState<"digital" | "physical">(() => {
     if (typeof window === "undefined") return "digital";
-    return localStorage.getItem("templodeluz:physical-letter-selected") === "true" ? "physical" : "digital";
+    return sessionStorage.getItem("templodeluz:physical-letter-selected") === "true" ? "physical" : "digital";
   });
   const [isPhysicalModalOpen, setIsPhysicalModalOpen] = useState(false);
   const [isPhysicalCheckoutOpen, setIsPhysicalCheckoutOpen] = useState(false);
@@ -326,19 +326,20 @@ function EscreverCartaPage() {
     .filter(Boolean)
     .join(", ");
   const isPhysicalLetter = letterFormat === "physical";
-  const isPhysicalLetterFeePaid = typeof window !== "undefined" && (
-    localStorage.getItem("templodeluz:physical-letter-fee-paid") === "true"
-    || (
-      localStorage.getItem("templodeluz:physical-letter-selected") === "true"
-      && sessionStorage.getItem("templodeluz:physical-letter-fee-included") === "true"
-      && sessionStorage.getItem("templodeluz:pix-paid") === "true"
-    )
-  );
+  const isPhysicalLetterFeePaid = (() => {
+    if (typeof window === "undefined") return false;
+    try {
+      const receipt = JSON.parse(sessionStorage.getItem("templodeluz:physical-letter-fee-receipt") || "null") as { orderId?: string; amountCents?: number } | null;
+      return Boolean(receipt?.orderId && Number.isInteger(receipt.amountCents) && receipt.amountCents >= 4000);
+    } catch {
+      return false;
+    }
+  })();
 
   useEffect(() => {
     try {
-      if (isPhysicalLetter) localStorage.setItem("templodeluz:physical-letter-selected", "true");
-      else localStorage.removeItem("templodeluz:physical-letter-selected");
+      if (isPhysicalLetter) sessionStorage.setItem("templodeluz:physical-letter-selected", "true");
+      else sessionStorage.removeItem("templodeluz:physical-letter-selected");
     } catch {
       // A preferência continua disponível na página atual.
     }

@@ -39,7 +39,7 @@ export interface PixCheckoutProps {
   autoOpen?: boolean | undefined;
   autoGeneratePix?: boolean | undefined;
   displayProductName?: string | undefined;
-  onPaymentConfirmed?: (() => void) | undefined;
+  onPaymentConfirmed?: ((receipt: { orderId: string; productId: PixCheckoutProps["productId"]; amountCents: number }) => void) | undefined;
 }
 
 function appendQuery(path: string, query: string) {
@@ -1200,7 +1200,7 @@ export function PixCheckout({
     paidCompletionRef.current = true;
     clearPixAttempt(productId, amountCents);
     clearStoredPixCharge(productId, amountCents);
-    onPaymentConfirmed?.();
+    onPaymentConfirmed?.({ orderId: charge?.orderId || "", productId, amountCents });
     storePaymentReceipt({
       orderId: charge?.orderId || "",
       productId,

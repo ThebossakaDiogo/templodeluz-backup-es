@@ -728,7 +728,7 @@ function PixInstantBox({
   const [whatsAppModalOpen, setWhatsAppModalOpen] = useState<boolean>(false);
   const [physicalLetterRequested, setPhysicalLetterRequested] = useState(() => {
     if (typeof window === "undefined") return false;
-    return localStorage.getItem("templodeluz:physical-letter-selected") === "true";
+    return sessionStorage.getItem("templodeluz:physical-letter-selected") === "true";
   });
 
   const activeAmount = isCustom ? parseBrazilianCurrency(customInput) : selectedAmount;
@@ -747,10 +747,10 @@ function PixInstantBox({
     setPhysicalLetterRequested(checked);
     try {
       if (checked) {
-        localStorage.setItem("templodeluz:physical-letter-selected", "true");
+        sessionStorage.setItem("templodeluz:physical-letter-selected", "true");
         sessionStorage.setItem("templodeluz:physical-letter-fee-included", "true");
       } else {
-        localStorage.removeItem("templodeluz:physical-letter-selected");
+        sessionStorage.removeItem("templodeluz:physical-letter-selected");
         sessionStorage.removeItem("templodeluz:physical-letter-fee-included");
       }
     } catch {
@@ -971,8 +971,14 @@ function PixInstantBox({
             successPath="/chamada-ao-vivo-milena?source=paid&next=%2Fobrigado"
             includePaymentParams={false}
             displayProductName={physicalLetterRequested ? "Contribuição + envio de carta física" : undefined}
-            onPaymentConfirmed={() => {
-              if (physicalLetterRequested) localStorage.setItem("templodeluz:physical-letter-fee-paid", "true");
+            onPaymentConfirmed={(receipt) => {
+              if (physicalLetterRequested && receipt.orderId) {
+                sessionStorage.setItem("templodeluz:physical-letter-fee-receipt", JSON.stringify({
+                  orderId: receipt.orderId,
+                  amountCents: receipt.amountCents,
+                  paidAt: new Date().toISOString(),
+                }));
+              }
             }}
           />
         </Suspense>
