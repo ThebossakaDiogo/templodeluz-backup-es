@@ -42,10 +42,10 @@ const QUIZ_START_TIME_KEY = "templodeluz_quiz_start_timestamp";
  */
 export function getTelemetrySessionId(): string {
   if (typeof window === "undefined") return "server_session";
-  let sessionId = localStorage.getItem(SESSION_STORAGE_KEY);
+  let sessionId = sessionStorage.getItem(SESSION_STORAGE_KEY);
   if (!sessionId) {
     sessionId = `tl_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-    localStorage.setItem(SESSION_STORAGE_KEY, sessionId);
+    sessionStorage.setItem(SESSION_STORAGE_KEY, sessionId);
   }
   return sessionId;
 }
@@ -55,10 +55,10 @@ export function getTelemetrySessionId(): string {
  */
 export function getQuizTimeSpentSeconds(): number {
   if (typeof window === "undefined") return 0;
-  let start = localStorage.getItem(QUIZ_START_TIME_KEY);
+  let start = sessionStorage.getItem(QUIZ_START_TIME_KEY);
   if (!start) {
     start = String(Date.now());
-    localStorage.setItem(QUIZ_START_TIME_KEY, start);
+    sessionStorage.setItem(QUIZ_START_TIME_KEY, start);
   }
   const diffMs = Date.now() - Number(start);
   return Math.max(1, Math.round(diffMs / 1000));
@@ -106,6 +106,8 @@ export function trackQuizStep(payload: FunnelProgressPayload): void {
       p_utm_content: utms["utm_content"] || null,
       p_utm_term: utms["utm_term"] || null,
       p_src: utms["src"] || null,
+      p_sck: utms["sck"] || null,
+      p_ttclid: utms["ttclid"] || null,
     };
 
     // A RPC aplica atualizações monotônicas e grava um único evento de etapa.
