@@ -589,13 +589,13 @@ function PixFormView({
         htmlFor={`pix-payer-${productId}`}
         className="mb-2 block text-left text-xs font-bold text-[#2d144d]"
       >
-        Nome completo do titular:
+        Nome do titular:
       </label>
       <input
         id={`pix-payer-${productId}`}
         value={customerName}
         onChange={(e) => onNameChange(e.target.value)}
-        placeholder="Digite seu nome completo"
+        placeholder="Digite o nome do titular"
         className="w-full rounded-2xl border-2 border-[#d8caea] bg-white px-4 py-3.5 text-base text-[#181126] outline-none transition-colors placeholder:text-[#9583a6] focus:border-emerald-500"
       />
 
@@ -1246,8 +1246,8 @@ export function PixCheckout({
   }, [status, amountCents, customerName, customerPhone, productId, prodName, charge?.orderId, resolvedEnte, resolvedGrau, mensagemPreview, initial.mensagem, successPath, includePaymentParams, onPaymentConfirmed]);
 
   const generatePix = async () => {
-    if (!customerName.trim()) {
-      setError("Por favor, preencha seu nome completo para gerar o PIX.");
+    if (customerName.trim().length < 2) {
+      setError("Informe o nome do titular com pelo menos 2 letras para gerar o PIX.");
       return;
     }
     const cleanPhone = customerPhone.replace(/\D/g, "");

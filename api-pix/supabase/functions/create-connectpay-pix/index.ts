@@ -163,7 +163,7 @@ Deno.serve(async (req) => {
     if (
       requestedQuizOrigin !== QUIZ_ORIGIN
       || !/^[a-z0-9][a-z0-9_-]{1,63}$/.test(productId)
-      || customerName.length < 3
+      || customerName.length < 2
       || !isUuid(idempotencyKey)
       || statusToken.length < 32
       || statusToken.length > 200
