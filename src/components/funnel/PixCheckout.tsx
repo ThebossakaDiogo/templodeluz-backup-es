@@ -1240,7 +1240,7 @@ export function PixCheckout({
       window.location.href = includePaymentParams
         ? appendQuery(target, `orderId=${encodeURIComponent(charge?.orderId || "")}&method=pix`)
         : target;
-    }, 2500);
+    }, 900);
 
     return () => clearTimeout(timer);
   }, [status, amountCents, customerName, customerPhone, productId, prodName, charge?.orderId, resolvedEnte, resolvedGrau, mensagemPreview, initial.mensagem, successPath, includePaymentParams, onPaymentConfirmed]);
