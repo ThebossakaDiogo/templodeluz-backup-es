@@ -94,8 +94,8 @@ export function SocialProofSection() {
                 </div>
                 <span className="rounded-full bg-[#f2eef8] px-2.5 py-1 text-[9px] font-bold text-[#5d4786]">Relato recebido</span>
               </div>
-              <div className="bg-[#f8f6fa] p-3">
-                <div className="relative mx-auto aspect-video w-full overflow-hidden rounded-2xl bg-black shadow-[0_16px_34px_-20px_rgba(0,0,0,0.75)] ring-1 ring-black/10">
+              <div className="bg-[#f8f6fa] px-3 py-4">
+                <div className="relative mx-auto aspect-[3/4] max-w-[230px] overflow-hidden rounded-2xl bg-black shadow-[0_16px_34px_-20px_rgba(0,0,0,0.75)] ring-1 ring-black/10">
                   <video controls playsInline preload="none" poster={feedbackVideoThreePoster} controlsList="nodownload" aria-label="Novo relato em vídeo de uma família acolhida" className="block h-full w-full bg-black object-cover">
                     <source src={feedbackVideoThree} type="video/mp4" />
                     Seu navegador não oferece suporte à reprodução deste vídeo.
