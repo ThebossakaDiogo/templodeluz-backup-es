@@ -925,13 +925,13 @@ function PixInstantBox({
             {physicalLetterFee === 0 ? "A taxa já está incluída neste valor. Na próxima página, você informa apenas o endereço." : "R$15 serão incluídos automaticamente no total do PIX/cartão. Na próxima página, você informa apenas o endereço de entrega."}
           </p>
           {physicalLetterRequested && (
-            <div className="mt-3 grid grid-cols-[130px_1fr] items-center gap-3 border-t border-[#d8cae5] pt-3">
-              <div className="flex h-14 items-center justify-center rounded-xl bg-white px-3 shadow-sm ring-1 ring-[#e1d8ec]">
-                <img src={correiosLogo} alt="Correios" className="h-10 w-full object-contain" loading="lazy" decoding="async" />
+            <div className="mt-4 border-t border-[#d8cae5] pt-4">
+              <div className="flex justify-center rounded-2xl bg-white px-5 py-3 shadow-sm ring-1 ring-[#e1d8ec]">
+                <img src={correiosLogo} alt="Correios" className="h-10 w-auto max-w-[190px] object-contain" loading="lazy" decoding="async" />
               </div>
-              <div>
-                <span className="block text-[11.5px] font-black text-[#2d144d]">Envio pelos Correios</span>
-                <span className="mt-0.5 block text-[10.5px] leading-relaxed text-[#6b6175]">Postagem estimada em 2–3 dias úteis após confirmar o endereço. Prazo final depende do CEP.</span>
+              <div className="mt-3 text-left">
+                <span className="block text-[12px] font-black text-[#2d144d]">Envio pelos Correios</span>
+                <span className="mt-1 block text-[11px] leading-relaxed text-[#6b6175]">Postagem estimada em 2–3 dias úteis após confirmar o endereço. O prazo final depende do CEP.</span>
               </div>
             </div>
           )}
