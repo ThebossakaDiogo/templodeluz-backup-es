@@ -375,7 +375,9 @@ Deno.serve(async (req) => {
       }),
     });
 
-    const [gatewayResponse] = await Promise.all([gatewayPromise, leadSyncPromise]);
+    // A telemetria não pode atrasar a entrega do QR Code ao visitante.
+    runUtmifyInBackground(leadSyncPromise, 'PIX LEAD SYNC');
+    const gatewayResponse = await gatewayPromise;
     const gateway = await gatewayResponse.json().catch(() => ({}));
     const data = gateway?.data ?? gateway;
     const pix = data?.pix ?? {};
@@ -416,11 +418,14 @@ Deno.serve(async (req) => {
 
     // InitiateCheckout é enviado no clique que abre o modal, antes de qualquer PIX ser criado.
     // O banco legou uma outbox de IC vinculada ao pedido; ela não representa este estágio do funil.
-    await supabase
-      .from('meta_conversion_deliveries')
-      .delete()
-      .eq('order_id', completedOrder.id)
-      .eq('event_name', 'InitiateCheckout');
+    runUtmifyInBackground(
+      supabase
+        .from('meta_conversion_deliveries')
+        .delete()
+        .eq('order_id', completedOrder.id)
+        .eq('event_name', 'InitiateCheckout'),
+      'PIX META LEGACY CLEANUP',
+    );
 
     return json(origin, chargeResponse(completedOrder, statusToken));
   } catch (error) {
