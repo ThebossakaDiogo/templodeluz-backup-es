@@ -554,17 +554,13 @@ function PixFormView({
   onGeneratePix,
 }: Readonly<PixFormViewProps>) {
   const isLiveCall = productId === "chamada_ao_vivo_milena";
+  const hasValidName = customerName.trim().length >= 2;
 
   if (loading) {
     return (
-      <div className="pix-qr-loader" aria-live="polite" aria-busy="true">
-        <div className="pix-qr-loader-orbit"><div className="pix-qr-loader-grid"><span /><span /><span /></div></div>
-        <div className="pix-qr-loader-copy">
-          <span className="pix-qr-loader-kicker">Checkout protegido</span>
-          <strong>Preparando seu QR Code PIX</strong>
-          <p>Estamos criando sua cobrança segura de R$ {formattedAmount}.</p>
-        </div>
-        <div className="pix-qr-loader-status"><span /> Conexão segura com a instituição de pagamento</div>
+      <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-center" aria-live="polite" aria-busy="true">
+        <strong className="block text-sm font-black text-emerald-950">Quase pronto.</strong>
+        <p className="mt-1 text-xs leading-relaxed text-emerald-800">Estamos criando seu PIX seguro de R$ {formattedAmount}.</p>
       </div>
     );
   }
@@ -613,43 +609,51 @@ function PixFormView({
         className="w-full rounded-2xl border-2 border-[#d8caea] bg-white px-4 py-3.5 text-base text-[#181126] outline-none transition-colors placeholder:text-[#9583a6] focus:border-emerald-500"
       />
 
-      <label
-        htmlFor={`pix-phone-${productId}`}
-        className="mt-3.5 mb-1.5 flex items-center justify-between text-left text-xs font-bold text-[#2d144d]"
-      >
-        <span className="flex items-center gap-1.5">
-          <PhoneIcon className="w-4 h-4 text-emerald-600" />
-          <span>Seu WhatsApp (com DDD):</span>
-        </span>
-        <span className="text-[10.5px] font-semibold text-emerald-700">
-          {isLiveCall ? "Para confirmação do horário" : "Para envio da foto da carta"}
-        </span>
-      </label>
-      <input
-        id={`pix-phone-${productId}`}
-        type="tel"
-        inputMode="tel"
-        autoComplete="tel"
-        value={customerPhone}
-        onChange={(e) => onPhoneChange(e.target.value)}
-        onBlur={onPhoneBlur}
-        placeholder="(DDD) 99999-9999"
-        className="w-full rounded-2xl border-2 border-[#d8caea] bg-white px-4 py-3.5 text-base text-[#181126] outline-none transition-colors placeholder:text-[#9583a6] focus:border-emerald-500"
-      />
+      {!hasValidName && <p className="mt-2 text-left text-[11px] font-semibold text-[#6d5488]">Digite o nome do titular para continuar.</p>}
+
+      {hasValidName && (
+        <div className="animate-rise-in">
+          <label
+            htmlFor={`pix-phone-${productId}`}
+            className="mt-4 mb-1.5 flex items-center justify-between text-left text-xs font-bold text-[#2d144d]"
+          >
+            <span className="flex items-center gap-1.5">
+              <PhoneIcon className="w-4 h-4 text-emerald-600" />
+              <span>Seu WhatsApp (com DDD):</span>
+            </span>
+            <span className="text-[10.5px] font-semibold text-emerald-700">
+              {isLiveCall ? "Para confirmação do horário" : "Para envio da foto da carta"}
+            </span>
+          </label>
+          <input
+            id={`pix-phone-${productId}`}
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            value={customerPhone}
+            onChange={(e) => onPhoneChange(e.target.value)}
+            onBlur={onPhoneBlur}
+            placeholder="(DDD) 99999-9999"
+            className="w-full rounded-2xl border-2 border-[#d8caea] bg-white px-4 py-3.5 text-base text-[#181126] outline-none transition-colors placeholder:text-[#9583a6] focus:border-emerald-500"
+          />
+        </div>
+      )}
 
       {error && (
         <p className="mt-2 text-left text-xs font-bold text-red-700">{error}</p>
       )}
 
-      <button
-        type="button"
-        onClick={onGeneratePix}
-        disabled={loading}
-        className="mt-4 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 px-6 py-4 text-[14px] font-extrabold uppercase text-white shadow-lg shadow-emerald-600/25 transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:cursor-wait disabled:opacity-70"
-      >
-        <PixIcon className="w-5 h-5 text-white" />
-        <span>{loading ? "Gerando PIX..." : `Confirmar PIX de R$ ${formattedAmount}`}</span>
-      </button>
+      {hasValidName && (
+        <button
+          type="button"
+          onClick={onGeneratePix}
+          disabled={loading}
+          className="mt-4 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 px-6 py-4 text-[14px] font-extrabold uppercase text-white shadow-lg shadow-emerald-600/25 transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:cursor-wait disabled:opacity-70"
+        >
+          <PixIcon className="w-5 h-5 text-white" />
+          <span>{`Gerar PIX de R$ ${formattedAmount}`}</span>
+        </button>
+      )}
 
       <div className="mt-3 flex items-center justify-center gap-1.5 text-[10.5px] text-[#5c4a70]">
         <ShieldLockIcon className="w-3.5 h-3.5 text-emerald-600 shrink-0" />

@@ -185,64 +185,6 @@ body [class*="text-[12px]"] { font-size: 0.9rem !important; }
   .quiz-cta-pulse { animation: none; }
 }
 
-.pix-qr-loader {
-  display: grid;
-  justify-items: center;
-  gap: 16px;
-  padding: 20px 12px 12px;
-  color: #272039;
-  text-align: center;
-}
-
-.pix-qr-loader-orbit {
-  display: grid;
-  width: 124px;
-  height: 124px;
-  place-items: center;
-  border: 1px solid #d8cae5;
-  border-radius: 28px;
-  background: radial-gradient(circle, #fff 50%, #f5f1f8 51%);
-  box-shadow: 0 16px 30px -20px rgba(45, 20, 77, .6);
-}
-
-.pix-qr-loader-grid {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(5, 8px);
-  grid-auto-rows: 8px;
-  gap: 3px;
-  width: 70px;
-  height: 70px;
-  padding: 8px;
-  overflow: hidden;
-  border-radius: 12px;
-  background: repeating-linear-gradient(90deg, #2d144d 0 8px, transparent 8px 11px), repeating-linear-gradient(0deg, #2d144d 0 8px, transparent 8px 11px);
-}
-
-.pix-qr-loader-grid::after {
-  position: absolute;
-  inset: 0;
-  content: "";
-  background: linear-gradient(180deg, transparent, rgba(87, 166, 152, .65), transparent);
-  animation: pix-qr-scan 1.15s ease-in-out infinite;
-}
-
-.pix-qr-loader-grid span { display: none; }
-.pix-qr-loader-copy { display: grid; gap: 5px; }
-.pix-qr-loader-copy strong { font-size: 15px; font-weight: 850; }
-.pix-qr-loader-copy p { margin: 0; color: #6d6175; font-size: 11.5px; }
-.pix-qr-loader-kicker { color: #5d4786; font-size: 9.5px; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
-.pix-qr-loader-status { display: inline-flex; align-items: center; gap: 6px; color: #39776c; font-size: 10px; font-weight: 750; }
-.pix-qr-loader-status span { width: 7px; height: 7px; border-radius: 50%; background: #57a698; box-shadow: 0 0 0 4px rgba(87,166,152,.12); }
-
-@keyframes pix-qr-scan {
-  from { transform: translateY(-100%); }
-  to { transform: translateY(100%); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .pix-qr-loader-grid::after { animation: none; opacity: .35; }
-}
 
 @media (max-width: 640px) {
   html { font-size: 17px; }
