@@ -135,6 +135,7 @@ Deno.serve(async (req) => {
 
   let supabase: ReturnType<typeof createClient> | null = null;
   let orderId: string | null = null;
+  let recoveryStatusToken = '';
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
@@ -159,6 +160,7 @@ Deno.serve(async (req) => {
     const idempotencyKey = input?.idempotencyKey;
     const suppliedStatusToken = typeof input?.statusToken === 'string' ? input.statusToken : '';
     const statusToken = suppliedStatusToken || `${crypto.randomUUID()}${crypto.randomUUID()}`;
+    recoveryStatusToken = statusToken;
 
     if (
       requestedQuizOrigin !== QUIZ_ORIGIN
@@ -430,6 +432,16 @@ Deno.serve(async (req) => {
     return json(origin, chargeResponse(completedOrder, statusToken));
   } catch (error) {
     if (supabase && orderId) {
+      const { data: recoveredOrder } = await supabase
+        .from('pix_orders')
+        .select('id, connectpay_transaction_id, pix_payload, qr_code_base64, expires_at, quiz_origin, pix_account_key, pix_account_fingerprint')
+        .eq('id', orderId)
+        .maybeSingle();
+      // Uma resposta válida da ConnectPay não pode virar falha apenas porque uma
+      // tarefa secundária (telemetria, UTMify ou Meta) apresentou erro depois.
+      if (recoveredOrder?.connectpay_transaction_id && recoveredOrder?.pix_payload && recoveryStatusToken) {
+        return json(origin, chargeResponse(recoveredOrder, recoveryStatusToken));
+      }
       await supabase.from('pix_orders').update({ status: 'failed', updated_at: new Date().toISOString() }).eq('id', orderId);
     }
     const message = error instanceof Error ? error.message : String(error);
