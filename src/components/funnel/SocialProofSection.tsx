@@ -68,29 +68,39 @@ export function SocialProofSection() {
             </p>
           </div>
 
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <div className="rounded-3xl border border-[#e5daf0] bg-white p-3 shadow-sm">
-              <div className="mb-3 px-1 text-left">
-                <span className="block text-[10px] font-extrabold uppercase tracking-[0.15em] text-[#5d4786]">Relato em vídeo</span>
-                <strong className="mt-0.5 block text-sm text-[#241535]">Mensagem compartilhada por uma família</strong>
+          <div className="mt-4 space-y-4">
+            <div className="overflow-hidden rounded-3xl border border-[#e5daf0] bg-white shadow-sm">
+              <div className="flex items-center justify-between gap-3 border-b border-[#f0eaf5] px-4 py-3 text-left">
+                <div>
+                  <span className="block text-[10px] font-extrabold uppercase tracking-[0.15em] text-[#5d4786]">Relato em vídeo</span>
+                  <strong className="mt-0.5 block text-sm text-[#241535]">Mensagem compartilhada por uma família</strong>
+                </div>
+                <span className="rounded-full bg-[#f2eef8] px-2.5 py-1 text-[9px] font-bold text-[#5d4786]">Relato recebido</span>
               </div>
-              <div className="relative mx-auto aspect-[3/4] max-w-[270px] overflow-hidden rounded-2xl bg-black ring-1 ring-black/10">
-                <video controls playsInline preload="none" poster={feedbackVideoTwoPoster} controlsList="nodownload" aria-label="Relato em vídeo de uma família acolhida" className="block h-full w-full bg-black object-cover">
-                  <source src={feedbackVideoTwo} type="video/mp4" />
-                  Seu navegador não oferece suporte à reprodução deste vídeo.
-                </video>
+              <div className="bg-[#f8f6fa] px-3 py-4">
+                <div className="relative mx-auto aspect-[3/4] max-w-[230px] overflow-hidden rounded-2xl bg-black shadow-[0_16px_34px_-20px_rgba(0,0,0,0.75)] ring-1 ring-black/10">
+                  <video controls playsInline preload="none" poster={feedbackVideoTwoPoster} controlsList="nodownload" aria-label="Relato em vídeo de uma família acolhida" className="block h-full w-full bg-black object-cover">
+                    <source src={feedbackVideoTwo} type="video/mp4" />
+                    Seu navegador não oferece suporte à reprodução deste vídeo.
+                  </video>
+                </div>
               </div>
             </div>
-            <div className="rounded-3xl border border-[#e5daf0] bg-white p-3 shadow-sm">
-              <div className="mb-3 px-1 text-left">
-                <span className="block text-[10px] font-extrabold uppercase tracking-[0.15em] text-[#5d4786]">Relato em vídeo</span>
-                <strong className="mt-0.5 block text-sm text-[#241535]">Mais uma história recebida pelo Templo</strong>
+            <div className="overflow-hidden rounded-3xl border border-[#e5daf0] bg-white shadow-sm">
+              <div className="flex items-center justify-between gap-3 border-b border-[#f0eaf5] px-4 py-3 text-left">
+                <div>
+                  <span className="block text-[10px] font-extrabold uppercase tracking-[0.15em] text-[#5d4786]">Relato em vídeo</span>
+                  <strong className="mt-0.5 block text-sm text-[#241535]">Carta recebida e compartilhada com o Templo</strong>
+                </div>
+                <span className="rounded-full bg-[#f2eef8] px-2.5 py-1 text-[9px] font-bold text-[#5d4786]">Relato recebido</span>
               </div>
-              <div className="relative mx-auto aspect-video w-full overflow-hidden rounded-2xl bg-black ring-1 ring-black/10">
-                <video controls playsInline preload="none" poster={feedbackVideoThreePoster} controlsList="nodownload" aria-label="Novo relato em vídeo de uma família acolhida" className="block h-full w-full bg-black object-contain">
-                  <source src={feedbackVideoThree} type="video/mp4" />
-                  Seu navegador não oferece suporte à reprodução deste vídeo.
-                </video>
+              <div className="bg-[#f8f6fa] p-3">
+                <div className="relative mx-auto aspect-video w-full overflow-hidden rounded-2xl bg-black shadow-[0_16px_34px_-20px_rgba(0,0,0,0.75)] ring-1 ring-black/10">
+                  <video controls playsInline preload="none" poster={feedbackVideoThreePoster} controlsList="nodownload" aria-label="Novo relato em vídeo de uma família acolhida" className="block h-full w-full bg-black object-cover">
+                    <source src={feedbackVideoThree} type="video/mp4" />
+                    Seu navegador não oferece suporte à reprodução deste vídeo.
+                  </video>
+                </div>
               </div>
             </div>
           </div>

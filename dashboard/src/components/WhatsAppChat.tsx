@@ -410,7 +410,7 @@ export function WhatsAppChat({ profile, accessToken, onUnreadCountChange }: What
       {notice && <div className="whatsapp-chat-notice"><Check /> {notice}<button type="button" onClick={() => setNotice(null)} aria-label="Fechar aviso"><X /></button></div>}
       {evolutionQr && !evolutionStatus?.connected && (
         <section className="card whatsapp-cloud-qr" aria-label="Conectar WhatsApp na nuvem">
-          <div className="whatsapp-cloud-qr-copy"><span className="section-kicker">Evolution Railway · 24/7</span><h3>Conecte {evolutionQr.instance}</h3><ol><li>Abra o WhatsApp no celular.</li><li>Entre em <b>Aparelhos conectados</b>.</li><li>Toque em <b>Conectar aparelho</b> e escaneie.</li></ol><p><RefreshCw className="spinning" /> A conexão será detectada automaticamente.</p>{evolutionQr.pairingCode && <strong>Código: {evolutionQr.pairingCode}</strong>}</div>
+          <div className="whatsapp-cloud-qr-copy"><span className="section-kicker">Evolution Railway · 24/7</span><h3>Conecte {evolutionQr.instance}</h3><p className="whatsapp-cloud-qr-summary">Escaneie uma vez para receber e responder mensagens de qualquer lugar.</p><ol><li><b>WhatsApp</b> no celular</li><li><b>Aparelhos conectados</b></li><li><b>Conectar aparelho</b> e escanear</li></ol><p className="whatsapp-cloud-qr-listening"><RefreshCw className="spinning" /> Aguardando conexão automática.</p>{evolutionQr.pairingCode && <strong>Código: {evolutionQr.pairingCode}</strong>}</div>
           <div className="whatsapp-cloud-qr-code">{evolutionQr.base64 ? <img src={evolutionQr.base64.startsWith("data:") ? evolutionQr.base64 : `data:image/png;base64,${evolutionQr.base64}`} alt={`QR Code da instância ${evolutionQr.instance}`} /> : <code>{evolutionQr.code || "QR Code sendo preparado. Clique em atualizar em alguns segundos."}</code>}<small>Mantenha esta tela aberta até aparecer “Online”.</small></div>
         </section>
       )}
@@ -443,7 +443,7 @@ export function WhatsAppChat({ profile, accessToken, onUnreadCountChange }: What
         </aside>
 
         <main className="whatsapp-conversation" aria-live="polite">
-          {!selectedThread && !loading && <div className="whatsapp-conversation-empty"><MessageCircle /><h3>Selecione uma conversa</h3><p>As mensagens recebidas pela instância {profileLabel} aparecerão aqui.</p></div>}
+          {!selectedThread && !loading && <div className="whatsapp-conversation-empty"><MessageCircle /><h3>{evolutionStatus?.connected ? "Selecione uma conversa" : "Conecte o WhatsApp para começar"}</h3><p>{evolutionStatus?.connected ? `As mensagens recebidas pela instância ${profileLabel} aparecerão aqui.` : "Assim que o QR for escaneado, novas mensagens entrarão automaticamente neste inbox."}</p><div className="whatsapp-empty-steps"><span><b>1</b> Conecte</span><span><b>2</b> Receba</span><span><b>3</b> Responda</span></div></div>}
           {selectedThread && (
             <>
               <header className="whatsapp-conversation-head">
