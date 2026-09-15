@@ -224,16 +224,16 @@ function ChamadaAoVivoMilenaPage() {
         minute: "2-digit",
       }).format(new Date(selectedSlot))
     : "";
+  const quizFirstName = quizProfile.nome?.trim().split(/\s+/)[0] || "";
+  const personalizedOffer = quizFirstName && quizProfile.ente
+    ? `${quizFirstName}, pelo que você compartilhou sobre ${quizProfile.ente}${quizProfile.relacao ? ` (${quizProfile.relacao})` : ""}, escolha o formato de conversa que mais respeita o seu momento.`
+    : "Escolha o formato de conversa que mais respeita o seu momento.";
   const whatsappConfirmationUrl = `https://api.whatsapp.com/send?phone=5511960746285&text=${encodeURIComponent(
      `Olá, sou ${contractSigner}. Contratei ${selectedPackage.title} e indiquei ${selectedDate} (horário de São Paulo) como preferência. Gostaria de confirmar o agendamento.`,
    )}`;
   const whatsappCheckoutUrl = `https://api.whatsapp.com/send?phone=5511960746285&text=${encodeURIComponent(
     `Olá! ${quizFirstName ? `Sou ${quizFirstName} e ` : ""}gostaria de finalizar pelo WhatsApp o atendimento “${selectedPackage.heading}” no valor de R$ ${(callAmountCents / 100).toFixed(2).replace(".", ",")}. ${quizProfile.ente ? `Meu pedido está relacionado a ${quizProfile.ente}. ` : ""}Gostaria de receber orientação para escolher data e horário.`,
   )}`;
-  const quizFirstName = quizProfile.nome?.trim().split(/\s+/)[0] || "";
-  const personalizedOffer = quizFirstName && quizProfile.ente
-    ? `${quizFirstName}, pelo que você compartilhou sobre ${quizProfile.ente}${quizProfile.relacao ? ` (${quizProfile.relacao})` : ""}, escolha o formato de conversa que mais respeita o seu momento.`
-    : "Escolha o formato de conversa que mais respeita o seu momento.";
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#fdfbf7] via-[#f7f2ea] to-[#f4eee4] text-[#181126] antialiased">
