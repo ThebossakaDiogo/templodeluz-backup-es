@@ -186,6 +186,25 @@ body [class*="text-[12px]"] { font-size: 0.9rem !important; }
 .jungle-quiz main > .animate-rise-in:not(.jungle-intro) { background: rgba(248, 248, 246, 0.96); }
 .jungle-quiz .animate-rise-in { animation: none; }
 
+/* Paleta única do funil: noite de floresta, sálvia e dourado. */
+.jungle-quiz .bg-\[\#211a35\] { background-color: #14201c !important; }
+.jungle-quiz .bg-\[\#171225\] { background-color: #0c1512 !important; }
+.jungle-quiz .bg-\[\#29213b\] { background-color: #1a2b24 !important; }
+.jungle-quiz .bg-\[\#2d144d\],
+.jungle-quiz .bg-\[\#5d4786\] { background-color: #39776c !important; }
+.jungle-quiz .bg-\[\#f2eef8\],
+.jungle-quiz .bg-\[\#f6f0fc\],
+.jungle-quiz .bg-\[\#f5f1f8\] { background-color: #edf7f2 !important; }
+.jungle-quiz .text-\[\#5d4786\],
+.jungle-quiz .text-\[\#2d144d\] { color: #39776c !important; }
+.jungle-quiz .text-\[\#d8c7e9\],
+.jungle-quiz .text-\[\#e9e0f1\],
+.jungle-quiz .text-\[\#d9cce7\] { color: #d6e9df !important; }
+.jungle-quiz .border-\[\#d8c7e9\],
+.jungle-quiz .border-\[\#d8cae5\],
+.jungle-quiz .border-\[\#e1d8ec\],
+.jungle-quiz .border-\[\#ded8e7\] { border-color: #c9e0d4 !important; }
+
 .quiz-modern input,
 .quiz-modern textarea,
 .quiz-modern button {
