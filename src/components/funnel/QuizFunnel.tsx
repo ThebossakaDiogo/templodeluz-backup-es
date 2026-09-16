@@ -1292,7 +1292,7 @@ function Intro({
               </p>
             </div>
 
-            <div className="relative">
+            <div id="intro-name-field" className="relative">
               <Field
                 label="Como podemos chamar você? (Seu nome)"
                 value={nome}
@@ -2073,8 +2073,15 @@ export function QuizFunnel() {
             }}
             error={erroNome}
             next={() => {
-              if (!nome.trim())
-                return setErroNome("Por favor, informe seu nome para abrirmos a conexão.");
+              if (!nome.trim()) {
+                setErroNome("Informe seu nome para continuar.");
+                window.requestAnimationFrame(() => {
+                  const field = document.getElementById("intro-name-field");
+                  field?.scrollIntoView({ behavior: "smooth", block: "center" });
+                  field?.querySelector<HTMLInputElement>("input")?.focus({ preventScroll: true });
+                });
+                return;
+              }
               goto("ente");
             }}
           />
