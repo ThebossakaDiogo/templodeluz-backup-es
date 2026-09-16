@@ -14,6 +14,7 @@ import insumoCartaImage from "../../assets/images/quiz/insumo-carta.png";
 import insumoSopaImage from "../../assets/images/quiz/insumo-sopa.png";
 import milenaLoaderImage from "../../assets/images/quiz/milena-loader.jpeg";
 import milenaDonationAudio from "../../assets/media/audio/milena-doacao-templo.mp3";
+import milenaFreeLetterAudio from "../../assets/media/audio/milena-carta-gratuita.mp3";
 import correiosLogo from "../../assets/images/quiz/correios-logo.png";
 
 const LetterZoomModal = lazy(() => import("./LetterZoomModal").then(({ LetterZoomModal: Component }) => ({ default: Component })));
@@ -729,6 +730,7 @@ function PixInstantBox({
   const [customInput, setCustomInput] = useState<string>("");
   const [isCustom, setIsCustom] = useState<boolean>(false);
   const [whatsAppModalOpen, setWhatsAppModalOpen] = useState<boolean>(false);
+  const [freeLetterAudioOpen, setFreeLetterAudioOpen] = useState(false);
   const [physicalLetterRequested, setPhysicalLetterRequested] = useState(() => {
     if (typeof window === "undefined") return false;
     return sessionStorage.getItem("templodeluz:physical-letter-selected") === "true";
@@ -769,11 +771,8 @@ function PixInstantBox({
     handlePhysicalLetterPreference(includesPhysical);
   };
 
-  const handleIrParaPergaminho = (e?: React.MouseEvent) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
+  const continueToPergaminho = () => {
+    setFreeLetterAudioOpen(false);
     if (typeof window !== "undefined") {
       sessionStorage.setItem("templodeluz:initial-payment-skipped", "true");
     }
@@ -788,6 +787,12 @@ function PixInstantBox({
       console.warn("[TELEMETRY]", err);
     }
     redirectWithParams("/chamada-ao-vivo-milena?source=skipped&next=%2Fescrever-carta");
+  };
+
+  const handleIrParaPergaminho = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    setFreeLetterAudioOpen(true);
   };
 
   const presets = [
@@ -1142,10 +1147,11 @@ function PixInstantBox({
             <button
               type="button"
               onClick={handleIrParaPergaminho}
-              className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 hover:to-amber-800 p-3.5 text-center text-white font-extrabold text-xs sm:text-[13px] uppercase tracking-wider shadow-md hover:shadow-lg active:scale-[0.99] transition-all cursor-pointer border-0"
+              className="group relative w-full overflow-hidden flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#4b8b7e] via-[#39776c] to-[#2d665e] p-3.5 text-center text-white font-extrabold text-xs sm:text-[13px] uppercase tracking-wider shadow-lg shadow-[#39776c]/25 hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 transition-all cursor-pointer border-0"
             >
-              <span>Acessar Pergaminho & Preencher Carta</span>
-              <span className="text-sm font-bold">→</span>
+              <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-1000 group-hover:translate-x-full" />
+              <span className="relative">Acessar Pergaminho & Preencher Carta</span>
+              <span className="relative text-sm font-bold">→</span>
             </button>
 
             <div className="text-center pt-0.5">
@@ -1154,6 +1160,35 @@ function PixInstantBox({
               </p>
             </div>
           </div>
+
+          {freeLetterAudioOpen && (
+            <div className="free-letter-audio-backdrop fixed inset-0 z-[230] flex items-center justify-center bg-[#0c1512]/75 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="free-letter-audio-title">
+              <button type="button" aria-label="Fechar" onClick={() => setFreeLetterAudioOpen(false)} className="absolute inset-0 cursor-default" />
+              <div className="free-letter-audio-card relative z-10 w-full max-w-[430px] overflow-hidden rounded-[28px] border border-[#d8cae5] bg-[#fffefd] shadow-[0_28px_80px_-28px_rgba(0,0,0,0.9)]">
+                <div className="relative overflow-hidden bg-[#14201c] px-5 py-7 text-center text-white">
+                  <div className="pointer-events-none absolute -left-12 -top-12 h-28 w-28 rounded-full bg-[#a8d3c0]/20 blur-3xl" />
+                  <div className="pointer-events-none absolute -right-10 bottom-0 h-24 w-24 rounded-full bg-[#c49a52]/20 blur-3xl" />
+                  <span className="relative inline-flex rounded-full border border-[#f5d285]/30 bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#f5d285]">Mensagem da Milena</span>
+                  <h2 id="free-letter-audio-title" className="relative mt-3 font-display text-[22px] font-black leading-tight">OUÇA ANTES DE SAIR PARA RECEBER A CARTA</h2>
+                  <p className="relative mt-2 text-[12px] leading-relaxed text-[#e0eee7]">A carta continua gratuita. Esta mensagem é opcional e pode ser ignorada.</p>
+                </div>
+                <div className="p-5">
+                  <div className="free-letter-audio-player rounded-2xl border border-[#d8e9e3] bg-[#eff8f3] p-3">
+                    <audio controls preload="none" aria-label="Mensagem da Milena sobre receber a carta" className="w-full accent-[#39776c]">
+                      <source src={milenaFreeLetterAudio} type="audio/mpeg" />
+                      Seu navegador não oferece suporte à reprodução deste áudio.
+                    </audio>
+                  </div>
+                  <button type="button" onClick={continueToPergaminho} className="mt-5 w-full rounded-2xl bg-gradient-to-r from-[#4b8b7e] via-[#39776c] to-[#2d665e] px-5 py-4 text-sm font-black text-white shadow-lg shadow-[#39776c]/25 transition-all hover:-translate-y-0.5">
+                    Continuar para o pergaminho
+                  </button>
+                  <button type="button" onClick={continueToPergaminho} className="mt-2 w-full py-2 text-[11.5px] font-bold text-slate-500 underline decoration-slate-300 underline-offset-2">
+                    Ignorar áudio e continuar
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
