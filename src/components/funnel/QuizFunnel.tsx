@@ -9,7 +9,6 @@ import { useCandlesGoalSimulation } from "@/lib/donation-simulation";
 import { parseBrazilianCurrency, sanitizeBrazilianCurrencyInput } from "@/lib/currency";
 import { PIX_CONFIG_ORIGINAL, pixFunctionHeaders } from "@/lib/pix-config";
 import milenaCartaImage from "../../assets/images/quiz/medium-milena-carta.jpeg";
-import cartaPsicografadaImage from "../../assets/images/quiz/carta-psicografada.webp";
 import insumoVelaImage from "../../assets/images/quiz/insumo-vela.png";
 import insumoCartaImage from "../../assets/images/quiz/insumo-carta.png";
 import insumoSopaImage from "../../assets/images/quiz/insumo-sopa.png";
@@ -1279,9 +1278,9 @@ function Intro({
        <header className="overflow-hidden bg-[#07142f]">
         <div className="w-full p-3 sm:p-4">
           <img
-            src={cartaPsicografadaImage}
-            alt="Carta psicografada manuscrita"
-            className="mx-auto block h-auto w-full max-w-[620px] scale-[1.025] rounded-2xl object-cover shadow-[0_20px_45px_-26px_rgba(0,0,0,0.82)]"
+            src={milenaCartaImage}
+            alt="Milena Medeiros escrevendo uma carta no oratório"
+            className="mx-auto block h-auto w-full max-w-[620px] rounded-2xl object-contain shadow-[0_20px_45px_-26px_rgba(0,0,0,0.82)]"
             fetchPriority="high"
             decoding="async"
           />
@@ -1370,21 +1369,19 @@ function Intro({
             type="button"
             onClick={() => setLetterModalOpen(true)}
             aria-label="Toque para ampliar exemplo de carta psicografada"
-            className="group relative block w-full mx-auto max-w-[300px] rounded-2xl p-1 bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 shadow-xl cursor-zoom-in transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl text-left"
+            className="group relative block w-full mx-auto max-w-[300px] overflow-hidden rounded-2xl border border-[#e6c96e] bg-[#fffdf8] shadow-xl cursor-zoom-in transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl text-left"
           >
-            <div className="relative overflow-hidden rounded-xl">
+            <div className="relative bg-white p-2">
               <img
                 src={IMAGES.carta}
                 alt="Exemplo real de carta psicografada manuscrita"
-                className="w-full rounded-xl object-cover transition-transform duration-300 group-hover:scale-105"
+                className="w-full rounded-xl object-cover transition-transform duration-300 group-hover:scale-[1.035]"
                 loading="lazy"
                 decoding="async"
               />
-              <div className="absolute inset-0 bg-black/25 group-hover:bg-black/10 transition-colors flex flex-col items-center justify-center p-3">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3.5 py-1.5 text-[11.5px] font-black text-[#2d144d] shadow-xl backdrop-blur-xs border border-amber-300/80">
-                  <span>🔍</span> Ver exemplo real
-                </span>
-              </div>
+            </div>
+            <div className="flex items-center justify-center gap-2 border-t border-[#f0dca2] bg-[#fff9e7] px-3 py-3 text-center text-[11.5px] font-black text-[#6e4d0d]">
+              <span>🔍</span> Ver exemplo real
             </div>
           </button>
         </Reveal>

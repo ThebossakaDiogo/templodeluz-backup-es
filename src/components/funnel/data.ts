@@ -1,4 +1,4 @@
-import cartaExemplo from "@/assets/exemplo-carta.jpeg";
+import cartaExemplo from "@/assets/images/quiz/carta-psicografada.webp";
 import logoTemplo from "@/assets/logo-templo-de-luz.png";
 import mediumMilena from "@/assets/medium-milena.jpeg";
 import milenaEmocionada from "@/assets/milena.webp";
