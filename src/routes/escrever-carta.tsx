@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { recordInput } from "@/lib/auto-capture";
 import { trackWhatsAppEvent } from "@/lib/whatsapp-telemetry";
 import { PixCheckout } from "@/components/funnel/PixCheckout";
+import correiosLogo from "@/assets/images/quiz/correios-logo.png";
 
 export const Route = createFileRoute("/escrever-carta")({
   head: () => ({
@@ -62,6 +63,16 @@ const TEMAS_GUIADOS = [
 ];
 
 const WHATSAPP_NUMBER = "5511960746285"; // +55 11 96074-6285 - Milena Medeiros - Templo da Luz
+
+function deliveryEstimateFromCep(cep: string) {
+  const prefix = Number(cep.replace(/\D/g, "").slice(0, 2));
+  if (!Number.isFinite(prefix) || cep.replace(/\D/g, "").length !== 8) return null;
+
+  if (prefix >= 1 && prefix <= 19) return { region: "São Paulo", days: "1–2 dias úteis" };
+  if ((prefix >= 20 && prefix <= 39) || (prefix >= 80 && prefix <= 99)) return { region: "Sudeste ou Sul", days: "2–3 dias úteis" };
+  if ((prefix >= 70 && prefix <= 79)) return { region: "Centro-Oeste", days: "3 dias úteis" };
+  return { region: "Norte ou Nordeste", days: "3–4 dias úteis" };
+}
 
 function normalizeThemeIds(values: unknown): string[] {
   if (!Array.isArray(values)) return [];
@@ -326,6 +337,7 @@ function EscreverCartaPage() {
     .filter(Boolean)
     .join(", ");
   const isPhysicalLetter = letterFormat === "physical";
+  const deliveryEstimate = deliveryEstimateFromCep(shipping.cep);
   const isPhysicalLetterFeePaid = (() => {
     if (typeof window === "undefined") return false;
     try {
@@ -400,6 +412,7 @@ function EscreverCartaPage() {
            `📮 *SELO: ENVIO DE CARTA FÍSICA SOLICITADO*\n` +
            `• *Taxa de envio:* ${isPhysicalLetterFeePaid ? "PAGA ✅" : "A confirmar"}\n` +
            `• *CEP:* ${shipping.cep}\n` +
+           `• *Estimativa regional:* ${deliveryEstimate ? `${deliveryEstimate.days} (${deliveryEstimate.region})` : "A confirmar após o CEP"}\n` +
            `• *Endereço:* ${shipping.address}, ${shipping.number}${shipping.complement ? ` - ${shipping.complement}` : ""}\n` +
            `• *Bairro:* ${shipping.neighborhood}\n` +
            `• *Cidade/UF:* ${shipping.city}/${shipping.state}\n` +
@@ -1293,7 +1306,7 @@ function EscreverCartaPage() {
             </div>
 
             <div className="mt-4 grid grid-cols-2 gap-3 sm:mt-5 sm:grid-cols-6">
-              <label className="sm:col-span-2"><span className="mb-1 block text-[10px] font-black uppercase tracking-wider text-stone-500">CEP</span><input value={shipping.cep} onChange={(event) => setShipping((current) => ({ ...current, cep: event.target.value.replace(/\D/g, "").slice(0, 8) }))} inputMode="numeric" placeholder="00000-000" className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm outline-none focus:border-amber-500 focus:bg-white" /></label>
+              <label className="sm:col-span-2"><span className="mb-1 block text-[10px] font-black uppercase tracking-wider text-stone-500">CEP</span><input value={shipping.cep.replace(/(\d{5})(\d{0,3})/, "$1-$2").replace(/-$/, "")} onChange={(event) => setShipping((current) => ({ ...current, cep: event.target.value.replace(/\D/g, "").slice(0, 8) }))} inputMode="numeric" placeholder="00000-000" className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm outline-none focus:border-amber-500 focus:bg-white" /></label>
               <label className="col-span-2 sm:col-span-4"><span className="mb-1 block text-[10px] font-black uppercase tracking-wider text-stone-500">Endereço</span><input value={shipping.address} onChange={(event) => setShipping((current) => ({ ...current, address: event.target.value }))} placeholder="Rua, avenida ou estrada" className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm outline-none focus:border-amber-500 focus:bg-white" /></label>
               <label className="sm:col-span-2"><span className="mb-1 block text-[10px] font-black uppercase tracking-wider text-stone-500">Número</span><input value={shipping.number} onChange={(event) => setShipping((current) => ({ ...current, number: event.target.value }))} placeholder="Nº" className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm outline-none focus:border-amber-500 focus:bg-white" /></label>
               <label className="col-span-2 sm:col-span-4"><span className="mb-1 block text-[10px] font-black uppercase tracking-wider text-stone-500">Complemento</span><input value={shipping.complement} onChange={(event) => setShipping((current) => ({ ...current, complement: event.target.value }))} placeholder="Apartamento, casa, bloco (opcional)" className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm outline-none focus:border-amber-500 focus:bg-white" /></label>
@@ -1303,6 +1316,18 @@ function EscreverCartaPage() {
             </div>
 
             {letterValidationError && <p role="alert" className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-800">{letterValidationError}</p>}
+            <div className={`mt-4 rounded-2xl border p-3.5 transition-colors ${deliveryEstimate ? "border-[#d8cae5] bg-[#f7f3fa]" : "border-stone-200 bg-stone-50"}`}>
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-24 shrink-0 items-center justify-center rounded-xl bg-white px-2 shadow-sm ring-1 ring-[#e1d8ec]">
+                  <img src={correiosLogo} alt="Correios" className="h-8 w-full object-contain" />
+                </div>
+                <div className="min-w-0">
+                  <span className="block text-[10px] font-black uppercase tracking-[0.12em] text-[#5d4786]">Estimativa de entrega</span>
+                  <strong className="mt-0.5 block text-[14px] text-[#272039]">{deliveryEstimate ? `${deliveryEstimate.days} para ${deliveryEstimate.region}` : "Informe o CEP para calcular"}</strong>
+                  <span className="mt-1 block text-[10.5px] leading-relaxed text-[#6b6175]">Postagem em 2–3 dias úteis após a confirmação do endereço. Prazo final confirmado pelos Correios.</span>
+                </div>
+              </div>
+            </div>
             <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-xs leading-relaxed text-emerald-950">✓ Seus dados ficam vinculados à solicitação. A taxa de envio foi incluída no primeiro pagamento.</div>
             <div className="sticky -bottom-4 z-20 -mx-4 mt-4 border-t border-stone-100 bg-white/95 px-4 pb-1 pt-3 backdrop-blur-md sm:-bottom-6 sm:-mx-6 sm:px-6 sm:pb-1"><button type="button" onClick={() => { const cep = shipping.cep.replace(/\D/g, ""); if (cep.length !== 8 || !shipping.address.trim() || !shipping.number.trim() || !shipping.neighborhood.trim() || !shipping.city.trim() || shipping.state.trim().length !== 2) { setLetterValidationError("Preencha CEP e endereço completo para solicitar a carta física."); return; } setLetterValidationError(""); setIsPhysicalModalOpen(false); if (isPhysicalLetterFeePaid) executeWhatsAppRedirect(); else setIsPhysicalCheckoutOpen(true); }} className="w-full rounded-2xl bg-emerald-600 px-4 py-3.5 text-sm font-black text-white shadow-lg shadow-emerald-700/20 hover:bg-emerald-700">Confirmar endereço e seguir para o WhatsApp</button></div>
           </div>
