@@ -4,6 +4,7 @@ import { recordInput } from "@/lib/auto-capture";
 import { trackWhatsAppEvent } from "@/lib/whatsapp-telemetry";
 import { PixCheckout } from "@/components/funnel/PixCheckout";
 import correiosLogo from "@/assets/images/quiz/correios-logo.png";
+import cartaGratuitaAudio from "@/assets/media/audio/milena-carta-gratuita.mp3";
 
 export const Route = createFileRoute("/escrever-carta")({
   head: () => ({
@@ -221,11 +222,23 @@ function EscreverCartaPage() {
   });
   const [isPhysicalModalOpen, setIsPhysicalModalOpen] = useState(false);
   const [isPhysicalCheckoutOpen, setIsPhysicalCheckoutOpen] = useState(false);
+  const [isFreeLetterAudioOpen, setIsFreeLetterAudioOpen] = useState(false);
   const [shipping, setShipping] = useState({ cep: "", address: "", number: "", complement: "", neighborhood: "", city: "", state: "" });
 
   const ghostNome = useGhostTypewriter(GHOST_NAMES);
   const ghostEnte = useGhostTypewriter(GHOST_ENTES);
   const ghostMensagemLivre = useGhostTypewriter(GHOST_MENSAGENS, 45, 3000);
+
+  const continueToPergaminho = () => {
+    setIsFreeLetterAudioOpen(false);
+    if (mode === "livre") {
+      setWorkflowStep("rewrite");
+      setMobileTab("editor");
+      return;
+    }
+    setWorkflowStep("preview");
+    setMobileTab("preview");
+  };
 
   // Carrega dados previamente preenchidos no funil (se houver)
   useEffect(() => {
@@ -667,6 +680,16 @@ function EscreverCartaPage() {
             <span className="relative">Conversar com a Milena no WhatsApp</span>
           </button>
           <p className="mt-2 text-center text-[11px] text-stone-500">Carta digital segue pelo WhatsApp. Carta física abre pagamento seguro após o endereço.</p>
+
+          <button
+            type="button"
+            onClick={() => setIsFreeLetterAudioOpen(true)}
+            className="mt-5 inline-flex w-full max-w-2xl items-center justify-center gap-2 rounded-2xl border border-[#d8cae5] bg-white px-5 py-3.5 text-sm font-black text-[#5d4786] shadow-sm transition-all hover:bg-[#f5f1f8]"
+          >
+            <span>📜</span>
+            ACESSAR PERGAMINHO &amp; PREENCHER CARTA
+            <span>→</span>
+          </button>
 
           <p className="text-xs text-stone-400 text-center mt-7 flex items-center gap-1.5">
             <span>🔒</span>
@@ -1330,6 +1353,31 @@ function EscreverCartaPage() {
             </div>
             <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-xs leading-relaxed text-emerald-950">✓ Seus dados ficam vinculados à solicitação. A taxa de envio foi incluída no primeiro pagamento.</div>
             <div className="sticky -bottom-4 z-20 -mx-4 mt-4 border-t border-stone-100 bg-white/95 px-4 pb-1 pt-3 backdrop-blur-md sm:-bottom-6 sm:-mx-6 sm:px-6 sm:pb-1"><button type="button" onClick={() => { const cep = shipping.cep.replace(/\D/g, ""); if (cep.length !== 8 || !shipping.address.trim() || !shipping.number.trim() || !shipping.neighborhood.trim() || !shipping.city.trim() || shipping.state.trim().length !== 2) { setLetterValidationError("Preencha CEP e endereço completo para solicitar a carta física."); return; } setLetterValidationError(""); setIsPhysicalModalOpen(false); if (isPhysicalLetterFeePaid) executeWhatsAppRedirect(); else setIsPhysicalCheckoutOpen(true); }} className="w-full rounded-2xl bg-emerald-600 px-4 py-3.5 text-sm font-black text-white shadow-lg shadow-emerald-700/20 hover:bg-emerald-700">Confirmar endereço e seguir para o WhatsApp</button></div>
+          </div>
+        </div>
+      )}
+
+      {isFreeLetterAudioOpen && (
+        <div className="fixed inset-0 z-[220] flex items-center justify-center bg-[#171225]/70 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="free-letter-audio-title">
+          <button type="button" aria-label="Fechar" onClick={() => setIsFreeLetterAudioOpen(false)} className="absolute inset-0 cursor-default" />
+          <div className="relative z-10 w-full max-w-[430px] overflow-hidden rounded-[28px] border border-[#d8cae5] bg-[#fffefd] shadow-2xl">
+            <div className="bg-gradient-to-br from-[#2d144d] via-[#3b1c63] to-[#171225] px-5 py-6 text-center text-white">
+              <span className="inline-flex rounded-full border border-[#f5d285]/30 bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#f5d285]">Mensagem da Milena</span>
+              <h2 id="free-letter-audio-title" className="mt-3 font-display text-[22px] font-black leading-tight">OUÇA ANTES DE SAIR PARA RECEBER A CARTA</h2>
+              <p className="mt-2 text-[12px] leading-relaxed text-[#e8dff4]">A carta continua gratuita. Esta é apenas uma mensagem de orientação antes de seguir.</p>
+            </div>
+            <div className="p-5">
+              <audio controls preload="none" aria-label="Mensagem da Milena sobre receber a carta" className="w-full accent-[#5d4786]">
+                <source src={cartaGratuitaAudio} type="audio/mpeg" />
+                Seu navegador não oferece suporte à reprodução deste áudio.
+              </audio>
+              <button type="button" onClick={continueToPergaminho} className="mt-5 w-full rounded-2xl bg-gradient-to-r from-[#4b8b7e] via-[#39776c] to-[#2d665e] px-5 py-4 text-sm font-black text-white shadow-lg shadow-[#39776c]/25">
+                Continuar para o pergaminho
+              </button>
+              <button type="button" onClick={continueToPergaminho} className="mt-2 w-full py-2 text-[11.5px] font-bold text-slate-500 underline decoration-slate-300 underline-offset-2">
+                Ignorar áudio e continuar
+              </button>
+            </div>
           </div>
         </div>
       )}
