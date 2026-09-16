@@ -41,8 +41,8 @@ const ITEMS: {
   {
     id: "rastreamento",
     slug: "/rastreamento",
-    label: "Rastreamento",
-    sub: "Funil & Pessoas Ao Vivo",
+    label: "Rascunhos ao vivo",
+    sub: "Campos salvos em tempo real",
     Icon: Activity,
     accent: "#fbbf24", // Amber Solar
   },

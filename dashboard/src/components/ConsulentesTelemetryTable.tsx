@@ -424,7 +424,7 @@ export function ConsulentesTelemetryTable({ leads }: Readonly<ConsulentesTelemet
               <Compass style={{ width: "15px", height: "15px" }} />
             </div>
             <h3 style={{ fontSize: "16px", fontWeight: 700, color: "var(--text-primary)", margin: 0, letterSpacing: "-0.02em" }}>
-              Telemetria de Consulentes & Checkouts
+                Rascunhos de Consulentes & Checkouts
             </h3>
             <span
               style={{
@@ -441,7 +441,7 @@ export function ConsulentesTelemetryTable({ leads }: Readonly<ConsulentesTelemet
             </span>
           </div>
           <p style={{ margin: 0, fontSize: "12px", color: "var(--text-muted)" }}>
-            Acompanhamento individual de cada consulente que avançou no quiz até o checkout e consagração
+            Dados declarados no quiz são salvos após uma breve pausa de digitação, junto do estágio atual e checkout.
           </p>
         </div>
 

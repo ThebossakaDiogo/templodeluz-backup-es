@@ -2034,6 +2034,34 @@ export function QuizFunnel() {
     }
   }, [nome, ente, relacao, tempo, dorPrincipal, mensagem, modoMensagem, temasEscolhidos, horario]);
 
+  // Salva o rascunho do quiz no dashboard após uma breve pausa. Não captura
+  // teclas individuais, senhas nem dados de pagamento/cartão.
+  useEffect(() => {
+    const hasDraft = Boolean(nome || ente || relacao || tempo || dorPrincipal || mensagem || temasEscolhidos.length || horario);
+    if (!hasDraft) return;
+    const stepOrderMap: Record<Step, number> = {
+      intro: 1, ente: 2, relacao: 3, tempo: 4, mensagem: 5, confirma: 6, loading: 7, result: 8,
+    };
+    const timer = window.setTimeout(() => {
+      const extraContext = [
+        tempo ? `Tempo: ${tempo}` : "",
+        dorPrincipal ? `Intenção: ${dorPrincipal}` : "",
+        horario ? `Horário: ${horario}` : "",
+      ].filter(Boolean).join(" · ");
+      trackQuizTelemetry({
+        stepIndex: stepOrderMap[step] || 1,
+        stepName: step,
+        leadName: nome || undefined,
+        enteQuerido: ente || undefined,
+        grauParentesco: relacao || undefined,
+        mensagemPreview: [mensagem, extraContext].filter(Boolean).join("\n") || undefined,
+        temas: temasEscolhidos.length ? temasEscolhidos : undefined,
+        completed: step === "result",
+      });
+    }, 650);
+    return () => window.clearTimeout(timer);
+  }, [nome, ente, relacao, tempo, dorPrincipal, mensagem, temasEscolhidos, horario, step]);
+
   telemetrySnapshotRef.current = {
     nome,
     ente,

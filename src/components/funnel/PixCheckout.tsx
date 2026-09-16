@@ -937,97 +937,54 @@ function PixPendingView({
   );
 }
 
-interface CardFormViewProps {
+interface CardCheckoutPreviewProps {
   readonly productId: string;
   readonly formattedAmount: string;
-  readonly customerPhone: string;
-  readonly error: string;
-  readonly cardLoading: boolean;
-  readonly onPhoneChange: (value: string) => void;
-  readonly onPhoneBlur: () => void;
-  readonly onStartStripe: () => void;
+  readonly onUsePix: () => void;
 }
 
-function CardFormView({
+function CardCheckoutPreview({
   productId,
   formattedAmount,
-  customerPhone,
-  error,
-  cardLoading,
-  onPhoneChange,
-  onPhoneBlur,
-  onStartStripe,
-}: Readonly<CardFormViewProps>) {
+  onUsePix,
+}: Readonly<CardCheckoutPreviewProps>) {
   const isLiveCall = productId === "chamada_ao_vivo_milena";
 
   return (
     <>
-      <div className="space-y-3 text-left">
-        <div>
-          <label
-            htmlFor={`card-phone-${productId}`}
-            className="mb-1.5 flex items-center justify-between text-left text-xs font-bold text-[#2d144d]"
-          >
-            <span className="flex items-center gap-1.5">
-              <PhoneIcon className="w-4 h-4 text-[#6366f1]" />
-              <span>Seu WhatsApp (com DDD):</span>
-            </span>
-            <span className="text-[10.5px] font-semibold text-[#6366f1]">
-              {isLiveCall ? "Para confirmação do horário" : "Para envio da carta"}
-            </span>
-          </label>
-          <input
-            id={`card-phone-${productId}`}
-            type="tel"
-            inputMode="tel"
-            autoComplete="tel"
-            value={customerPhone}
-            onChange={(e) => onPhoneChange(e.target.value)}
-            onBlur={onPhoneBlur}
-            placeholder="(DDD) 99999-9999"
-            className="w-full rounded-2xl border-2 border-[#d8caea] bg-white px-4 py-3.5 text-base text-[#181126] outline-none transition-colors placeholder:text-[#9583a6] focus:border-[#6366f1]"
-          />
-        </div>
-
-        <div className="rounded-xl border border-indigo-200 bg-indigo-50/70 p-3 text-left">
-          <div className="flex items-start gap-2">
-            <ReturnIcon className="w-4 h-4 text-indigo-700 shrink-0 mt-0.5" />
-            <p className="text-[11.5px] text-indigo-950 leading-relaxed">
-              No próximo passo você preencherá os dados do cartão no ambiente seguro da <strong>Stripe</strong>. <strong>Após concluir, retorne a esta página para {isLiveCall ? "escolher o horário da chamada" : "receber sua carta"}.</strong>
-            </p>
+      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-[#fbfcff] text-left shadow-sm">
+        <div className="border-b border-slate-200 bg-white px-4 py-3">
+          <span className="text-[10px] font-black uppercase tracking-[0.14em] text-[#2563eb]">Pagamento com cartão</span>
+          <div className="mt-1 flex items-center justify-between gap-3">
+            <strong className="text-[15px] text-[#111827]">Resumo do pedido</strong>
+            <strong className="text-[16px] text-[#111827]">R$ {formattedAmount}</strong>
           </div>
         </div>
-      </div>
+        <div className="space-y-3 p-4">
+          <div>
+            <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">Número do cartão</span>
+            <div className="flex h-12 items-center justify-between rounded-xl border border-slate-200 bg-slate-100 px-3 text-[13px] font-semibold text-slate-400"><span>•••• •••• •••• ••••</span><CardIcon className="h-5 w-5" /></div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">Validade</span><div className="h-11 rounded-xl border border-slate-200 bg-slate-100" /></div>
+            <div><span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">CVC</span><div className="h-11 rounded-xl border border-slate-200 bg-slate-100" /></div>
+          </div>
+          <div className="rounded-xl border border-blue-200 bg-blue-50 p-3 text-[11px] leading-relaxed text-blue-900">
+            O cartão está em ativação neste checkout. Nenhum dado de cartão é solicitado, enviado ou armazenado nesta tela.
+          </div>
+        </div>
+      </section>
 
-      {error && (
-        <p className="mt-2 text-left text-xs font-bold text-red-700">{error}</p>
-      )}
-
-      <div className="mt-4 py-2 border-y border-[#eee5f5]">
-        <span className="text-[10px] font-bold text-[#6c5a82] uppercase block mb-1.5 text-center">
-          Bandeiras aceitas no checkout:
-        </span>
+      <div className="mt-4 border-y border-[#eee5f5] py-2">
+        <span className="mb-1.5 block text-center text-[10px] font-bold uppercase text-[#6c5a82]">Bandeiras previstas</span>
         <CardFlagsBadgeRow />
       </div>
 
-      <button
-        type="button"
-        onClick={onStartStripe}
-        disabled={cardLoading}
-        className="mt-4 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#6366f1] via-[#4f46e5] to-[#4338ca] px-6 py-4 text-[14px] font-extrabold uppercase text-white shadow-lg shadow-indigo-600/30 transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:cursor-wait disabled:opacity-70"
-      >
-        <CardIcon className="w-5 h-5 text-white" />
-        <span>
-          {cardLoading
-            ? "Conectando Stripe..."
-            : `Pagar R$ ${formattedAmount} no Cartão (Stripe)`}
-        </span>
+      <button type="button" onClick={onUsePix} className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#4b8b7e] via-[#39776c] to-[#2d665e] px-6 py-4 text-[14px] font-extrabold uppercase text-white shadow-lg shadow-[#39776c]/25">
+        <PixIcon className="h-5 w-5 text-white" />
+        <span>Usar PIX agora</span>
       </button>
-
-      <div className="mt-3 flex items-center justify-center gap-1.5 text-[10.5px] text-[#5c4a70]">
-        <ShieldLockIcon className="w-3.5 h-3.5 text-[#6366f1] shrink-0" />
-        <span>Ambiente 100% seguro com criptografia SSL 256-bit Stripe</span>
-      </div>
+      <p className="mt-3 flex items-center justify-center gap-1.5 text-[10.5px] text-[#5c4a70]"><ShieldLockIcon className="h-3.5 w-3.5 text-[#39776c]" /> Seus dados de cartão permanecem protegidos: não coletamos informações nesta etapa.</p>
     </>
   );
 }
@@ -1652,17 +1609,15 @@ export function PixCheckout({
                 </>
               )}
 
-              {/* Conteúdo da Aba Cartão Stripe */}
+              {/* Prévia nativa de cartão — integração real permanece desativada até PCI/provider. */}
               {showCard && activeTab === "card" && !charge && (
-                <CardFormView
+                <CardCheckoutPreview
                   productId={productId}
                   formattedAmount={formattedAmount}
-                  customerPhone={customerPhone}
-                  error={error}
-                  cardLoading={cardLoading}
-                  onPhoneChange={handlePhoneChange}
-                  onPhoneBlur={handlePhoneBlur}
-                  onStartStripe={startStripeCheckout}
+                  onUsePix={() => {
+                    setActiveTab("pix");
+                    setError("");
+                  }}
                 />
               )}
             </div>
