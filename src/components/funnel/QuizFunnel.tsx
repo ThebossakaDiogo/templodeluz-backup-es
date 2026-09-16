@@ -1238,8 +1238,8 @@ function Intro({
   const [letterModalOpen, setLetterModalOpen] = useState(false);
 
   return (
-    <div className="jungle-intro animate-rise-in min-h-screen bg-[#120d20]">
-       <header className="overflow-hidden bg-[#171225]">
+    <div className="jungle-intro animate-rise-in min-h-screen bg-[#0c1512]">
+       <header className="overflow-hidden bg-[#0c1512]">
         <div className="w-full p-3 sm:p-4">
           <img
             src={milenaCartaImage}
@@ -1251,16 +1251,16 @@ function Intro({
         </div>
 
         <div className="px-4 pb-6 pt-5">
-          <div className="mx-auto max-w-[680px] rounded-[26px] border border-[#c49a52]/35 bg-[#211a35] p-5 shadow-[0_24px_56px_-28px_rgba(0,0,0,0.9)] text-center sm:p-7">
+          <div className="mx-auto max-w-[680px] rounded-[26px] border border-[#c49a52]/35 bg-[#14201c] p-5 shadow-[0_24px_56px_-28px_rgba(0,0,0,0.9)] text-center sm:p-7">
             <Stars className="mb-3" />
-            <span className="mb-3 inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-[#eee6f6]">Templo de Luz · Acolhimento privado</span>
+            <span className="mb-3 inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-[#e8f0ec]">Templo de Luz · Acolhimento privado</span>
             <h1 className="font-display text-[25px] sm:text-[32px] leading-[1.12] font-medium text-white tracking-[-0.03em]">
               Organize uma intenção de carta para quem você ama,{" "}
-              <span className="text-[#5d4786] underline decoration-[#c49a52] decoration-2 underline-offset-4">
+              <span className="text-[#a8d3c0] underline decoration-[#c49a52] decoration-2 underline-offset-4">
                 com acolhimento da médium Milena
               </span>
             </h1>
-            <p className="mt-3 text-[14px] leading-relaxed text-[#e9e0f1] font-normal">
+            <p className="mt-3 text-[14px] leading-relaxed text-[#d7e3dc] font-normal">
               Um espaço de acolhimento para registrar sua história, sua saudade e o que deseja expressar.
             </p>
           </div>
@@ -1268,7 +1268,7 @@ function Intro({
       </header>
 
       {/* Faixa de Prova Social */}
-      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 border-y border-white/10 bg-[#1b142d] px-4 py-3 text-[11.5px] text-[#f5effa] sm:text-[12.5px]">
+      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 border-y border-white/10 bg-[#101d18] px-4 py-3 text-[11.5px] text-[#e7f0eb] sm:text-[12.5px]">
         <span className="font-bold">💌 Atendimento acolhedor</span>
         <span className="h-3 w-px bg-white/20" />
         <span className="font-bold">✍️ Carta e pergaminho</span>
