@@ -9,6 +9,7 @@ import { useCandlesGoalSimulation } from "@/lib/donation-simulation";
 import { parseBrazilianCurrency, sanitizeBrazilianCurrencyInput } from "@/lib/currency";
 import { PIX_CONFIG_ORIGINAL, pixFunctionHeaders } from "@/lib/pix-config";
 import milenaCartaImage from "../../assets/images/quiz/medium-milena-carta.jpeg";
+import cartaPsicografadaImage from "../../assets/images/quiz/carta-psicografada.webp";
 import insumoVelaImage from "../../assets/images/quiz/insumo-vela.png";
 import insumoCartaImage from "../../assets/images/quiz/insumo-carta.png";
 import insumoSopaImage from "../../assets/images/quiz/insumo-sopa.png";
@@ -16,7 +17,6 @@ import milenaLoaderImage from "../../assets/images/quiz/milena-loader.jpeg";
 import milenaDonationAudio from "../../assets/media/audio/milena-doacao-templo.mp3";
 import milenaFreeLetterAudio from "../../assets/media/audio/milena-carta-gratuita.mp3";
 import correiosLogo from "../../assets/images/quiz/correios-logo.png";
-import { GradientBackground } from "@/components/ui/iris-bloom";
 
 const LetterZoomModal = lazy(() => import("./LetterZoomModal").then(({ LetterZoomModal: Component }) => ({ default: Component })));
 const PixCheckout = lazy(() => import("./PixCheckout").then(({ PixCheckout: Component }) => ({ default: Component })));
@@ -1279,9 +1279,9 @@ function Intro({
        <header className="overflow-hidden bg-[#07142f]">
         <div className="w-full p-3 sm:p-4">
           <img
-            src={milenaCartaImage}
-            alt="Milena Medeiros escrevendo uma carta no oratório"
-            className="mx-auto block h-auto w-full max-w-[620px] rounded-2xl object-contain"
+            src={cartaPsicografadaImage}
+            alt="Carta psicografada manuscrita"
+            className="mx-auto block h-auto w-full max-w-[620px] scale-[1.025] rounded-2xl object-cover shadow-[0_20px_45px_-26px_rgba(0,0,0,0.82)]"
             fetchPriority="high"
             decoding="async"
           />
@@ -2097,8 +2097,7 @@ export function QuizFunnel() {
   const primeiroNome = nome?.trim() ? nome.trim().split(" ")[0] : "você";
 
   return (
-    <div className="jungle-quiz quiz-modern relative isolate mx-auto flex min-h-screen w-full max-w-[520px] flex-col overflow-hidden bg-transparent text-[#272039] shadow-[0_0_70px_-30px_rgba(33,26,53,0.4)] border-x border-white/15">
-      <div className="absolute inset-0 z-0"><GradientBackground className="h-full w-full" /></div>
+    <div className="jungle-quiz quiz-modern relative isolate mx-auto flex min-h-screen w-full max-w-[520px] flex-col overflow-hidden bg-[#07142f] text-[#272039] shadow-[0_0_70px_-30px_rgba(33,26,53,0.4)] border-x border-white/15">
       <main className="relative z-10 flex flex-1 flex-col">
         {/* ETAPA 1: NOME */}
         {step === "intro" && (

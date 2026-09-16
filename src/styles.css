@@ -163,18 +163,12 @@ body [class*="text-[12px]"] { font-size: 0.9rem !important; }
 
 .jungle-intro {
   font-family: "Satoshi", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background:
-    radial-gradient(circle at 12% 18%, rgba(196, 154, 82, .6) 0 1px, transparent 1.5px),
-    radial-gradient(circle at 78% 7%, rgba(156, 196, 255, .85) 0 1px, transparent 1.5px),
-    radial-gradient(circle at 88% 72%, rgba(196, 154, 82, .55) 0 1px, transparent 1.5px),
-    radial-gradient(circle at 20% 86%, rgba(156, 196, 255, .65) 0 1px, transparent 1.5px),
-    radial-gradient(circle at 50% 0%, rgba(37, 99, 235, .42), transparent 42%),
-    linear-gradient(180deg, #0c2762 0%, #07142f 100%);
+  background: #07142f;
 }
 
 .jungle-intro .font-display { font-family: "Satoshi", "Plus Jakarta Sans", sans-serif; }
 
-.jungle-quiz.quiz-modern { background: transparent; }
+.jungle-quiz.quiz-modern { background: #07142f; }
 .jungle-quiz main > .animate-rise-in:not(.jungle-intro) { background: rgba(248, 248, 246, 0.96); }
 .jungle-quiz .animate-rise-in { animation: none; }
 
