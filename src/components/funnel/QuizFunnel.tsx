@@ -16,6 +16,7 @@ import milenaLoaderImage from "../../assets/images/quiz/milena-loader.jpeg";
 import milenaDonationAudio from "../../assets/media/audio/milena-doacao-templo.mp3";
 import milenaFreeLetterAudio from "../../assets/media/audio/milena-carta-gratuita.mp3";
 import correiosLogo from "../../assets/images/quiz/correios-logo.png";
+import { GradientBackground } from "@/components/ui/iris-bloom";
 
 const LetterZoomModal = lazy(() => import("./LetterZoomModal").then(({ LetterZoomModal: Component }) => ({ default: Component })));
 const PixCheckout = lazy(() => import("./PixCheckout").then(({ PixCheckout: Component }) => ({ default: Component })));
@@ -62,7 +63,7 @@ function Cta({
     "bg-gradient-to-r from-[#67508f] via-[#5d4786] to-[#49356f] text-white shadow-[#5d4786]/25 border border-[#8067a9]/35 hover:brightness-105";
   if (tone === "green") {
     toneClasses =
-      "bg-gradient-to-r from-[#4b8b7e] via-[#39776c] to-[#2d665e] text-white shadow-[#39776c]/25 border border-[#72aa9d]/35 hover:brightness-105";
+      "bg-gradient-to-r from-[#2563eb] via-[#1d4ed8] to-[#173ea5] text-white shadow-[#1d4ed8]/30 border border-[#60a5fa]/35 hover:brightness-105";
   } else if (tone === "royal") {
     toneClasses =
       "bg-gradient-to-r from-[#272039] via-[#211a35] to-[#171225] text-white shadow-[#211a35]/30 border border-[#46395e] hover:brightness-110";
@@ -733,7 +734,8 @@ function PixInstantBox({
   const [freeLetterAudioOpen, setFreeLetterAudioOpen] = useState(false);
   const [physicalLetterRequested, setPhysicalLetterRequested] = useState(() => {
     if (typeof window === "undefined") return false;
-    return sessionStorage.getItem("templodeluz:physical-letter-selected") === "true";
+    const storedPreference = sessionStorage.getItem("templodeluz:physical-letter-selected");
+    return storedPreference === null || storedPreference === "true";
   });
 
   const activeAmount = isCustom ? parseBrazilianCurrency(customInput) : selectedAmount;
@@ -924,10 +926,10 @@ function PixInstantBox({
         <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2 text-[14px] font-extrabold text-[#272039]">
               <span>Quero receber a carta física</span>
-            <span className="rounded-full bg-[#fffefd] px-2 py-0.5 text-[10px] font-black text-[#5d4786] ring-1 ring-[#d8cae5]">{physicalLetterFee === 0 ? "INCLUÍDA NO VALOR" : "+ R$ 15"}</span>
+            <span className="rounded-full bg-[#fffefd] px-2 py-0.5 text-[10px] font-black text-[#5d4786] ring-1 ring-[#d8cae5]">{physicalLetterRequested ? (physicalLetterFee === 0 ? "INCLUÍDA NO VALOR" : "+ R$ 15 ENTREGA") : "+ R$ 15 ENTREGA"}</span>
           </div>
           <p className="mt-1 text-[11.5px] leading-relaxed text-slate-500">
-            {physicalLetterFee === 0 ? "A taxa já está incluída neste valor. Na próxima página, você informa apenas o endereço." : "R$15 serão incluídos automaticamente no total do PIX/cartão. Na próxima página, você informa apenas o endereço de entrega."}
+            {physicalLetterRequested ? (physicalLetterFee === 0 ? "A taxa já está incluída neste valor. Na próxima página, você informa apenas o endereço." : "R$15 serão incluídos automaticamente no total do PIX/cartão. Na próxima página, você informa apenas o endereço de entrega.") : "Marque esta opção para incluir R$15 de envio e receber a carta física pelos Correios."}
           </p>
           {physicalLetterRequested && (
             <div className="mt-4 border-t border-[#d8cae5] pt-4">
@@ -1273,8 +1275,8 @@ function Intro({
   const [letterModalOpen, setLetterModalOpen] = useState(false);
 
   return (
-    <div className="jungle-intro animate-rise-in min-h-screen bg-[#0c1512]">
-       <header className="overflow-hidden bg-[#0c1512]">
+    <div className="jungle-intro animate-rise-in min-h-screen bg-[#07142f]">
+       <header className="overflow-hidden bg-[#07142f]">
         <div className="w-full p-3 sm:p-4">
           <img
             src={milenaCartaImage}
@@ -1286,16 +1288,16 @@ function Intro({
         </div>
 
         <div className="px-4 pb-6 pt-5">
-          <div className="mx-auto max-w-[680px] rounded-[26px] border border-[#c49a52]/35 bg-[#14201c] p-5 shadow-[0_24px_56px_-28px_rgba(0,0,0,0.9)] text-center sm:p-7">
+          <div className="mx-auto max-w-[680px] rounded-[26px] border border-[#8bb8ff]/35 bg-[#10275a] p-5 shadow-[0_24px_56px_-28px_rgba(0,0,0,0.9)] text-center sm:p-7">
             <Stars className="mb-3" />
-            <span className="mb-3 inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-[#e8f0ec]">Templo de Luz · Acolhimento privado</span>
+            <span className="mb-3 inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-[#e6efff]">Templo de Luz · Acolhimento privado</span>
             <h1 className="font-display text-[25px] sm:text-[32px] leading-[1.12] font-medium text-white tracking-[-0.03em]">
               Organize uma intenção de carta para quem você ama,{" "}
-              <span className="text-[#a8d3c0] underline decoration-[#c49a52] decoration-2 underline-offset-4">
+              <span className="text-[#9cc4ff] underline decoration-[#f5d285] decoration-2 underline-offset-4">
                 com acolhimento da médium Milena
               </span>
             </h1>
-            <p className="mt-3 text-[14px] leading-relaxed text-[#d7e3dc] font-normal">
+            <p className="mt-3 text-[14px] leading-relaxed text-[#d9e6ff] font-normal">
               Um espaço de acolhimento para registrar sua história, sua saudade e o que deseja expressar.
             </p>
           </div>
@@ -1303,7 +1305,7 @@ function Intro({
       </header>
 
       {/* Faixa de Prova Social */}
-      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 border-y border-white/10 bg-[#101d18] px-4 py-3 text-[11.5px] text-[#e7f0eb] sm:text-[12.5px]">
+      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 border-y border-white/10 bg-[#0b1d44] px-4 py-3 text-[11.5px] text-[#e7efff] sm:text-[12.5px]">
         <span className="font-bold">💌 Atendimento acolhedor</span>
         <span className="h-3 w-px bg-white/20" />
         <span className="font-bold">✍️ Carta e pergaminho</span>
@@ -2095,7 +2097,8 @@ export function QuizFunnel() {
   const primeiroNome = nome?.trim() ? nome.trim().split(" ")[0] : "você";
 
   return (
-    <div className="jungle-quiz quiz-modern relative isolate mx-auto flex min-h-screen w-full max-w-[520px] flex-col overflow-hidden bg-[#171225] text-[#272039] shadow-[0_0_70px_-30px_rgba(33,26,53,0.4)] border-x border-[#3d3152]">
+    <div className="jungle-quiz quiz-modern relative isolate mx-auto flex min-h-screen w-full max-w-[520px] flex-col overflow-hidden bg-transparent text-[#272039] shadow-[0_0_70px_-30px_rgba(33,26,53,0.4)] border-x border-white/15">
+      <div className="absolute inset-0 z-0"><GradientBackground className="h-full w-full" /></div>
       <main className="relative z-10 flex flex-1 flex-col">
         {/* ETAPA 1: NOME */}
         {step === "intro" && (
