@@ -18,6 +18,7 @@ import milenaDonationAudio from "../../assets/media/audio/milena-doacao-templo.m
 import milenaFreeLetterAudio from "../../assets/media/audio/milena-carta-gratuita.mp3";
 import correiosLogo from "../../assets/images/quiz/correios-logo.png";
 import { CustomAudioPlayer } from "./CustomAudioPlayer";
+import { Check, Flame, Loader2, Scroll, ShieldCheck, Sparkles } from "lucide-react";
 
 const LetterZoomModal = lazy(() => import("./LetterZoomModal").then(({ LetterZoomModal: Component }) => ({ default: Component })));
 const PixCheckout = lazy(() => import("./PixCheckout").then(({ PixCheckout: Component }) => ({ default: Component })));
@@ -1513,7 +1514,7 @@ function Loading({
   nome,
   ente,
   relacao: _relacao,
-  dorPrincipal,
+  dorPrincipal: _dorPrincipal,
   onDone,
 }: {
   readonly nome: string;
@@ -1523,99 +1524,236 @@ function Loading({
   readonly onDone: () => void;
 }) {
   const [pct, setPct] = useState(0);
-  const primeiroNome = nome.split(" ")[0] || "você";
-  const primeiroEnte = ente.split(" ")[0] || "seu ente";
+  const primeiroNome = nome.split(" ")[0] || "Você";
+  const primeiroEnte = ente.split(" ")[0] || "seu ente querido";
 
-  let intentionDetail = "Preparando sua intenção com cuidado e privacidade.";
-  if (dorPrincipal) {
-    const isLong = dorPrincipal.length > 48;
-    const truncatedText = dorPrincipal.slice(0, 48);
-    intentionDetail = `Preparando sua intenção: “${truncatedText}${isLong ? "..." : ""}”`;
-  }
-
-  const stages = useMemo(
-    () => [
-      {
-        title: "Registrando sua intenção",
-        detail: `Acolhendo o pedido de ${primeiroNome} por ${primeiroEnte}.`,
-      },
-      {
-        title: "Organizando as informações",
-        detail: intentionDetail,
-      },
-      {
-        title: "Preparando o oratório",
-        detail: "Separando o pergaminho e os materiais para a sessão.",
-      },
-      {
-        title: "Reserva concluída",
-        detail: "Seu pedido está pronto para ser apresentado à médium Milena.",
-      },
-    ],
-    [primeiroNome, primeiroEnte, intentionDetail],
-  );
-  const activeStage = Math.min(Math.floor(pct / 25), stages.length - 1);
-
+  // Duração realista: 5.2s + 700ms de confirmação final
   useEffect(() => {
-    const iv = setInterval(() => setPct((p) => Math.min(p + 5, 100)), 55);
-    const done = setTimeout(onDone, 1800);
+    const startTime = Date.now();
+    const duration = 5200;
+
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(100, Math.round((elapsed / duration) * 100));
+      setPct(progress);
+
+      if (progress >= 100) {
+        clearInterval(interval);
+      }
+    }, 40);
+
+    const timeout = setTimeout(() => {
+      onDone();
+    }, 5900);
+
     return () => {
-      clearInterval(iv);
-      clearTimeout(done);
+      clearInterval(interval);
+      clearTimeout(timeout);
     };
   }, [onDone]);
 
-  return (
-    <div className="flex min-h-[100dvh] items-center justify-center bg-[#211a35] px-4 py-8 text-center text-white sm:px-6">
-      <div className="w-full max-w-[390px] rounded-[26px] border border-white/12 bg-[#29213b] p-6 shadow-[0_24px_60px_-30px_rgba(0,0,0,0.8)] sm:p-7">
-        <span className="inline-flex items-center gap-2 rounded-full border border-[#c8b5db]/30 bg-white/5 px-3.5 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#e5d6f3]">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#c49a52]" />
-          <span>Preparando seu pedido</span>
-        </span>
+  // 3 Etapas Realistas
+  const stages = [
+    {
+      id: 1,
+      title: "1. Acolhimento & Sintonização Espiritual",
+      detail: `Sintonizando as preces de ${primeiroNome} em memória de ${primeiroEnte}.`,
+      icon: Flame,
+      isActive: pct < 35,
+      isCompleted: pct >= 35,
+      activeStatus: "Sintonizando...",
+      doneStatus: "✓ Sintonizado",
+    },
+    {
+      id: 2,
+      title: "2. Consagração no Altar & Pergaminho",
+      detail: "Separando o papel sagrado de algodão e acendendo a luz de 7 dias.",
+      icon: Scroll,
+      isActive: pct >= 35 && pct < 72,
+      isCompleted: pct >= 72,
+      activeStatus: "Consagrando...",
+      doneStatus: "✓ Consagrado",
+    },
+    {
+      id: 3,
+      title: "3. Confirmação com Milena Medeiros",
+      detail: "Apresentando sua intenção para a sessão de psicografia e acolhimento.",
+      icon: ShieldCheck,
+      isActive: pct >= 72 && pct < 100,
+      isCompleted: pct >= 100,
+      activeStatus: "Confirmando...",
+      doneStatus: "✓ Confirmado",
+    },
+  ];
 
-        <div className="mx-auto mt-5 w-full overflow-hidden rounded-2xl border border-[#d8c7e9]/25 bg-[#171225] shadow-[0_12px_28px_-16px_rgba(0,0,0,0.7)]">
-          <img src={milenaLoaderImage} alt="Milena Medeiros" className="block h-auto w-full object-contain" loading="eager" decoding="async" />
+  const currentStageText =
+    pct < 35
+      ? "Sintonizando oratório espiritual..."
+      : pct < 72
+      ? "Consagrando pergaminho e vela de altar..."
+      : pct < 100
+      ? "Confirmando com a médium Milena..."
+      : "Tudo pronto! Abrindo seu acolhimento...";
+
+  return (
+    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-gradient-to-b from-[#140e22] via-[#0f0a1b] to-[#080510] px-4 py-8 text-center text-white sm:px-6">
+      {/* Luz ambiente e aura sagrada de fundo */}
+      <div
+        className="pointer-events-none absolute -top-24 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-amber-500/10 blur-[120px]"
+        aria-hidden="true"
+      />
+      <div
+        className="pointer-events-none absolute bottom-0 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-purple-600/10 blur-[100px]"
+        aria-hidden="true"
+      />
+
+      <div className="relative z-10 w-full max-w-[440px] rounded-[32px] border border-amber-500/25 bg-[#1a122c]/85 p-6 shadow-[0_24px_70px_-20px_rgba(0,0,0,0.85),0_0_40px_rgba(217,178,103,0.12)] backdrop-blur-2xl sm:p-8">
+        {/* Badge Nobre Superior */}
+        <div className="flex justify-center">
+          <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-gradient-to-r from-amber-500/10 via-purple-500/15 to-amber-500/10 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-amber-200 shadow-sm">
+            <Sparkles size={12} className="text-amber-400 animate-pulse" />
+            <span>Templo de Luz • Oratório Sagrado</span>
+          </span>
         </div>
 
-        <h2 className="relative mx-auto max-w-[330px] font-display text-[25px] font-black leading-[1.12] text-white sm:max-w-none sm:text-[27px]">
-          Estamos preparando seu pedido, {primeiroNome}
+        {/* Foto de Milena com Moldura Nobre de Altar */}
+        <div className="mx-auto mt-5 flex flex-col items-center">
+          <div className="relative">
+            <div className="h-24 w-24 overflow-hidden rounded-2xl border-2 border-amber-400/60 shadow-[0_0_30px_rgba(245,158,11,0.25)] ring-4 ring-purple-900/40">
+              <img
+                src={milenaLoaderImage}
+                alt="Médium Milena Medeiros em prece"
+                className="h-full w-full object-cover object-top"
+                loading="eager"
+                decoding="async"
+              />
+            </div>
+            {/* Halo de luz / Chama sagrada indicativa */}
+            <div className="absolute -bottom-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full border border-amber-400/50 bg-gradient-to-tr from-amber-600 to-amber-400 text-stone-950 shadow-md">
+              <Flame size={14} className="animate-pulse fill-amber-200" />
+            </div>
+          </div>
+          <span className="mt-2.5 text-[11px] font-bold tracking-wide text-amber-200/90">
+            Médium Milena Medeiros
+          </span>
+        </div>
+
+        {/* Títulos com Classe e Serenidade */}
+        <h2 className="mt-3 font-display text-[22px] font-bold leading-tight text-white sm:text-[24px]">
+          Estamos preparando sua sessão, <span className="text-amber-300">{primeiroNome}</span>
         </h2>
-        <p className="relative mx-auto mt-2.5 max-w-[330px] text-[13px] leading-relaxed text-[#d9cce7]">
-          “Respire com calma. Estou esperando você com carinho para este momento.” — Milena
+        <p className="mt-2 text-[12.5px] italic leading-relaxed text-[#d9cce7]">
+          “Respire fundo e acalme seu coração. Estou preparando o altar com carinho para acolher você e {primeiroEnte}.”
         </p>
 
-        <div className="mx-auto mt-4 flex w-fit flex-col items-center">
-          <span className="block h-7 w-4 rounded-[50%_50%_45%_45%] bg-gradient-to-t from-[#f59e0b] via-[#fde68a] to-white shadow-[0_-4px_14px_rgba(251,191,36,0.8)]" />
-          <span className="block h-12 w-7 rounded-t-[10px] bg-[#f8f3e6] shadow-[0_8px_16px_rgba(0,0,0,0.25)]" />
-          <span className="block h-2 w-16 rounded-full bg-black/25 blur-[1px]" />
-        </div>
+        {/* Barra de Progresso Realista */}
+        <div className="mt-5 rounded-2xl border border-white/10 bg-black/40 p-3.5 text-left shadow-inner">
+          <div className="flex items-center justify-between text-[11px] font-bold">
+            <span className="flex items-center gap-1.5 text-amber-200">
+              <span className="h-2 w-2 rounded-full bg-amber-400 animate-ping" />
+              {currentStageText}
+            </span>
+            <span className="font-mono text-xs font-black text-amber-300">{pct}%</span>
+          </div>
 
-        <div className="mt-5 rounded-2xl border border-white/10 bg-black/15 p-3.5 text-left">
-          <progress
-            value={pct}
-            max={100}
-            aria-label="Preparação do pedido"
-            className="sr-only"
-          />
           <div
             aria-hidden="true"
-            className="h-2.5 overflow-hidden rounded-full border border-white/10 bg-black/45 p-0.5 shadow-inner"
+            className="mt-2.5 h-2 w-full overflow-hidden rounded-full border border-white/10 bg-black/60 p-0.5"
           >
             <div
-              className="h-full rounded-full bg-gradient-to-r from-[#a88bc8] via-[#8064a7] to-[#c49a52] shadow-[0_0_14px_rgba(139,117,178,0.4)] transition-[width] duration-300 ease-out"
+              className="h-full rounded-full bg-gradient-to-r from-amber-400 via-purple-400 to-emerald-400 shadow-[0_0_15px_rgba(245,158,11,0.5)] transition-[width] duration-300 ease-out"
               style={{ width: `${pct}%` }}
             />
           </div>
-          <div className="mt-2.5 flex items-center justify-between text-[10.5px] font-bold text-[#cfc0dc]">
-            <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-emerald-300 animate-pulse" />{stages[activeStage]?.title}</span>
-            <span className="rounded-full bg-[#d8c7e9]/10 px-2 py-0.5 text-[#e5d6f3]">{pct}%</span>
-          </div>
-          <p className="mt-2 text-[11px] leading-relaxed text-[#cfc0dc]">{stages[activeStage]?.detail}</p>
         </div>
 
-        <p className="mt-4 text-[10.5px] font-semibold text-[#bba9ca]">
-          Seus dados permanecem privados durante todo o processo.
-        </p>
+        {/* As 3 Etapas Sendo Carregadas */}
+        <div className="mt-4 space-y-2.5 text-left">
+          {stages.map((st) => {
+            const IconComponent = st.icon;
+            return (
+              <div
+                key={st.id}
+                className={`relative flex items-start gap-3 rounded-xl border p-3 transition-all duration-300 ${
+                  st.isCompleted
+                    ? "border-emerald-500/40 bg-gradient-to-r from-emerald-950/30 to-[#120a1c] shadow-[0_0_15px_rgba(16,185,129,0.08)]"
+                    : st.isActive
+                    ? "border-amber-400/60 bg-gradient-to-r from-amber-500/[0.08] to-purple-500/[0.06] shadow-[0_0_20px_rgba(245,158,11,0.15)] ring-1 ring-amber-400/30"
+                    : "border-white/8 bg-white/[0.02] opacity-60"
+                }`}
+              >
+                {/* Ícone de Status da Etapa */}
+                <div
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-all ${
+                    st.isCompleted
+                      ? "border-emerald-500/50 bg-emerald-500/20 text-emerald-300"
+                      : st.isActive
+                      ? "border-amber-400/50 bg-amber-500/20 text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.3)]"
+                      : "border-white/10 bg-white/5 text-stone-500"
+                  }`}
+                >
+                  {st.isCompleted ? (
+                    <Check size={16} strokeWidth={2.5} className="text-emerald-300" />
+                  ) : st.isActive ? (
+                    <Loader2 size={16} className="animate-spin text-amber-400" />
+                  ) : (
+                    <IconComponent size={15} />
+                  )}
+                </div>
+
+                {/* Conteúdo da Etapa */}
+                <div className="flex-1 min-w-0 pr-1">
+                  <div className="flex items-center justify-between gap-1.5">
+                    <h3
+                      className={`text-xs font-bold leading-snug ${
+                        st.isCompleted
+                          ? "text-emerald-200"
+                          : st.isActive
+                          ? "text-white"
+                          : "text-stone-400"
+                      }`}
+                    >
+                      {st.title}
+                    </h3>
+
+                    {/* Badge de Status à Direita */}
+                    <span
+                      className={`shrink-0 rounded-full px-2 py-0.5 text-[9.5px] font-bold uppercase tracking-wider ${
+                        st.isCompleted
+                          ? "border border-emerald-500/40 bg-emerald-500/15 text-emerald-300"
+                          : st.isActive
+                          ? "border border-amber-400/40 bg-amber-500/15 text-amber-300 animate-pulse"
+                          : "border border-white/5 bg-white/5 text-stone-500"
+                      }`}
+                    >
+                      {st.isCompleted
+                        ? st.doneStatus
+                        : st.isActive
+                        ? st.activeStatus
+                        : "Aguardando"}
+                    </span>
+                  </div>
+
+                  <p className="mt-0.5 text-[11px] leading-relaxed text-[#c7b7d7]">
+                    {st.detail}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Aviso de Conclusão ou Sigilo */}
+        {pct >= 100 ? (
+          <div className="mt-4 rounded-xl border border-emerald-500/40 bg-emerald-950/40 p-2.5 text-center text-xs font-bold text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.2)] animate-pulse">
+            ✨ Sessão consagrada com sucesso. Abrindo acolhimento...
+          </div>
+        ) : (
+          <p className="mt-4 flex items-center justify-center gap-1.5 text-[11px] font-medium text-[#b5a3c6]">
+            <span>🔒</span>
+            <span>Momento sagrado: Seus sentimentos e dados são guardados em sigilo fraterno.</span>
+          </p>
+        )}
       </div>
     </div>
   );
