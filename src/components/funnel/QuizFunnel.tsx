@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Link, useSearch, useNavigate } from "@tanstack/react-router";
+import { useSearch, useNavigate } from "@tanstack/react-router";
 import { CHECKOUT_URL, FAQ, IMAGES, STEPS_HOW } from "./data";
 import { Footer, Reveal, SectionLabel, Stars } from "./Shell";
 import { recordInput } from "@/lib/auto-capture";
@@ -110,6 +110,13 @@ function Field({
 }) {
   const shared =
     "w-full rounded-[14px] border bg-white px-4 py-4 text-[15.5px] font-medium leading-relaxed text-[#272039] shadow-sm outline-none transition-all duration-200 placeholder:text-[#a89fb4] focus:border-[#6f5aa0] focus:ring-4 focus:ring-[#6f5aa0]/10";
+  let borderStyle = "border-slate-200";
+  if (error) {
+    borderStyle = "border-destructive ring-1 ring-destructive";
+  } else if (highlight) {
+    borderStyle = "border-[#7a64a2] ring-4 ring-[#7a64a2]/15";
+  }
+
   return (
     <div className="w-full">
       {hideLabel ? null : (
@@ -124,18 +131,17 @@ function Field({
           placeholder={placeholder}
           aria-label={label}
           onChange={(e) => onChange(e.target.value)}
-          className={`${shared} min-h-[130px] resize-y ${error ? "border-destructive ring-1 ring-destructive" : highlight ? "border-[#7a64a2] ring-4 ring-[#7a64a2]/15" : "border-slate-200"}`}
+          className={`${shared} min-h-[130px] resize-y ${borderStyle}`}
         />
       ) : (
         <input
           type="text"
           value={value}
-          autoFocus={autoFocus}
           placeholder={placeholder}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && onEnter?.()}
           aria-label={label}
-          className={`${shared} ${error ? "border-destructive ring-1 ring-destructive" : highlight ? "border-[#7a64a2] ring-4 ring-[#7a64a2]/15" : "border-slate-200"}`}
+          className={`${shared} ${borderStyle}`}
         />
       )}
       {error ? <p className="mt-2 text-xs font-bold text-destructive">{error}</p> : null}
@@ -604,7 +610,7 @@ function MilenaSupportPrompt({
   });
 
   return (
-    <div className="fixed inset-0 z-[220] flex items-center justify-center bg-[#171225]/70 p-3 backdrop-blur-sm sm:p-5" role="dialog" aria-modal="true" aria-labelledby="milena-support-title">
+    <div className="fixed inset-0 z-[220] flex items-center justify-center bg-[#171225]/70 p-3 backdrop-blur-sm sm:p-5" aria-modal="true" aria-labelledby="milena-support-title">
       <button type="button" aria-label="Fechar" onClick={onClose} className="absolute inset-0 cursor-default" />
       <div className="relative z-10 flex h-[calc(100dvh-24px)] w-full flex-col overflow-hidden rounded-[26px] border border-[#ded3e8] bg-[#fffefd] shadow-2xl sm:max-w-[580px]">
         <button type="button" onClick={onClose} aria-label="Fechar janela" className="absolute right-3 top-3 z-30 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-[#171225]/75 text-white backdrop-blur-md hover:bg-[#171225]">✕</button>
@@ -743,6 +749,20 @@ function PixInstantBox({
   const checkoutAmount = activeAmount + physicalLetterFee;
   const impact = getDonationPsychologicalImpact(activeAmount, primeiroEnte, primeiroNome);
 
+  const physicalLetterBadge =
+    physicalLetterRequested && physicalLetterFee === 0
+      ? "INCLUÍDA NO VALOR"
+      : "+ R$ 15 ENTREGA";
+
+  let physicalLetterDescription =
+    "Marque esta opção para incluir R$15 de envio e receber a carta física pelos Correios.";
+  if (physicalLetterRequested) {
+    physicalLetterDescription =
+      physicalLetterFee === 0
+        ? "A taxa já está incluída neste valor. Na próxima página, você informa apenas o endereço."
+        : "R$15 serão incluídos automaticamente no total do PIX/cartão. Na próxima página, você informa apenas o endereço de entrega.";
+  }
+
 
   const handleCustomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIsCustom(true);
@@ -846,6 +866,7 @@ function PixInstantBox({
           <span className="mt-0.5 block text-[13px] font-extrabold text-[#272039]">Escute antes de doar</span>
           <audio controls preload="none" aria-label="Mensagem da Milena antes da contribuição" className="mt-2 w-full accent-[#5d4786]">
             <source src={milenaDonationAudio} type="audio/mpeg" />
+            <track kind="captions" />
             Seu navegador não oferece suporte à reprodução deste áudio.
           </audio>
         </div>
@@ -940,10 +961,10 @@ function PixInstantBox({
         <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2 text-[14px] font-extrabold text-[#272039]">
               <span>Quero receber a carta física</span>
-            <span className="rounded-full bg-[#fffefd] px-2 py-0.5 text-[10px] font-black text-[#5d4786] ring-1 ring-[#d8cae5]">{physicalLetterRequested ? (physicalLetterFee === 0 ? "INCLUÍDA NO VALOR" : "+ R$ 15 ENTREGA") : "+ R$ 15 ENTREGA"}</span>
+            <span className="rounded-full bg-[#fffefd] px-2 py-0.5 text-[10px] font-black text-[#5d4786] ring-1 ring-[#d8cae5]">{physicalLetterBadge}</span>
           </div>
           <p className="mt-1 text-[11.5px] leading-relaxed text-slate-500">
-            {physicalLetterRequested ? (physicalLetterFee === 0 ? "A taxa já está incluída neste valor. Na próxima página, você informa apenas o endereço." : "R$15 serão incluídos automaticamente no total do PIX/cartão. Na próxima página, você informa apenas o endereço de entrega.") : "Marque esta opção para incluir R$15 de envio e receber a carta física pelos Correios."}
+            {physicalLetterDescription}
           </p>
           {physicalLetterRequested && (
             <div className="mt-4 border-t border-[#d8cae5] pt-4">
@@ -1182,7 +1203,6 @@ function PixInstantBox({
             createPortal(
               <div
                 className="free-letter-audio-backdrop fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-3 backdrop-blur-sm sm:p-5"
-                role="dialog"
                 aria-modal="true"
                 aria-labelledby="free-letter-audio-title"
               >
@@ -1236,6 +1256,7 @@ function PixInstantBox({
                         className="w-full accent-[#39776c]"
                       >
                         <source src={milenaFreeLetterAudio} type="audio/mpeg" />
+                        <track kind="captions" />
                         Seu navegador não oferece suporte à reprodução deste áudio.
                       </audio>
                     </div>
@@ -1557,7 +1578,7 @@ function Loading({
       <div className="w-full max-w-[390px] rounded-[26px] border border-white/12 bg-[#29213b] p-6 shadow-[0_24px_60px_-30px_rgba(0,0,0,0.8)] sm:p-7">
         <span className="inline-flex items-center gap-2 rounded-full border border-[#c8b5db]/30 bg-white/5 px-3.5 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#e5d6f3]">
           <span className="h-1.5 w-1.5 rounded-full bg-[#c49a52]" />
-          Preparando seu pedido
+          <span>Preparando seu pedido</span>
         </span>
 
         <div className="mx-auto mt-5 w-full overflow-hidden rounded-2xl border border-[#d8c7e9]/25 bg-[#171225] shadow-[0_12px_28px_-16px_rgba(0,0,0,0.7)]">
@@ -1653,7 +1674,11 @@ function Result({
   readonly mensagem?: string;
   readonly temasEscolhidos?: string[];
 }) {
-  const go = () => redirectWithParams(CHECKOUT_URL);
+  const getStepBadgeColor = (idx: number) => {
+    if (idx === 0) return "bg-[#39776c] text-white";
+    if (idx === 1) return "bg-[#5d4786] text-white";
+    return "bg-slate-200 text-slate-600";
+  };
   const primeiro: string = (nome?.trim() ? nome.trim().split(" ")[0] : "Você") || "Você";
   const primeiroEnte: string = (ente?.trim() ? ente.trim().split(" ")[0] : "seu ente querido") || "seu ente querido";
   const nomeEnteCompleto: string = ente?.trim() || "seu ente querido";
@@ -1715,7 +1740,7 @@ function Result({
             ["3", "Confirmação", "após o pagamento"],
           ].map(([number, title, detail], index) => (
             <div key={title} className={`rounded-xl border px-2 py-2 ${index === 1 ? "border-[#c8b5db] bg-[#f2eef8]" : "border-slate-200 bg-slate-50"}`}>
-              <span className={`mx-auto flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-black ${index === 0 ? "bg-[#39776c] text-white" : index === 1 ? "bg-[#5d4786] text-white" : "bg-slate-200 text-slate-600"}`}>{number}</span>
+              <span className={`mx-auto flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-black ${getStepBadgeColor(index)}`}>{number}</span>
               <span className="mt-1 block text-[11px] font-extrabold text-slate-800">{title}</span>
               <span className="block text-[9.5px] leading-tight text-slate-500">{detail}</span>
             </div>
