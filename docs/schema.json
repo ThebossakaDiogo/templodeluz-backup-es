@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "TemploDeLuzFunnelAndODMetrics",
+  "version": "2.0.0",
+  "description": "Schema canônico e funcional do ecossistema Templo de Luz (Quiz Funnel, Telemetria, Checkout PIX e Dashboard OD Metrics).",
+  "meta": {
+    "project": "Templo de Luz - Médium Milena Medeiros",
+    "dashboard": "OD Metrics",
+    "stack": {
+      "quiz": "React 19 + TanStack Router/Start + Vite + TailwindCSS",
+      "dashboard": "React 19 + Vite + TailwindCSS + Supabase Auth",
+      "backend": "Supabase PostgreSQL + Edge Functions (ConnectPay PIX + Stripe)",
+      "hosting": "Vercel"
+    }
+  },
+  "routes": {
+    "quiz_public": [
+      { "path": "/", "name": "quiz-funnel", "description": "Funil principal de acolhimento e psicografia" },
+      { "path": "/como-funciona", "name": "como-funciona", "description": "Explicação institucional e doutrinária sobre a carta" },
+      { "path": "/escrever-carta", "name": "escrever-carta", "description": "Formulário de prece e carta aos entes queridos" },
+      { "path": "/chamada-ao-vivo-milena", "name": "chamada-ao-vivo", "description": "Agendamento de chamada de vídeo individual com a médium" },
+      { "path": "/ajuda-milena", "name": "ajuda-milena", "description": "Apoio voluntário à cirurgia de catarata da médium" },
+      { "path": "/apoio-milena", "name": "apoio-milena", "description": "Página de contribuição solidária complementar" },
+      { "path": "/obrigado", "name": "obrigado", "description": "Confirmação e instruções pós-doação" },
+      { "path": "/privacidade", "name": "privacidade", "description": "Política de privacidade e proteção de dados" },
+      { "path": "/termos", "name": "termos", "description": "Termos de uso e responsabilidade" }
+    ],
+    "dashboard_od_metrics": [
+      { "path": "/visao-geral", "section": "visao-geral", "label": "Visão Geral", "description": "Métricas do dia, gráficos de receita e pedidos recentes" },
+      { "path": "/rastreamento", "section": "rastreamento", "label": "Funil & Telemetria", "description": "Distribuição por etapa do quiz e Live Tracking Hub" },
+      { "path": "/abandonos", "section": "abandonos", "label": "Abandono & Recuperação", "description": "Leads com checkout ou PIX pendente a recuperar" },
+      { "path": "/pedidos", "section": "pedidos", "label": "Pedidos & Vendas", "description": "Auditoria de transações PIX e Cartão" },
+      { "path": "/relatorios", "section": "relatorios", "label": "Relatórios & UTMs", "description": "Origem de tráfego, campanhas e exportação CSV" },
+      { "path": "/whatsapp", "section": "whatsapp", "label": "WhatsApp Chat", "description": "Atendimento ao vivo via Evolution API" },
+      { "path": "/perfil", "section": "perfil", "label": "Meu Perfil", "description": "Configurações do operador e logout" },
+      { "path": "/login", "section": "login", "label": "Autenticação", "description": "Acesso seguro via Supabase Auth (e-mails autorizados)" }
+    ]
+  },
+  "funnel_architecture": {
+    "steps": [
+      {
+        "index": 1,
+        "id": "intro",
+        "title": "Introdução e Acolhimento",
+        "description": "Apresentação da médium Milena Medeiros e sintonização inicial",
+        "captured_fields": []
+      },
+      {
+        "index": 2,
+        "id": "ente",
+        "title": "Nome do Ente Querido",
+        "description": "Identificação de quem partiu para o plano espiritual",
+        "captured_fields": ["ente_querido"]
+      },
+      {
+        "index": 3,
+        "id": "relacao",
+        "title": "Vínculo Familiar",
+        "description": "Grau de parentesco (mãe, pai, filho, cônjuge, etc.)",
+        "captured_fields": ["grau_parentesco"]
+      },
+      {
+        "index": 4,
+        "id": "tempo",
+        "title": "Tempo de Partida",
+        "description": "Há quanto tempo ocorreu a passagem para a espiritualidade",
+        "captured_fields": ["tempo_partida"]
+      },
+      {
+        "index": 5,
+        "id": "mensagem",
+        "title": "Intenção e Dor Principal",
+        "description": "Sentimentos, dor no peito, necessidade de conforto e paz",
+        "captured_fields": ["mensagem_preview", "temas_selecionados"]
+      },
+      {
+        "index": 6,
+        "id": "confirma",
+        "title": "Identificação do Consulente",
+        "description": "Captura de nome completo, WhatsApp com DDD e e-mail",
+        "captured_fields": ["lead_name", "lead_phone", "lead_email"]
+      },
+      {
+        "index": 7,
+        "id": "loading",
+        "title": "Sintonização em 3 Etapas",
+        "description": "Loader cerimonial realista: Sintonização, Consagração do Pergaminho e Confirmação com Milena",
+        "duration_seconds": 5.2,
+        "captured_fields": []
+      },
+      {
+        "index": 8,
+        "id": "result",
+        "title": "Resultado e Checkout de Doação",
+        "description": "Apresentação da carta sagrada, áudio de Milena, insumos do oratório e botão de doação PIX",
+        "captured_fields": ["checkout_initiated", "checkout_opened", "pix_generated", "last_amount_cents"]
+      }
+    ]
+  },
+  "database_schema": {
+    "tables": {
+      "quiz_funnel_leads": {
+        "description": "Registros de leads capturados no funil com telemetria contínua",
+        "primary_key": "id",
+        "columns": {
+          "id": { "type": "uuid", "description": "Identificador único do lead" },
+          "session_id": { "type": "text", "description": "Identificador da sessão do navegador do consulente" },
+          "lead_name": { "type": "text", "nullable": true, "description": "Nome informado pelo consulente" },
+          "lead_email": { "type": "text", "nullable": true, "description": "E-mail informado" },
+          "lead_phone": { "type": "text", "nullable": true, "description": "Telefone/WhatsApp com DDD sanitizado" },
+          "ente_querido": { "type": "text", "nullable": true, "description": "Nome do ente homenageado" },
+          "grau_parentesco": { "type": "text", "nullable": true, "description": "Vínculo familiar" },
+          "mensagem_preview": { "type": "text", "nullable": true, "description": "Texto ou dor expressa pelo consulente" },
+          "temas_selecionados": { "type": "text[]", "nullable": true, "description": "Afinidades e temas do oratório" },
+          "current_step_index": { "type": "integer", "description": "Índice da etapa em que o consulente está (1 a 8)" },
+          "current_step_name": { "type": "text", "description": "Slug da etapa atual (ex: 'result', 'confirma')" },
+          "highest_step_index": { "type": "integer", "description": "Maior etapa alcançada no funil" },
+          "completed": { "type": "boolean", "description": "Verdadeiro se concluiu o quiz ou pagamento" },
+          "time_spent_seconds": { "type": "integer", "description": "Tempo total gasto pelo consulente no fluxo" },
+          "checkout_initiated": { "type": "boolean", "description": "Sinaliza se clicou para doar/abrir checkout" },
+          "checkout_opened": { "type": "boolean", "description": "Sinaliza se o modal de checkout foi aberto" },
+          "pix_generated": { "type": "boolean", "description": "Sinaliza se gerou código PIX ou QR Code" },
+          "payment_status": { "type": "text", "enum": ["none", "waiting_payment", "paid", "failed"], "description": "Status de pagamento do lead" },
+          "last_amount_cents": { "type": "integer", "description": "Último valor gerado ou doado em centavos de BRL" },
+          "utm_source": { "type": "text", "nullable": true, "description": "Origem de tráfego (ex: fb, ig, tiktok)" },
+          "utm_medium": { "type": "text", "nullable": true, "description": "Meio de marketing (ex: cpc, bio, story)" },
+          "utm_campaign": { "type": "text", "nullable": true, "description": "Nome da campanha de anúncios" },
+          "utm_content": { "type": "text", "nullable": true, "description": "Identificador do anúncio ou criativo" },
+          "utm_term": { "type": "text", "nullable": true, "description": "Público-alvo ou termo de busca" },
+          "created_at": { "type": "timestamptz", "description": "Data de criação da sessão" },
+          "updated_at": { "type": "timestamptz", "description": "Última interação registrada" }
+        }
+      },
+      "pix_orders": {
+        "description": "Pedidos de doação e transações financeiras geradas via ConnectPay ou Stripe",
+        "primary_key": "id",
+        "columns": {
+          "id": { "type": "uuid", "description": "Identificador único do pedido" },
+          "order_id": { "type": "text", "nullable": true, "description": "ID de referência externo no gateway" },
+          "customer_name": { "type": "text", "description": "Nome do pagador" },
+          "customer_email": { "type": "text", "description": "E-mail do pagador" },
+          "customer_phone": { "type": "text", "nullable": true, "description": "Telefone do pagador" },
+          "product_name": { "type": "text", "description": "Nome do item doado (ex: 'Carta Sagrada', 'Chamada em Vídeo')" },
+          "amount_cents": { "type": "integer", "description": "Valor da contribuição em centavos (ex: 3500 para R$ 35,00)" },
+          "status": { "type": "text", "enum": ["pending", "paid", "failed", "creating", "expired", "in_dispute"], "description": "Status financeiro" },
+          "payment_method": { "type": "text", "enum": ["pix", "credit_card"], "description": "Método de pagamento" },
+          "gateway": { "type": "text", "description": "Gateway processador ('connectpay' ou 'stripe')" },
+          "quiz_origin": { "type": "text", "description": "Origem do funil ('original' para Meta, 'mirrored' para TikTok)" },
+          "created_at": { "type": "timestamptz", "description": "Data de geração da cobrança" },
+          "fulfilled_at": { "type": "timestamptz", "nullable": true, "description": "Data e hora exata da confirmação do pagamento" }
+        }
+      },
+      "whatsapp_conversations": {
+        "description": "Controle de conversas e mensagens de acolhimento via WhatsApp",
+        "primary_key": "id",
+        "columns": {
+          "id": { "type": "uuid", "description": "ID da conversa" },
+          "customer_phone": { "type": "text", "description": "Número do WhatsApp com DDI e DDD" },
+          "customer_name": { "type": "text", "nullable": true, "description": "Nome do contato" },
+          "last_message": { "type": "text", "nullable": true, "description": "Última mensagem trocada" },
+          "unread_count": { "type": "integer", "description": "Contador de mensagens não lidas" },
+          "status": { "type": "text", "description": "Status da conversa (aberta, aguardando, finalizada)" },
+          "created_at": { "type": "timestamptz", "description": "Início da conversa" },
+          "updated_at": { "type": "timestamptz", "description": "Última atividade" }
+        }
+      }
+    }
+  },
+  "products_and_pricing": {
+    "carta_sagrada": {
+      "name": "Carta Sagrada Psicografada",
+      "default_donation_reais": 35.0,
+      "minimum_donation_reais": 15.0,
+      "suggested_values_reais": [25.0, 35.0, 50.0, 75.0, 100.0]
+    },
+    "chamada_ao_vivo": {
+      "name": "Chamada Individual com a Médium Milena",
+      "duration_minutes": 30,
+      "default_value_reais": 97.0
+    }
+  }
+}
