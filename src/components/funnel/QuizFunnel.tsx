@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link, useSearch, useNavigate } from "@tanstack/react-router";
 import { CHECKOUT_URL, FAQ, IMAGES, STEPS_HOW } from "./data";
 import { Footer, Reveal, SectionLabel, Stars } from "./Shell";
@@ -796,6 +797,20 @@ function PixInstantBox({
     setFreeLetterAudioOpen(true);
   };
 
+  useEffect(() => {
+    if (!freeLetterAudioOpen) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setFreeLetterAudioOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [freeLetterAudioOpen]);
+
   const presets = [
     { val: 20, label: "R$ 20", tag: "Vela + papel" },
     { val: 30, label: "R$ 30", tag: "Vela + pergaminho" },
@@ -1162,34 +1177,90 @@ function PixInstantBox({
             </div>
           </div>
 
-          {freeLetterAudioOpen && (
-            <div className="free-letter-audio-backdrop fixed inset-0 z-[230] flex items-center justify-center bg-[#0c1512]/75 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="free-letter-audio-title">
-              <button type="button" aria-label="Fechar" onClick={() => setFreeLetterAudioOpen(false)} className="absolute inset-0 cursor-default" />
-              <div className="free-letter-audio-card relative z-10 w-full max-w-[430px] overflow-hidden rounded-[28px] border border-[#d8cae5] bg-[#fffefd] shadow-[0_28px_80px_-28px_rgba(0,0,0,0.9)]">
-                <div className="relative overflow-hidden bg-[#14201c] px-5 py-7 text-center text-white">
-                  <div className="pointer-events-none absolute -left-12 -top-12 h-28 w-28 rounded-full bg-[#a8d3c0]/20 blur-3xl" />
-                  <div className="pointer-events-none absolute -right-10 bottom-0 h-24 w-24 rounded-full bg-[#c49a52]/20 blur-3xl" />
-                  <span className="relative inline-flex rounded-full border border-[#f5d285]/30 bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#f5d285]">Mensagem da Milena</span>
-                  <h2 id="free-letter-audio-title" className="relative mt-3 font-display text-[22px] font-black leading-tight">OUÇA ANTES DE SAIR PARA RECEBER A CARTA</h2>
-                  <p className="relative mt-2 text-[12px] leading-relaxed text-[#e0eee7]">A carta continua gratuita. Esta mensagem é opcional e pode ser ignorada.</p>
-                </div>
-                <div className="p-5">
-                  <div className="free-letter-audio-player rounded-2xl border border-[#d8e9e3] bg-[#eff8f3] p-3">
-                    <audio controls preload="none" aria-label="Mensagem da Milena sobre receber a carta" className="w-full accent-[#39776c]">
-                      <source src={milenaFreeLetterAudio} type="audio/mpeg" />
-                      Seu navegador não oferece suporte à reprodução deste áudio.
-                    </audio>
+          {freeLetterAudioOpen &&
+            typeof document !== "undefined" &&
+            createPortal(
+              <div
+                className="free-letter-audio-backdrop fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-3 backdrop-blur-sm sm:p-5"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="free-letter-audio-title"
+              >
+                <div
+                  className="fixed inset-0"
+                  onClick={() => setFreeLetterAudioOpen(false)}
+                  aria-hidden="true"
+                />
+                <div className="free-letter-audio-card relative z-10 max-h-[calc(100dvh-24px)] w-full max-w-[420px] overflow-y-auto overscroll-contain rounded-[26px] border border-[#d8cae5] bg-[#fffefd] shadow-2xl text-center pb-2">
+                  {/* Topo Elegante com Botão Fechar */}
+                  <div className="relative overflow-hidden bg-gradient-to-br from-[#182622] to-[#101916] px-5 pt-6 pb-5 text-center text-white">
+                    <button
+                      type="button"
+                      onClick={() => setFreeLetterAudioOpen(false)}
+                      aria-label="Fechar"
+                      className="absolute top-3.5 right-3.5 z-20 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-white/20 text-white text-sm font-bold transition-all hover:bg-white/30 active:scale-95"
+                    >
+                      ✕
+                    </button>
+                    <div className="pointer-events-none absolute -left-12 -top-12 h-28 w-28 rounded-full bg-[#a8d3c0]/20 blur-3xl" />
+                    <div className="pointer-events-none absolute -right-10 bottom-0 h-24 w-24 rounded-full bg-[#c49a52]/20 blur-3xl" />
+
+                    <span className="relative inline-flex items-center gap-1 rounded-full border border-[#f5d285]/35 bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#f5d285]">
+                      <span>🕊️</span> Mensagem da Milena
+                    </span>
+
+                    <h2 id="free-letter-audio-title" className="relative mt-2.5 font-display text-[19px] sm:text-[21px] font-black leading-snug">
+                      OUÇA ANTES DE SEGUIR PARA O PERGAMINHO
+                    </h2>
+                    <p className="relative mt-1 text-[11.5px] leading-relaxed text-[#e0eee7]">
+                      Sua carta continua 100% gratuita. Ouça este breve recado especial da médium antes de você redigir.
+                    </p>
                   </div>
-                  <button type="button" onClick={continueToPergaminho} className="mt-5 w-full rounded-2xl bg-gradient-to-r from-[#4b8b7e] via-[#39776c] to-[#2d665e] px-5 py-4 text-sm font-black text-white shadow-lg shadow-[#39776c]/25 transition-all hover:-translate-y-0.5">
-                    Continuar para o pergaminho
-                  </button>
-                  <button type="button" onClick={continueToPergaminho} className="mt-2 w-full py-2 text-[11.5px] font-bold text-slate-500 underline decoration-slate-300 underline-offset-2">
-                    Ignorar áudio e continuar
-                  </button>
+
+                  {/* Conteúdo do Modal */}
+                  <div className="p-5 sm:p-6 space-y-4">
+                    <div className="free-letter-audio-player rounded-2xl border border-[#d8e9e3] bg-[#eff8f3] p-3 text-left shadow-2xs">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#39776c] text-[10px] font-bold text-white">
+                          ▶
+                        </span>
+                        <span className="text-xs font-black text-[#1c3029]">
+                          Áudio de acolhimento da Médium
+                        </span>
+                      </div>
+                      <audio
+                        controls
+                        autoPlay
+                        preload="auto"
+                        aria-label="Mensagem da Milena sobre receber a carta"
+                        className="w-full accent-[#39776c]"
+                      >
+                        <source src={milenaFreeLetterAudio} type="audio/mpeg" />
+                        Seu navegador não oferece suporte à reprodução deste áudio.
+                      </audio>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={continueToPergaminho}
+                      className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#4b8b7e] via-[#39776c] to-[#2d665e] py-3.5 px-5 text-sm font-black text-white uppercase tracking-wider shadow-lg shadow-[#39776c]/30 hover:shadow-xl hover:shadow-[#39776c]/40 hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer"
+                    >
+                      <span>Continuar para o pergaminho</span>
+                      <span className="text-base">→</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={continueToPergaminho}
+                      className="w-full py-2 text-xs font-bold text-slate-500 hover:text-slate-800 underline decoration-slate-300 underline-offset-3 transition-colors cursor-pointer"
+                    >
+                      Ignorar áudio e ir direto ao pergaminho
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </div>
-          )}
+              </div>,
+              document.body
+            )}
         </div>
       </div>
     </div>
