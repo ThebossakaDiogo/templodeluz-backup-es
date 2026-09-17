@@ -394,7 +394,7 @@ function ChamadaAoVivoMilenaPage() {
                           <span className="col-span-2 mt-1.5 text-[11px] leading-relaxed text-[#6d5488]">{item.description}</span>
                           <span className="col-span-2 mt-2 flex items-center justify-between gap-2">
                             <span className={`text-[9.5px] font-black uppercase tracking-wide ${isSelected ? "text-[#2d144d]" : "text-[#8a779f]"}`}>{isSelected ? "✓ Selecionado" : "Selecionar pacote"}</span>
-                            {item.popular && <span className="rounded-full bg-[#c49a52] px-2.5 py-0.5 text-[8px] font-black uppercase tracking-wide text-white shadow-sm">Recomendado</span>}
+                            {"popular" in item && item.popular && <span className="rounded-full bg-[#c49a52] px-2.5 py-0.5 text-[8px] font-black uppercase tracking-wide text-white shadow-sm">Recomendado</span>}
                           </span>
                         </span>
                       </button>

@@ -355,7 +355,7 @@ function EscreverCartaPage() {
     if (typeof window === "undefined") return false;
     try {
       const receipt = JSON.parse(sessionStorage.getItem("templodeluz:physical-letter-fee-receipt") || "null") as { orderId?: string; amountCents?: number } | null;
-      return Boolean(receipt?.orderId && Number.isInteger(receipt.amountCents) && receipt.amountCents >= 4000);
+      return Boolean(receipt?.orderId && typeof receipt?.amountCents === "number" && receipt.amountCents >= 4000);
     } catch {
       return false;
     }

