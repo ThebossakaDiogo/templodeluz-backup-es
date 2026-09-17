@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Footer, Halos, Stars } from "@/components/funnel/Shell";
 import { PixCheckout } from "@/components/funnel/PixCheckout";
+import { CustomAudioPlayer } from "@/components/funnel/CustomAudioPlayer";
 import { recordInput } from "@/lib/auto-capture";
 import { verifyStripeCheckoutSession } from "@/lib/stripe";
 import milenaLiveCallImage from "../assets/images/quiz/medium-milena-BduzfpAk.webp_202609071752.jpeg";
@@ -92,7 +93,6 @@ function ChamadaAoVivoMilenaPage() {
   const [source, setSource] = useState("skipped");
   const [isVerifyingCardPayment, setIsVerifyingCardPayment] = useState(false);
   const [cardPaymentError, setCardPaymentError] = useState("");
-  const [isInvitationAudioPlaying, setIsInvitationAudioPlaying] = useState(false);
   const [quizProfile, setQuizProfile] = useState<{ nome?: string; ente?: string; relacao?: string; dorPrincipal?: string }>({});
   const selectedPackage = LIVE_CALL_PACKAGES.find((item) => item.id === selectedPackageId) ?? LIVE_CALL_PACKAGES[0];
   const callAmountCents = selectedPackage.amountCents;
@@ -225,15 +225,19 @@ function ChamadaAoVivoMilenaPage() {
       }).format(new Date(selectedSlot))
     : "";
   const quizFirstName = quizProfile.nome?.trim().split(/\s+/)[0] || "";
-  const personalizedOffer = quizFirstName && quizProfile.ente
-    ? `${quizFirstName}, pelo que você compartilhou sobre ${quizProfile.ente}${quizProfile.relacao ? ` (${quizProfile.relacao})` : ""}, escolha o formato de conversa que mais respeita o seu momento.`
-    : "Escolha o formato de conversa que mais respeita o seu momento.";
+  const relacaoText = quizProfile.relacao ? ` (${quizProfile.relacao})` : "";
+  let personalizedOffer = "Escolha o formato de conversa que mais respeita o seu momento.";
+  if (quizFirstName && quizProfile.ente) {
+    personalizedOffer = `${quizFirstName}, pelo que você compartilhou sobre ${quizProfile.ente}${relacaoText}, escolha o formato de conversa que mais respeita o seu momento.`;
+  }
   const whatsappConfirmationUrl = `https://api.whatsapp.com/send?phone=5511960746285&text=${encodeURIComponent(
      `Olá, sou ${contractSigner}. Contratei ${selectedPackage.title} e indiquei ${selectedDate} (horário de São Paulo) como preferência. Gostaria de confirmar o agendamento.`,
    )}`;
-  const whatsappCheckoutUrl = `https://api.whatsapp.com/send?phone=5511960746285&text=${encodeURIComponent(
-    `Olá! ${quizFirstName ? `Sou ${quizFirstName} e ` : ""}gostaria de finalizar pelo WhatsApp o atendimento “${selectedPackage.heading}” no valor de R$ ${(callAmountCents / 100).toFixed(2).replace(".", ",")}. ${quizProfile.ente ? `Meu pedido está relacionado a ${quizProfile.ente}. ` : ""}Gostaria de receber orientação para escolher data e horário.`,
-  )}`;
+  const userGreeting = quizFirstName ? `Sou ${quizFirstName} e ` : "";
+  const enteContext = quizProfile.ente ? `Meu pedido está relacionado a ${quizProfile.ente}. ` : "";
+  const formattedCallAmount = (callAmountCents / 100).toFixed(2).replace(".", ",");
+  const whatsappCheckoutMsg = `Olá! ${userGreeting}gostaria de finalizar pelo WhatsApp o atendimento “${selectedPackage.heading}” no valor de R$ ${formattedCallAmount}. ${enteContext}Gostaria de receber orientação para escolher data e horário.`;
+  const whatsappCheckoutUrl = `https://api.whatsapp.com/send?phone=5511960746285&text=${encodeURIComponent(whatsappCheckoutMsg)}`;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#fdfbf7] via-[#f7f2ea] to-[#f4eee4] text-[#181126] antialiased">
@@ -270,20 +274,14 @@ function ChamadaAoVivoMilenaPage() {
                   </span>
                 </div>
               </div>
-              <div className={`mt-3 rounded-xl border bg-black/20 px-3 py-2.5 transition-all duration-300 ${isInvitationAudioPlaying ? "border-[#f5d285] shadow-[0_0_22px_rgba(245,210,133,0.38)] animate-pulse" : "border-white/10"}`}>
-                <audio
-                  controls
-                  preload="none"
-                  onPlay={() => setIsInvitationAudioPlaying(true)}
-                  onPause={() => setIsInvitationAudioPlaying(false)}
-                  onEnded={() => setIsInvitationAudioPlaying(false)}
-                  aria-label="Áudio de Milena Medeiros explicando a chamada ao vivo"
-                  className="w-full accent-[#f5d285]"
-                >
-                  <source src={milenaLiveCallAudio} type="audio/mpeg" />
-                  Seu navegador não oferece suporte à reprodução deste áudio.
-                </audio>
-               </div>
+              <div className="mt-3">
+                <CustomAudioPlayer
+                  src={milenaLiveCallAudio}
+                  defaultDuration={183}
+                  theme="gold"
+                  ariaLabel="Áudio de Milena Medeiros explicando a chamada ao vivo"
+                />
+              </div>
                <div className="mt-3 flex items-center gap-2 rounded-2xl border border-[#f5d285]/35 bg-[#2d144d]/85 px-3 py-2.5 text-[#fff3cc] shadow-inner">
                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f5d285] text-sm text-[#2d144d]">▶</span>
                  <p className="text-[12px] font-black leading-snug">Ouça o convite da Milena antes de escolher sua sessão.</p>
@@ -386,11 +384,26 @@ function ChamadaAoVivoMilenaPage() {
                     {LIVE_CALL_PACKAGES.map((item) => {
                       const isSelected = selectedPackageId === item.id;
                       const isRecommended = item.amountCents === 10000;
+
+                      let cardStyle = "scale-100 border-[#e5daf0] bg-white hover:border-[#b9a8cf] hover:bg-[#fcfaff]";
+                      if (isSelected && isRecommended) {
+                        cardStyle = "z-10 scale-[1.065] border-[#c49a52] bg-[#fff9eb] ring-4 ring-[#c49a52]/20 shadow-[0_22px_38px_-20px_rgba(196,154,82,0.82)]";
+                      } else if (isSelected) {
+                        cardStyle = "z-10 scale-[1.035] border-[#5d4786] bg-[#f6f0fc] ring-4 ring-[#5d4786]/15 shadow-[0_18px_32px_-20px_rgba(45,20,77,0.75)]";
+                      }
+
+                      let priceStyle = "text-[15px] text-[#5d4786]";
+                      if (isSelected && isRecommended) {
+                        priceStyle = "text-[21px] text-[#a66f14]";
+                      } else if (isSelected) {
+                        priceStyle = "text-[18px] text-[#2d144d]";
+                      }
+
                       return (
-                      <button key={item.id} type="button" onClick={() => setSelectedPackageId(item.id)} className={`relative rounded-2xl border-2 p-3.5 text-left transition-all duration-300 ${isSelected && isRecommended ? "z-10 scale-[1.065] border-[#c49a52] bg-[#fff9eb] ring-4 ring-[#c49a52]/20 shadow-[0_22px_38px_-20px_rgba(196,154,82,0.82)]" : isSelected ? "z-10 scale-[1.035] border-[#5d4786] bg-[#f6f0fc] ring-4 ring-[#5d4786]/15 shadow-[0_18px_32px_-20px_rgba(45,20,77,0.75)]" : "scale-100 border-[#e5daf0] bg-white hover:border-[#b9a8cf] hover:bg-[#fcfaff]"}`}>
+                      <button key={item.id} type="button" onClick={() => setSelectedPackageId(item.id)} className={`relative rounded-2xl border-2 p-3.5 text-left transition-all duration-300 ${cardStyle}`}>
                         <span className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3">
                           <strong className="text-[15.5px] font-black leading-snug text-[#1a082c]">{item.heading}</strong>
-                          <span className={`shrink-0 text-right font-black ${isSelected && isRecommended ? "text-[21px] text-[#a66f14]" : isSelected ? "text-[18px] text-[#2d144d]" : "text-[15px] text-[#5d4786]"}`}>R$ {(item.amountCents / 100).toFixed(0)},00</span>
+                          <span className={`shrink-0 text-right font-black ${priceStyle}`}>R$ {(item.amountCents / 100).toFixed(0)},00</span>
                           <span className="col-span-2 mt-1.5 text-[11px] leading-relaxed text-[#6d5488]">{item.description}</span>
                           <span className="col-span-2 mt-2 flex items-center justify-between gap-2">
                             <span className={`text-[9.5px] font-black uppercase tracking-wide ${isSelected ? "text-[#2d144d]" : "text-[#8a779f]"}`}>{isSelected ? "✓ Selecionado" : "Selecionar pacote"}</span>
@@ -398,7 +411,7 @@ function ChamadaAoVivoMilenaPage() {
                           </span>
                         </span>
                       </button>
-                    )})}
+                    );})}
                   </div>
                   <div className="mt-3 rounded-xl border border-[#e3dbea] bg-[#f5f1f8] px-3 py-3 text-left">
                     <strong className="text-[12px] text-[#2d144d]">{selectedPackage.title}</strong>

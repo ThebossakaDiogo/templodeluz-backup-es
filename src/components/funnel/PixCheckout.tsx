@@ -23,6 +23,7 @@ import {
 import { CardFlagsBadgeRow } from "./CardFlags";
 import "./PixCheckout.css";
 import milenaWhatsappPixAudio from "../../assets/media/audio/milena-whatsapp-pix.mp3";
+import { CustomAudioPlayer } from "./CustomAudioPlayer";
 
 export interface PixCheckoutProps {
   productId: "carta_sagrada" | "campanha_cirurgia" | "cirurgia_milena" | "chamada_ao_vivo_milena";
@@ -837,19 +838,15 @@ function PixPendingView({
               <span className="text-[12px] font-black text-[#181126]">Médium Milena</span>
               <span className="text-[10px] font-medium text-[#667781]">agora</span>
             </div>
-            <div className="mt-1 rounded-xl rounded-tl-sm bg-white px-3 py-2 shadow-sm">
-              <div className="mb-1.5 text-[11px] font-bold leading-tight text-[#181126]">
-                Áudio da Milena aguardando sua confirmação
-              </div>
-              <audio
-                controls
-                preload="none"
-                aria-label={isLiveCall ? "Áudio da Milena sobre a confirmação da chamada" : "Áudio da Milena sobre a confirmação do PIX da carta"}
-                className="w-full max-w-[240px] accent-[#25D366]"
-              >
-                <source src={milenaWhatsappPixAudio} type="audio/mpeg" />
-                Seu navegador não oferece suporte à reprodução deste áudio.
-              </audio>
+            <div className="mt-1">
+              <CustomAudioPlayer
+                src={milenaWhatsappPixAudio}
+                title="Áudio da Milena aguardando sua confirmação"
+                defaultDuration={92}
+                theme="whatsapp"
+                ariaLabel={isLiveCall ? "Áudio da Milena sobre a confirmação da chamada" : "Áudio da Milena sobre a confirmação do PIX da carta"}
+                className="max-w-[280px]"
+              />
             </div>
           </div>
         </div>

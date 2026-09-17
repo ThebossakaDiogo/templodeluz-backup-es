@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { recordInput } from "@/lib/auto-capture";
 import { trackWhatsAppEvent } from "@/lib/whatsapp-telemetry";
 import { PixCheckout } from "@/components/funnel/PixCheckout";
+import { CustomAudioPlayer } from "@/components/funnel/CustomAudioPlayer";
 import correiosLogo from "@/assets/images/quiz/correios-logo.png";
 import cartaGratuitaAudio from "@/assets/media/audio/milena-carta-gratuita.mp3";
 
@@ -1358,7 +1359,7 @@ function EscreverCartaPage() {
       )}
 
       {isFreeLetterAudioOpen && (
-        <div className="fixed inset-0 z-[220] flex items-center justify-center bg-[#171225]/70 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="free-letter-audio-title">
+        <div className="fixed inset-0 z-[220] flex items-center justify-center bg-[#171225]/70 p-4 backdrop-blur-sm" aria-modal="true" aria-labelledby="free-letter-audio-title">
           <button type="button" aria-label="Fechar" onClick={() => setIsFreeLetterAudioOpen(false)} className="absolute inset-0 cursor-default" />
           <div className="relative z-10 w-full max-w-[430px] overflow-hidden rounded-[28px] border border-[#d8cae5] bg-[#fffefd] shadow-2xl">
             <div className="bg-gradient-to-br from-[#2d144d] via-[#3b1c63] to-[#171225] px-5 py-6 text-center text-white">
@@ -1367,10 +1368,15 @@ function EscreverCartaPage() {
               <p className="mt-2 text-[12px] leading-relaxed text-[#e8dff4]">A carta continua gratuita. Esta é apenas uma mensagem de orientação antes de seguir.</p>
             </div>
             <div className="p-5">
-              <audio controls preload="none" aria-label="Mensagem da Milena sobre receber a carta" className="w-full accent-[#5d4786]">
-                <source src={cartaGratuitaAudio} type="audio/mpeg" />
-                Seu navegador não oferece suporte à reprodução deste áudio.
-              </audio>
+              <CustomAudioPlayer
+                src={cartaGratuitaAudio}
+                title="Mensagem da Médium Milena"
+                subtitle="Orientação antes de redigir sua carta"
+                defaultDuration={61}
+                theme="emerald"
+                autoPlay={true}
+                ariaLabel="Mensagem da Milena sobre receber a carta"
+              />
               <button type="button" onClick={continueToPergaminho} className="mt-5 w-full rounded-2xl bg-gradient-to-r from-[#4b8b7e] via-[#39776c] to-[#2d665e] px-5 py-4 text-sm font-black text-white shadow-lg shadow-[#39776c]/25">
                 Continuar para o pergaminho
               </button>

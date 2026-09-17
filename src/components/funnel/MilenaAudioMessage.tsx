@@ -1,5 +1,6 @@
 import milenaAudio from "../../assets/media/audio/audio-milena.mp3";
 import { IMAGES } from "./data";
+import { CustomAudioPlayer } from "./CustomAudioPlayer";
 
 const transcript = [
   "Olá. Aqui é a Milena Medeiros.",
@@ -36,19 +37,15 @@ export function MilenaAudioMessage() {
           </div>
         </div>
 
-        <div className="mt-4 rounded-2xl border border-[#e5daf0] bg-white/90 p-3 shadow-sm">
-          <audio
-            controls
-            preload="none"
-            aria-label="Mensagem em áudio de Milena Medeiros sobre a contribuição das velas"
-            className="w-full accent-[#6b21a8]"
-          >
-            <source src={milenaAudio} type="audio/mpeg" />
-            Seu navegador não oferece suporte à reprodução deste áudio.
-          </audio>
-          <p className="mt-2 text-center text-[11px] font-semibold text-[#786445]">
-            Toque para ouvir a explicação antes de seguir para PIX ou cartão.
-          </p>
+        <div className="mt-4">
+          <CustomAudioPlayer
+            src={milenaAudio}
+            title="Explicação da Médium Milena"
+            subtitle="Por que os materiais do oratório são preparados"
+            defaultDuration={277}
+            theme="purple"
+            ariaLabel="Mensagem em áudio de Milena Medeiros sobre a contribuição das velas"
+          />
         </div>
 
         <details className="mt-3 rounded-2xl border border-amber-200/80 bg-white/70 px-3 py-2 text-left">

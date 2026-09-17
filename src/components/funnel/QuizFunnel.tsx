@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useSearch, useNavigate } from "@tanstack/react-router";
-import { CHECKOUT_URL, FAQ, IMAGES, STEPS_HOW } from "./data";
+import { FAQ, IMAGES, STEPS_HOW } from "./data";
 import { Footer, Reveal, SectionLabel, Stars } from "./Shell";
 import { recordInput } from "@/lib/auto-capture";
 import { trackQuizStep } from "@/lib/metaPixel";
@@ -17,6 +17,7 @@ import milenaLoaderImage from "../../assets/images/quiz/milena-loader.jpeg";
 import milenaDonationAudio from "../../assets/media/audio/milena-doacao-templo.mp3";
 import milenaFreeLetterAudio from "../../assets/media/audio/milena-carta-gratuita.mp3";
 import correiosLogo from "../../assets/images/quiz/correios-logo.png";
+import { CustomAudioPlayer } from "./CustomAudioPlayer";
 
 const LetterZoomModal = lazy(() => import("./LetterZoomModal").then(({ LetterZoomModal: Component }) => ({ default: Component })));
 const PixCheckout = lazy(() => import("./PixCheckout").then(({ PixCheckout: Component }) => ({ default: Component })));
@@ -859,17 +860,20 @@ function PixInstantBox({
       </div>
 
       <div className="p-4 sm:p-6">
-      <div className="mb-4 flex items-center gap-3 rounded-2xl border border-[#ded3e8] bg-white p-3 text-left shadow-sm">
-        <img src={IMAGES.medium} alt="Milena Medeiros" className="h-14 w-14 shrink-0 rounded-2xl border-2 border-[#d8cae5] object-cover object-top shadow-sm" loading="lazy" decoding="async" />
-        <div className="min-w-0 flex-1">
-          <span className="block text-[10px] font-black uppercase tracking-[0.12em] text-[#5d4786]">Mensagem da Milena</span>
-          <span className="mt-0.5 block text-[13px] font-extrabold text-[#272039]">Escute antes de doar</span>
-          <audio controls preload="none" aria-label="Mensagem da Milena antes da contribuição" className="mt-2 w-full accent-[#5d4786]">
-            <source src={milenaDonationAudio} type="audio/mpeg" />
-            <track kind="captions" />
-            Seu navegador não oferece suporte à reprodução deste áudio.
-          </audio>
+      <div className="mb-4 rounded-2xl border border-[#ded3e8] bg-white p-3.5 text-left shadow-sm">
+        <div className="flex items-center gap-3 mb-2.5">
+          <img src={IMAGES.medium} alt="Milena Medeiros" className="h-12 w-12 shrink-0 rounded-2xl border-2 border-[#d8cae5] object-cover object-top shadow-sm" loading="lazy" decoding="async" />
+          <div className="min-w-0 flex-1">
+            <span className="block text-[10px] font-black uppercase tracking-[0.12em] text-[#5d4786]">Mensagem da Milena</span>
+            <span className="mt-0.5 block text-[13px] font-extrabold text-[#272039]">Escute antes de doar</span>
+          </div>
         </div>
+        <CustomAudioPlayer
+          src={milenaDonationAudio}
+          defaultDuration={164}
+          theme="purple"
+          ariaLabel="Mensagem da Milena antes da contribuição"
+        />
       </div>
       <div className="grid grid-cols-3 gap-2 rounded-2xl border border-slate-200 bg-white p-3 text-center shadow-sm">
         {[
@@ -1239,27 +1243,15 @@ function PixInstantBox({
 
                   {/* Conteúdo do Modal */}
                   <div className="p-5 sm:p-6 space-y-4">
-                    <div className="free-letter-audio-player rounded-2xl border border-[#d8e9e3] bg-[#eff8f3] p-3 text-left shadow-2xs">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#39776c] text-[10px] font-bold text-white">
-                          ▶
-                        </span>
-                        <span className="text-xs font-black text-[#1c3029]">
-                          Áudio de acolhimento da Médium
-                        </span>
-                      </div>
-                      <audio
-                        controls
-                        autoPlay
-                        preload="auto"
-                        aria-label="Mensagem da Milena sobre receber a carta"
-                        className="w-full accent-[#39776c]"
-                      >
-                        <source src={milenaFreeLetterAudio} type="audio/mpeg" />
-                        <track kind="captions" />
-                        Seu navegador não oferece suporte à reprodução deste áudio.
-                      </audio>
-                    </div>
+                    <CustomAudioPlayer
+                      src={milenaFreeLetterAudio}
+                      title="Áudio de acolhimento"
+                      subtitle="Mensagem de orientação da Médium"
+                      autoPlay={true}
+                      defaultDuration={61}
+                      theme="emerald"
+                      ariaLabel="Mensagem da Milena sobre receber a carta"
+                    />
 
                     <button
                       type="button"
