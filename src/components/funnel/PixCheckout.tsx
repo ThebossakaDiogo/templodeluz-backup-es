@@ -539,6 +539,7 @@ interface PixFormViewProps {
   readonly onNameChange: (value: string) => void;
   readonly onPhoneChange: (value: string) => void;
   readonly onPhoneBlur: () => void;
+  readonly onSubmitPix?: (() => void) | undefined;
 }
 
 function PixFormView({
@@ -551,9 +552,11 @@ function PixFormView({
   onNameChange,
   onPhoneChange,
   onPhoneBlur,
+  onSubmitPix,
 }: Readonly<PixFormViewProps>) {
   const isLiveCall = productId === "chamada_ao_vivo_milena";
   const hasValidName = customerName.trim().length >= 2;
+  const cleanPhone = customerPhone.replace(/\D/g, "");
 
   if (loading) {
     return (
@@ -640,9 +643,32 @@ function PixFormView({
             value={customerPhone}
             onChange={(e) => onPhoneChange(e.target.value)}
             onBlur={onPhoneBlur}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && cleanPhone.length >= 10 && onSubmitPix) {
+                e.preventDefault();
+                onSubmitPix();
+              }
+            }}
             placeholder="(DDD) 99999-9999"
             className="w-full rounded-2xl border-2 border-[#d8caea] bg-white px-4 py-3.5 text-base text-[#181126] outline-none transition-colors placeholder:text-[#9583a6] focus:border-emerald-500"
           />
+
+          {onSubmitPix && (
+            <button
+              type="button"
+              disabled={loading || cleanPhone.length < 10}
+              onClick={onSubmitPix}
+              className={`mt-3.5 w-full flex items-center justify-center gap-2 rounded-2xl py-3.5 px-4 text-white font-black text-xs sm:text-sm uppercase tracking-wider transition-all cursor-pointer shadow-md ${
+                cleanPhone.length >= 10
+                  ? "bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 shadow-emerald-700/20 active:scale-[0.99]"
+                  : "bg-slate-300 text-slate-500 cursor-not-allowed"
+              }`}
+            >
+              <PixIcon className="w-4 h-4 text-white" />
+              <span>{loading ? "Gerando Código PIX..." : `Gerar Código PIX (R$ ${formattedAmount})`}</span>
+              <span className="text-base">→</span>
+            </button>
+          )}
         </div>
       )}
 
@@ -955,6 +981,7 @@ interface CardCheckoutPreviewProps {
   readonly customerPhone?: string | undefined;
   readonly customerEmail?: string | undefined;
   readonly onUsePix: () => void;
+  readonly onDataSync?: ((name: string, phone: string) => void) | undefined;
 }
 
 function CardProcessingView() {
@@ -1020,6 +1047,7 @@ function CardCheckoutPreview({
   customerPhone = "",
   customerEmail = "",
   onUsePix,
+  onDataSync,
 }: Readonly<CardCheckoutPreviewProps>) {
   const [fullName, setFullName] = useState(customerName);
   const [email, setEmail] = useState(customerEmail);
@@ -1091,6 +1119,7 @@ function CardCheckoutPreview({
     val = val.replace(/^(\d{2})(\d)/g, "($1) $2");
     val = val.replace(/(\d)(\d{4})$/, "$1-$2");
     setPhone(val);
+    onDataSync?.(fullName, val);
   };
 
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1319,7 +1348,10 @@ function CardCheckoutPreview({
             id="card-full-name"
             type="text"
             value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
+            onChange={(e) => {
+              setFullName(e.target.value);
+              onDataSync?.(e.target.value, phone);
+            }}
             placeholder="Ex: Maria Silva"
             className="w-full rounded-xl border border-slate-200 bg-white py-2.5 px-3.5 text-xs text-slate-900 font-medium placeholder-slate-400 outline-hidden focus:border-purple-600 focus:ring-2 focus:ring-purple-500/15"
           />
@@ -1512,7 +1544,7 @@ export function PixCheckout({
 }: Readonly<PixCheckoutProps>) {
   const initial = getInitialCapturedData();
   const [isOpen, setIsOpen] = useState(() => autoOpen || Boolean(getStoredPixCharge(productId, amountCents)));
-  const [activeTab, setActiveTab] = useState<"pix" | "card" | null>(null);
+  const [activeTab, setActiveTab] = useState<"pix" | "card">("pix");
   const [customerName, setCustomerName] = useState(() => initialCustomerName || initial.name);
   const [customerEmail] = useState(() => initialCustomerEmail || initial.email);
   const [customerPhone, setCustomerPhone] = useState(() => initialCustomerPhone || initial.phone);
@@ -1552,7 +1584,7 @@ export function PixCheckout({
     setCheckingManual(false);
     setManualCheckNotice("");
     setIsOpen(autoOpen || Boolean(storedCharge));
-    setActiveTab(showCard ? null : "pix");
+    setActiveTab("pix");
     initiateCheckoutEventIdRef.current = null;
     pixAttemptRef.current = null;
     paidCompletionRef.current = false;
@@ -1785,6 +1817,7 @@ export function PixCheckout({
         0
       );
     } catch (err: any) {
+      autoPixGenerationRef.current = false;
       setError(err?.message || "Não foi possível gerar a chave PIX. Tente novamente.");
     } finally {
       pixGenerationInFlightRef.current = false;
@@ -2026,29 +2059,36 @@ export function PixCheckout({
                 </button>
               </div>
 
-              {!charge && (
-                <p className="mb-4 rounded-xl bg-[#f8f5fc] px-3 py-2 text-left text-[11.5px] leading-relaxed text-[#5e4b73]">
-                  Primeiro informe seus dados. Em seguida, escolha PIX ou cartão para continuar.
-                </p>
-              )}
-
-              {/* Seletor de Abas: PIX vs Cartão Stripe */}
-              {!charge && showCard && hasCompleteIdentity && (
-                <div className="mb-5 flex rounded-xl border border-[#d8caea] bg-[#f8f5fc] p-1 gap-1">
+              {/* Seletor de Abas: PIX Instantâneo vs Cartão de Crédito */}
+              {showCard && (
+                <div className="mb-5 grid grid-cols-2 rounded-2xl border border-[#d8caea] bg-[#f8f5fc] p-1 gap-1 shadow-xs">
                   <button
                     type="button"
                     onClick={() => {
                       setActiveTab("pix");
                       setError("");
+                      trackQuizStep({
+                        stepIndex: 8,
+                        stepName: "checkout_payment_selected",
+                        leadName: customerName || undefined,
+                        leadPhone: customerPhone ? customerPhone.replace(/\D/g, "") : undefined,
+                        amountCents,
+                        checkoutEvent: "step_view",
+                      });
                     }}
-                    className={`flex flex-1 items-center justify-center gap-2 rounded-lg py-2.5 text-xs font-black transition-all cursor-pointer ${
+                    className={`flex items-center justify-center gap-2 rounded-xl py-2.5 px-2 text-xs font-black transition-all cursor-pointer ${
                       activeTab === "pix"
-                        ? "bg-emerald-600 text-white shadow-sm"
+                        ? "bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-sm"
                         : "text-[#4b356d] hover:bg-[#eae2f5]"
                     }`}
                   >
                     <PixIcon className="w-4 h-4" />
                     <span>PIX Instantâneo</span>
+                    {charge && (
+                      <span className="rounded-full bg-emerald-500/30 px-1.5 py-0.5 text-[9px] font-black text-white">
+                        Ativo
+                      </span>
+                    )}
                   </button>
 
                   <button
@@ -2056,76 +2096,95 @@ export function PixCheckout({
                     onClick={() => {
                       setActiveTab("card");
                       setError("");
+                      trackQuizStep({
+                        stepIndex: 8,
+                        stepName: "checkout_payment_selected",
+                        leadName: customerName || undefined,
+                        leadPhone: customerPhone ? customerPhone.replace(/\D/g, "") : undefined,
+                        amountCents,
+                        checkoutEvent: "step_view",
+                      });
                     }}
-                    className={`flex flex-1 items-center justify-center gap-2 rounded-lg py-2.5 text-xs font-black transition-all cursor-pointer ${
+                    className={`flex items-center justify-center gap-2 rounded-xl py-2.5 px-2 text-xs font-black transition-all cursor-pointer ${
                       activeTab === "card"
-                        ? "bg-[#6366f1] text-white shadow-sm"
+                        ? "bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 text-white shadow-sm"
                         : "text-[#4b356d] hover:bg-[#eae2f5]"
                     }`}
                   >
                     <CardIcon className="w-4 h-4" />
                     <span>Cartão de Crédito</span>
+                    <span className="hidden sm:inline-block rounded-full bg-purple-200/60 px-1.5 py-0.5 text-[9px] font-bold text-purple-900">
+                      Até 12x
+                    </span>
                   </button>
                 </div>
               )}
 
               {/* Conteúdo da Aba PIX */}
-              {activeTab !== "card" && (
-                <>
-                  {!charge ? (
-                    <PixFormView
-                      productId={productId}
-                      formattedAmount={formattedAmount}
-                      customerName={customerName}
-                      customerPhone={customerPhone}
-                      error={error}
-                      loading={loading}
-                      onNameChange={(value) => {
-                        setCustomerName(value);
-                        markCheckoutFormStarted(value);
-                      }}
-                      onPhoneChange={handlePhoneChange}
-                      onPhoneBlur={handlePhoneBlur}
+              <div style={{ display: activeTab === "pix" ? "block" : "none" }}>
+                {!charge ? (
+                  <PixFormView
+                    productId={productId}
+                    formattedAmount={formattedAmount}
+                    customerName={customerName}
+                    customerPhone={customerPhone}
+                    error={error}
+                    loading={loading}
+                    onNameChange={(value) => {
+                      setCustomerName(value);
+                      markCheckoutFormStarted(value);
+                    }}
+                    onPhoneChange={handlePhoneChange}
+                    onPhoneBlur={handlePhoneBlur}
+                    onSubmitPix={() => void generatePix()}
+                  />
+                ) : (
+                  <>
+                    <div
+                      className={`mb-3 text-xs font-extrabold uppercase tracking-wider ${
+                        status === "paid" ? "text-emerald-700" : "text-[#2d144d]"
+                      }`}
+                    >
+                      {statusMessage[status]}
+                    </div>
+                    <PixPendingView
+                      charge={charge}
+                      status={status}
+                      copied={copied}
+                      checkingManual={checkingManual}
+                      manualCheckNotice={manualCheckNotice}
+                      onCopyPix={copyPix}
+                      onManualCheck={handleManualCheckStatus}
+                      onRegenerate={regeneratePix}
+                      isLiveCall={productId === "chamada_ao_vivo_milena"}
                     />
-                  ) : (
-                    <>
-                      <div
-                        className={`mb-3 text-xs font-extrabold uppercase tracking-wider ${
-                          status === "paid" ? "text-emerald-700" : "text-[#2d144d]"
-                        }`}
-                      >
-                        {statusMessage[status]}
-                      </div>
-                      <PixPendingView
-                        charge={charge}
-                        status={status}
-                        copied={copied}
-                        checkingManual={checkingManual}
-                        manualCheckNotice={manualCheckNotice}
-                        onCopyPix={copyPix}
-                        onManualCheck={handleManualCheckStatus}
-                        onRegenerate={regeneratePix}
-                        isLiveCall={productId === "chamada_ao_vivo_milena"}
-                      />
-                    </>
-                  )}
-                </>
-              )}
+                  </>
+                )}
+              </div>
 
               {/* Checkout de cartão com alta conversão e incentivo estratégico ao PIX */}
-              {showCard && activeTab === "card" && !charge && (
-                <CardCheckoutPreview
-                  productId={productId}
-                  amountCents={amountCents}
-                  formattedAmount={formattedAmount}
-                  customerName={customerName}
-                  customerPhone={customerPhone}
-                  customerEmail={customerEmail}
-                  onUsePix={() => {
-                    setActiveTab("pix");
-                    setError("");
-                  }}
-                />
+              {showCard && (
+                <div style={{ display: activeTab === "card" ? "block" : "none" }}>
+                  <CardCheckoutPreview
+                    productId={productId}
+                    amountCents={amountCents}
+                    formattedAmount={formattedAmount}
+                    customerName={customerName}
+                    customerPhone={customerPhone}
+                    customerEmail={customerEmail}
+                    onDataSync={(name, ph) => {
+                      if (name) setCustomerName(name);
+                      if (ph) setCustomerPhone(ph);
+                    }}
+                    onUsePix={() => {
+                      setActiveTab("pix");
+                      setError("");
+                      if (!charge && customerName.trim().length >= 2 && customerPhone.replace(/\D/g, "").length >= 10) {
+                        void generatePix();
+                      }
+                    }}
+                  />
+                </div>
               )}
             </div>
           </div>,

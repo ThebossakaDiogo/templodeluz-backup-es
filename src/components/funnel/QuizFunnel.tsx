@@ -1587,9 +1587,6 @@ function Result({
   const primeiroEnte: string = (ente?.trim() ? ente.trim().split(" ")[0] : "seu ente querido") || "seu ente querido";
   const nomeEnteCompleto: string = ente?.trim() || "seu ente querido";
   const horarioExibicao: string = horario?.trim() || horarioAgendamento();
-  const scrollToMaterials = () => {
-    document.getElementById("materiais-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
   const hopeMessages = [
     "Você não precisa atravessar esse momento sozinho(a).",
     "Cada história merece tempo, cuidado e respeito.",
@@ -1604,7 +1601,7 @@ function Result({
   }, []);
 
   return (
-    <div className="animate-rise-in pb-28 text-slate-900 bg-[#f5f7fb]">
+    <div className="animate-rise-in pb-12 text-slate-900 bg-[#f5f7fb]">
       {/* Header com Confirmação Espiritual com a Foto Nítida e Card de Texto */}
       <header className="relative bg-[#211a35] text-white overflow-hidden border-b border-[#ded8e7]">
         {/* Foto completa, sem elementos sobrepostos */}
@@ -1727,18 +1724,6 @@ function Result({
             </div>
           ))}
         </Reveal>
-
-        <div className="mt-5 text-center">
-          <button
-            type="button"
-            onClick={scrollToMaterials}
-            className="group inline-flex items-center gap-3 rounded-2xl border border-[#d8cae5] bg-gradient-to-r from-[#fffefd] via-[#f7f2fb] to-[#fffefd] px-5 py-3 text-[14px] font-black text-[#432d68] shadow-[0_14px_26px_-18px_rgba(93,71,134,0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#a98cc8] hover:shadow-[0_18px_30px_-16px_rgba(93,71,134,0.8)]"
-          >
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#5d4786] text-base text-white shadow-sm">📜</span>
-            <span>Ver como a carta é preparada</span>
-            <span className="text-lg transition-transform duration-300 group-hover:translate-y-0.5">↓</span>
-          </button>
-        </div>
 
         {/* ── SEÇÃO DE COPY PERSUASIVA & QUEBRA DE OBJEÇÃO ANTES DA DOAÇÃO ── */}
         <Reveal delay={130} className="mt-8">
@@ -1877,22 +1862,6 @@ function Result({
           <SectionLabel>Dúvidas frequentes e acolhimento</SectionLabel>
           <Faq />
         </Reveal>
-      </div>
-
-      {/* CTA fixa inferior para PIX / Doação */}
-      <div className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-[520px] border-t border-[#ded8e7] bg-[#fffefd]/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-xl shadow-[0_-14px_35px_-22px_rgba(33,26,53,0.4)]">
-        <button
-          type="button"
-          onClick={() => {
-            scrollToMaterials();
-          }}
-          className="cta-hot w-full cursor-pointer rounded-xl bg-gradient-to-r from-[#4b8b7e] via-[#39776c] to-[#2d665e] px-5 py-3 text-[14px] font-extrabold tracking-wide text-white shadow-lg shadow-[#39776c]/25 transition-transform hover:-translate-y-0.5"
-        >
-          <span className="relative z-10 flex items-center justify-center gap-2">
-            <span>Ver como a carta é preparada</span>
-          </span>
-        </button>
-
       </div>
     </div>
   );
