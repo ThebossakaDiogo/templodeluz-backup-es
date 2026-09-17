@@ -10,46 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AbandonosRouteImport } from './routes/abandonos'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AjudaMilenaRouteImport } from './routes/ajuda-milena'
 import { Route as ApoioMilenaRouteImport } from './routes/apoio-milena'
 import { Route as ChamadaAoVivoMilenaRouteImport } from './routes/chamada-ao-vivo-milena'
 import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
-import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
-import { Route as ConversasRouteImport } from './routes/conversas'
-import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as EscreverCartaRouteImport } from './routes/escrever-carta'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as MetricasRouteImport } from './routes/metricas'
 import { Route as ObrigadoRouteImport } from './routes/obrigado'
-import { Route as PainelRouteImport } from './routes/painel'
-import { Route as PedidosRouteImport } from './routes/pedidos'
-import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
-import { Route as RastreamentoRouteImport } from './routes/rastreamento'
-import { Route as RelatoriosRouteImport } from './routes/relatorios'
-import { Route as TelemetriaRouteImport } from './routes/telemetria'
 import { Route as TermosRouteImport } from './routes/termos'
-import { Route as VendasRouteImport } from './routes/vendas'
-import { Route as VisaoGeralRouteImport } from './routes/visao-geral'
-import { Route as Visao_geralRouteImport } from './routes/visao_geral'
-import { Route as WhatsappRouteImport } from './routes/whatsapp'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AbandonosRoute = AbandonosRouteImport.update({
-  id: '/abandonos',
-  path: '/abandonos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AjudaMilenaRoute = AjudaMilenaRouteImport.update({
@@ -72,39 +44,9 @@ const ComoFuncionaRoute = ComoFuncionaRouteImport.update({
   path: '/como-funciona',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ConfiguracoesRoute = ConfiguracoesRouteImport.update({
-  id: '/configuracoes',
-  path: '/configuracoes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ConversasRoute = ConversasRouteImport.update({
-  id: '/conversas',
-  path: '/conversas',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EntrarRoute = EntrarRouteImport.update({
-  id: '/entrar',
-  path: '/entrar',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const EscreverCartaRoute = EscreverCartaRouteImport.update({
   id: '/escrever-carta',
   path: '/escrever-carta',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MetricasRoute = MetricasRouteImport.update({
-  id: '/metricas',
-  path: '/metricas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ObrigadoRoute = ObrigadoRouteImport.update({
@@ -112,39 +54,9 @@ const ObrigadoRoute = ObrigadoRouteImport.update({
   path: '/obrigado',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PainelRoute = PainelRouteImport.update({
-  id: '/painel',
-  path: '/painel',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PedidosRoute = PedidosRouteImport.update({
-  id: '/pedidos',
-  path: '/pedidos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PerfilRoute = PerfilRouteImport.update({
-  id: '/perfil',
-  path: '/perfil',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PrivacidadeRoute = PrivacidadeRouteImport.update({
   id: '/privacidade',
   path: '/privacidade',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RastreamentoRoute = RastreamentoRouteImport.update({
-  id: '/rastreamento',
-  path: '/rastreamento',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RelatoriosRoute = RelatoriosRouteImport.update({
-  id: '/relatorios',
-  path: '/relatorios',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TelemetriaRoute = TelemetriaRouteImport.update({
-  id: '/telemetria',
-  path: '/telemetria',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermosRoute = TermosRouteImport.update({
@@ -152,233 +64,87 @@ const TermosRoute = TermosRouteImport.update({
   path: '/termos',
   getParentRoute: () => rootRouteImport,
 } as any)
-const VendasRoute = VendasRouteImport.update({
-  id: '/vendas',
-  path: '/vendas',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const VisaoGeralRoute = VisaoGeralRouteImport.update({
-  id: '/visao-geral',
-  path: '/visao-geral',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const Visao_geralRoute = Visao_geralRouteImport.update({
-  id: '/visao_geral',
-  path: '/visao_geral',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const WhatsappRoute = WhatsappRouteImport.update({
-  id: '/whatsapp',
-  path: '/whatsapp',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/abandonos': typeof AbandonosRoute
-  '/admin': typeof AdminRoute
   '/ajuda-milena': typeof AjudaMilenaRoute
   '/apoio-milena': typeof ApoioMilenaRoute
   '/chamada-ao-vivo-milena': typeof ChamadaAoVivoMilenaRoute
   '/como-funciona': typeof ComoFuncionaRoute
-  '/configuracoes': typeof ConfiguracoesRoute
-  '/conversas': typeof ConversasRoute
-  '/dashboard': typeof DashboardRoute
-  '/entrar': typeof EntrarRoute
   '/escrever-carta': typeof EscreverCartaRoute
-  '/login': typeof LoginRoute
-  '/metricas': typeof MetricasRoute
   '/obrigado': typeof ObrigadoRoute
-  '/painel': typeof PainelRoute
-  '/pedidos': typeof PedidosRoute
-  '/perfil': typeof PerfilRoute
   '/privacidade': typeof PrivacidadeRoute
-  '/rastreamento': typeof RastreamentoRoute
-  '/relatorios': typeof RelatoriosRoute
-  '/telemetria': typeof TelemetriaRoute
   '/termos': typeof TermosRoute
-  '/vendas': typeof VendasRoute
-  '/visao-geral': typeof VisaoGeralRoute
-  '/visao_geral': typeof Visao_geralRoute
-  '/whatsapp': typeof WhatsappRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/abandonos': typeof AbandonosRoute
-  '/admin': typeof AdminRoute
   '/ajuda-milena': typeof AjudaMilenaRoute
   '/apoio-milena': typeof ApoioMilenaRoute
   '/chamada-ao-vivo-milena': typeof ChamadaAoVivoMilenaRoute
   '/como-funciona': typeof ComoFuncionaRoute
-  '/configuracoes': typeof ConfiguracoesRoute
-  '/conversas': typeof ConversasRoute
-  '/dashboard': typeof DashboardRoute
-  '/entrar': typeof EntrarRoute
   '/escrever-carta': typeof EscreverCartaRoute
-  '/login': typeof LoginRoute
-  '/metricas': typeof MetricasRoute
   '/obrigado': typeof ObrigadoRoute
-  '/painel': typeof PainelRoute
-  '/pedidos': typeof PedidosRoute
-  '/perfil': typeof PerfilRoute
   '/privacidade': typeof PrivacidadeRoute
-  '/rastreamento': typeof RastreamentoRoute
-  '/relatorios': typeof RelatoriosRoute
-  '/telemetria': typeof TelemetriaRoute
   '/termos': typeof TermosRoute
-  '/vendas': typeof VendasRoute
-  '/visao-geral': typeof VisaoGeralRoute
-  '/visao_geral': typeof Visao_geralRoute
-  '/whatsapp': typeof WhatsappRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/abandonos': typeof AbandonosRoute
-  '/admin': typeof AdminRoute
   '/ajuda-milena': typeof AjudaMilenaRoute
   '/apoio-milena': typeof ApoioMilenaRoute
   '/chamada-ao-vivo-milena': typeof ChamadaAoVivoMilenaRoute
   '/como-funciona': typeof ComoFuncionaRoute
-  '/configuracoes': typeof ConfiguracoesRoute
-  '/conversas': typeof ConversasRoute
-  '/dashboard': typeof DashboardRoute
-  '/entrar': typeof EntrarRoute
   '/escrever-carta': typeof EscreverCartaRoute
-  '/login': typeof LoginRoute
-  '/metricas': typeof MetricasRoute
   '/obrigado': typeof ObrigadoRoute
-  '/painel': typeof PainelRoute
-  '/pedidos': typeof PedidosRoute
-  '/perfil': typeof PerfilRoute
   '/privacidade': typeof PrivacidadeRoute
-  '/rastreamento': typeof RastreamentoRoute
-  '/relatorios': typeof RelatoriosRoute
-  '/telemetria': typeof TelemetriaRoute
   '/termos': typeof TermosRoute
-  '/vendas': typeof VendasRoute
-  '/visao-geral': typeof VisaoGeralRoute
-  '/visao_geral': typeof Visao_geralRoute
-  '/whatsapp': typeof WhatsappRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/abandonos'
-    | '/admin'
     | '/ajuda-milena'
     | '/apoio-milena'
     | '/chamada-ao-vivo-milena'
     | '/como-funciona'
-    | '/configuracoes'
-    | '/conversas'
-    | '/dashboard'
-    | '/entrar'
     | '/escrever-carta'
-    | '/login'
-    | '/metricas'
     | '/obrigado'
-    | '/painel'
-    | '/pedidos'
-    | '/perfil'
     | '/privacidade'
-    | '/rastreamento'
-    | '/relatorios'
-    | '/telemetria'
     | '/termos'
-    | '/vendas'
-    | '/visao-geral'
-    | '/visao_geral'
-    | '/whatsapp'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/abandonos'
-    | '/admin'
     | '/ajuda-milena'
     | '/apoio-milena'
     | '/chamada-ao-vivo-milena'
     | '/como-funciona'
-    | '/configuracoes'
-    | '/conversas'
-    | '/dashboard'
-    | '/entrar'
     | '/escrever-carta'
-    | '/login'
-    | '/metricas'
     | '/obrigado'
-    | '/painel'
-    | '/pedidos'
-    | '/perfil'
     | '/privacidade'
-    | '/rastreamento'
-    | '/relatorios'
-    | '/telemetria'
     | '/termos'
-    | '/vendas'
-    | '/visao-geral'
-    | '/visao_geral'
-    | '/whatsapp'
   id:
     | '__root__'
     | '/'
-    | '/abandonos'
-    | '/admin'
     | '/ajuda-milena'
     | '/apoio-milena'
     | '/chamada-ao-vivo-milena'
     | '/como-funciona'
-    | '/configuracoes'
-    | '/conversas'
-    | '/dashboard'
-    | '/entrar'
     | '/escrever-carta'
-    | '/login'
-    | '/metricas'
     | '/obrigado'
-    | '/painel'
-    | '/pedidos'
-    | '/perfil'
     | '/privacidade'
-    | '/rastreamento'
-    | '/relatorios'
-    | '/telemetria'
     | '/termos'
-    | '/vendas'
-    | '/visao-geral'
-    | '/visao_geral'
-    | '/whatsapp'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AbandonosRoute: typeof AbandonosRoute
-  AdminRoute: typeof AdminRoute
   AjudaMilenaRoute: typeof AjudaMilenaRoute
   ApoioMilenaRoute: typeof ApoioMilenaRoute
   ChamadaAoVivoMilenaRoute: typeof ChamadaAoVivoMilenaRoute
   ComoFuncionaRoute: typeof ComoFuncionaRoute
-  ConfiguracoesRoute: typeof ConfiguracoesRoute
-  ConversasRoute: typeof ConversasRoute
-  DashboardRoute: typeof DashboardRoute
-  EntrarRoute: typeof EntrarRoute
   EscreverCartaRoute: typeof EscreverCartaRoute
-  LoginRoute: typeof LoginRoute
-  MetricasRoute: typeof MetricasRoute
   ObrigadoRoute: typeof ObrigadoRoute
-  PainelRoute: typeof PainelRoute
-  PedidosRoute: typeof PedidosRoute
-  PerfilRoute: typeof PerfilRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
-  RastreamentoRoute: typeof RastreamentoRoute
-  RelatoriosRoute: typeof RelatoriosRoute
-  TelemetriaRoute: typeof TelemetriaRoute
   TermosRoute: typeof TermosRoute
-  VendasRoute: typeof VendasRoute
-  VisaoGeralRoute: typeof VisaoGeralRoute
-  Visao_geralRoute: typeof Visao_geralRoute
-  WhatsappRoute: typeof WhatsappRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -388,20 +154,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/abandonos': {
-      id: '/abandonos'
-      path: '/abandonos'
-      fullPath: '/abandonos'
-      preLoaderRoute: typeof AbandonosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ajuda-milena': {
@@ -432,53 +184,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ComoFuncionaRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/configuracoes': {
-      id: '/configuracoes'
-      path: '/configuracoes'
-      fullPath: '/configuracoes'
-      preLoaderRoute: typeof ConfiguracoesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/conversas': {
-      id: '/conversas'
-      path: '/conversas'
-      fullPath: '/conversas'
-      preLoaderRoute: typeof ConversasRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/entrar': {
-      id: '/entrar'
-      path: '/entrar'
-      fullPath: '/entrar'
-      preLoaderRoute: typeof EntrarRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/escrever-carta': {
       id: '/escrever-carta'
       path: '/escrever-carta'
       fullPath: '/escrever-carta'
       preLoaderRoute: typeof EscreverCartaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/metricas': {
-      id: '/metricas'
-      path: '/metricas'
-      fullPath: '/metricas'
-      preLoaderRoute: typeof MetricasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/obrigado': {
@@ -488,53 +198,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ObrigadoRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/painel': {
-      id: '/painel'
-      path: '/painel'
-      fullPath: '/painel'
-      preLoaderRoute: typeof PainelRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pedidos': {
-      id: '/pedidos'
-      path: '/pedidos'
-      fullPath: '/pedidos'
-      preLoaderRoute: typeof PedidosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/perfil': {
-      id: '/perfil'
-      path: '/perfil'
-      fullPath: '/perfil'
-      preLoaderRoute: typeof PerfilRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/privacidade': {
       id: '/privacidade'
       path: '/privacidade'
       fullPath: '/privacidade'
       preLoaderRoute: typeof PrivacidadeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/rastreamento': {
-      id: '/rastreamento'
-      path: '/rastreamento'
-      fullPath: '/rastreamento'
-      preLoaderRoute: typeof RastreamentoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/relatorios': {
-      id: '/relatorios'
-      path: '/relatorios'
-      fullPath: '/relatorios'
-      preLoaderRoute: typeof RelatoriosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/telemetria': {
-      id: '/telemetria'
-      path: '/telemetria'
-      fullPath: '/telemetria'
-      preLoaderRoute: typeof TelemetriaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/termos': {
@@ -544,65 +212,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermosRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/vendas': {
-      id: '/vendas'
-      path: '/vendas'
-      fullPath: '/vendas'
-      preLoaderRoute: typeof VendasRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/visao-geral': {
-      id: '/visao-geral'
-      path: '/visao-geral'
-      fullPath: '/visao-geral'
-      preLoaderRoute: typeof VisaoGeralRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/visao_geral': {
-      id: '/visao_geral'
-      path: '/visao_geral'
-      fullPath: '/visao_geral'
-      preLoaderRoute: typeof Visao_geralRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/whatsapp': {
-      id: '/whatsapp'
-      path: '/whatsapp'
-      fullPath: '/whatsapp'
-      preLoaderRoute: typeof WhatsappRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AbandonosRoute: AbandonosRoute,
-  AdminRoute: AdminRoute,
   AjudaMilenaRoute: AjudaMilenaRoute,
   ApoioMilenaRoute: ApoioMilenaRoute,
   ChamadaAoVivoMilenaRoute: ChamadaAoVivoMilenaRoute,
   ComoFuncionaRoute: ComoFuncionaRoute,
-  ConfiguracoesRoute: ConfiguracoesRoute,
-  ConversasRoute: ConversasRoute,
-  DashboardRoute: DashboardRoute,
-  EntrarRoute: EntrarRoute,
   EscreverCartaRoute: EscreverCartaRoute,
-  LoginRoute: LoginRoute,
-  MetricasRoute: MetricasRoute,
   ObrigadoRoute: ObrigadoRoute,
-  PainelRoute: PainelRoute,
-  PedidosRoute: PedidosRoute,
-  PerfilRoute: PerfilRoute,
   PrivacidadeRoute: PrivacidadeRoute,
-  RastreamentoRoute: RastreamentoRoute,
-  RelatoriosRoute: RelatoriosRoute,
-  TelemetriaRoute: TelemetriaRoute,
   TermosRoute: TermosRoute,
-  VendasRoute: VendasRoute,
-  VisaoGeralRoute: VisaoGeralRoute,
-  Visao_geralRoute: Visao_geralRoute,
-  WhatsappRoute: WhatsappRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

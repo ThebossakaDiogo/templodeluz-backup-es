@@ -26,6 +26,7 @@ import { WhatsAppChat } from "@/components/WhatsAppChat";
 import { AbandonmentTracker } from "@/components/AbandonmentTracker";
 import { ProfileView } from "@/components/ProfileView";
 import { LoginPage } from "@/components/LoginPage";
+import { LiveTrackingHub } from "@/components/LiveTrackingHub";
 import { supabase } from "@/lib/supabase";
 import {
   DASHBOARD_PROFILES,
@@ -594,6 +595,7 @@ export function App() {
   const [allOrders, setAllOrders] = useState<PaymentOrder[]>([]);
   const [allLeads, setAllLeads] = useState<Lead[]>([]);
   const [whatsAppChatUnreadCount, setWhatsAppChatUnreadCount] = useState(0);
+  const [trackingView, setTrackingView] = useState<"funil" | "live">("funil");
   const fetchVersionRef = useRef(0);
 
   useEffect(() => {
@@ -1143,14 +1145,45 @@ export function App() {
 
           {/* SLUG: /rastreamento */}
           {section === "rastreamento" && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "26px" }}>
-              <FunnelTracker
-                leads={allLeads}
-                loading={loading}
-                onRefresh={fetchData}
-                onlineCount={onlineCount}
-              />
-              <ConsulentesTelemetryTable leads={allLeads} />
+            <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+              <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                <button
+                  type="button"
+                  onClick={() => setTrackingView("funil")}
+                  className={`btn ${trackingView === "funil" ? "btn-emerald" : "btn-secondary"}`}
+                  style={{ fontSize: "12px", padding: "6px 14px" }}
+                >
+                  Funil & Telemetria Geral
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTrackingView("live")}
+                  className={`btn ${trackingView === "live" ? "btn-emerald" : "btn-secondary"}`}
+                  style={{ fontSize: "12px", padding: "6px 14px" }}
+                >
+                  Tracking ao Vivo (Leads & WhatsApps)
+                </button>
+              </div>
+
+              {trackingView === "funil" ? (
+                <>
+                  <FunnelTracker
+                    leads={allLeads}
+                    loading={loading}
+                    onRefresh={fetchData}
+                    onlineCount={onlineCount}
+                  />
+                  <ConsulentesTelemetryTable leads={allLeads} />
+                </>
+              ) : (
+                <LiveTrackingHub
+                  leads={allLeads}
+                  orders={allOrders}
+                  loading={loading}
+                  onRefresh={fetchData}
+                  onlineCount={onlineCount}
+                />
+              )}
             </div>
           )}
 
