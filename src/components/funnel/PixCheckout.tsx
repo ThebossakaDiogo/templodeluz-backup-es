@@ -334,16 +334,28 @@ function formatPhone(value: string): string {
   return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
 }
 
-async function createPixCharge(
-  payerName: string,
-  amountCents: number,
-  productId: string,
-  payerPhone?: string,
-  payerEmail?: string,
-  enteQuerido?: string,
-  grauParentesco?: string,
-  attempt?: PixAttempt,
-): Promise<PixCharge> {
+interface CreatePixChargeParams {
+  readonly payerName: string;
+  readonly amountCents: number;
+  readonly productId: string;
+  readonly payerPhone?: string;
+  readonly payerEmail?: string;
+  readonly enteQuerido?: string;
+  readonly grauParentesco?: string;
+  readonly attempt?: PixAttempt;
+}
+
+async function createPixCharge(params: CreatePixChargeParams): Promise<PixCharge> {
+  const {
+    payerName,
+    amountCents,
+    productId,
+    payerPhone,
+    payerEmail,
+    enteQuerido,
+    grauParentesco,
+    attempt,
+  } = params;
   const url = `${config.supabaseUrl}/functions/v1/create-connectpay-pix`;
   if (!attempt) throw new Error("Tentativa PIX não inicializada.");
   const sessionId = getTelemetrySessionId();
@@ -714,6 +726,31 @@ interface PixPendingViewProps {
   readonly isLiveCall?: boolean;
 }
 
+function getUrgencyTone(remainingSeconds: number) {
+  if (remainingSeconds <= 60) {
+    return {
+      ring: "border-red-300 bg-red-50",
+      bar: "from-red-500 to-red-600",
+      text: "text-red-600",
+      label: "text-red-700",
+    };
+  }
+  if (remainingSeconds <= 300) {
+    return {
+      ring: "border-amber-300 bg-amber-50",
+      bar: "from-amber-500 to-red-500",
+      text: "text-amber-700",
+      label: "text-amber-800",
+    };
+  }
+  return {
+    ring: "border-amber-200 bg-amber-50",
+    bar: "from-amber-400 to-amber-500",
+    text: "text-[#2d144d]",
+    label: "text-amber-800",
+  };
+}
+
 function PixPendingView({
   charge,
   status,
@@ -766,12 +803,7 @@ function PixPendingView({
   const cycleMessage = cycleMessages[cycleIndex % cycleMessages.length] ?? cycleMessages[0]!;
 
   const urgencyPercent = Math.max(0, Math.min(100, (remaining / totalSeconds) * 100));
-  const urgencyTone =
-    remaining <= 60
-      ? { ring: "border-red-300 bg-red-50", bar: "from-red-500 to-red-600", text: "text-red-600", label: "text-red-700" }
-      : remaining <= 300
-        ? { ring: "border-amber-300 bg-amber-50", bar: "from-amber-500 to-red-500", text: "text-amber-700", label: "text-amber-800" }
-        : { ring: "border-amber-200 bg-amber-50", bar: "from-amber-400 to-amber-500", text: "text-[#2d144d]", label: "text-amber-800" };
+  const urgencyTone = getUrgencyTone(remaining);
 
   if (status === "paid") {
     return (
@@ -1074,7 +1106,7 @@ function CardCheckoutPreview({
   // Identificação da bandeira
   const rawCardDigits = cardNumber.replace(/\D/g, "");
   let brandObj = cardBrandsMap.default;
-  if (cardBrandsMap.visa.pattern.test(rawCardDigits)) brandObj = cardBrandsMap.visa;
+  if (rawCardDigits.startsWith("4")) brandObj = cardBrandsMap.visa;
   else if (cardBrandsMap.mastercard.pattern.test(rawCardDigits)) brandObj = cardBrandsMap.mastercard;
   else if (cardBrandsMap.amex.pattern.test(rawCardDigits)) brandObj = cardBrandsMap.amex;
   else if (cardBrandsMap.elo.pattern.test(rawCardDigits)) brandObj = cardBrandsMap.elo;
@@ -1084,15 +1116,19 @@ function CardCheckoutPreview({
   const installmentOptions = useMemo<{ label: string; val: string }[]>(() => {
     const list = [{ label: `1x de R$ ${totalReais.toFixed(2).replace(".", ",")} (Sem juros)`, val: "1x" }];
     if (totalReais >= 20) {
-      list.push({ label: `2x de R$ ${(totalReais / 2).toFixed(2).replace(".", ",")}`, val: "2x" });
-      list.push({ label: `3x de R$ ${(totalReais / 3).toFixed(2).replace(".", ",")}`, val: "3x" });
+      list.push(
+        { label: `2x de R$ ${(totalReais / 2).toFixed(2).replace(".", ",")}`, val: "2x" },
+        { label: `3x de R$ ${(totalReais / 3).toFixed(2).replace(".", ",")}`, val: "3x" }
+      );
     }
     if (totalReais >= 40) {
       list.push({ label: `6x de R$ ${(totalReais / 6).toFixed(2).replace(".", ",")}`, val: "6x" });
     }
     if (totalReais >= 70) {
-      list.push({ label: `10x de R$ ${(totalReais / 10).toFixed(2).replace(".", ",")}`, val: "10x" });
-      list.push({ label: `12x de R$ ${(totalReais / 12).toFixed(2).replace(".", ",")}`, val: "12x" });
+      list.push(
+        { label: `10x de R$ ${(totalReais / 10).toFixed(2).replace(".", ",")}`, val: "10x" },
+        { label: `12x de R$ ${(totalReais / 12).toFixed(2).replace(".", ",")}`, val: "12x" }
+      );
     }
     return list;
   }, [totalReais]);
@@ -1145,7 +1181,7 @@ function CardCheckoutPreview({
 
   const handleMonthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let val = e.target.value.replace(/\D/g, "");
-    if (val.length === 1 && parseInt(val, 10) > 1) {
+    if (val.length === 1 && Number.parseInt(val, 10) > 1) {
       val = "0" + val;
       setCardMonth(val);
       setTimeout(() => yearRef.current?.focus(), 50);
@@ -1153,7 +1189,7 @@ function CardCheckoutPreview({
     }
     if (val.length > 2) val = val.slice(0, 2);
     if (val.length === 2) {
-      let num = parseInt(val, 10);
+      let num = Number.parseInt(val, 10);
       if (num > 12) val = "12";
       if (num === 0) val = "01";
       setCardMonth(val);
@@ -1180,7 +1216,7 @@ function CardCheckoutPreview({
     setCardCvv(val);
   };
 
-  const handlePayWithCard = (e: React.FormEvent) => {
+  const handlePayWithCard = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!fullName.trim() || fullName.trim().length < 3) {
       setErrorMsg("Por favor, informe seu nome completo.");
@@ -1521,6 +1557,13 @@ function CardCheckoutPreview({
   );
 }
 
+function resolveCheckoutProductName(productId: string, displayProductName?: string): string {
+  if (displayProductName) return displayProductName;
+  if (productId === "carta_sagrada") return "Carta Psicografada Sagrada";
+  if (productId === "chamada_ao_vivo_milena") return "Chamada Ao Vivo com Milena";
+  return "Campanha Solidária - Cirurgia Médium Milena";
+}
+
 export function PixCheckout({
   productId,
   pixProductId,
@@ -1548,7 +1591,6 @@ export function PixCheckout({
   const [charge, setCharge] = useState<PixCharge | null>(() => getStoredPixCharge(productId, amountCents));
   const [status, setStatus] = useState<PixPaymentStatus>(() => getStoredPixCharge(productId, amountCents) ? "pending" : "creating");
   const [loading, setLoading] = useState(false);
-  const [cardLoading, setCardLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
   const [checkingManual, setCheckingManual] = useState(false);
@@ -1564,13 +1606,7 @@ export function PixCheckout({
   const resolvedGrau = grauParentesco || initial.relacao || undefined;
 
   const formattedAmount = (amountCents / 100).toFixed(2).replace(".", ",");
-  const prodName = displayProductName || (
-    productId === "carta_sagrada"
-      ? "Carta Psicografada Sagrada"
-      : productId === "chamada_ao_vivo_milena"
-        ? "Chamada Ao Vivo com Milena"
-        : "Campanha Solidária - Cirurgia Médium Milena"
-  );
+  const prodName = resolveCheckoutProductName(productId, displayProductName);
 
   useEffect(() => {
     const storedCharge = getStoredPixCharge(productId, amountCents);
@@ -1782,16 +1818,16 @@ export function PixCheckout({
     try {
       pixAttemptRef.current ||= getOrCreatePixAttempt(productId, amountCents);
       initiateCheckoutEventIdRef.current = pixAttemptRef.current.initiateCheckoutEventId;
-      const newCharge = await createPixCharge(
-        customerName.trim(),
+      const newCharge = await createPixCharge({
+        payerName: customerName.trim(),
         amountCents,
-        pixProductId || productId,
-        cleanPhone,
-        customerEmail.trim() || undefined,
-        resolvedEnte,
-        resolvedGrau,
-        pixAttemptRef.current,
-      );
+        productId: pixProductId || productId,
+        payerPhone: cleanPhone,
+        payerEmail: customerEmail.trim() || undefined,
+        enteQuerido: resolvedEnte,
+        grauParentesco: resolvedGrau,
+        attempt: pixAttemptRef.current,
+      });
       storePixCharge(productId, amountCents, newCharge);
       setCharge(newCharge);
       setStatus("pending");
@@ -1880,76 +1916,6 @@ export function PixCheckout({
     setManualCheckNotice("");
   };
 
-  const startStripeCheckout = async () => {
-    const cleanPhone = customerPhone.replace(/\D/g, "");
-    if (cleanPhone.length < 10) {
-      setError(`Por favor, informe seu WhatsApp com DDD para ${productId === "chamada_ao_vivo_milena" ? "confirmar o horário" : "envio da carta"}.`);
-      return;
-    }
-    setError("");
-    setCardLoading(true);
-    const payerName = customerName.trim() || "Consulente";
-    pixAttemptRef.current ||= getOrCreatePixAttempt(productId, amountCents);
-
-    try {
-      if (cleanPhone) {
-        recordInput(
-          "whatsapp_card_checkout",
-          customerPhone,
-          {
-            userName: customerName.trim(),
-            metadata: { phone: cleanPhone },
-            currentScreen: "card_checkout",
-          },
-          0
-        );
-      }
-
-      const checkoutSuccessPath = successPath || "/obrigado";
-      const checkoutCancelPath = successPath || "/";
-      const url = `${config.supabaseUrl}/functions/v1/create-stripe-checkout`;
-      const response = await fetch(url, {
-        method: "POST",
-        headers: pixFunctionHeaders(config),
-        body: JSON.stringify({
-          amountCents,
-          productName: prodName,
-          productId,
-          customerName: payerName,
-          customerEmail: customerEmail.trim() || undefined,
-          customerPhone: cleanPhone,
-          telemetrySessionId: getTelemetrySessionId(),
-          idempotencyKey: pixAttemptRef.current.idempotencyKey,
-          successUrl: `${window.location.origin}${includePaymentParams ? appendQuery(checkoutSuccessPath, "method=card&session_id={CHECKOUT_SESSION_ID}") : checkoutSuccessPath}`,
-          cancelUrl: `${window.location.origin}${appendQuery(checkoutCancelPath, "payment=cancelled")}`,
-          trackingParameters: getUtmParams(),
-        }),
-      });
-
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error || `Erro HTTP ${response.status}`);
-      }
-
-      const data = await response.json();
-      if (data?.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error("URL de checkout não retornada pela Stripe");
-      }
-    } catch (err: any) {
-      trackCardDeclined({
-        leadName: payerName,
-        leadEmail: customerEmail.trim() || undefined,
-        leadPhone: cleanPhone,
-        amountCents,
-      });
-      setError(err?.message || "Não foi possível iniciar o checkout com cartão. Tente novamente.");
-    } finally {
-      setCardLoading(false);
-    }
-  };
-
   const copyPix = async () => {
     if (!charge?.pixPayload) return;
     try {
@@ -1972,8 +1938,6 @@ export function PixCheckout({
   const handlePhoneBlur = () => {
     syncLeadPhoneImmediate(customerPhone, customerName);
   };
-
-  const hasCompleteIdentity = customerName.trim().length >= 2 && customerPhone.replace(/\D/g, "").length >= 10;
 
   return (
     <>
@@ -2025,11 +1989,11 @@ export function PixCheckout({
       {isOpen &&
         typeof document !== "undefined" &&
         createPortal(
-          <div
+          <dialog
+            open
             aria-modal="true"
-            role="dialog"
             aria-label={productId === "chamada_ao_vivo_milena" ? "Checkout da chamada ao vivo" : "Checkout da contribuição"}
-            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/75 p-3 backdrop-blur-sm sm:p-5"
+            className="fixed inset-0 z-[200] m-0 flex h-full max-h-none w-full max-w-none items-center justify-center border-none bg-black/75 p-3 backdrop-blur-sm sm:p-5"
           >
             <div className="fixed inset-0" onClick={() => setIsOpen(false)} aria-hidden="true" />
             <div className="relative z-10 max-h-[calc(100dvh-24px)] w-full overflow-y-auto overscroll-contain rounded-[26px] border border-[#e5daf0] bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] text-center shadow-2xl sm:max-w-[460px] sm:p-6">
@@ -2185,7 +2149,7 @@ export function PixCheckout({
                 </div>
               )}
             </div>
-          </div>,
+          </dialog>,
           document.body
         )}
     </>
