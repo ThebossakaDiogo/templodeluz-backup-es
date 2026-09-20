@@ -2006,6 +2006,13 @@ function Result({
     return () => window.clearInterval(timer);
   }, []);
 
+  const scrollToEscolha = () => {
+    const section = document.getElementById("escolha-caminho");
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   return (
     <div className="animate-rise-in pb-12 text-slate-900 bg-[#f5f7fb]">
       {/* ── HEADER: CONFIRMAÇÃO ESPIRITUAL & ESCOLHA COM CALMA ── */}
@@ -2074,10 +2081,7 @@ function Result({
             <div className="relative z-10 mt-5">
               <button
                 type="button"
-                onClick={() => {
-                  const section = document.getElementById("escolha-caminho");
-                  if (section) section.scrollIntoView({ behavior: "smooth" });
-                }}
+                onClick={scrollToEscolha}
                 className="group relative w-full overflow-hidden cursor-pointer rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 p-4 text-[14px] sm:text-[15px] font-black uppercase tracking-wide text-stone-950 shadow-xl shadow-amber-950/40 hover:brightness-105 active:scale-[0.99] transition-all"
               >
                 <span className="relative flex items-center justify-center gap-2">
@@ -2370,34 +2374,36 @@ function Result({
         </Reveal>
 
         {/* ── SEÇÃO DE ESCOLHA: AGORA ESCOLHA COMO DESEJA CONTINUAR ── */}
-        <Reveal className="relative mt-8 scroll-mt-12" id="escolha-caminho">
-          <div className="text-center mb-3">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#f2eef8] border border-[#e1d8ec] text-[#5d4786] text-[11px] font-extrabold uppercase tracking-wider">
-              <span>✦</span> Decisão Tranquila
-            </span>
-            <h2 className="font-display mt-2 text-[23px] sm:text-[26px] font-extrabold text-[#181126] leading-snug">
-              Agora escolha como deseja continuar
-            </h2>
-            <p className="mx-auto mt-1 max-w-md text-[13px] text-[#5e4b73]">
-              Selecione o caminho que melhor acolhe o seu momento e o seu coração:
-            </p>
-          </div>
+        <div id="escolha-caminho" className="scroll-mt-12">
+          <Reveal className="relative mt-8">
+            <div className="text-center mb-3">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#f2eef8] border border-[#e1d8ec] text-[#5d4786] text-[11px] font-extrabold uppercase tracking-wider">
+                <span>✦</span> Decisão Tranquila
+              </span>
+              <h2 className="font-display mt-2 text-[23px] sm:text-[26px] font-extrabold text-[#181126] leading-snug">
+                Agora escolha como deseja continuar
+              </h2>
+              <p className="mx-auto mt-1 max-w-md text-[13px] text-[#5e4b73]">
+                Selecione o caminho que melhor acolhe o seu momento e o seu coração:
+              </p>
+            </div>
 
-          {/* Opção 1 e Opção 2 integradas no seletor com PIX e Cartão */}
-          <PixInstantBox
-            primeiroNome={primeiro}
-            primeiroEnte={primeiroEnte}
-            nomeCompleto={nome}
-            enteCompleto={ente}
-            relacao={relacao}
-            mensagem={mensagem}
-            temas={temasEscolhidos}
-            horario={horarioExibicao}
-          />
+            {/* Opção 1 e Opção 2 integradas no seletor com PIX e Cartão */}
+            <PixInstantBox
+              primeiroNome={primeiro}
+              primeiroEnte={primeiroEnte}
+              nomeCompleto={nome}
+              enteCompleto={ente}
+              relacao={relacao}
+              mensagem={mensagem}
+              temas={temasEscolhidos}
+              horario={horarioExibicao}
+            />
 
-          {/* Selos de Segurança e Garantia */}
-          <SecurityGuaranteeSeal />
-        </Reveal>
+            {/* Selos de Segurança e Garantia */}
+            <SecurityGuaranteeSeal />
+          </Reveal>
+        </div>
 
         {/* ── SEÇÃO DE DÚVIDAS FREQUENTES (FAQ) ── */}
         <Reveal className="mt-10">
@@ -2423,10 +2429,7 @@ function Result({
             <div className="mt-5 max-w-sm mx-auto">
               <button
                 type="button"
-                onClick={() => {
-                  const section = document.getElementById("escolha-caminho");
-                  if (section) section.scrollIntoView({ behavior: "smooth" });
-                }}
+                onClick={scrollToEscolha}
                 className="w-full cursor-pointer rounded-2xl bg-gradient-to-r from-[#5d4786] via-[#4e3877] to-[#3a275f] p-4 text-[13.5px] sm:text-[14px] font-black uppercase tracking-wider text-white shadow-lg hover:brightness-110 active:scale-[0.99] transition-all"
               >
                 ESCOLHER COMO CONTINUAR

@@ -5,10 +5,12 @@ export function Reveal({
   children,
   delay = 0,
   className = "",
+  id,
 }: Readonly<{
   children: ReactNode;
   delay?: number;
   className?: string;
+  id?: string;
 }>) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [shown, setShown] = useState(false);
@@ -38,6 +40,7 @@ export function Reveal({
   return (
     <div
       ref={ref}
+      id={id}
       className={`${shown ? "reveal-in" : "reveal-hidden"} ${className}`}
       style={shown && delay ? { animationDelay: `${delay}ms` } : undefined}
     >
