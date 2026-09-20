@@ -82,13 +82,16 @@ function Cta({
   readonly pulse?: boolean;
 }) {
   let toneClasses =
-    "bg-gradient-to-r from-[#67508f] via-[#5d4786] to-[#49356f] text-white shadow-[#5d4786]/25 border border-[#8067a9]/35 hover:brightness-105";
+    "bg-gradient-to-r from-[#6d4e94] via-[#5d3f82] to-[#4b3070] text-white shadow-[#4b3070]/25 border border-[#8b6ab5]/35 hover:brightness-105";
   if (tone === "green") {
     toneClasses =
-      "bg-gradient-to-r from-[#2563eb] via-[#1d4ed8] to-[#173ea5] text-white shadow-[#1d4ed8]/30 border border-[#60a5fa]/35 hover:brightness-105";
+      "bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 text-white shadow-emerald-700/25 border border-emerald-400/35 hover:brightness-105";
+  } else if (tone === "gold") {
+    toneClasses =
+      "bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-stone-950 shadow-amber-950/20 border border-amber-300/60 hover:brightness-105";
   } else if (tone === "royal") {
     toneClasses =
-      "bg-gradient-to-r from-[#272039] via-[#211a35] to-[#171225] text-white shadow-[#211a35]/30 border border-[#46395e] hover:brightness-110";
+      "bg-gradient-to-r from-[#2c1d42] via-[#221535] to-[#180e28] text-white shadow-[#180e28]/30 border border-[#523875] hover:brightness-110";
   }
 
   return (
@@ -1591,8 +1594,8 @@ function Intro({
   const [letterModalOpen, setLetterModalOpen] = useState(false);
 
   return (
-    <div className="jungle-intro animate-rise-in min-h-screen bg-[#07142f]">
-      <header className="overflow-hidden bg-[#07142f]">
+    <div className="jungle-intro animate-rise-in min-h-screen bg-[#181024]">
+      <header className="overflow-hidden bg-[#181024]">
         <div className="w-full p-3 sm:p-4">
           <img
             src={milenaCartaImage}
@@ -1604,18 +1607,18 @@ function Intro({
         </div>
 
         <div className="px-4 pb-6 pt-5">
-          <div className="mx-auto max-w-[680px] rounded-[26px] border border-[#8bb8ff]/35 bg-[#10275a] p-5 shadow-[0_24px_56px_-28px_rgba(0,0,0,0.9)] text-center sm:p-7">
+          <div className="mx-auto max-w-[680px] rounded-[26px] border border-[#d8be7c]/35 bg-[#241739] p-5 shadow-[0_24px_56px_-28px_rgba(0,0,0,0.9)] text-center sm:p-7">
             <Stars className="mb-3" />
             <span className="mb-3 inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-[#e6efff]">
               Templo de Luz · Acolhimento privado
             </span>
             <h1 className="font-display text-[25px] sm:text-[32px] leading-[1.12] font-medium text-white tracking-[-0.03em]">
               Organize uma intenção de carta para quem você ama,{" "}
-              <span className="text-[#9cc4ff] underline decoration-[#f5d285] decoration-2 underline-offset-4">
+              <span className="text-[#f7dfa3] underline decoration-[#f5d285] decoration-2 underline-offset-4">
                 com acolhimento da médium Milena
               </span>
             </h1>
-            <p className="mt-3 text-[14px] leading-relaxed text-[#d9e6ff] font-normal">
+            <p className="mt-3 text-[14px] leading-relaxed text-[#ecdff8] font-normal">
               Um espaço de acolhimento para registrar sua história, sua saudade e o que deseja
               expressar.
             </p>
@@ -1624,7 +1627,7 @@ function Intro({
       </header>
 
       {/* Faixa de Prova Social */}
-      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 border-y border-white/10 bg-[#0b1d44] px-4 py-3 text-[11.5px] text-[#e7efff] sm:text-[12.5px]">
+      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 border-y border-white/10 bg-[#1e1330] px-4 py-3 text-[11.5px] text-[#f4ebfb] sm:text-[12.5px]">
         <span className="font-bold">💌 Atendimento acolhedor</span>
         <span className="h-3 w-px bg-white/20" />
         <span className="font-bold">✍️ Carta e pergaminho</span>
@@ -2798,7 +2801,7 @@ export function QuizFunnel() {
   const primeiroNome = nome?.trim() ? nome.trim().split(" ")[0] : "você";
 
   return (
-    <div className="jungle-quiz quiz-modern relative isolate mx-auto flex min-h-screen w-full max-w-[520px] flex-col overflow-hidden bg-[#07142f] text-[#272039] shadow-[0_0_70px_-30px_rgba(33,26,53,0.4)] border-x border-white/15">
+    <div className="jungle-quiz quiz-modern relative isolate mx-auto flex min-h-screen w-full max-w-[520px] flex-col overflow-hidden bg-[#181024] text-[#272039] shadow-[0_0_70px_-30px_rgba(33,26,53,0.4)] border-x border-white/15">
       <main className="relative z-10 flex flex-1 flex-col">
         {/* ETAPA 1: NOME */}
         {step === "intro" && (
