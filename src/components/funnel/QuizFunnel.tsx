@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useSearch, useNavigate } from "@tanstack/react-router";
 import { FAQ, IMAGES, STEPS_HOW } from "./data";
@@ -14,7 +14,6 @@ import insumoVelaImage from "../../assets/images/quiz/insumo-vela.png";
 import insumoCartaImage from "../../assets/images/quiz/insumo-carta.png";
 import insumoSopaImage from "../../assets/images/quiz/insumo-sopa.png";
 import milenaLoaderImage from "../../assets/images/quiz/milena-loader.jpeg";
-import milenaDonationAudio from "../../assets/media/audio/milena-doacao-templo.mp3";
 import milenaFreeLetterAudio from "../../assets/media/audio/milena-carta-gratuita.mp3";
 import correiosLogo from "../../assets/images/quiz/correios-logo.png";
 import { CustomAudioPlayer } from "./CustomAudioPlayer";
@@ -877,8 +876,11 @@ function PixInstantBox({
     if (!target || typeof IntersectionObserver === "undefined") return;
 
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsCheckoutInView(entry.isIntersecting && entry.intersectionRatio >= 0.15);
+      (entries) => {
+        const entry = entries[0];
+        if (entry) {
+          setIsCheckoutInView(entry.isIntersecting && entry.intersectionRatio >= 0.15);
+        }
       },
       {
         threshold: [0, 0.15, 0.5, 1],
@@ -1360,8 +1362,7 @@ function PixInstantBox({
                   Escrever uma mensagem com suas próprias palavras
                 </span>
                 <span className="text-[11.5px] text-slate-500 leading-relaxed block mt-0.5">
-                  Escreva à mão livre seu desabafo ou lembrança para <strong>{primeiroEnte}</strong>
-                  .
+                  Escreva à mão livre seu desabafo ou lembrança para <strong>{primeiroEnte}</strong>.
                 </span>
               </div>
             </div>
@@ -1756,6 +1757,60 @@ function Intro({
   );
 }
 
+function getLoadingCurrentStageText(pct: number): string {
+  if (pct < 35) return "Sintonizando oratório espiritual...";
+  if (pct < 72) return "Consagrando pergaminho e vela de altar...";
+  if (pct < 100) return "Confirmando com a médium Milena...";
+  return "Tudo pronto! Abrindo seu acolhimento...";
+}
+
+function getStageCardClass(isCompleted: boolean, isActive: boolean): string {
+  if (isCompleted) {
+    return "border-emerald-500/40 bg-gradient-to-r from-emerald-950/30 to-[#120a1c] shadow-[0_0_15px_rgba(16,185,129,0.08)]";
+  }
+  if (isActive) {
+    return "border-amber-400/60 bg-gradient-to-r from-amber-500/[0.08] to-purple-500/[0.06] shadow-[0_0_20px_rgba(245,158,11,0.15)] ring-1 ring-amber-400/30";
+  }
+  return "border-white/8 bg-white/[0.02] opacity-60";
+}
+
+function getStageIconClass(isCompleted: boolean, isActive: boolean): string {
+  if (isCompleted) {
+    return "border-emerald-500/50 bg-emerald-500/20 text-emerald-300";
+  }
+  if (isActive) {
+    return "border-amber-400/50 bg-amber-500/20 text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.3)]";
+  }
+  return "border-white/10 bg-white/5 text-stone-500";
+}
+
+function getStageTitleClass(isCompleted: boolean, isActive: boolean): string {
+  if (isCompleted) return "text-emerald-200";
+  if (isActive) return "text-white";
+  return "text-stone-400";
+}
+
+function getStageBadgeClass(isCompleted: boolean, isActive: boolean): string {
+  if (isCompleted) {
+    return "border border-emerald-500/40 bg-emerald-500/15 text-emerald-300";
+  }
+  if (isActive) {
+    return "border border-amber-400/40 bg-amber-500/15 text-amber-300 animate-pulse";
+  }
+  return "border border-white/5 bg-white/5 text-stone-500";
+}
+
+function getStageBadgeText(
+  isCompleted: boolean,
+  isActive: boolean,
+  doneStatus: string,
+  activeStatus: string,
+): string {
+  if (isCompleted) return doneStatus;
+  if (isActive) return activeStatus;
+  return "Aguardando";
+}
+
 function Loading({
   nome,
   ente,
@@ -1812,8 +1867,8 @@ function Loading({
     },
     {
       id: 2,
-      title: "2. Consagração no Altar & Pergaminho",
-      detail: "Separando o papel sagrado de algodão e acendendo a luz de 7 dias.",
+      title: "2. Consagração dos Materiais Sagrados",
+      detail: `Preparando a vela de 7 dias e o pergaminho consagrado no altar.`,
       icon: Scroll,
       isActive: pct >= 35 && pct < 72,
       isCompleted: pct >= 72,
@@ -1832,14 +1887,7 @@ function Loading({
     },
   ];
 
-  const currentStageText =
-    pct < 35
-      ? "Sintonizando oratório espiritual..."
-      : pct < 72
-        ? "Consagrando pergaminho e vela de altar..."
-        : pct < 100
-          ? "Confirmando com a médium Milena..."
-          : "Tudo pronto! Abrindo seu acolhimento...";
+  const currentStageText = getLoadingCurrentStageText(pct);
 
   return (
     <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-gradient-to-b from-[#140e22] via-[#0f0a1b] to-[#080510] px-4 py-8 text-center text-white sm:px-6">
@@ -1928,63 +1976,52 @@ function Loading({
             return (
               <div
                 key={st.id}
-                className={`relative flex items-start gap-3 rounded-xl border p-3 transition-all duration-300 ${
-                  st.isCompleted
-                    ? "border-emerald-500/40 bg-gradient-to-r from-emerald-950/30 to-[#120a1c] shadow-[0_0_15px_rgba(16,185,129,0.08)]"
-                    : st.isActive
-                      ? "border-amber-400/60 bg-gradient-to-r from-amber-500/[0.08] to-purple-500/[0.06] shadow-[0_0_20px_rgba(245,158,11,0.15)] ring-1 ring-amber-400/30"
-                      : "border-white/8 bg-white/[0.02] opacity-60"
-                }`}
+                className={`relative flex items-start gap-3 rounded-xl border p-3 transition-all duration-300 ${getStageCardClass(
+                  st.isCompleted,
+                  st.isActive,
+                )}`}
               >
                 {/* Ícone de Status da Etapa */}
                 <div
-                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-all ${
-                    st.isCompleted
-                      ? "border-emerald-500/50 bg-emerald-500/20 text-emerald-300"
-                      : st.isActive
-                        ? "border-amber-400/50 bg-amber-500/20 text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.3)]"
-                        : "border-white/10 bg-white/5 text-stone-500"
-                  }`}
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-all ${getStageIconClass(
+                    st.isCompleted,
+                    st.isActive,
+                  )}`}
                 >
-                  {st.isCompleted ? (
+                  {st.isCompleted && (
                     <Check size={16} strokeWidth={2.5} className="text-emerald-300" />
-                  ) : st.isActive ? (
-                    <Loader2 size={16} className="animate-spin text-amber-400" />
-                  ) : (
-                    <IconComponent size={15} />
                   )}
+                  {!st.isCompleted && st.isActive && (
+                    <Loader2 size={16} className="animate-spin text-amber-400" />
+                  )}
+                  {!st.isCompleted && !st.isActive && <IconComponent size={15} />}
                 </div>
 
                 {/* Conteúdo da Etapa */}
                 <div className="flex-1 min-w-0 pr-1">
                   <div className="flex items-center justify-between gap-1.5">
                     <h3
-                      className={`text-xs font-bold leading-snug ${
-                        st.isCompleted
-                          ? "text-emerald-200"
-                          : st.isActive
-                            ? "text-white"
-                            : "text-stone-400"
-                      }`}
+                      className={`text-xs font-bold leading-snug ${getStageTitleClass(
+                        st.isCompleted,
+                        st.isActive,
+                      )}`}
                     >
                       {st.title}
                     </h3>
 
                     {/* Badge de Status à Direita */}
                     <span
-                      className={`shrink-0 rounded-full px-2 py-0.5 text-[9.5px] font-bold uppercase tracking-wider ${
-                        st.isCompleted
-                          ? "border border-emerald-500/40 bg-emerald-500/15 text-emerald-300"
-                          : st.isActive
-                            ? "border border-amber-400/40 bg-amber-500/15 text-amber-300 animate-pulse"
-                            : "border border-white/5 bg-white/5 text-stone-500"
-                      }`}
+                      className={`shrink-0 rounded-full px-2 py-0.5 text-[9.5px] font-bold uppercase tracking-wider ${getStageBadgeClass(
+                        st.isCompleted,
+                        st.isActive,
+                      )}`}
                     >
-                      {st.isCompleted
-                        ? st.doneStatus
-                        : st.isActive
-                          ? st.activeStatus
-                          : "Aguardando"}
+                      {getStageBadgeText(
+                        st.isCompleted,
+                        st.isActive,
+                        st.doneStatus,
+                        st.activeStatus,
+                      )}
                     </span>
                   </div>
 
@@ -2058,11 +2095,6 @@ function Result({
   readonly mensagem?: string;
   readonly temasEscolhidos?: string[];
 }) {
-  const getStepBadgeColor = (idx: number) => {
-    if (idx === 0) return "bg-[#39776c] text-white";
-    if (idx === 1) return "bg-[#5d4786] text-white";
-    return "bg-slate-200 text-slate-600";
-  };
   const primeiro: string = (nome?.trim() ? nome.trim().split(" ")[0] : "Você") || "Você";
   const primeiroEnte: string =
     (ente?.trim() ? ente.trim().split(" ")[0] : "seu ente querido") || "seu ente querido";
@@ -2365,8 +2397,7 @@ function Result({
                 casa informados abaixo. Ela{" "}
                 <strong className="text-[#1f1035] font-extrabold">
                   não é o preço da psicografia
-                </strong>
-                .
+                </strong>.
               </p>
             </div>
 
