@@ -859,6 +859,8 @@ function PixInstantBox({
   const [isCustom, setIsCustom] = useState<boolean>(false);
   const [whatsAppModalOpen, setWhatsAppModalOpen] = useState<boolean>(false);
   const [freeLetterAudioOpen, setFreeLetterAudioOpen] = useState(false);
+  const [hasUserSelectedOption, setHasUserSelectedOption] = useState<boolean>(false);
+  const [isCheckoutInView, setIsCheckoutInView] = useState<boolean>(false);
   const [physicalLetterRequested, setPhysicalLetterRequested] = useState(() => {
     if (typeof window === "undefined") return false;
     const storedPreference = sessionStorage.getItem("templodeluz:physical-letter-selected");
@@ -869,6 +871,31 @@ function PixInstantBox({
   const physicalLetterFee = physicalLetterRequested && activeAmount < 40 ? 15 : 0;
   const checkoutAmount = activeAmount + physicalLetterFee;
   const impact = getDonationPsychologicalImpact(activeAmount, primeiroEnte, primeiroNome);
+
+  useEffect(() => {
+    const target = document.getElementById("area-pagamento-pix");
+    if (!target || typeof IntersectionObserver === "undefined") return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsCheckoutInView(entry.isIntersecting && entry.intersectionRatio >= 0.15);
+      },
+      {
+        threshold: [0, 0.15, 0.5, 1],
+        rootMargin: "0px 0px -40px 0px",
+      },
+    );
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [impact.isValid]);
+
+  const scrollToCheckout = () => {
+    const target = document.getElementById("area-pagamento-pix");
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   const physicalLetterBadge =
     physicalLetterRequested && physicalLetterFee === 0 ? "INCLUÍDA NO VALOR" : "+ R$ 15 ENTREGA";
@@ -886,11 +913,13 @@ function PixInstantBox({
     setIsCustom(true);
     const nextValue = sanitizeBrazilianCurrencyInput(e.target.value);
     setCustomInput(nextValue);
+    setHasUserSelectedOption(true);
     if (parseBrazilianCurrency(nextValue) > 0) handlePhysicalLetterPreference(true);
   };
 
   const handlePhysicalLetterPreference = (checked: boolean) => {
     setPhysicalLetterRequested(checked);
+    setHasUserSelectedOption(true);
     try {
       if (checked) {
         sessionStorage.setItem("templodeluz:physical-letter-selected", "true");
@@ -909,6 +938,7 @@ function PixInstantBox({
     setIsCustom(false);
     setCustomInput("");
     handlePhysicalLetterPreference(includesPhysical);
+    setHasUserSelectedOption(true);
   };
 
   const continueToPergaminho = () => {
@@ -1025,7 +1055,10 @@ function PixInstantBox({
                 type="text"
                 inputMode="decimal"
                 value={customInput}
-                onFocus={() => setIsCustom(true)}
+                onFocus={() => {
+                  setIsCustom(true);
+                  setHasUserSelectedOption(true);
+                }}
                 onChange={handleCustomChange}
                 placeholder="Ex.: 50,00"
                 className="w-full rounded-xl border border-[#d8cae5] bg-[#faf9fb] py-4 pl-12 pr-4 text-[22px] font-black text-[#272039] outline-none transition-all placeholder:text-slate-300 focus:border-[#6f5aa0] focus:bg-white"
@@ -1167,39 +1200,41 @@ function PixInstantBox({
         )}
       </div>
 
-      {impact.isValid ? (
-        <Suspense fallback={<DeferredFallback />}>
-          <PixCheckout
-            productId="carta_sagrada"
-            amountCents={Math.round(checkoutAmount * 100)}
-            initialCustomerName={nomeCompleto || primeiroNome}
-            enteQuerido={enteCompleto || primeiroEnte}
-            grauParentesco={relacao}
-            mensagemPreview={mensagem}
-            successPath="/chamada-ao-vivo-milena?source=paid&next=%2Fobrigado"
-            includePaymentParams={false}
-            displayProductName={
-              physicalLetterRequested ? "Contribuição + envio de carta física" : undefined
-            }
-            onPaymentConfirmed={(receipt) => {
-              if (physicalLetterRequested && receipt.orderId) {
-                sessionStorage.setItem(
-                  "templodeluz:physical-letter-fee-receipt",
-                  JSON.stringify({
-                    orderId: receipt.orderId,
-                    amountCents: receipt.amountCents,
-                    paidAt: new Date().toISOString(),
-                  }),
-                );
+      <div id="area-pagamento-pix" className="scroll-mt-14">
+        {impact.isValid ? (
+          <Suspense fallback={<DeferredFallback />}>
+            <PixCheckout
+              productId="carta_sagrada"
+              amountCents={Math.round(checkoutAmount * 100)}
+              initialCustomerName={nomeCompleto || primeiroNome}
+              enteQuerido={enteCompleto || primeiroEnte}
+              grauParentesco={relacao}
+              mensagemPreview={mensagem}
+              successPath="/chamada-ao-vivo-milena?source=paid&next=%2Fobrigado"
+              includePaymentParams={false}
+              displayProductName={
+                physicalLetterRequested ? "Contribuição + envio de carta física" : undefined
               }
-            }}
-          />
-        </Suspense>
-      ) : (
-        <div className="mt-5 p-4 rounded-2xl bg-zinc-100 border border-zinc-200 text-zinc-600 text-xs font-semibold">
-          Por favor, selecione ou digite um valor a partir de R$ 15 para continuar.
-        </div>
-      )}
+              onPaymentConfirmed={(receipt) => {
+                if (physicalLetterRequested && receipt.orderId) {
+                  sessionStorage.setItem(
+                    "templodeluz:physical-letter-fee-receipt",
+                    JSON.stringify({
+                      orderId: receipt.orderId,
+                      amountCents: receipt.amountCents,
+                      paidAt: new Date().toISOString(),
+                    }),
+                  );
+                }
+              }}
+            />
+          </Suspense>
+        ) : (
+          <div className="mt-5 p-4 rounded-2xl bg-zinc-100 border border-zinc-200 text-zinc-600 text-xs font-semibold">
+            Por favor, selecione ou digite um valor a partir de R$ 15 para continuar.
+          </div>
+        )}
+      </div>
 
       {/* Continuidade após o pagamento */}
       <div className="mt-4 pt-3 border-t border-slate-100">
@@ -1427,6 +1462,49 @@ function PixInstantBox({
               </div>,
               document.body,
             )}
+
+      {/* ── BARRA FLUTUANTE DE PAGAMENTO RÁPIDO (PIX / CARTÃO) ── */}
+      {hasUserSelectedOption &&
+        impact.isValid &&
+        !isCheckoutInView &&
+        !freeLetterAudioOpen &&
+        !whatsAppModalOpen &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <aside
+            className="float-bar-enter fixed bottom-0 left-0 right-0 z-[9990] border-t border-[#ded4eb] bg-white/95 px-4 py-3 shadow-[0_-12px_35px_rgba(33,26,53,0.22)] backdrop-blur-md transition-all sm:px-6"
+            aria-label="Pagamento Rápido"
+          >
+            <div className="mx-auto flex max-w-[480px] items-center justify-between gap-3">
+              <div className="min-w-0 flex-1 text-left">
+                <span className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 truncate">
+                  {physicalLetterRequested ? "Total com envio:" : "Valor selecionado:"}
+                </span>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="font-display text-[21px] sm:text-[24px] font-black text-[#2e1d4a] leading-none">
+                    R$ {checkoutAmount.toFixed(2).replace(".", ",")}
+                  </span>
+                  <span className="inline-flex text-[9.5px] font-extrabold text-[#5d4786] bg-[#f2eef8] border border-[#e1d8ec] px-1.5 py-0.5 rounded-md">
+                    PIX / Cartão
+                  </span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={scrollToCheckout}
+                className="group relative cursor-pointer flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 px-5 py-3 text-white font-black text-[13px] sm:text-[14px] uppercase tracking-wider shadow-lg shadow-emerald-950/20 hover:brightness-105 active:scale-[0.98] transition-all"
+              >
+                <PixIcon className="w-4 h-4 fill-white shrink-0" />
+                <span>PAGAR AGORA</span>
+                <span className="text-emerald-100 text-base leading-none transition-transform group-hover:translate-y-0.5">
+                  ↓
+                </span>
+              </button>
+            </div>
+          </aside>,
+          document.body,
+        )}
         </div>
       </div>
     </div>
