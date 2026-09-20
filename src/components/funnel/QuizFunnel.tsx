@@ -896,9 +896,17 @@ function PixInstantBox({
   }, [impact.isValid]);
 
   const scrollToCheckout = () => {
-    const target = document.getElementById("area-pagamento-pix");
-    if (target) {
-      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    const payBtn =
+      document.getElementById("botao-pagamento-checkout") ||
+      document.querySelector<HTMLButtonElement>("#area-pagamento-pix button.utmify-initiate-checkout") ||
+      document.getElementById("area-pagamento-pix");
+
+    if (payBtn) {
+      payBtn.scrollIntoView({ behavior: "smooth", block: "center" });
+      payBtn.classList.add("ring-4", "ring-emerald-400", "scale-[1.015]");
+      window.setTimeout(() => {
+        payBtn.classList.remove("ring-4", "ring-emerald-400", "scale-[1.015]");
+      }, 1600);
     }
   };
 
@@ -1248,21 +1256,17 @@ function PixInstantBox({
         </p>
       </div>
 
-      {/* Botão de WhatsApp Oficial - Espaçoso, Elegante e Direto */}
+      {/* Linha de Apoio via WhatsApp - Sutil, elegante e sem roubar o foco do pagamento */}
       <div className="mt-4 pt-3.5 border-t border-slate-100">
         <button
           type="button"
           onClick={() => setWhatsAppModalOpen(true)}
-          className="group relative w-full overflow-hidden rounded-2xl bg-gradient-to-r from-[#128C7E] via-[#25D366] to-[#075E54] p-3.5 sm:p-4 text-white shadow-md shadow-emerald-900/15 hover:shadow-lg hover:shadow-emerald-900/25 active:scale-[0.99] transition-all text-left cursor-pointer"
+          className="group flex w-full items-center justify-between gap-3 rounded-2xl border border-emerald-200/80 bg-emerald-50/50 hover:bg-emerald-100/50 p-3 sm:p-3.5 transition-all text-left cursor-pointer shadow-2xs"
         >
-          {/* Brilho suave deslizante */}
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
-
-          <div className="flex items-center gap-3 relative z-10">
-            {/* Ícone WhatsApp com Ponto Online Vivo */}
-            <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-[#25D366] shadow-sm">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#25D366] text-white shadow-xs">
               <svg
-                className="w-6 h-6 text-[#25D366]"
+                className="w-5 h-5 text-white"
                 viewBox="0 0 24 24"
                 fill="currentColor"
                 aria-hidden="true"
@@ -1270,35 +1274,24 @@ function PixInstantBox({
                 <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.694.062-1.107-.07-.251-.08-.574-.188-.988-.369-1.758-.767-2.903-2.545-2.991-2.663-.088-.118-.718-.956-.718-1.822 0-.866.453-1.293.614-1.469.161-.177.351-.221.468-.221.117 0 .234.001.336.006.107.005.251-.041.393.298.146.351.498 1.214.542 1.303.044.088.073.192.015.308-.059.117-.088.19-.176.293-.088.103-.186.23-.265.31-.088.088-.18.184-.078.36.103.176.458.756.983 1.224.676.602 1.246.789 1.422.877.176.088.279.074.382-.044.103-.117.439-.512.556-.688.117-.176.235-.147.396-.088.161.059 1.026.484 1.202.572.176.088.293.132.337.206.044.074.044.43-.1 1.035z" />
                 <path d="M12 2C6.477 2 2 6.477 2 12c0 1.891.523 3.664 1.435 5.186L2.1 22l4.98-1.306A9.958 9.958 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18.2c-1.635 0-3.15-.494-4.414-1.343l-.316-.214-2.95.774.787-2.876-.234-.336A8.163 8.163 0 0 1 3.8 12c0-4.521 3.679-8.2 8.2-8.2 4.521 0 8.2 3.679 8.2 8.2 0 4.521-3.679 8.2-8.2 8.2z" />
               </svg>
-              <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-200 opacity-80" />
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-[#25D366] border-2 border-white" />
-              </span>
             </div>
-
-            {/* Textos sem aperto */}
-            <div className="flex-1 min-w-0">
+            <div className="min-w-0">
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-100 bg-black/15 px-2 py-0.5 rounded-md">
-                  WhatsApp Oficial
+                <span className="text-[9.5px] font-extrabold uppercase tracking-wider text-emerald-800 bg-emerald-200/60 px-1.5 py-0.5 rounded">
+                  Suporte
                 </span>
-                <span className="text-[10.5px] font-semibold text-emerald-100/90">
-                  Médium Milena
+                <span className="text-[12px] font-bold text-slate-900 leading-tight">
+                  Dúvidas com seu pedido? Fale no WhatsApp
                 </span>
               </div>
-              <div className="text-[14px] sm:text-[15px] font-black text-white leading-snug mt-0.5">
-                Falar com a Médium no WhatsApp
-              </div>
-              <p className="text-[11.5px] text-emerald-100/90 leading-tight mt-0.5 truncate">
-                Dúvidas ou prefere atendimento direto? Toque aqui
+              <p className="text-[11px] text-slate-500 leading-tight mt-0.5 truncate">
+                Atendimento fraterno com a equipe da Médium Milena
               </p>
             </div>
-
-            {/* Seta direta e limpa */}
-            <div className="shrink-0 flex items-center justify-center h-8 w-8 rounded-full bg-white/20 text-white font-black text-sm group-hover:bg-white group-hover:text-emerald-700 transition-all">
-              ›
-            </div>
           </div>
+          <span className="shrink-0 flex items-center justify-center h-7 w-7 rounded-full bg-emerald-200/50 text-emerald-800 font-black text-sm group-hover:bg-emerald-600 group-hover:text-white transition-all">
+            ›
+          </span>
         </button>
       </div>
 
@@ -1323,7 +1316,7 @@ function PixInstantBox({
       </Suspense>
 
       {/* ── OPÇÃO 2: CONTINUAR SEM CONTRIBUIR AGORA ── */}
-      <div className="mt-6 pt-5 border-t border-slate-200/80">
+      <div className="mt-8 pt-6 border-t border-slate-200/80">
         <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 text-left shadow-xs">
           {/* Badge & Título */}
           <div className="flex items-center gap-2 mb-1.5">

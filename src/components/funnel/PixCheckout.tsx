@@ -1980,9 +1980,10 @@ export function PixCheckout({
       {/* Botão Gatilho com Suporte a PIX e Cartão */}
       <div className="mt-5 text-center">
         <button
+          id="botao-pagamento-checkout"
           type="button"
           onClick={handleOpenCheckout}
-          className="utmify-initiate-checkout group relative flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 px-6 py-4 text-[14.5px] font-black uppercase tracking-wide text-white shadow-xl shadow-emerald-600/30 transition-all duration-200 hover:scale-[1.015] hover:brightness-105 active:scale-[0.985]"
+          className="utmify-initiate-checkout group relative flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 px-6 py-4 text-[14.5px] font-black uppercase tracking-wide text-white shadow-xl shadow-emerald-600/30 transition-all duration-200 hover:scale-[1.015] hover:brightness-105 active:scale-[0.985] scroll-mt-32"
         >
           {charge ? (
             <PixIcon className="w-5 h-5 text-white shrink-0 drop-shadow-xs" />
