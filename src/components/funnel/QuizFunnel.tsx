@@ -863,6 +863,7 @@ function PixInstantBox({
   const [freeLetterAudioOpen, setFreeLetterAudioOpen] = useState(false);
   const [hasUserSelectedOption, setHasUserSelectedOption] = useState<boolean>(false);
   const [isCheckoutInView, setIsCheckoutInView] = useState<boolean>(false);
+  const [checkoutPosition, setCheckoutPosition] = useState<"above" | "below">("below");
   const [physicalLetterRequested, setPhysicalLetterRequested] = useState(() => {
     if (typeof window === "undefined") return false;
     const storedPreference = sessionStorage.getItem("templodeluz:physical-letter-selected");
@@ -875,25 +876,45 @@ function PixInstantBox({
   const impact = getDonationPsychologicalImpact(activeAmount, primeiroEnte, primeiroNome);
 
   useEffect(() => {
-    const target = document.getElementById("area-pagamento-pix");
-    if (!target || typeof IntersectionObserver === "undefined") return;
+    const getCheckoutTarget = () =>
+      document.getElementById("botao-pagamento-checkout") ||
+      document.querySelector<HTMLElement>("#area-pagamento-pix button.utmify-initiate-checkout") ||
+      document.getElementById("area-pagamento-pix");
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (entry) {
-          setIsCheckoutInView(entry.isIntersecting && entry.intersectionRatio >= 0.15);
-        }
-      },
-      {
-        threshold: [0, 0.15, 0.5, 1],
-        rootMargin: "0px 0px -40px 0px",
-      },
-    );
+    let rafId: number | null = null;
 
-    observer.observe(target);
-    return () => observer.disconnect();
-  }, [impact.isValid]);
+    const checkPosition = () => {
+      const el = getCheckoutTarget();
+      if (!el) return;
+
+      const rect = el.getBoundingClientRect();
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+
+      const inView = rect.top < viewportHeight - 50 && rect.bottom > 50;
+      setIsCheckoutInView(inView);
+
+      if (rect.top < 0) {
+        setCheckoutPosition("above");
+      } else {
+        setCheckoutPosition("below");
+      }
+    };
+
+    const handleScrollOrResize = () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      rafId = window.requestAnimationFrame(checkPosition);
+    };
+
+    checkPosition();
+    window.addEventListener("scroll", handleScrollOrResize, { passive: true });
+    window.addEventListener("resize", handleScrollOrResize, { passive: true });
+
+    return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      window.removeEventListener("scroll", handleScrollOrResize);
+      window.removeEventListener("resize", handleScrollOrResize);
+    };
+  }, [impact.isValid, hasUserSelectedOption]);
 
   const scrollToCheckout = () => {
     const payBtn =
@@ -1494,8 +1515,15 @@ function PixInstantBox({
               >
                 <PixIcon className="w-4 h-4 fill-white shrink-0" />
                 <span>PAGAR AGORA</span>
-                <span className="text-emerald-100 text-base leading-none transition-transform group-hover:translate-y-0.5">
-                  ↓
+                <span
+                  aria-hidden="true"
+                  className={`text-emerald-100 text-base leading-none transition-transform ${
+                    checkoutPosition === "above"
+                      ? "group-hover:-translate-y-0.5"
+                      : "group-hover:translate-y-0.5"
+                  }`}
+                >
+                  {checkoutPosition === "above" ? "↑" : "↓"}
                 </span>
               </button>
             </div>
