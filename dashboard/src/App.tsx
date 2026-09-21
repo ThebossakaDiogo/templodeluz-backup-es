@@ -27,6 +27,7 @@ import { AbandonmentTracker } from "@/components/AbandonmentTracker";
 import { ProfileView } from "@/components/ProfileView";
 import { LoginPage } from "@/components/LoginPage";
 import { LiveTrackingHub } from "@/components/LiveTrackingHub";
+import { AdSpendTracker } from "@/components/AdSpendTracker";
 import { supabase } from "@/lib/supabase";
 import {
   DASHBOARD_PROFILES,
@@ -422,7 +423,7 @@ function reconcileDashboardData(
 }
 
 // ─── Secções & Slugs do painel ───────────────────────────────────────────────
-export type Section = "visao-geral" | "rastreamento" | "abandonos" | "pedidos" | "relatorios" | "whatsapp" | "perfil" | "login";
+export type Section = "visao-geral" | "anuncios" | "rastreamento" | "abandonos" | "pedidos" | "relatorios" | "whatsapp" | "perfil" | "login";
 
 const SLUG_TO_SECTION: Record<string, Section> = {
   "/": "visao-geral",
@@ -431,6 +432,10 @@ const SLUG_TO_SECTION: Record<string, Section> = {
   "/dashboard": "visao-geral",
   "/painel": "visao-geral",
   "/admin": "visao-geral",
+  "/anuncios": "anuncios",
+  "/gastos": "anuncios",
+  "/lucro": "anuncios",
+  "/trafego": "anuncios",
   "/rastreamento": "rastreamento",
   "/telemetria": "rastreamento",
   "/abandonos": "abandonos",
@@ -448,6 +453,7 @@ const SLUG_TO_SECTION: Record<string, Section> = {
 
 const SECTION_TO_SLUG: Record<Section, string> = {
   "visao-geral": "/visao-geral",
+  "anuncios": "/anuncios",
   "rastreamento": "/rastreamento",
   "abandonos": "/abandonos",
   "pedidos": "/pedidos",
@@ -632,19 +638,33 @@ export function App() {
       localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
       setTheme(nextTheme);
     };
+
+    root.classList.add("dashboard-theme-fade");
+
     const viewTransition = (document as Document & {
-      startViewTransition?: (callback: () => void) => { ready: Promise<void> };
+      startViewTransition?: (callback: () => void) => { ready: Promise<void>; finished?: Promise<void> };
     }).startViewTransition;
 
     if (!viewTransition) {
-      root.classList.add("dashboard-theme-fade");
       applyTheme();
-      window.setTimeout(() => root.classList.remove("dashboard-theme-fade"), 450);
+      window.setTimeout(() => root.classList.remove("dashboard-theme-fade"), 350);
       return;
     }
 
-    const transition = viewTransition.call(document, applyTheme);
-    void transition.ready.catch(() => undefined);
+    try {
+      const transition = viewTransition.call(document, applyTheme);
+      void transition.ready.catch(() => undefined);
+      if (transition.finished) {
+        void transition.finished.finally(() => {
+          root.classList.remove("dashboard-theme-fade");
+        });
+      } else {
+        window.setTimeout(() => root.classList.remove("dashboard-theme-fade"), 350);
+      }
+    } catch {
+      applyTheme();
+      window.setTimeout(() => root.classList.remove("dashboard-theme-fade"), 350);
+    }
   };
 
   const activeDashboardProfile = useMemo(
@@ -1143,6 +1163,15 @@ export function App() {
             </>
           )}
 
+          {/* SLUG: /anuncios */}
+          {section === "anuncios" && (
+            <AdSpendTracker
+              orders={allOrders}
+              profile={dashboardProfile}
+              dateKeyFn={dateKeyInBrasilia}
+            />
+          )}
+
           {/* SLUG: /rastreamento */}
           {section === "rastreamento" && (
             <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
@@ -1191,7 +1220,11 @@ export function App() {
           {section === "abandonos" && (
             <AbandonmentTracker
               leads={filteredLeads.length > 0 ? filteredLeads : allLeads}
+              orders={allOrders}
+              profile={dashboardProfile}
+              accessToken={session.access_token}
               loading={loading}
+              onRefresh={() => { void fetchData({ showSpinner: true }); }}
             />
           )}
 

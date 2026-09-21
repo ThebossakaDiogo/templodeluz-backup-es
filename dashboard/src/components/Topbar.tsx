@@ -35,6 +35,7 @@ interface TopbarProps {
 
 const SECTION_LABELS: Record<Section, string> = {
   "visao-geral":  "Visão Geral",
+  "anuncios":     "Gastos & Lucro",
   "rastreamento": "Funil & Telemetria",
   "abandonos":    "Métricas de Abandono",
   "pedidos":      "Auditoria de Pedidos",
@@ -69,7 +70,7 @@ export function Topbar({
     });
   }, []);
 
-  const showDateRange = section === "visao-geral" || section === "pedidos" || section === "relatorios";
+  const showDateRange = section === "visao-geral" || section === "anuncios" || section === "pedidos" || section === "relatorios";
 
   return (
     <>

@@ -1,6 +1,7 @@
 import type { Section } from "../App";
 import {
   LayoutGrid,
+  TrendingUp,
   Activity,
   CreditCard,
   FileBarChart2,
@@ -37,6 +38,14 @@ const ITEMS: {
     sub: "Métricas & Pizza Charts",
     Icon: LayoutGrid,
     accent: "#f59e0b", // Gold Imperial
+  },
+  {
+    id: "anuncios",
+    slug: "/anuncios",
+    label: "Gastos & Lucro",
+    sub: "Ad Spend, Receita & ROI",
+    Icon: TrendingUp,
+    accent: "#10b981", // Emerald Verde
   },
   {
     id: "rastreamento",

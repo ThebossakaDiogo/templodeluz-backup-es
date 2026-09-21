@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
   LayoutGrid,
+  TrendingUp,
   Activity,
   CreditCard,
   BarChart3,
@@ -44,6 +45,7 @@ export function FloatingDockNav({
 
   const navItems: DockItem[] = [
     { id: "visao-geral",  label: "Visão Geral", icon: LayoutGrid },
+    { id: "anuncios",     label: "Gastos & Lucro", icon: TrendingUp },
     { id: "rastreamento", label: "Funil & Telemetria", icon: Activity, badge: onlineCount > 0 ? `${onlineCount}` : undefined },
     { id: "pedidos",      label: "Pedidos & Vendas", icon: CreditCard },
     { id: "relatorios",   label: "Relatórios & UTMs", icon: BarChart3 },

@@ -64,6 +64,7 @@ export interface WhatsAppChatClient {
   updateAiSettings(settings: Partial<WhatsAppAiSettings>): Promise<WhatsAppAiSettings>;
   generateDraft(threadId: string): Promise<{ draft: string; run: WhatsAppAiRun | null }>;
   listAiRuns(threadId: string): Promise<WhatsAppAiRun[]>;
+  createThread(input: { customerPhone: string; customerName: string | null }): Promise<WhatsAppChatThread>;
   sendText(input: { thread: WhatsAppChatThread; content: string }): Promise<void>;
   sendMaterial(input: { thread: WhatsAppChatThread; material: WhatsAppMaterial }): Promise<void>;
   getEvolutionStatus(): Promise<WhatsAppEvolutionStatus>;
@@ -200,6 +201,9 @@ export function createWhatsAppChatClient(
     async listAiRuns(threadId) {
       const result = await invoke<{ runs: WhatsAppAiRun[] }>("list_ai_runs", { threadId });
       return result.runs ?? [];
+    },
+    async createThread({ customerPhone, customerName }) {
+      return mapThread(await invoke<AdminThreadRow>("create_thread", { customerPhone, customerName }));
     },
     async sendText({ thread, content }) {
       await invoke("send_message", { threadId: thread.id, body: content, messageType: "text" });

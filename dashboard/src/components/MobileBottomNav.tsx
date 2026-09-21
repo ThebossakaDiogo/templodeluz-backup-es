@@ -8,6 +8,7 @@ import {
   LayoutGrid,
   Menu,
   MessageCircle,
+  TrendingUp,
   User,
   X,
 } from "lucide-react";
@@ -27,6 +28,7 @@ const PRIMARY_ITEMS = [
 ];
 
 const MORE_ITEMS = [
+  { id: "anuncios" as Section, label: "Gastos & Lucro", detail: "Gastos em anúncios, receita e ROI", Icon: TrendingUp },
   { id: "abandonos" as Section, label: "Abandono e recuperação", detail: "PIX e checkouts pendentes", Icon: AlertOctagon },
   { id: "relatorios" as Section, label: "Relatórios", detail: "Canais, UTMs e exportação", Icon: BarChart3 },
   { id: "perfil" as Section, label: "Meu perfil", detail: "Conta e preferências", Icon: User },
