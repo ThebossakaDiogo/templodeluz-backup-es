@@ -14,13 +14,13 @@ import {
 import { PwaInstallPrompt } from "./PwaInstallPrompt";
 
 interface SidebarProps {
-  section: Section;
-  onSelect: (section: Section) => void;
-  onlineCount: number;
-  currentUserEmail?: string;
-  onSignOut?: () => void;
-  isOpenMobile?: boolean;
-  onCloseMobile?: () => void;
+  readonly section: Section;
+  readonly onSelect: (section: Section) => void;
+  readonly onlineCount: number;
+  readonly currentUserEmail?: string;
+  readonly onSignOut?: () => void;
+  readonly isOpenMobile?: boolean;
+  readonly onCloseMobile?: () => void;
 }
 
 const ITEMS: {
@@ -102,9 +102,11 @@ export function Sidebar({
     <>
       {/* Backdrop para mobile */}
       {isOpenMobile && (
-        <div
+        <button
+          type="button"
           onClick={onCloseMobile}
           className="mobile-sidebar-backdrop"
+          aria-label="Fechar menu lateral"
         />
       )}
       <aside
@@ -122,7 +124,7 @@ export function Sidebar({
             />
             <div>
               <div className="sidebar-brand-text">
-                OD Metrics
+                {"OD Metrics "}
                 <span className="sidebar-brand-reg">®</span>
               </div>
               <span className="sidebar-brand-sub">

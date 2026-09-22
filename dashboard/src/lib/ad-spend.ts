@@ -89,7 +89,7 @@ export function calculateDayRoi(revenue: number, spend: number): number {
   return Number((revenue / spend).toFixed(2));
 }
 
-export function calculateAdSpendSummary(records: AdSpendDayRecord[]): AdSpendSummary {
+export function calculateAdSpendSummary(records: readonly AdSpendDayRecord[]): AdSpendSummary {
   let totalSpend = 0;
   let totalRevenue = 0;
   let profitableDaysCount = 0;
@@ -104,7 +104,12 @@ export function calculateAdSpendSummary(records: AdSpendDayRecord[]): AdSpendSum
   }
 
   const totalProfit = Number((totalRevenue - totalSpend).toFixed(2));
-  const overallRoi = totalSpend > 0 ? Number((totalRevenue / totalSpend).toFixed(2)) : (totalRevenue > 0 ? 999 : 0);
+  let overallRoi = 0;
+  if (totalSpend > 0) {
+    overallRoi = Number((totalRevenue / totalSpend).toFixed(2));
+  } else if (totalRevenue > 0) {
+    overallRoi = 999;
+  }
 
   return {
     totalSpend: Number(totalSpend.toFixed(2)),
@@ -149,7 +154,7 @@ export function formatFullDayDisplay(dateIsoYmd: string): string {
  * Agrupa ordens pagas por data em Brasília (YYYY-MM-DD) para sincronização automática.
  */
 export function aggregateRevenueByDate(
-  orders: PaymentOrder[],
+  orders: readonly PaymentOrder[],
   dateKeyFn: (date: string | Date) => string
 ): Map<string, number> {
   const revenueMap = new Map<string, number>();
@@ -168,7 +173,7 @@ export function aggregateRevenueByDate(
 /**
  * Gera arquivo CSV compatível com Excel e Google Sheets.
  */
-export function exportAdSpendToCsv(records: AdSpendDayRecord[], profileLabel: string): void {
+export function exportAdSpendToCsv(records: readonly AdSpendDayRecord[], profileLabel: string): void {
   const headers = ["Data", "Gastos (R$)", "Receita (R$)", "Lucro (R$)", "ROI", "Observações"];
   const rows = records.map((r) => {
     const profit = calculateDayProfit(r.revenue, r.spend);
@@ -180,7 +185,7 @@ export function exportAdSpendToCsv(records: AdSpendDayRecord[], profileLabel: st
       r.revenue.toFixed(2).replace(".", ","),
       profit.toFixed(2).replace(".", ","),
       roiStr,
-      `"${(r.notes || "").replace(/"/g, '""')}"`,
+      `"${(r.notes || "").replaceAll('"', '""')}"`,
     ].join(";");
   });
 
@@ -192,6 +197,6 @@ export function exportAdSpendToCsv(records: AdSpendDayRecord[], profileLabel: st
   a.download = `controle-anuncios-${profileLabel.toLowerCase()}-${new Date().toISOString().slice(0, 10)}.csv`;
   document.body.appendChild(a);
   a.click();
-  document.body.removeChild(a);
+  a.remove();
   URL.revokeObjectURL(url);
 }

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, type SyntheticEvent } from "react";
 import {
   TrendingUp,
   TrendingDown,
@@ -29,7 +29,7 @@ import {
 } from "@/lib/ad-spend";
 
 interface AdSpendTrackerProps {
-  readonly orders: PaymentOrder[];
+  readonly orders: readonly PaymentOrder[];
   readonly profile: DashboardProfileId;
   readonly dateKeyFn: (value: string | Date) => string;
 }
@@ -84,7 +84,7 @@ export function AdSpendTracker({ orders, profile, dateKeyFn }: Readonly<AdSpendT
     saveAdSpendRecords(profile, updated);
   };
 
-  const handleSaveModal = (e: React.FormEvent) => {
+  const handleSaveModal = (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!formDate) return;
 
@@ -511,10 +511,11 @@ export function AdSpendTracker({ orders, profile, dateKeyFn }: Readonly<AdSpendT
             <form onSubmit={handleSaveModal} className="space-y-4">
               {/* Data */}
               <div>
-                <label className="block text-xs font-bold text-[var(--text-muted)] mb-1">
+                <label htmlFor="ad-spend-modal-date" className="block text-xs font-bold text-[var(--text-muted)] mb-1">
                   Data do Lançamento
                 </label>
                 <input
+                  id="ad-spend-modal-date"
                   type="date"
                   required
                   value={formDate}
@@ -525,10 +526,11 @@ export function AdSpendTracker({ orders, profile, dateKeyFn }: Readonly<AdSpendT
 
               {/* Gastos em Anúncios */}
               <div>
-                <label className="block text-xs font-bold text-[var(--text-muted)] mb-1">
+                <label htmlFor="ad-spend-modal-spend" className="block text-xs font-bold text-[var(--text-muted)] mb-1">
                   Gastos em Anúncios (R$)
                 </label>
                 <input
+                  id="ad-spend-modal-spend"
                   type="text"
                   placeholder="Ex: 32,25"
                   value={formSpend}
@@ -543,7 +545,7 @@ export function AdSpendTracker({ orders, profile, dateKeyFn }: Readonly<AdSpendT
               {/* Receita */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-bold text-[var(--text-muted)]">
+                  <label htmlFor="ad-spend-modal-revenue" className="block text-xs font-bold text-[var(--text-muted)]">
                     Receita / Faturamento (R$)
                   </label>
                   <button
@@ -555,6 +557,7 @@ export function AdSpendTracker({ orders, profile, dateKeyFn }: Readonly<AdSpendT
                   </button>
                 </div>
                 <input
+                  id="ad-spend-modal-revenue"
                   type="text"
                   placeholder="Ex: 64,95"
                   value={formRevenue}
@@ -568,10 +571,11 @@ export function AdSpendTracker({ orders, profile, dateKeyFn }: Readonly<AdSpendT
 
               {/* Observações */}
               <div>
-                <label className="block text-xs font-bold text-[var(--text-muted)] mb-1">
+                <label htmlFor="ad-spend-modal-notes" className="block text-xs font-bold text-[var(--text-muted)] mb-1">
                   Observações do Dia
                 </label>
                 <textarea
+                  id="ad-spend-modal-notes"
                   rows={2}
                   placeholder="Ex: Teste de novos criativos, primeiro dia de oferta..."
                   value={formNotes}

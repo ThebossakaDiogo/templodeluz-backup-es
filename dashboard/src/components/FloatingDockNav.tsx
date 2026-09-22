@@ -16,13 +16,12 @@ import {
 import type { Section } from "../App";
 
 interface FloatingDockNavProps {
-  section: Section;
-  onSelect: (section: Section) => void;
-  onlineCount: number;
-  theme: "light" | "dark";
-  onToggleTheme: () => void;
-  currentUserEmail?: string;
-  onSignOut: () => void;
+  readonly section: Section;
+  readonly onSelect: (section: Section) => void;
+  readonly onlineCount: number;
+  readonly theme: "light" | "dark";
+  readonly onToggleTheme: () => void;
+  readonly onSignOut: () => void;
 }
 
 interface DockItem {

@@ -15,9 +15,9 @@ import {
 import type { Section } from "@/App";
 
 interface MobileBottomNavProps {
-  currentSection: Section;
-  onSelect: (section: Section) => void;
-  unreadWhatsAppCount?: number;
+  readonly currentSection: Section;
+  readonly onSelect: (section: Section) => void;
+  readonly unreadWhatsAppCount?: number;
 }
 
 const PRIMARY_ITEMS = [
@@ -62,13 +62,15 @@ export function MobileBottomNav({
 
   const moreIsActive = MORE_ITEMS.some((item) => item.id === currentSection);
   const moreSheet = showMore && typeof document !== "undefined" ? createPortal(
-    <div
-      className="mobile-more-backdrop"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) setShowMore(false);
-      }}
-    >
-      <section className="mobile-more-sheet" role="dialog" aria-modal="true" aria-labelledby="mobile-more-title">
+    <div className="mobile-more-backdrop" role="presentation">
+      <button
+        type="button"
+        className="mobile-backdrop-dismiss"
+        onClick={() => setShowMore(false)}
+        aria-label="Fechar modal de opções"
+        style={{ position: "absolute", inset: 0, border: 0, background: "transparent", cursor: "default", width: "100%", height: "100%" }}
+      />
+      <dialog open className="mobile-more-sheet" aria-labelledby="mobile-more-title">
         <header>
           <div>
             <h2 id="mobile-more-title">Mais opções</h2>
@@ -91,7 +93,7 @@ export function MobileBottomNav({
             </button>
           ))}
         </div>
-      </section>
+      </dialog>
     </div>,
     document.body,
   ) : null;

@@ -392,6 +392,8 @@ html.dashboard-theme-fade aside {
   display: inline-flex;
   gap: 6px;
   padding: 4px;
+  margin: 0;
+  min-inline-size: 0;
   background: var(--surface-1);
   border: 1px solid var(--border-subtle);
   border-radius: 999px;

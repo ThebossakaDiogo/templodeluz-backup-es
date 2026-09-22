@@ -489,8 +489,9 @@ const ALLOWED_ADMIN_EMAILS = new Set([
 const THEME_STORAGE_KEY = "od-neo-theme";
 
 function isTikTokAttributedOrder(order: Record<string, unknown>) {
-  const source = String(order.utm_source ?? "").trim().toLowerCase();
-  return Boolean(String(order.ttclid ?? "").trim())
+  const source = typeof order.utm_source === "string" ? order.utm_source.trim().toLowerCase() : "";
+  const ttclid = typeof order.ttclid === "string" ? order.ttclid.trim() : "";
+  return Boolean(ttclid)
     || /^(tiktok|tt|tik)(?:$|[^a-z])/.test(source);
 }
 
@@ -1029,7 +1030,7 @@ export function App() {
           <strong>{activeDashboardProfile.label}</strong>
           <span>{activeDashboardProfile.sourceLabel}</span>
         </div>
-        <div className="dashboard-profile-switcher" role="group" aria-label="Selecionar perfil">
+        <fieldset className="dashboard-profile-switcher" aria-label="Selecionar perfil">
           {DASHBOARD_PROFILES.map((profile) => {
             const active = profile.id === dashboardProfile;
             return (
@@ -1045,7 +1046,7 @@ export function App() {
               </button>
             );
           })}
-        </div>
+        </fieldset>
       </section>
 
       {/* Barra de Subnavegação Executiva Estilo Vercel/Stripe (Desktop) */}
