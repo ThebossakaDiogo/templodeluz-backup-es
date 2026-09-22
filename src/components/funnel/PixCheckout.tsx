@@ -364,6 +364,7 @@ async function createPixCharge(params: CreatePixChargeParams): Promise<PixCharge
   const response = await fetch(url, {
     method: "POST",
     headers: pixFunctionHeaders(config),
+    signal: AbortSignal.timeout(20_000),
     body: JSON.stringify({
       productId,
       quizOrigin: config.quizOrigin,
@@ -678,9 +679,16 @@ function PixFormView({
               }`}
             >
               <PixIcon className="w-4 h-4 text-white" />
-              <span>{loading ? "Gerando Código PIX..." : `Gerar Código PIX (R$ ${formattedAmount})`}</span>
+              <span>{loading ? "Emitindo Chave PIX..." : `Gerar Código PIX (R$ ${formattedAmount})`}</span>
               <span className="text-base">→</span>
             </button>
+          )}
+
+          {loading && (
+            <div className="mt-3 flex items-center justify-center gap-2 rounded-xl bg-emerald-50 border border-emerald-300/80 px-3.5 py-2.5 text-[11.5px] font-bold text-emerald-900 shadow-xs animate-pulse">
+              <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
+              <span>Registrando seu QR Code oficial no Banco Central...</span>
+            </div>
           )}
         </div>
       )}
@@ -1670,6 +1678,11 @@ export function PixCheckout({
       });
     }
     setIsOpen(true);
+    const cleanPhone = customerPhone.replace(/\D/g, "");
+    if (customerName.trim().length >= 2 && cleanPhone.length >= 10 && !charge && !loading) {
+      autoPixGenerationRef.current = true;
+      void generatePix();
+    }
   };
 
   const markCheckoutFormStarted = (value: string) => {
@@ -1712,17 +1725,16 @@ export function PixCheckout({
   }, [isOpen]);
 
   useEffect(() => {
-    if (!isOpen || charge) return;
+    if (charge) return;
     const controller = new AbortController();
-    // Acorda a Edge Function enquanto o visitante termina o WhatsApp.
-    // O QR continua sendo criado só após os dados mínimos estarem válidos.
+    // Pré-aquece a Edge Function imediatamente para eliminar cold start do Deno no Supabase
     void fetch(`${config.supabaseUrl.replace(/\/$/, "")}/functions/v1/create-connectpay-pix`, {
       method: "OPTIONS",
       headers: pixFunctionHeaders(config),
       signal: controller.signal,
     }).catch(() => undefined);
     return () => controller.abort();
-  }, [isOpen, charge]);
+  }, [charge]);
 
   // Confirmação instantânea do PIX (long-polling + re-cheque ao voltar para a aba)
   useEffect(() => {
@@ -1832,10 +1844,6 @@ export function PixCheckout({
       setError("O valor mínimo para doação da vela e materiais é de R$ 15,00.");
       return;
     }
-    if (amountCents > 50000 && (productId === "carta_sagrada" || pixProductId === "carta_sagrada")) {
-      setError("Para contribuições acima de R$ 500,00, fale conosco diretamente pelo WhatsApp.");
-      return;
-    }
 
     setError("");
     autoPixGenerationRef.current = true;
@@ -1931,8 +1939,11 @@ export function PixCheckout({
       || cleanPhone.length < 10
     ) return;
 
-    autoPixGenerationRef.current = true;
-    void generatePix();
+    const timer = setTimeout(() => {
+      autoPixGenerationRef.current = true;
+      void generatePix();
+    }, 350);
+    return () => clearTimeout(timer);
   }, [isOpen, activeTab, customerName, customerPhone, charge, loading, error]);
 
   const regeneratePix = () => {

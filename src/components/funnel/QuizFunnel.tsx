@@ -504,18 +504,6 @@ function getDonationPsychologicalImpact(
       isValid: false,
     };
   }
-  if (amount > 500) {
-    return {
-      tier: "invalid",
-      icon: "🕊️",
-      badge: "Limite para doação online",
-      title: "Contribuição fraterna ampliada",
-      description: `Para doações acima de R$ 500,00, fale conosco diretamente pelo WhatsApp para receber orientações fraternas personalizadas.`,
-      badgeColor: "bg-amber-100 text-amber-950 border-amber-300",
-      cardBorder: "border-amber-300 bg-amber-50/40",
-      isValid: false,
-    };
-  }
   if (amount < 30) {
     return {
       tier: "basic",
@@ -1160,11 +1148,6 @@ function PixInstantBox({
                 O valor sugerido a partir de R$ 15 ajuda a cobrir os materiais mínimos do oratório.
               </p>
             )}
-            {isCustom && activeAmount > 500 && (
-              <p className="mt-2 rounded-xl bg-amber-50 px-3 py-2 text-[11px] font-semibold leading-relaxed text-amber-900">
-                O valor máximo sugerido para contribuição direta é de R$ 500,00.
-              </p>
-            )}
           </div>
 
           <div className="mb-3 px-1 text-[11px] font-extrabold uppercase tracking-[0.08em] text-slate-500">
@@ -1292,11 +1275,6 @@ function PixInstantBox({
         {activeAmount < 15 && (
           <div className="mt-2.5 p-2.5 rounded-xl bg-red-100/80 border border-red-200 text-red-900 text-[11.5px] font-bold leading-tight">
             O valor mínimo de R$15 ajuda a cobrir a vela de 7 dias e o pergaminho físico.
-          </div>
-        )}
-        {activeAmount > 500 && (
-          <div className="mt-2.5 p-2.5 rounded-xl bg-amber-100/80 border border-amber-300 text-amber-950 text-[11.5px] font-bold leading-tight">
-            O valor máximo para doação online no checkout é de R$ 500,00.
           </div>
         )}
       </div>
