@@ -686,7 +686,18 @@ function PixFormView({
       )}
 
       {error && (
-        <p className="mt-2 text-left text-xs font-bold text-red-700">{error}</p>
+        <div className="mt-3.5 rounded-2xl border border-red-200/90 bg-red-50/80 p-3.5 text-left space-y-2">
+          <p className="text-xs font-bold text-red-800 leading-relaxed">{error}</p>
+          <button
+            type="button"
+            onClick={() => {
+              if (onSubmitPix) onSubmitPix();
+            }}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-700 px-3.5 py-1.5 text-[11.5px] font-black text-white hover:bg-emerald-800 active:scale-95 transition-all cursor-pointer shadow-xs"
+          >
+            🔄 Tentar novamente
+          </button>
+        </div>
       )}
 
       <div className="mt-3 flex items-center justify-center gap-1.5 text-[10.5px] text-[#5c4a70]">
@@ -1811,7 +1822,17 @@ export function PixCheckout({
       setError(`Por favor, informe seu WhatsApp com DDD para ${productId === "chamada_ao_vivo_milena" ? "confirmar o horário" : "envio da foto da carta"}.`);
       return;
     }
+    if (amountCents < 1500 && (productId === "carta_sagrada" || pixProductId === "carta_sagrada")) {
+      setError("O valor mínimo para doação da vela e materiais é de R$ 15,00.");
+      return;
+    }
+    if (amountCents > 50000 && (productId === "carta_sagrada" || pixProductId === "carta_sagrada")) {
+      setError("Para contribuições acima de R$ 500,00, fale conosco diretamente pelo WhatsApp.");
+      return;
+    }
+
     setError("");
+    autoPixGenerationRef.current = true;
     pixGenerationInFlightRef.current = true;
     setLoading(true);
     paidCompletionRef.current = false;
@@ -1850,8 +1871,12 @@ export function PixCheckout({
         0
       );
     } catch (err: any) {
-      autoPixGenerationRef.current = false;
-      setError(err?.message || "Não foi possível gerar a chave PIX. Tente novamente.");
+      const msg = String(err?.message || "");
+      if (msg.includes("429") || msg.includes("Muitas tentativas")) {
+        setError("Muitas tentativas em pouco tempo. Por favor, aguarde 1 minuto para tentar novamente.");
+      } else {
+        setError(msg || "Não foi possível gerar a chave PIX. Tente novamente.");
+      }
     } finally {
       pixGenerationInFlightRef.current = false;
       setLoading(false);
@@ -1895,13 +1920,14 @@ export function PixCheckout({
       || autoPixGenerationRef.current
       || charge
       || loading
+      || Boolean(error)
       || customerName.trim().length < 2
       || cleanPhone.length < 10
     ) return;
 
     autoPixGenerationRef.current = true;
     void generatePix();
-  }, [isOpen, activeTab, customerName, customerPhone, charge, loading]);
+  }, [isOpen, activeTab, customerName, customerPhone, charge, loading, error]);
 
   const regeneratePix = () => {
     clearPixAttempt(productId, amountCents);
@@ -1932,7 +1958,10 @@ export function PixCheckout({
     setCustomerPhone(formatted);
     markCheckoutFormStarted(formatted);
     syncLeadPhone(formatted, customerName);
-    if (error) setError("");
+    if (error) {
+      setError("");
+      autoPixGenerationRef.current = false;
+    }
   };
 
   const handlePhoneBlur = () => {
@@ -2095,10 +2124,18 @@ export function PixCheckout({
                     onNameChange={(value) => {
                       setCustomerName(value);
                       markCheckoutFormStarted(value);
+                      if (error) {
+                        setError("");
+                        autoPixGenerationRef.current = false;
+                      }
                     }}
                     onPhoneChange={handlePhoneChange}
                     onPhoneBlur={handlePhoneBlur}
-                    onSubmitPix={() => void generatePix()}
+                    onSubmitPix={() => {
+                      setError("");
+                      autoPixGenerationRef.current = false;
+                      void generatePix();
+                    }}
                   />
                 ) : (
                   <>
