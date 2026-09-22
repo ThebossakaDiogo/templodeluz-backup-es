@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { CircleDollarSign, CreditCard, QrCode, TrendingDown, TrendingUp } from "lucide-react";
 import type { DashboardStats } from "@/types";
 
@@ -24,7 +25,7 @@ function Difference({ value }: { value: number }) {
   );
 }
 
-export function MetricCards({ stats, loading }: MetricCardsProps) {
+export const MetricCards = memo(function MetricCards({ stats, loading }: MetricCardsProps) {
   const conversionRate = stats.newSubscriptions > 0
     ? (stats.newOrders / stats.newSubscriptions) * 100
     : 0;
@@ -106,4 +107,4 @@ export function MetricCards({ stats, loading }: MetricCardsProps) {
       </div>
     </section>
   );
-}
+});

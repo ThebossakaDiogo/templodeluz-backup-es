@@ -1,3 +1,4 @@
+import { memo } from "react";
 import {
   PieChart,
   Pie,
@@ -120,7 +121,7 @@ function CustomLegend({ payload }: any) {
   );
 }
 
-export function TrafficPieChart({ leads, loading }: TrafficPieChartProps) {
+export const TrafficPieChart = memo(function TrafficPieChart({ leads, loading }: TrafficPieChartProps) {
   // Agrupa leads por canal normalizado
   const counts: Record<string, number> = {};
 
@@ -239,4 +240,4 @@ export function TrafficPieChart({ leads, loading }: TrafficPieChartProps) {
       )}
     </div>
   );
-}
+});

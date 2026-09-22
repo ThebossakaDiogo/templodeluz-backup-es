@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Activity, Clock3, QrCode, Zap } from "lucide-react";
 
 interface TodayHeroMetricProps {
@@ -16,7 +17,7 @@ function formatTime(seconds: number): string {
   return minutes === 0 ? `${remainingSeconds}s` : `${minutes}m ${remainingSeconds}s`;
 }
 
-export function TodayHeroMetric({
+export const TodayHeroMetric = memo(function TodayHeroMetric({
   todayEntriesCount,
   onlineCount,
   todayCheckoutsCount,
@@ -96,4 +97,4 @@ export function TodayHeroMetric({
       </div>
     </section>
   );
-}
+});

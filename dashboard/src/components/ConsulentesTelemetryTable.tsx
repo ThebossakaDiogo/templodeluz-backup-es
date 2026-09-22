@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, memo } from "react";
 import type { Lead } from "@/types";
 import { diagnoseLeadAbandonment } from "@/utils/lead-abandonment";
 import {
@@ -362,7 +362,7 @@ function TelemetryCard({ lead }: { readonly lead: Lead }) {
   );
 }
 
-export function ConsulentesTelemetryTable({ leads }: Readonly<ConsulentesTelemetryTableProps>) {
+export const ConsulentesTelemetryTable = memo(function ConsulentesTelemetryTable({ leads }: Readonly<ConsulentesTelemetryTableProps>) {
   const [filter, setFilter] = useState<"all" | "checkout" | "pix" | "declined" | "paid">("all");
   const [search, setSearch] = useState("");
   const [pageSize, setPageSize] = useState<number>(10);
@@ -1017,4 +1017,4 @@ export function ConsulentesTelemetryTable({ leads }: Readonly<ConsulentesTelemet
       </div>
     </div>
   );
-}
+});

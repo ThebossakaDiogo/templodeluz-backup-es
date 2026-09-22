@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { QrCode, CreditCard, PieChart as PieIcon } from "lucide-react";
 import type { PaymentOrder } from "@/types";
@@ -14,7 +15,7 @@ function formatBRL(cents: number): string {
   }).format(cents / 100);
 }
 
-export function PaymentMethodsPieChart({ orders, loading }: PaymentMethodsPieChartProps) {
+export const PaymentMethodsPieChart = memo(function PaymentMethodsPieChart({ orders, loading }: PaymentMethodsPieChartProps) {
   const paidOrders = orders.filter((o) => o.status === "paid");
 
   // Separação rigorosa entre PIX e Cartão
@@ -226,4 +227,4 @@ export function PaymentMethodsPieChart({ orders, loading }: PaymentMethodsPieCha
       </div>
     </div>
   );
-}
+});

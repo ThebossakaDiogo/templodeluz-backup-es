@@ -625,47 +625,80 @@ export function App() {
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     localStorage.setItem(THEME_STORAGE_KEY, theme);
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute("content", theme === "dark" ? "#1f1d1a" : "#FFF9E6");
+    }
   }, [theme]);
 
   const toggleTheme = (event?: ReactMouseEvent<HTMLButtonElement>) => {
     const nextTheme = theme === "light" ? "dark" : "light";
     const root = document.documentElement;
-    const x = event?.clientX ?? window.innerWidth / 2;
-    const y = event?.clientY ?? window.innerHeight / 2;
-    root.style.setProperty("--theme-click-x", `${x}px`);
-    root.style.setProperty("--theme-click-y", `${y}px`);
 
     const applyTheme = () => {
       root.dataset.theme = nextTheme;
       localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
       setTheme(nextTheme);
+
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+      if (metaThemeColor) {
+        metaThemeColor.setAttribute("content", nextTheme === "dark" ? "#1f1d1a" : "#FFF9E6");
+      }
     };
 
-    root.classList.add("dashboard-theme-fade");
-
+    const isReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const viewTransition = (document as Document & {
       startViewTransition?: (callback: () => void) => { ready: Promise<void>; finished?: Promise<void> };
     }).startViewTransition;
 
-    if (!viewTransition) {
+    // Fallback fluido para navegadores sem View Transition ou com redução de movimento
+    if (!viewTransition || isReducedMotion) {
+      root.classList.add("dashboard-theme-transitioning");
       applyTheme();
-      window.setTimeout(() => root.classList.remove("dashboard-theme-fade"), 350);
+      window.setTimeout(() => {
+        root.classList.remove("dashboard-theme-transitioning");
+      }, 450);
       return;
     }
 
+    // Coordenadas para onda expansiva orgânica acelerada por GPU
+    const x = event?.clientX ?? window.innerWidth / 2;
+    const y = event?.clientY ?? window.innerHeight / 2;
+    const endRadius = Math.hypot(
+      Math.max(x, window.innerWidth - x),
+      Math.max(y, window.innerHeight - y)
+    );
+
+    // Garante que o snapshot DOM do novo tema seja puro e instantâneo
+    root.classList.remove("dashboard-theme-transitioning", "dashboard-theme-fade");
+
     try {
-      const transition = viewTransition.call(document, applyTheme);
-      void transition.ready.catch(() => undefined);
-      if (transition.finished) {
-        void transition.finished.finally(() => {
-          root.classList.remove("dashboard-theme-fade");
-        });
-      } else {
-        window.setTimeout(() => root.classList.remove("dashboard-theme-fade"), 350);
-      }
+      const transition = viewTransition.call(document, () => {
+        applyTheme();
+      });
+
+      void transition.ready
+        .then(() => {
+          const clipPath = [
+            `circle(0px at ${x}px ${y}px)`,
+            `circle(${endRadius}px at ${x}px ${y}px)`,
+          ];
+          document.documentElement.animate(
+            { clipPath },
+            {
+              duration: 460,
+              easing: "cubic-bezier(0.16, 1, 0.3, 1)",
+              pseudoElement: "::view-transition-new(root)",
+            }
+          );
+        })
+        .catch(() => undefined);
     } catch {
+      root.classList.add("dashboard-theme-transitioning");
       applyTheme();
-      window.setTimeout(() => root.classList.remove("dashboard-theme-fade"), 350);
+      window.setTimeout(() => {
+        root.classList.remove("dashboard-theme-transitioning");
+      }, 450);
     }
   };
 

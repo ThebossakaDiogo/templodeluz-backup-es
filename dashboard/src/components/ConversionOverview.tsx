@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Target, TrendingUp, ShieldCheck, QrCode, CreditCard } from "lucide-react";
 import type { Lead, PaymentOrder } from "@/types";
 
@@ -7,7 +8,7 @@ interface ConversionOverviewProps {
   readonly loading?: boolean;
 }
 
-export function ConversionOverview({ leads, orders, loading }: ConversionOverviewProps) {
+export const ConversionOverview = memo(function ConversionOverview({ leads, orders, loading }: ConversionOverviewProps) {
   const totalLeads = leads.length;
   const completedQuizLeads = leads.filter((l) => l.highest_step_index >= 8 || l.completed).length;
 
@@ -255,4 +256,4 @@ export function ConversionOverview({ leads, orders, loading }: ConversionOvervie
       </div>
     </div>
   );
-}
+});

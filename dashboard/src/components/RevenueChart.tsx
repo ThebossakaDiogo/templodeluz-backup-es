@@ -1,3 +1,4 @@
+import { memo } from "react";
 import {
   AreaChart,
   Area,
@@ -22,7 +23,7 @@ function formatBRL(val: number): string {
   }).format(val);
 }
 
-export function RevenueChart({ data, loading }: RevenueChartProps) {
+export const RevenueChart = memo(function RevenueChart({ data, loading }: RevenueChartProps) {
   const totalRevenue = data.reduce((s, d) => s + (d.receita ?? 0), 0);
   const totalPix = data.reduce((s, d) => s + (d.receitaPix ?? 0), 0);
   const totalCard = data.reduce((s, d) => s + (d.receitaCartao ?? 0), 0);
@@ -263,4 +264,4 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
       </div>
     </div>
   );
-}
+});

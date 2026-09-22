@@ -102,40 +102,38 @@
   background: var(--app-bg);
 }
 
-/* Transição suave e fluida de temas (Claro / Escuro) */
-html.dashboard-theme-fade,
-html.dashboard-theme-fade body,
-html.dashboard-theme-fade .dashboard-root,
-html.dashboard-theme-fade .card,
-html.dashboard-theme-fade .dashboard-topbar,
-html.dashboard-theme-fade .dashboard-sidebar,
-html.dashboard-theme-fade .floating-dock-container,
-html.dashboard-theme-fade header,
-html.dashboard-theme-fade nav,
-html.dashboard-theme-fade aside {
-  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-              border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+/* ==========================================================================
+   TRANSIÇÃO DE TEMA ULTRA FLUIDA (VIEW TRANSITIONS & CSS FALLBACK)
+   ========================================================================== */
+
+/* Suavização de View Transitions (Aceleração nativa por GPU sem congelamento de DOM) */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+  display: block;
 }
 
 ::view-transition-old(root) {
-  animation: dashboard-theme-fade-out 0.28s cubic-bezier(0.4, 0, 0.2, 1) both;
+  z-index: 1;
 }
 
 ::view-transition-new(root) {
-  animation: dashboard-theme-fade-in 0.28s cubic-bezier(0.4, 0, 0.2, 1) both;
-  mix-blend-mode: normal;
+  z-index: 9999;
 }
 
-@keyframes dashboard-theme-fade-out {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-
-@keyframes dashboard-theme-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+/* Fallback universal ultra-suave quando a View Transition não estiver ativa ou em navegadores sem suporte */
+html.dashboard-theme-transitioning,
+html.dashboard-theme-transitioning *,
+html.dashboard-theme-transitioning *::before,
+html.dashboard-theme-transitioning *::after {
+  transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              fill 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              stroke 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition-delay: 0s !important;
 }
 
 [data-theme="dark"] .dashboard-root,

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import {
   PieChart,
   Pie,
@@ -81,7 +82,7 @@ function CustomLegend({ payload }: any) {
   );
 }
 
-export function StatusPieChart({ orders, loading }: StatusPieChartProps) {
+export const StatusPieChart = memo(function StatusPieChart({ orders, loading }: StatusPieChartProps) {
   const counts = Object.keys(STATUS_CONFIG).reduce<Record<string, number>>(
     (acc, key) => {
       acc[key] = orders.filter((o) => o.status === key).length;
@@ -200,4 +201,4 @@ export function StatusPieChart({ orders, loading }: StatusPieChartProps) {
       )}
     </div>
   );
-}
+});
