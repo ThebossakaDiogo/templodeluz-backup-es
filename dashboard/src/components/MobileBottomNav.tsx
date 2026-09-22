@@ -62,7 +62,7 @@ export function MobileBottomNav({
 
   const moreIsActive = MORE_ITEMS.some((item) => item.id === currentSection);
   const moreSheet = showMore && typeof document !== "undefined" ? createPortal(
-    <div className="mobile-more-backdrop" role="presentation">
+    <div className="mobile-more-backdrop">
       <button
         type="button"
         className="mobile-backdrop-dismiss"
