@@ -4,8 +4,8 @@ import { QrCode, CreditCard, PieChart as PieIcon } from "lucide-react";
 import type { PaymentOrder } from "@/types";
 
 interface PaymentMethodsPieChartProps {
-  orders: PaymentOrder[];
-  loading?: boolean;
+  readonly orders: readonly PaymentOrder[];
+  readonly loading?: boolean;
 }
 
 function formatBRL(cents: number): string {
@@ -13,6 +13,41 @@ function formatBRL(cents: number): string {
     style: "currency",
     currency: "BRL",
   }).format(cents / 100);
+}
+
+interface PaymentMethodsTooltipProps {
+  readonly active?: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  readonly payload?: readonly any[];
+  readonly totalAmountCents: number;
+}
+
+function PaymentMethodsTooltip({ active, payload, totalAmountCents }: PaymentMethodsTooltipProps) {
+  if (!active || !payload?.length) return null;
+  const item = payload[0].payload;
+  const pct = totalAmountCents > 0 ? Math.round(((item.value * 100) / totalAmountCents) * 100) : 0;
+  return (
+    <div
+      style={{
+        background: "var(--bg-surface)",
+        border: `1px solid ${item.color}`,
+        borderRadius: "10px",
+        padding: "10px 14px",
+        boxShadow: "0 8px 24px rgba(0,0,0,0.3)",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
+        <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: item.color }} />
+        <strong style={{ fontSize: "12px", color: "var(--text-primary)" }}>{item.name}</strong>
+      </div>
+      <div style={{ fontSize: "13px", fontWeight: 900, color: item.color }}>
+        {formatBRL(item.value * 100)} ({pct}%)
+      </div>
+      <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>
+        {item.count} {item.count === 1 ? "transação aprovada" : "transações aprovadas"}
+      </div>
+    </div>
+  );
 }
 
 export const PaymentMethodsPieChart = memo(function PaymentMethodsPieChart({ orders, loading }: PaymentMethodsPieChartProps) {
@@ -100,75 +135,51 @@ export const PaymentMethodsPieChart = memo(function PaymentMethodsPieChart({ ord
 
       {/* Gráfico Donut */}
       <div style={{ height: "170px", width: "100%", position: "relative" }}>
-        {loading ? (
-          <div className="skeleton" style={{ height: "100%", width: "100%", borderRadius: "12px" }} />
-        ) : !hasData ? (
-          <div
-            style={{
-              height: "100%",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "6px",
-              color: "var(--text-muted)",
-              fontSize: "12px",
-            }}
-          >
-            <span>Nenhum pagamento liquidado no período</span>
-            <span style={{ fontSize: "11px" }}>As doações via PIX ou Stripe aparecerão aqui</span>
-          </div>
-        ) : (
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Tooltip
-                content={({ active, payload }) => {
-                  if (active && payload && payload.length) {
-                    const item = payload[0].payload;
-                    const pct = totalAmountCents > 0 ? Math.round(((item.value * 100) / totalAmountCents) * 100) : 0;
-                    return (
-                      <div
-                        style={{
-                          background: "var(--bg-surface)",
-                          border: `1px solid ${item.color}`,
-                          borderRadius: "10px",
-                          padding: "10px 14px",
-                          boxShadow: "0 8px 24px rgba(0,0,0,0.3)",
-                        }}
-                      >
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
-                          <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: item.color }} />
-                          <strong style={{ fontSize: "12px", color: "var(--text-primary)" }}>{item.name}</strong>
-                        </div>
-                        <div style={{ fontSize: "13px", fontWeight: 900, color: item.color }}>
-                          {formatBRL(item.value * 100)} ({pct}%)
-                        </div>
-                        <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>
-                          {item.count} {item.count === 1 ? "transação aprovada" : "transações aprovadas"}
-                        </div>
-                      </div>
-                    );
-                  }
-                  return null;
+        {(() => {
+          if (loading) {
+            return <div className="skeleton" style={{ height: "100%", width: "100%", borderRadius: "12px" }} />;
+          }
+          if (!hasData) {
+            return (
+              <div
+                style={{
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "6px",
+                  color: "var(--text-muted)",
+                  fontSize: "12px",
                 }}
-              />
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                innerRadius={48}
-                outerRadius={72}
-                paddingAngle={4}
-                dataKey="value"
-                strokeWidth={0}
               >
-                {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
-        )}
+                <span>Nenhum pagamento liquidado no período</span>
+                <span style={{ fontSize: "11px" }}>As doações via PIX ou Stripe aparecerão aqui</span>
+              </div>
+            );
+          }
+          return (
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Tooltip content={<PaymentMethodsTooltip totalAmountCents={totalAmountCents} />} />
+                <Pie
+                  data={data}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={48}
+                  outerRadius={72}
+                  paddingAngle={4}
+                  dataKey="value"
+                  strokeWidth={0}
+                >
+                  {data.map((entry) => (
+                    <Cell key={`cell-${entry.name}`} fill={entry.color} />
+                  ))}
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+          );
+        })()}
       </div>
 
       {/* Legenda & Detalhes por Método */}

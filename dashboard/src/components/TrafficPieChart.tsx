@@ -86,9 +86,9 @@ function CustomLegend({ payload }: any) {
       }}
     >
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      {payload.map((entry: any, index: number) => (
+      {payload.map((entry: any) => (
         <div
-          key={`legend-${index}`}
+          key={`legend-${entry.value ?? entry.name}`}
           style={{
             display: "flex",
             alignItems: "center",

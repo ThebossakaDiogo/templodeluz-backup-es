@@ -12,8 +12,8 @@ import { TrendingUp, QrCode, CreditCard } from "lucide-react";
 import type { ChartDataPoint } from "@/types";
 
 interface RevenueChartProps {
-  data: ChartDataPoint[];
-  loading: boolean;
+  readonly data: readonly ChartDataPoint[];
+  readonly loading: boolean;
 }
 
 function formatBRL(val: number): string {
@@ -21,6 +21,69 @@ function formatBRL(val: number): string {
     style: "currency",
     currency: "BRL",
   }).format(val);
+}
+
+interface RevenueTooltipProps {
+  readonly active?: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  readonly payload?: readonly any[];
+  readonly label?: string;
+}
+
+function RevenueChartTooltip({ active, payload, label }: RevenueTooltipProps) {
+  if (!active || !payload?.length) return null;
+  const row = payload[0].payload as ChartDataPoint;
+  return (
+    <div
+      style={{
+        background: "var(--surface-card)",
+        border: "1px solid var(--border-strong)",
+        borderRadius: "8px",
+        padding: "10px 14px",
+        boxShadow: "var(--shadow-card)",
+      }}
+    >
+      <p
+        style={{
+          fontSize: "11px",
+          fontWeight: 600,
+          color: "var(--text-primary)",
+          margin: "0 0 6px",
+          borderBottom: "1px solid var(--border-subtle)",
+          paddingBottom: "4px",
+        }}
+      >
+        {label}
+      </p>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "4px", fontSize: "11px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: "16px" }}>
+          <span style={{ color: "#9D1CBB", fontWeight: 500, display: "flex", alignItems: "center", gap: "4px" }}>
+            <QrCode style={{ width: "12px", height: "12px" }} /> PIX:
+          </span>
+          <strong style={{ color: "var(--text-primary)" }}>
+            {formatBRL(row.receitaPix ?? 0)} ({row.vendasPix ?? 0} vendas)
+          </strong>
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "space-between", gap: "16px" }}>
+          <span style={{ color: "#C4BAFF", fontWeight: 500, display: "flex", alignItems: "center", gap: "4px" }}>
+            <CreditCard style={{ width: "12px", height: "12px" }} /> Cartão Stripe:
+          </span>
+          <strong style={{ color: "var(--text-primary)" }}>
+            {formatBRL(row.receitaCartao ?? 0)} ({row.vendasCartao ?? 0} vendas)
+          </strong>
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "space-between", gap: "16px", marginTop: "4px", paddingTop: "4px", borderTop: "1px solid var(--border-subtle)" }}>
+          <span style={{ color: "var(--text-muted)", fontWeight: 500 }}>Total do Período:</span>
+          <strong style={{ color: "var(--success)", fontSize: "12.5px" }}>
+            {formatBRL(row.receita ?? 0)}
+          </strong>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export const RevenueChart = memo(function RevenueChart({ data, loading }: RevenueChartProps) {
@@ -146,7 +209,7 @@ export const RevenueChart = memo(function RevenueChart({ data, loading }: Revenu
           <div className="skeleton" style={{ height: "100%", width: "100%", borderRadius: "12px" }} />
         ) : (
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+            <AreaChart data={data as ChartDataPoint[]} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="pixGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="var(--success)" stopOpacity={0.3} />
@@ -177,65 +240,7 @@ export const RevenueChart = memo(function RevenueChart({ data, loading }: Revenu
                 axisLine={false}
                 tickFormatter={(v: number) => `R$${v}`}
               />
-              <Tooltip
-                content={({ active, payload, label }) => {
-                  if (active && payload && payload.length) {
-                    const row = payload[0].payload as ChartDataPoint;
-                    return (
-                      <div
-                        style={{
-                          background: "var(--surface-card)",
-                          border: "1px solid var(--border-strong)",
-                          borderRadius: "8px",
-                          padding: "10px 14px",
-                          boxShadow: "var(--shadow-card)",
-                        }}
-                      >
-                        <p
-                          style={{
-                            fontSize: "11px",
-                            fontWeight: 600,
-                            color: "var(--text-primary)",
-                            margin: "0 0 6px",
-                            borderBottom: "1px solid var(--border-subtle)",
-                            paddingBottom: "4px",
-                          }}
-                        >
-                          {label}
-                        </p>
-
-                        <div style={{ display: "flex", flexDirection: "column", gap: "4px", fontSize: "11px" }}>
-                          <div style={{ display: "flex", justifyContent: "space-between", gap: "16px" }}>
-                            <span style={{ color: "#9D1CBB", fontWeight: 500, display: "flex", alignItems: "center", gap: "4px" }}>
-                              <QrCode style={{ width: "12px", height: "12px" }} /> PIX:
-                            </span>
-                            <strong style={{ color: "var(--text-primary)" }}>
-                              {formatBRL(row.receitaPix ?? 0)} ({row.vendasPix ?? 0} vendas)
-                            </strong>
-                          </div>
-
-                          <div style={{ display: "flex", justifyContent: "space-between", gap: "16px" }}>
-                            <span style={{ color: "#C4BAFF", fontWeight: 500, display: "flex", alignItems: "center", gap: "4px" }}>
-                              <CreditCard style={{ width: "12px", height: "12px" }} /> Cartão Stripe:
-                            </span>
-                            <strong style={{ color: "var(--text-primary)" }}>
-                              {formatBRL(row.receitaCartao ?? 0)} ({row.vendasCartao ?? 0} vendas)
-                            </strong>
-                          </div>
-
-                          <div style={{ display: "flex", justifyContent: "space-between", gap: "16px", marginTop: "4px", paddingTop: "4px", borderTop: "1px solid var(--border-subtle)" }}>
-                            <span style={{ color: "var(--text-muted)", fontWeight: 500 }}>Total do Período:</span>
-                            <strong style={{ color: "var(--success)", fontSize: "12.5px" }}>
-                              {formatBRL(row.receita ?? 0)}
-                            </strong>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  }
-                  return null;
-                }}
-              />
+              <Tooltip content={<RevenueChartTooltip />} />
 
               {/* Área do Cartão Stripe */}
               <Area

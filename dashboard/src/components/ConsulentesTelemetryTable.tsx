@@ -362,8 +362,581 @@ function TelemetryCard({ lead }: { readonly lead: Lead }) {
   );
 }
 
+type TelemetryFilterType = "all" | "checkout" | "pix" | "declined" | "paid";
+type TelemetryMetrics = ReturnType<typeof calculateTelemetryMetrics>;
+
+interface TelemetryHeaderProps {
+  readonly metrics: TelemetryMetrics;
+}
+
+function TelemetryHeader({ metrics }: TelemetryHeaderProps) {
+  return (
+    <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start", gap: "16px" }}>
+      <div>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+          <div
+            style={{
+              width: "28px",
+              height: "28px",
+              borderRadius: "8px",
+              background: "var(--accent-soft-bg)",
+              border: "1px solid var(--accent-border)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "var(--accent-strong)",
+            }}
+          >
+            <Compass style={{ width: "15px", height: "15px" }} />
+          </div>
+          <h3 style={{ fontSize: "16px", fontWeight: 700, color: "var(--text-primary)", margin: 0, letterSpacing: "-0.02em" }}>
+            Rascunhos de Consulentes & Checkouts
+          </h3>
+          <span
+            style={{
+              fontSize: "10.5px",
+              fontWeight: 600,
+              color: "var(--accent-strong)",
+              background: "var(--accent-soft-bg)",
+              border: "1px solid var(--accent-border)",
+              padding: "2px 8px",
+              borderRadius: "999px",
+            }}
+          >
+            Tempo Real
+          </span>
+        </div>
+        <p style={{ margin: 0, fontSize: "12px", color: "var(--text-muted)" }}>
+          Dados declarados no quiz são salvos após uma breve pausa de digitação, junto do estágio atual e checkout.
+        </p>
+      </div>
+
+      <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+        <div
+          style={{
+            padding: "6px 12px",
+            background: "var(--surface-1)",
+            border: "1px solid var(--border-subtle)",
+            borderRadius: "10px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+        >
+          <Users style={{ width: "14px", height: "14px", color: "var(--text-muted)" }} />
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span style={{ fontSize: "9.5px", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase" }}>
+              Total Leads
+            </span>
+            <span style={{ fontSize: "13px", fontWeight: 800, color: "var(--text-primary)" }}>
+              {metrics.totalLeads}
+            </span>
+          </div>
+        </div>
+
+        <div
+          style={{
+            padding: "6px 12px",
+            background: "var(--surface-1)",
+            border: "1px solid var(--border-subtle)",
+            borderRadius: "10px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+        >
+          <CreditCard style={{ width: "14px", height: "14px", color: "var(--accent-strong)" }} />
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span style={{ fontSize: "9.5px", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase" }}>
+              No Checkout
+            </span>
+            <span style={{ fontSize: "13px", fontWeight: 800, color: "var(--accent-strong)" }}>
+              {metrics.checkoutsCount}
+            </span>
+          </div>
+        </div>
+
+        <div
+          style={{
+            padding: "6px 12px",
+            background: "rgba(46, 219, 111, 0.12)",
+            border: "1px solid rgba(46, 219, 111, 0.3)",
+            borderRadius: "10px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+        >
+          <CheckCircle2 style={{ width: "14px", height: "14px", color: "#2EDB6F" }} />
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span style={{ fontSize: "9.5px", fontWeight: 600, color: "#2EDB6F", textTransform: "uppercase" }}>
+              Pagos Confirmados
+            </span>
+            <span style={{ fontSize: "13px", fontWeight: 800, color: "#2EDB6F" }}>
+              {metrics.paidCount}
+            </span>
+          </div>
+        </div>
+
+        <div
+          style={{
+            padding: "6px 12px",
+            background: "var(--surface-1)",
+            border: "1px solid var(--border-subtle)",
+            borderRadius: "10px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+        >
+          <Clock style={{ width: "14px", height: "14px", color: "var(--text-muted)" }} />
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span style={{ fontSize: "9.5px", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase" }}>
+              Tempo Médio
+            </span>
+            <span style={{ fontSize: "13px", fontWeight: 800, color: "var(--text-primary)" }}>
+              {formatDuration(metrics.avgSeconds)}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface TelemetryFilterToolbarProps {
+  readonly leadsCount: number;
+  readonly metrics: TelemetryMetrics;
+  readonly filter: TelemetryFilterType;
+  readonly onFilterChange: (f: TelemetryFilterType) => void;
+  readonly viewMode: "table" | "cards";
+  readonly onViewModeChange: (m: "table" | "cards") => void;
+  readonly pageSize: number;
+  readonly onPageSizeChange: (s: number) => void;
+  readonly search: string;
+  readonly onSearchChange: (s: string) => void;
+}
+
+function TelemetryFilterToolbar({
+  leadsCount,
+  metrics,
+  filter,
+  onFilterChange,
+  viewMode,
+  onViewModeChange,
+  pageSize,
+  onPageSizeChange,
+  search,
+  onSearchChange,
+}: TelemetryFilterToolbarProps) {
+  const filterPills: { id: TelemetryFilterType; label: string; count: number }[] = [
+    { id: "all", label: "Todos", count: leadsCount },
+    { id: "checkout", label: "Checkout", count: metrics.checkoutsCount },
+    { id: "pix", label: "PIX", count: metrics.pixCount },
+    { id: "declined", label: "Recusados", count: metrics.declinedCount },
+    { id: "paid", label: "Pagos", count: metrics.paidCount },
+  ];
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        flexWrap: "wrap",
+        gap: "12px",
+        background: "var(--surface-1)",
+        border: "1px solid var(--border-subtle)",
+        borderRadius: "12px",
+        padding: "10px 14px",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+        {filterPills.map((f) => {
+          const active = filter === f.id;
+          return (
+            <button
+              key={f.id}
+              type="button"
+              onClick={() => onFilterChange(f.id)}
+              style={{
+                fontSize: "11px",
+                fontWeight: active ? 700 : 500,
+                padding: "4px 10px",
+                borderRadius: "8px",
+                border: active ? "1px solid var(--accent-strong)" : "1px solid var(--border-subtle)",
+                background: active ? "var(--accent-soft-bg)" : "var(--surface-1)",
+                color: active ? "var(--accent-strong)" : "var(--text-muted)",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+                transition: "all 0.15s ease",
+              }}
+            >
+              <span>{f.label}</span>
+              <span
+                style={{
+                  fontSize: "9.5px",
+                  fontWeight: 700,
+                  padding: "0 5px",
+                  borderRadius: "99px",
+                  background: active ? "var(--accent-strong)" : "var(--surface-3)",
+                  color: active ? "#FFFFFF" : "var(--text-muted)",
+                }}
+              >
+                {f.count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", flex: 1, minWidth: 0, justifyContent: "flex-end" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            background: "var(--surface-card)",
+            border: "1px solid var(--border-subtle)",
+            borderRadius: "8px",
+            padding: "2px",
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => onViewModeChange("table")}
+            title="Visualização em Tabela"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+              fontSize: "11px",
+              fontWeight: viewMode === "table" ? 700 : 500,
+              padding: "4px 8px",
+              borderRadius: "6px",
+              border: "none",
+              cursor: "pointer",
+              background: viewMode === "table" ? "var(--accent-strong)" : "transparent",
+              color: viewMode === "table" ? "#ffffff" : "var(--text-secondary)",
+            }}
+          >
+            <List style={{ width: "12px", height: "12px" }} />
+            <span>Tabela</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => onViewModeChange("cards")}
+            title="Visualização em Cards / Colunas"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+              fontSize: "11px",
+              fontWeight: viewMode === "cards" ? 700 : 500,
+              padding: "4px 8px",
+              borderRadius: "6px",
+              border: "none",
+              cursor: "pointer",
+              background: viewMode === "cards" ? "var(--accent-strong)" : "transparent",
+              color: viewMode === "cards" ? "#ffffff" : "var(--text-secondary)",
+            }}
+          >
+            <LayoutGrid style={{ width: "12px", height: "12px" }} />
+            <span>Cards</span>
+          </button>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", color: "var(--text-muted)" }}>
+          <span style={{ fontWeight: 600 }}>Limite:</span>
+          {[5, 10, 20, 50].map((size) => (
+            <button
+              key={size}
+              type="button"
+              onClick={() => onPageSizeChange(size)}
+              style={{
+                fontSize: "10.5px",
+                fontWeight: pageSize === size ? 800 : 500,
+                padding: "3px 7px",
+                borderRadius: "5px",
+                border: pageSize === size ? "1px solid var(--accent-strong)" : "1px solid var(--border-subtle)",
+                background: pageSize === size ? "var(--accent-soft-bg)" : "var(--surface-card)",
+                color: pageSize === size ? "var(--accent-strong)" : "var(--text-secondary)",
+                cursor: "pointer",
+              }}
+            >
+              {size}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ position: "relative", minWidth: "min(160px, 100%)", maxWidth: "240px", flex: 1, width: "100%" }}>
+          <Search
+            style={{
+              position: "absolute",
+              left: "9px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: "12px",
+              height: "12px",
+              color: "var(--text-muted)",
+              pointerEvents: "none",
+            }}
+          />
+          <input
+            type="text"
+            placeholder="Buscar consulente ou ente..."
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
+            style={{
+              width: "100%",
+              fontSize: "16px",
+              padding: "5px 10px 5px 28px",
+              borderRadius: "8px",
+              border: "1px solid var(--border-subtle)",
+              background: "var(--surface-card)",
+              color: "var(--text-primary)",
+              outline: "none",
+              boxSizing: "border-box",
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface TelemetryPaginationBarProps {
+  readonly currentPage: number;
+  readonly totalPages: number;
+  readonly startIndex: number;
+  readonly endIndex: number;
+  readonly totalItems: number;
+  readonly pageNumbers: readonly number[];
+  readonly onPageChange: (page: number | ((prev: number) => number)) => void;
+  readonly variant: "top" | "bottom";
+}
+
+function TelemetryPaginationBar({
+  currentPage,
+  totalPages,
+  startIndex,
+  endIndex,
+  totalItems,
+  pageNumbers,
+  onPageChange,
+  variant,
+}: TelemetryPaginationBarProps) {
+  const isTop = variant === "top";
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        flexWrap: "wrap",
+        gap: isTop ? "10px" : "12px",
+        padding: isTop ? "9px 12px" : "14px 0 0",
+        background: isTop ? "var(--surface-1)" : "transparent",
+        borderRadius: isTop ? "10px" : "0",
+        border: isTop ? "1px solid var(--border-subtle)" : "none",
+        borderTop: "1px solid var(--border-subtle)",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "11.5px", color: "var(--text-muted)" }}>
+        {isTop && (
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "4px",
+              padding: "2px 8px",
+              borderRadius: "6px",
+              background: "var(--surface-card)",
+              border: "1px solid var(--border-subtle)",
+              fontWeight: 700,
+              color: "var(--accent-strong)",
+            }}
+          >
+            Página {currentPage} de {totalPages}
+          </span>
+        )}
+        <span>
+          {isTop ? "Exibindo" : "Mostrando"}{" "}
+          <strong style={{ color: "var(--text-primary)" }}>{totalItems > 0 ? startIndex + 1 : 0}–{endIndex}</strong> de{" "}
+          <strong style={{ color: "var(--text-primary)" }}>{totalItems}</strong> consulentes
+        </span>
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "5px",
+          maxWidth: "100%",
+          overflowX: "auto",
+          WebkitOverflowScrolling: "touch",
+          padding: "2px 0",
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => onPageChange((p) => Math.max(1, p - 1))}
+          disabled={currentPage === 1}
+          title="Página anterior"
+          style={{
+            padding: "5px 9px",
+            fontSize: "11px",
+            fontWeight: 600,
+            borderRadius: "7px",
+            background: isTop ? "var(--surface-card)" : "var(--surface-1)",
+            border: "1px solid var(--border-subtle)",
+            color: currentPage === 1 ? "var(--text-muted)" : "var(--text-primary)",
+            cursor: currentPage === 1 ? "not-allowed" : "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: "3px",
+            opacity: currentPage === 1 ? 0.4 : 1,
+            flexShrink: 0,
+          }}
+        >
+          <ChevronLeft style={{ width: "13px", height: "13px" }} />
+          <span>Ant.</span>
+        </button>
+
+        {pageNumbers.map((p) => {
+          const active = p === currentPage;
+          return (
+            <button
+              key={p}
+              type="button"
+              onClick={() => onPageChange(p)}
+              style={{
+                padding: "5px 10px",
+                fontSize: "11px",
+                fontWeight: active ? 800 : 500,
+                borderRadius: "7px",
+                border: active ? "1px solid var(--accent-strong)" : "1px solid var(--border-subtle)",
+                background: active ? "var(--accent-strong)" : isTop ? "var(--surface-card)" : "var(--surface-1)",
+                color: active ? "#FFFFFF" : "var(--text-secondary)",
+                cursor: "pointer",
+                transition: "all 0.12s ease",
+                whiteSpace: "nowrap",
+                flexShrink: 0,
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+              }}
+            >
+              <span>{p}</span>
+            </button>
+          );
+        })}
+
+        <button
+          type="button"
+          onClick={() => onPageChange((p) => Math.min(totalPages, p + 1))}
+          disabled={currentPage === totalPages}
+          title="Próxima página"
+          style={{
+            padding: "5px 9px",
+            fontSize: "11px",
+            fontWeight: 600,
+            borderRadius: "7px",
+            background: isTop ? "var(--surface-card)" : "var(--surface-1)",
+            border: "1px solid var(--border-subtle)",
+            color: currentPage === totalPages ? "var(--text-muted)" : "var(--text-primary)",
+            cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: "3px",
+            opacity: currentPage === totalPages ? 0.4 : 1,
+            flexShrink: 0,
+          }}
+        >
+          <span>Próx.</span>
+          <ChevronRight style={{ width: "13px", height: "13px" }} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+interface TelemetryBodyProps {
+  readonly viewMode: "table" | "cards";
+  readonly paginatedLeads: readonly Lead[];
+}
+
+function TelemetryBody({ viewMode, paginatedLeads }: TelemetryBodyProps) {
+  if (viewMode === "table") {
+    return (
+      <div style={{ overflowX: "auto", margin: "0 -4px", maxWidth: "100%", WebkitOverflowScrolling: "touch" }}>
+        <table style={{ width: "100%", minWidth: "860px", borderCollapse: "collapse", fontSize: "12px", textAlign: "left" }}>
+          <thead>
+            <tr
+              style={{
+                borderBottom: "1px solid var(--border-subtle)",
+                color: "var(--text-muted)",
+                fontSize: "10.5px",
+                textTransform: "uppercase",
+                letterSpacing: "0.04em",
+              }}
+            >
+              <th style={{ padding: "10px 12px", fontWeight: 600 }}>Consulente & Ente</th>
+              <th style={{ padding: "10px 12px", fontWeight: 600 }}>Tempo no Quiz</th>
+              <th style={{ padding: "10px 12px", fontWeight: 600 }}>Etapa Alcançada</th>
+              <th style={{ padding: "10px 12px", fontWeight: 600 }}>Ação de Checkout</th>
+              <th style={{ padding: "10px 12px", fontWeight: 600 }}>Origem (UTM)</th>
+              <th style={{ padding: "10px 12px", fontWeight: 600, textAlign: "right" }}>Horário</th>
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedLeads.length === 0 ? (
+              <tr>
+                <td colSpan={6} style={{ padding: "36px 12px", textAlign: "center", color: "var(--text-muted)" }}>
+                  <Users style={{ width: "24px", height: "24px", margin: "0 auto 6px", opacity: 0.5 }} />
+                  <p style={{ margin: 0, fontSize: "12.5px", fontWeight: 500, color: "var(--text-primary)" }}>
+                    Nenhum consulente encontrado para o período ou filtro.
+                  </p>
+                </td>
+              </tr>
+            ) : (
+              paginatedLeads.map((lead) => (
+                <TelemetryTableRow key={lead.id || lead.session_id} lead={lead} />
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fill, minmax(min(280px, 100%), 1fr))",
+        gap: "12px",
+      }}
+    >
+      {paginatedLeads.length === 0 ? (
+        <div style={{ gridColumn: "1 / -1", padding: "32px", textAlign: "center", color: "var(--text-muted)" }}>
+          <Users style={{ width: "24px", height: "24px", margin: "0 auto 6px", opacity: 0.5 }} />
+          <p style={{ margin: 0, fontSize: "12.5px", fontWeight: 500, color: "var(--text-primary)" }}>
+            Nenhum consulente encontrado para o filtro.
+          </p>
+        </div>
+      ) : (
+        paginatedLeads.map((lead) => (
+          <TelemetryCard key={lead.id || lead.session_id} lead={lead} />
+        ))
+      )}
+    </div>
+  );
+}
+
 export const ConsulentesTelemetryTable = memo(function ConsulentesTelemetryTable({ leads }: Readonly<ConsulentesTelemetryTableProps>) {
-  const [filter, setFilter] = useState<"all" | "checkout" | "pix" | "declined" | "paid">("all");
+  const [filter, setFilter] = useState<TelemetryFilterType>("all");
   const [search, setSearch] = useState("");
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -404,617 +977,43 @@ export const ConsulentesTelemetryTable = memo(function ConsulentesTelemetryTable
 
   return (
     <div className="card" style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-      {/* ─── CABEÇALHO DO BLOCO: Título & Métricas Executivas de Retenção ─── */}
-      <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start", gap: "16px" }}>
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-            <div
-              style={{
-                width: "28px",
-                height: "28px",
-                borderRadius: "8px",
-                background: "var(--accent-soft-bg)",
-                border: "1px solid var(--accent-border)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "var(--accent-strong)",
-              }}
-            >
-              <Compass style={{ width: "15px", height: "15px" }} />
-            </div>
-            <h3 style={{ fontSize: "16px", fontWeight: 700, color: "var(--text-primary)", margin: 0, letterSpacing: "-0.02em" }}>
-                Rascunhos de Consulentes & Checkouts
-            </h3>
-            <span
-              style={{
-                fontSize: "10.5px",
-                fontWeight: 600,
-                color: "var(--accent-strong)",
-                background: "var(--accent-soft-bg)",
-                border: "1px solid var(--accent-border)",
-                padding: "2px 8px",
-                borderRadius: "999px",
-              }}
-            >
-              Tempo Real
-            </span>
-          </div>
-          <p style={{ margin: 0, fontSize: "12px", color: "var(--text-muted)" }}>
-            Dados declarados no quiz são salvos após uma breve pausa de digitação, junto do estágio atual e checkout.
-          </p>
-        </div>
-
-        {/* 4 Métricas Rápidas no Topo */}
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-          <div
-            style={{
-              padding: "6px 12px",
-              background: "var(--surface-1)",
-              border: "1px solid var(--border-subtle)",
-              borderRadius: "10px",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-            }}
-          >
-            <Users style={{ width: "14px", height: "14px", color: "var(--text-muted)" }} />
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <span style={{ fontSize: "9.5px", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase" }}>
-                Total Leads
-              </span>
-              <span style={{ fontSize: "13px", fontWeight: 800, color: "var(--text-primary)" }}>
-                {metrics.totalLeads}
-              </span>
-            </div>
-          </div>
-
-          <div
-            style={{
-              padding: "6px 12px",
-              background: "var(--surface-1)",
-              border: "1px solid var(--border-subtle)",
-              borderRadius: "10px",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-            }}
-          >
-            <CreditCard style={{ width: "14px", height: "14px", color: "var(--accent-strong)" }} />
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <span style={{ fontSize: "9.5px", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase" }}>
-                No Checkout
-              </span>
-              <span style={{ fontSize: "13px", fontWeight: 800, color: "var(--accent-strong)" }}>
-                {metrics.checkoutsCount}
-              </span>
-            </div>
-          </div>
-
-          <div
-            style={{
-              padding: "6px 12px",
-              background: "rgba(46, 219, 111, 0.12)",
-              border: "1px solid rgba(46, 219, 111, 0.3)",
-              borderRadius: "10px",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-            }}
-          >
-            <CheckCircle2 style={{ width: "14px", height: "14px", color: "#2EDB6F" }} />
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <span style={{ fontSize: "9.5px", fontWeight: 600, color: "#2EDB6F", textTransform: "uppercase" }}>
-                Pagos Confirmados
-              </span>
-              <span style={{ fontSize: "13px", fontWeight: 800, color: "#2EDB6F" }}>
-                {metrics.paidCount}
-              </span>
-            </div>
-          </div>
-
-          <div
-            style={{
-              padding: "6px 12px",
-              background: "var(--surface-1)",
-              border: "1px solid var(--border-subtle)",
-              borderRadius: "10px",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-            }}
-          >
-            <Clock style={{ width: "14px", height: "14px", color: "var(--text-muted)" }} />
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <span style={{ fontSize: "9.5px", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase" }}>
-                Tempo Médio
-              </span>
-              <span style={{ fontSize: "13px", fontWeight: 800, color: "var(--text-primary)" }}>
-                {formatDuration(metrics.avgSeconds)}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ─── FILTROS, BUSCA E CONTROLES DE EXIBIÇÃO / LIMITE MOBILE ─── */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: "12px",
-          background: "var(--surface-1)",
-          border: "1px solid var(--border-subtle)",
-          borderRadius: "12px",
-          padding: "10px 14px",
-        }}
-      >
-        {/* Pílulas de Filtro Rápido */}
-        <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
-          {[
-            { id: "all", label: "Todos", count: leads.length },
-            { id: "checkout", label: "Checkout", count: metrics.checkoutsCount },
-            { id: "pix", label: "PIX", count: metrics.pixCount },
-            { id: "declined", label: "Recusados", count: metrics.declinedCount },
-            { id: "paid", label: "Pagos", count: metrics.paidCount },
-          ].map((f) => {
-            const active = filter === f.id;
-            return (
-              <button
-                key={f.id}
-                type="button"
-                onClick={() => setFilter(f.id as typeof filter)}
-                style={{
-                  fontSize: "11px",
-                  fontWeight: active ? 700 : 500,
-                  padding: "4px 10px",
-                  borderRadius: "8px",
-                  border: active ? "1px solid var(--accent-strong)" : "1px solid var(--border-subtle)",
-                  background: active ? "var(--accent-soft-bg)" : "var(--surface-1)",
-                  color: active ? "var(--accent-strong)" : "var(--text-muted)",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "5px",
-                  transition: "all 0.15s ease",
-                }}
-              >
-                <span>{f.label}</span>
-                <span
-                  style={{
-                    fontSize: "9.5px",
-                    fontWeight: 700,
-                    padding: "0 5px",
-                    borderRadius: "99px",
-                    background: active ? "var(--accent-strong)" : "var(--surface-3)",
-                    color: active ? "#FFFFFF" : "var(--text-muted)",
-                  }}
-                >
-                  {f.count}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Controles da Direita: Busca, Limite por Página e Alternador de Colunas */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", flex: 1, minWidth: 0, justifyContent: "flex-end" }}>
-          {/* Alternador Tabela vs Colunas/Cards */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              background: "var(--surface-card)",
-              border: "1px solid var(--border-subtle)",
-              borderRadius: "8px",
-              padding: "2px",
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => setViewMode("table")}
-              title="Visualização em Tabela"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "4px",
-                fontSize: "11px",
-                fontWeight: viewMode === "table" ? 700 : 500,
-                padding: "4px 8px",
-                borderRadius: "6px",
-                border: "none",
-                cursor: "pointer",
-                background: viewMode === "table" ? "var(--accent-strong)" : "transparent",
-                color: viewMode === "table" ? "#ffffff" : "var(--text-secondary)",
-              }}
-            >
-              <List style={{ width: "12px", height: "12px" }} />
-              <span>Tabela</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode("cards")}
-              title="Visualização em Cards / Colunas"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "4px",
-                fontSize: "11px",
-                fontWeight: viewMode === "cards" ? 700 : 500,
-                padding: "4px 8px",
-                borderRadius: "6px",
-                border: "none",
-                cursor: "pointer",
-                background: viewMode === "cards" ? "var(--accent-strong)" : "transparent",
-                color: viewMode === "cards" ? "#ffffff" : "var(--text-secondary)",
-              }}
-            >
-              <LayoutGrid style={{ width: "12px", height: "12px" }} />
-              <span>Cards</span>
-            </button>
-          </div>
-
-          {/* Seletor de Limite de Itens (5 / 10 / 20 / 50) */}
-          <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", color: "var(--text-muted)" }}>
-            <span style={{ fontWeight: 600 }}>Limite:</span>
-            {[5, 10, 20, 50].map((size) => (
-              <button
-                key={size}
-                type="button"
-                onClick={() => setPageSize(size)}
-                style={{
-                  fontSize: "10.5px",
-                  fontWeight: pageSize === size ? 800 : 500,
-                  padding: "3px 7px",
-                  borderRadius: "5px",
-                  border: pageSize === size ? "1px solid var(--accent-strong)" : "1px solid var(--border-subtle)",
-                  background: pageSize === size ? "var(--accent-soft-bg)" : "var(--surface-card)",
-                  color: pageSize === size ? "var(--accent-strong)" : "var(--text-secondary)",
-                  cursor: "pointer",
-                }}
-              >
-                {size}
-              </button>
-            ))}
-          </div>
-
-          {/* Input de Busca */}
-          <div style={{ position: "relative", minWidth: "min(160px, 100%)", maxWidth: "240px", flex: 1, width: "100%" }}>
-            <Search
-              style={{
-                position: "absolute",
-                left: "9px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                width: "12px",
-                height: "12px",
-                color: "var(--text-muted)",
-                pointerEvents: "none",
-              }}
-            />
-            <input
-              type="text"
-              placeholder="Buscar consulente ou ente..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              style={{
-                width: "100%",
-                fontSize: "16px",
-                padding: "5px 10px 5px 28px",
-                borderRadius: "8px",
-                border: "1px solid var(--border-subtle)",
-                background: "var(--surface-card)",
-                color: "var(--text-primary)",
-                outline: "none",
-                boxSizing: "border-box",
-              }}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* ─── NAVEGAÇÃO DE COLUNAS / PÁGINAS NO TOPO (EVITA SCROLL INFINITO NO MOBILE) ─── */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: "10px",
-          padding: "9px 12px",
-          background: "var(--surface-1)",
-          borderRadius: "10px",
-          border: "1px solid var(--border-subtle)",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "11.5px", color: "var(--text-muted)" }}>
-          <span
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "4px",
-              padding: "2px 8px",
-              borderRadius: "6px",
-              background: "var(--surface-card)",
-              border: "1px solid var(--border-subtle)",
-              fontWeight: 700,
-              color: "var(--accent-strong)",
-            }}
-          >
-            Página {currentPage} de {totalPages}
-          </span>
-          <span>
-            Exibindo <strong style={{ color: "var(--text-primary)" }}>{filteredLeads.length > 0 ? startIndex + 1 : 0}–{endIndex}</strong> de{" "}
-            <strong style={{ color: "var(--text-primary)" }}>{filteredLeads.length}</strong> consulentes
-          </span>
-        </div>
-
-        {/* Navegação paginada */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "5px",
-            maxWidth: "100%",
-            overflowX: "auto",
-            WebkitOverflowScrolling: "touch",
-            padding: "2px 0",
-          }}
-        >
-          <button
-            type="button"
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            title="Página anterior"
-            style={{
-              padding: "5px 9px",
-              fontSize: "11px",
-              fontWeight: 600,
-              borderRadius: "7px",
-              background: "var(--surface-card)",
-              border: "1px solid var(--border-subtle)",
-              color: currentPage === 1 ? "var(--text-muted)" : "var(--text-primary)",
-              cursor: currentPage === 1 ? "not-allowed" : "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "3px",
-              opacity: currentPage === 1 ? 0.4 : 1,
-              flexShrink: 0,
-            }}
-          >
-            <ChevronLeft style={{ width: "13px", height: "13px" }} />
-            <span>Ant.</span>
-          </button>
-
-          {pageNumbers.map((p) => {
-            const active = p === currentPage;
-            return (
-              <button
-                key={p}
-                type="button"
-                onClick={() => setCurrentPage(p)}
-                style={{
-                  padding: "5px 10px",
-                  fontSize: "11px",
-                  fontWeight: active ? 800 : 500,
-                  borderRadius: "7px",
-                  border: active ? "1px solid var(--accent-strong)" : "1px solid var(--border-subtle)",
-                  background: active ? "var(--accent-strong)" : "var(--surface-card)",
-                  color: active ? "#FFFFFF" : "var(--text-secondary)",
-                  cursor: "pointer",
-                  transition: "all 0.12s ease",
-                  whiteSpace: "nowrap",
-                  flexShrink: 0,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                }}
-              >
-                <span>{p}</span>
-              </button>
-            );
-          })}
-
-          <button
-            type="button"
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-            title="Próxima página"
-            style={{
-              padding: "5px 9px",
-              fontSize: "11px",
-              fontWeight: 600,
-              borderRadius: "7px",
-              background: "var(--surface-card)",
-              border: "1px solid var(--border-subtle)",
-              color: currentPage === totalPages ? "var(--text-muted)" : "var(--text-primary)",
-              cursor: currentPage === totalPages ? "not-allowed" : "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "3px",
-              opacity: currentPage === totalPages ? 0.4 : 1,
-              flexShrink: 0,
-            }}
-          >
-            <span>Próx.</span>
-            <ChevronRight style={{ width: "13px", height: "13px" }} />
-          </button>
-        </div>
-      </div>
-
-      {/* ─── CORPO: TABELA OU GRADE DE COLUNAS/CARDS ─── */}
-      {viewMode === "table" ? (
-        <div style={{ overflowX: "auto", margin: "0 -4px", maxWidth: "100%", WebkitOverflowScrolling: "touch" }}>
-          <table style={{ width: "100%", minWidth: "860px", borderCollapse: "collapse", fontSize: "12px", textAlign: "left" }}>
-            <thead>
-              <tr
-                style={{
-                  borderBottom: "1px solid var(--border-subtle)",
-                  color: "var(--text-muted)",
-                  fontSize: "10.5px",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.04em",
-                }}
-              >
-                <th style={{ padding: "10px 12px", fontWeight: 600 }}>Consulente & Ente</th>
-                <th style={{ padding: "10px 12px", fontWeight: 600 }}>Tempo no Quiz</th>
-                <th style={{ padding: "10px 12px", fontWeight: 600 }}>Etapa Alcançada</th>
-                <th style={{ padding: "10px 12px", fontWeight: 600 }}>Ação de Checkout</th>
-                <th style={{ padding: "10px 12px", fontWeight: 600 }}>Origem (UTM)</th>
-                <th style={{ padding: "10px 12px", fontWeight: 600, textAlign: "right" }}>Horário</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedLeads.length === 0 ? (
-                <tr>
-                  <td colSpan={6} style={{ padding: "36px 12px", textAlign: "center", color: "var(--text-muted)" }}>
-                    <Users style={{ width: "24px", height: "24px", margin: "0 auto 6px", opacity: 0.5 }} />
-                    <p style={{ margin: 0, fontSize: "12.5px", fontWeight: 500, color: "var(--text-primary)" }}>
-                      Nenhum consulente encontrado para o período ou filtro.
-                    </p>
-                  </td>
-                </tr>
-              ) : (
-                paginatedLeads.map((lead) => (
-                  <TelemetryTableRow key={lead.id || lead.session_id} lead={lead} />
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        /* ─── MODO COLUNAS / CARDS (OTIMIZADO PARA CELULAR E EVITAR SCROLL INFINITO) ─── */
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(min(280px, 100%), 1fr))",
-            gap: "12px",
-          }}
-        >
-          {paginatedLeads.length === 0 ? (
-            <div style={{ gridColumn: "1 / -1", padding: "32px", textAlign: "center", color: "var(--text-muted)" }}>
-              <Users style={{ width: "24px", height: "24px", margin: "0 auto 6px", opacity: 0.5 }} />
-              <p style={{ margin: 0, fontSize: "12.5px", fontWeight: 500, color: "var(--text-primary)" }}>
-                Nenhum consulente encontrado para o filtro.
-              </p>
-            </div>
-          ) : (
-            paginatedLeads.map((lead) => (
-              <TelemetryCard key={lead.id || lead.session_id} lead={lead} />
-            ))
-          )}
-        </div>
-      )}
-
-      {/* ─── RODAPÉ: PAGINAÇÃO COMPLETA & SELEÇÃO DE COLUNAS / PÁGINAS ─── */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: "12px",
-          borderTop: "1px solid var(--border-subtle)",
-          paddingTop: "14px",
-        }}
-      >
-        <div style={{ fontSize: "11.5px", color: "var(--text-muted)" }}>
-          Mostrando <strong style={{ color: "var(--text-primary)" }}>{filteredLeads.length > 0 ? startIndex + 1 : 0}–{endIndex}</strong> de{" "}
-          <strong style={{ color: "var(--text-primary)" }}>{filteredLeads.length}</strong> consulentes
-        </div>
-
-        {/* Navegação paginada */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "5px",
-            maxWidth: "100%",
-            overflowX: "auto",
-            WebkitOverflowScrolling: "touch",
-            padding: "2px 0",
-          }}
-        >
-          <button
-            type="button"
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            style={{
-              padding: "5px 9px",
-              fontSize: "11px",
-              fontWeight: 600,
-              borderRadius: "7px",
-              background: "var(--surface-1)",
-              border: "1px solid var(--border-subtle)",
-              color: currentPage === 1 ? "var(--text-muted)" : "var(--text-primary)",
-              cursor: currentPage === 1 ? "not-allowed" : "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "3px",
-              opacity: currentPage === 1 ? 0.4 : 1,
-              flexShrink: 0,
-            }}
-          >
-            <ChevronLeft style={{ width: "13px", height: "13px" }} />
-            <span>Ant.</span>
-          </button>
-
-          {pageNumbers.map((p) => {
-            const active = p === currentPage;
-            return (
-              <button
-                key={p}
-                type="button"
-                onClick={() => setCurrentPage(p)}
-                style={{
-                  padding: "5px 10px",
-                  fontSize: "11px",
-                  fontWeight: active ? 800 : 500,
-                  borderRadius: "7px",
-                  border: active ? "1px solid var(--accent-strong)" : "1px solid var(--border-subtle)",
-                  background: active ? "var(--accent-strong)" : "var(--surface-1)",
-                  color: active ? "#FFFFFF" : "var(--text-secondary)",
-                  cursor: "pointer",
-                  transition: "all 0.12s ease",
-                  whiteSpace: "nowrap",
-                  flexShrink: 0,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                }}
-              >
-                <span>{p}</span>
-              </button>
-            );
-          })}
-
-          <button
-            type="button"
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-            style={{
-              padding: "5px 9px",
-              fontSize: "11px",
-              fontWeight: 600,
-              borderRadius: "7px",
-              background: "var(--surface-1)",
-              border: "1px solid var(--border-subtle)",
-              color: currentPage === totalPages ? "var(--text-muted)" : "var(--text-primary)",
-              cursor: currentPage === totalPages ? "not-allowed" : "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "3px",
-              opacity: currentPage === totalPages ? 0.4 : 1,
-              flexShrink: 0,
-            }}
-          >
-            <span>Próx.</span>
-            <ChevronRight style={{ width: "13px", height: "13px" }} />
-          </button>
-        </div>
-      </div>
+      <TelemetryHeader metrics={metrics} />
+      <TelemetryFilterToolbar
+        leadsCount={leads.length}
+        metrics={metrics}
+        filter={filter}
+        onFilterChange={setFilter}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        pageSize={pageSize}
+        onPageSizeChange={setPageSize}
+        search={search}
+        onSearchChange={setSearch}
+      />
+      <TelemetryPaginationBar
+        currentPage={currentPage}
+        totalPages={totalPages}
+        startIndex={startIndex}
+        endIndex={endIndex}
+        totalItems={filteredLeads.length}
+        pageNumbers={pageNumbers}
+        onPageChange={setCurrentPage}
+        variant="top"
+      />
+      <TelemetryBody
+        viewMode={viewMode}
+        paginatedLeads={paginatedLeads}
+      />
+      <TelemetryPaginationBar
+        currentPage={currentPage}
+        totalPages={totalPages}
+        startIndex={startIndex}
+        endIndex={endIndex}
+        totalItems={filteredLeads.length}
+        pageNumbers={pageNumbers}
+        onPageChange={setCurrentPage}
+        variant="bottom"
+      />
     </div>
   );
 });

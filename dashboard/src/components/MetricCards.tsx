@@ -3,8 +3,8 @@ import { CircleDollarSign, CreditCard, QrCode, TrendingDown, TrendingUp } from "
 import type { DashboardStats } from "@/types";
 
 interface MetricCardsProps {
-  stats: DashboardStats;
-  loading: boolean;
+  readonly stats: DashboardStats;
+  readonly loading: boolean;
 }
 
 function formatBRL(value: number): string {
@@ -15,7 +15,7 @@ function formatBRL(value: number): string {
   }).format(value || 0);
 }
 
-function Difference({ value }: { value: number }) {
+function Difference({ value }: { readonly value: number }) {
   const positive = value >= 0;
   const Icon = positive ? TrendingUp : TrendingDown;
   return (
