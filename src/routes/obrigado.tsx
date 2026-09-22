@@ -6,13 +6,11 @@ import {
   CheckCircle2,
   Sparkles,
   Flame,
-  MessageCircle,
   Video,
   ArrowRight,
   ShieldCheck,
   Scroll,
   HelpCircle,
-  HeartHandshake,
 } from "lucide-react";
 
 export const Route = createFileRoute("/obrigado")({
@@ -31,123 +29,149 @@ export const Route = createFileRoute("/obrigado")({
 
 function parseCurrency(val: string | null | undefined): string {
   if (!val) return "R$ 35,00";
-  const num = parseFloat(val.replace(/[^\d.,]/g, "").replace(",", "."));
-  if (isNaN(num) || num <= 0) return "R$ 35,00";
+  const num = Number.parseFloat(val.replace(/[^\d.,]/g, "").replace(",", "."));
+  if (Number.isNaN(num) || num <= 0) return "R$ 35,00";
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL",
   }).format(num);
 }
 
+function generateSecureOrderCode(): string {
+  if (typeof window !== "undefined" && window.crypto?.getRandomValues) {
+    const array = new Uint32Array(1);
+    window.crypto.getRandomValues(array);
+    return `TL-${100000 + (array[0] % 900000)}`;
+  }
+  return `TL-${Date.now().toString().slice(-6)}`;
+}
+
+function triggerCelebrationConfetti() {
+  try {
+    const count = 150;
+    const defaults = {
+      origin: { y: 0.45 },
+      colors: ["#ffd700", "#f59e0b", "#fbbf24", "#ffffff", "#d4af37", "#fef3c7"],
+    };
+
+    const fire = (particleRatio: number, opts: confetti.Options) => {
+      confetti({
+        ...defaults,
+        ...opts,
+        particleCount: Math.floor(count * particleRatio),
+      });
+    };
+
+    fire(0.25, { spread: 30, startVelocity: 60 });
+    fire(0.2, { spread: 70 });
+    fire(0.35, { spread: 110, decay: 0.91, scalar: 0.9 });
+    fire(0.1, { spread: 130, startVelocity: 30, decay: 0.92, scalar: 1.2 });
+    fire(0.1, { spread: 130, startVelocity: 50 });
+  } catch {
+    // ignore
+  }
+}
+
+function resolveDeliveryEstimate(): string {
+  try {
+    const stored =
+      sessionStorage.getItem("templodeluz_horario_entrega") ||
+      localStorage.getItem("templodeluz_horario_entrega");
+    if (stored && stored.trim().length >= 4) {
+      return stored.trim();
+    }
+  } catch {
+    // ignore
+  }
+
+  const d = new Date();
+  d.setMinutes(d.getMinutes() + 75);
+  const rem = d.getMinutes() % 5;
+  if (rem !== 0) d.setMinutes(d.getMinutes() + (5 - rem));
+  return `${String(d.getHours()).padStart(2, "0")}h${String(d.getMinutes()).padStart(2, "0")}`;
+}
+
+function extractNameFromLogs(): string {
+  try {
+    const logs = localStorage.getItem("play_and_win_captured_logs");
+    if (logs) {
+      const parsed = JSON.parse(logs);
+      const nameEvent = parsed.find(
+        (e: { field: string; value: string }) =>
+          (e.field === "nome_consulente" || e.field === "lead_name") && e.value,
+      );
+      return nameEvent?.value || "";
+    }
+  } catch {
+    // ignore
+  }
+  return "";
+}
+
+interface ResolvedObrigadoData {
+  userName: string;
+  enteName: string;
+  donationAmount: string;
+  orderId: string;
+  deliveryTime: string;
+}
+
+function resolveObrigadoState(): ResolvedObrigadoData {
+  if (typeof window === "undefined") {
+    return {
+      userName: "Consulente",
+      enteName: "seu ente querido",
+      donationAmount: "R$ 35,00",
+      orderId: generateSecureOrderCode(),
+      deliveryTime: "em breve",
+    };
+  }
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const paramName = urlParams.get("name") || urlParams.get("cliente");
+  const paramEnte = urlParams.get("ente") || urlParams.get("ente_querido");
+  const paramAmount = urlParams.get("amount") || urlParams.get("valor");
+  const paramOrderId =
+    urlParams.get("orderId") || urlParams.get("order_id") || urlParams.get("session_id");
+
+  let resolvedName = paramName || "";
+  let resolvedEnte = paramEnte || "";
+  let resolvedAmount = paramAmount || "";
+
+  try {
+    const quizStateRaw = localStorage.getItem("templodeluz_quiz_state");
+    if (quizStateRaw) {
+      const quiz = JSON.parse(quizStateRaw);
+      if (!resolvedName && quiz.nome) resolvedName = quiz.nome;
+      if (!resolvedEnte && quiz.ente) resolvedEnte = quiz.ente;
+    }
+
+    if (!resolvedName) resolvedName = localStorage.getItem("templodeluz_lead_name") || "";
+    if (!resolvedEnte) resolvedEnte = localStorage.getItem("templodeluz_ente_querido") || "";
+    if (!resolvedAmount) resolvedAmount = localStorage.getItem("templodeluz_last_donation_amount") || "";
+    if (!resolvedName) resolvedName = extractNameFromLogs();
+  } catch {
+    // ignore
+  }
+
+  return {
+    userName: resolvedName ? resolvedName.trim().split(" ")[0] || resolvedName : "Consulente",
+    enteName: resolvedEnte ? resolvedEnte.trim().split(" ")[0] || resolvedEnte : "seu ente querido",
+    donationAmount: resolvedAmount ? parseCurrency(resolvedAmount) : "R$ 35,00",
+    orderId: paramOrderId ? paramOrderId.slice(0, 10) : generateSecureOrderCode(),
+    deliveryTime: resolveDeliveryEstimate(),
+  };
+}
+
 function ObrigadoPage() {
-  const [userName, setUserName] = useState("Consulente");
-  const [enteName, setEnteName] = useState("seu ente querido");
-  const [donationAmount, setDonationAmount] = useState("R$ 35,00");
-  const [orderId, setOrderId] = useState<string | null>(null);
-  const [deliveryTime, setDeliveryTime] = useState<string>("em breve");
+  const [data, setData] = useState<ResolvedObrigadoData>(() => resolveObrigadoState());
 
   useEffect(() => {
-    // Efeito comemorativo de confetes dourados sagrados ao carregar
-    try {
-      const count = 150;
-      const defaults = {
-        origin: { y: 0.45 },
-        colors: ["#ffd700", "#f59e0b", "#fbbf24", "#ffffff", "#d4af37", "#fef3c7"],
-      };
-
-      const fire = (particleRatio: number, opts: confetti.Options) => {
-        confetti({
-          ...defaults,
-          ...opts,
-          particleCount: Math.floor(count * particleRatio),
-        });
-      };
-
-      fire(0.25, { spread: 30, startVelocity: 60 });
-      fire(0.2, { spread: 70 });
-      fire(0.35, { spread: 110, decay: 0.91, scalar: 0.9 });
-      fire(0.1, { spread: 130, startVelocity: 30, decay: 0.92, scalar: 1.2 });
-      fire(0.1, { spread: 130, startVelocity: 50 });
-    } catch {
-      // ignore
-    }
-
-    if (typeof window !== "undefined") {
-      // 1. Busca por parâmetros de URL
-      const urlParams = new URLSearchParams(window.location.search);
-      const paramName = urlParams.get("name") || urlParams.get("cliente");
-      const paramEnte = urlParams.get("ente") || urlParams.get("ente_querido");
-      const paramAmount = urlParams.get("amount") || urlParams.get("valor");
-      const paramOrderId =
-        urlParams.get("orderId") || urlParams.get("order_id") || urlParams.get("session_id");
-
-      if (paramOrderId) setOrderId(paramOrderId);
-
-      // 2. Busca por dados locais persistidos do funil
-      let resolvedName = paramName || "";
-      let resolvedEnte = paramEnte || "";
-      let resolvedAmount = paramAmount || "";
-
-      try {
-        const quizStateRaw = localStorage.getItem("templodeluz_quiz_state");
-        if (quizStateRaw) {
-          const quiz = JSON.parse(quizStateRaw);
-          if (!resolvedName && quiz.nome) resolvedName = quiz.nome;
-          if (!resolvedEnte && quiz.ente) resolvedEnte = quiz.ente;
-        }
-
-        if (!resolvedName) {
-          resolvedName = localStorage.getItem("templodeluz_lead_name") || "";
-        }
-
-        if (!resolvedEnte) {
-          resolvedEnte = localStorage.getItem("templodeluz_ente_querido") || "";
-        }
-
-        if (!resolvedAmount) {
-          resolvedAmount = localStorage.getItem("templodeluz_last_donation_amount") || "";
-        }
-
-        if (!resolvedName) {
-          const logs = localStorage.getItem("play_and_win_captured_logs");
-          if (logs) {
-            const parsed = JSON.parse(logs);
-            const nameEvent = parsed.find(
-              (e: { field: string; value: string }) =>
-                (e.field === "nome_consulente" || e.field === "lead_name") && e.value,
-            );
-            if (nameEvent && nameEvent.value) {
-              resolvedName = nameEvent.value;
-            }
-          }
-        }
-      } catch {
-        // ignore
-      }
-
-      let resolvedDelivery = "";
-      try {
-        resolvedDelivery =
-          sessionStorage.getItem("templodeluz_horario_entrega") ||
-          localStorage.getItem("templodeluz_horario_entrega") ||
-          "";
-      } catch {
-        // ignore
-      }
-      if (!resolvedDelivery) {
-        const d = new Date();
-        d.setMinutes(d.getMinutes() + 75);
-        const rem = d.getMinutes() % 5;
-        if (rem !== 0) d.setMinutes(d.getMinutes() + (5 - rem));
-        resolvedDelivery = `${String(d.getHours()).padStart(2, "0")}h${String(d.getMinutes()).padStart(2, "0")}`;
-      }
-      setDeliveryTime(resolvedDelivery);
-
-      if (resolvedName) setUserName(resolvedName.split(" ")[0] || resolvedName);
-      if (resolvedEnte) setEnteName(resolvedEnte.split(" ")[0] || resolvedEnte);
-      if (resolvedAmount) setDonationAmount(parseCurrency(resolvedAmount));
-    }
+    triggerCelebrationConfetti();
+    setData(resolveObrigadoState());
   }, []);
+
+  const { userName, enteName, donationAmount, orderId, deliveryTime } = data;
 
   return (
     <div className="min-h-screen bg-[#f7f4fa] text-[#1c0d2d] antialiased selection:bg-[#f5d285] selection:text-[#160829]">
@@ -216,7 +240,7 @@ function ObrigadoPage() {
               <div>
                 <span className="text-[#87729f] block text-[10.5px]">Código do Pedido:</span>
                 <span className="font-mono text-[10.5px] text-stone-600">
-                  {orderId ? orderId.slice(0, 10) : "TL-" + Math.floor(100000 + Math.random() * 900000)}
+                  {orderId.slice(0, 10)}
                 </span>
               </div>
               <div className="col-span-2 pt-2 border-t border-[#ebdff5] flex items-center justify-between">
