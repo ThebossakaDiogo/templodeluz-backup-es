@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useMemo, useRef, type MouseEvent as ReactMouseEvent } from "react";
 import {
   LayoutGrid,
+  TrendingUp,
   Activity,
   CreditCard,
   BarChart3,
@@ -898,6 +899,7 @@ export function App() {
   // Hook incondicional executado em toda renderização (respeitando as Rules of Hooks)
   const NAV_TABS = useMemo(() => [
     { id: "visao-geral" as Section, label: "Visão Geral", icon: LayoutGrid },
+    { id: "anuncios" as Section, label: "Gastos & Lucro", icon: TrendingUp },
     { id: "rastreamento" as Section, label: "Funil & Telemetria", icon: Activity, badge: onlineCount > 0 ? `${onlineCount}` : undefined },
     { id: "abandonos" as Section, label: "Abandono & Recuperação", icon: AlertOctagon, badge: pixUnpaidOver1hCount > 0 ? `${pixUnpaidOver1hCount}` : undefined },
     { id: "pedidos" as Section, label: "Pedidos & Vendas", icon: CreditCard },
