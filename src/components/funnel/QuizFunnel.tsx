@@ -62,10 +62,37 @@ function redirectWithParams(destination: string) {
     destination + (destination.includes("?") ? "&" : "?") + params.substring(1);
 }
 
-function horarioAgendamento() {
+function horarioAgendamento(): string {
+  if (typeof window !== "undefined") {
+    try {
+      const stored =
+        sessionStorage.getItem("templodeluz_horario_entrega") ||
+        localStorage.getItem("templodeluz_horario_entrega");
+      if (stored && stored.trim().length >= 4) {
+        return stored.trim();
+      }
+    } catch {
+      // ignore
+    }
+  }
+
   const d = new Date();
-  d.setHours(d.getHours() + 1);
-  return `${String(d.getHours()).padStart(2, "0")}h${String(d.getMinutes()).padStart(2, "0")}`;
+  d.setMinutes(d.getMinutes() + 75);
+  const rem = d.getMinutes() % 5;
+  if (rem !== 0) {
+    d.setMinutes(d.getMinutes() + (5 - rem));
+  }
+  const formatted = `${String(d.getHours()).padStart(2, "0")}h${String(d.getMinutes()).padStart(2, "0")}`;
+
+  if (typeof window !== "undefined") {
+    try {
+      sessionStorage.setItem("templodeluz_horario_entrega", formatted);
+      localStorage.setItem("templodeluz_horario_entrega", formatted);
+    } catch {
+      // ignore
+    }
+  }
+  return formatted;
 }
 
 /* ─────────── UI primitives (Tema Claro, Acolhedor & Alta Legibilidade) ─────────── */
@@ -1037,6 +1064,9 @@ function PixInstantBox({
             Escolha livremente o valor que deseja contribuir para os materiais e o acolhimento da
             casa na sessão de {primeiroEnte}.
           </p>
+          <div className="mt-3 inline-flex items-center gap-2 rounded-xl bg-amber-400/15 border border-amber-300/30 px-3 py-1.5 text-[11.5px] font-semibold text-amber-200">
+            <span>⏱️ Previsão de recebimento: <strong>Hoje às {horario || "18h00"}</strong></span>
+          </div>
         </div>
       </div>
 
@@ -1354,6 +1384,10 @@ function PixInstantBox({
           <p className="mt-1 text-[12.5px] text-slate-600 leading-relaxed">
             Você também pode seguir para o pergaminho sem realizar uma contribuição neste momento.
           </p>
+
+          <div className="mt-2.5 inline-flex items-center gap-2 rounded-xl bg-[#f2eef8] border border-[#d8cae5] px-3 py-1.5 text-[11.5px] font-semibold text-[#5d4786]">
+            <span>⏱️ Previsão de entrega da carta: <strong>Hoje às {horario || "18h00"}</strong></span>
+          </div>
 
           <div className="mt-3.5 space-y-2">
             <div className="text-[11px] font-black uppercase tracking-wider text-slate-700">
@@ -2140,6 +2174,17 @@ function Result({
     return () => window.clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    if (typeof window !== "undefined" && horarioExibicao) {
+      try {
+        sessionStorage.setItem("templodeluz_horario_entrega", horarioExibicao);
+        localStorage.setItem("templodeluz_horario_entrega", horarioExibicao);
+      } catch {
+        // ignore
+      }
+    }
+  }, [horarioExibicao]);
+
   const scrollToEscolha = () => {
     const section = document.getElementById("escolha-caminho");
     if (section) {
@@ -2198,6 +2243,35 @@ function Result({
               </p>
             </div>
 
+            {/* Gatilho de Recebimento com Horário Confirmado */}
+            <div className="relative z-10 mt-3.5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-amber-400/20 to-amber-500/15 border border-amber-300/40 p-3.5 sm:p-4 text-left shadow-lg backdrop-blur-xs">
+              <div className="flex items-center justify-between gap-2 border-b border-amber-300/20 pb-2 mb-2">
+                <div className="flex items-center gap-1.5">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-400/30 text-amber-200 text-[11px]">
+                    ⏱️
+                  </span>
+                  <span className="text-[10.5px] font-black uppercase tracking-wider text-amber-200">
+                    Previsão de Recebimento
+                  </span>
+                </div>
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/25 border border-emerald-400/50 px-2 py-0.5 text-[9.5px] font-extrabold text-emerald-200">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Horário Reservado
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-baseline gap-2">
+                <span className="text-[12px] text-zinc-200 font-medium">Horário previsto de entrega:</span>
+                <span className="text-[17px] sm:text-[19px] font-black text-amber-300 tracking-tight">
+                  Hoje às {horarioExibicao}
+                </span>
+              </div>
+
+              <p className="mt-1 text-[11px] leading-relaxed text-zinc-300/90">
+                A sessão de oração e acolhimento para <strong>{nomeEnteCompleto}</strong> está agendada no oratório. A mensagem será liberada para você até este horário.
+              </p>
+            </div>
+
             {/* Três Passos Claros */}
             <div className="relative z-10 mt-4 grid grid-cols-3 gap-2 text-center text-[10.5px]">
               <div className="rounded-lg bg-emerald-500/20 border border-emerald-400/40 p-2 text-emerald-200 font-bold">
@@ -2206,8 +2280,8 @@ function Result({
               <div className="rounded-lg bg-amber-400/20 border border-amber-400/60 p-2 text-amber-200 font-extrabold shadow-xs">
                 2. Escolha como continuar
               </div>
-              <div className="rounded-lg bg-white/5 border border-white/10 p-2 text-zinc-400">
-                3. Confirmação
+              <div className="rounded-lg bg-amber-500/20 border border-amber-400/40 p-2 text-amber-200 font-bold">
+                3. Receba às {horarioExibicao}
               </div>
             </div>
 
@@ -2295,11 +2369,10 @@ function Result({
                 </span>
                 <div className="min-w-0">
                   <h3 className="text-[14px] font-bold text-slate-900 leading-tight">
-                    Você revisa tudo antes de confirmar
+                    Recebimento previsto para hoje às {horarioExibicao}
                   </h3>
                   <p className="mt-1 text-[12px] leading-relaxed text-slate-600">
-                    Caso escolha contribuir, o valor e a forma de pagamento serão apresentados antes
-                    da confirmação.
+                    Sua sessão foi acolhida no oratório com previsão de entrega <strong className="text-[#2b1747]">hoje, até às {horarioExibicao}</strong>. Você poderá ler a mensagem e acompanhar todas as orientações espirituais.
                   </p>
                 </div>
               </div>
@@ -2554,6 +2627,9 @@ function Result({
             <h2 className="font-display text-[22px] sm:text-[25px] font-extrabold text-[#1f1035] leading-snug">
               Seu pedido para {nomeEnteCompleto} já foi recebido 🕊️
             </h2>
+            <div className="inline-flex items-center gap-2 mt-2.5 px-3.5 py-1 rounded-full bg-amber-100 border border-amber-300 text-amber-950 text-xs font-black shadow-2xs">
+              <span>⏱️ Horário estimado de entrega: <strong>Hoje às {horarioExibicao}</strong></span>
+            </div>
             <p className="mx-auto mt-2 max-w-md text-[13.5px] text-[#5e4b73] leading-relaxed">
               Você não precisa decidir com pressa. Revise as opções acima e escolha o caminho que
               fizer sentido para você.

@@ -44,6 +44,7 @@ function ObrigadoPage() {
   const [enteName, setEnteName] = useState("seu ente querido");
   const [donationAmount, setDonationAmount] = useState("R$ 35,00");
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [deliveryTime, setDeliveryTime] = useState<string>("em breve");
 
   useEffect(() => {
     // Efeito comemorativo de confetes dourados sagrados ao carregar
@@ -124,6 +125,24 @@ function ObrigadoPage() {
         // ignore
       }
 
+      let resolvedDelivery = "";
+      try {
+        resolvedDelivery =
+          sessionStorage.getItem("templodeluz_horario_entrega") ||
+          localStorage.getItem("templodeluz_horario_entrega") ||
+          "";
+      } catch {
+        // ignore
+      }
+      if (!resolvedDelivery) {
+        const d = new Date();
+        d.setMinutes(d.getMinutes() + 75);
+        const rem = d.getMinutes() % 5;
+        if (rem !== 0) d.setMinutes(d.getMinutes() + (5 - rem));
+        resolvedDelivery = `${String(d.getHours()).padStart(2, "0")}h${String(d.getMinutes()).padStart(2, "0")}`;
+      }
+      setDeliveryTime(resolvedDelivery);
+
       if (resolvedName) setUserName(resolvedName.split(" ")[0] || resolvedName);
       if (resolvedEnte) setEnteName(resolvedEnte.split(" ")[0] || resolvedEnte);
       if (resolvedAmount) setDonationAmount(parseCurrency(resolvedAmount));
@@ -155,7 +174,7 @@ function ObrigadoPage() {
 
             <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-[11px] font-semibold text-emerald-300 bg-emerald-950/40 border border-emerald-500/30 px-3.5 py-1.5 rounded-full">
               <CheckCircle2 size={13} className="text-emerald-400" />
-              <span>Horário reservado com Milena para a memória de <strong>{enteName}</strong></span>
+              <span>Horário reservado com Milena: <strong>Hoje às {deliveryTime}</strong> para acolher <strong>{enteName}</strong></span>
             </div>
           </div>
         </header>
@@ -199,6 +218,12 @@ function ObrigadoPage() {
                 <span className="font-mono text-[10.5px] text-stone-600">
                   {orderId ? orderId.slice(0, 10) : "TL-" + Math.floor(100000 + Math.random() * 900000)}
                 </span>
+              </div>
+              <div className="col-span-2 pt-2 border-t border-[#ebdff5] flex items-center justify-between">
+                <span className="text-[#87729f] text-[10.5px]">Previsão de Entrega da Carta:</span>
+                <strong className="text-amber-800 text-[11.5px] font-black bg-amber-100/90 px-2 py-0.5 rounded border border-amber-300/60">
+                  Hoje às {deliveryTime}
+                </strong>
               </div>
             </div>
           </div>
