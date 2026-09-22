@@ -890,6 +890,58 @@ function MilenaSupportPrompt({
   );
 }
 
+function useCheckoutPosition(isValid: boolean, hasUserSelectedOption: boolean) {
+  const [isCheckoutInView, setIsCheckoutInView] = useState<boolean>(false);
+  const [checkoutPosition, setCheckoutPosition] = useState<"above" | "below">("below");
+
+  useEffect(() => {
+    const getCheckoutTarget = () =>
+      document.getElementById("botao-pagamento-checkout") ||
+      document.querySelector<HTMLElement>("#area-pagamento-pix button.utmify-initiate-checkout") ||
+      document.getElementById("area-pagamento-pix");
+
+    let rafId: number | null = null;
+
+    const checkPosition = () => {
+      const el = getCheckoutTarget();
+      if (!el) return;
+
+      const rect = el.getBoundingClientRect();
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+
+      const inView = rect.top < viewportHeight - 50 && rect.bottom > 50;
+      setIsCheckoutInView(inView);
+      setCheckoutPosition(rect.top < 0 ? "above" : "below");
+    };
+
+    const handleScrollOrResize = () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      rafId = window.requestAnimationFrame(checkPosition);
+    };
+
+    checkPosition();
+    window.addEventListener("scroll", handleScrollOrResize, { passive: true });
+    window.addEventListener("resize", handleScrollOrResize, { passive: true });
+
+    return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      window.removeEventListener("scroll", handleScrollOrResize);
+      window.removeEventListener("resize", handleScrollOrResize);
+    };
+  }, [isValid, hasUserSelectedOption]);
+
+  return { isCheckoutInView, checkoutPosition };
+}
+
+function resolvePhysicalLetterDescription(requested: boolean, fee: number): string {
+  if (!requested) {
+    return "Marque esta opção para incluir R$15 de envio e receber a carta física pelos Correios.";
+  }
+  return fee === 0
+    ? "A taxa já está incluída neste valor. Na próxima página, você informa apenas o endereço."
+    : "R$15 serão incluídos automaticamente no total do PIX/cartão. Na próxima página, você informa apenas o endereço de entrega.";
+}
+
 function PixInstantBox({
   primeiroNome = "Você",
   primeiroEnte = "seu ente querido",
@@ -915,8 +967,6 @@ function PixInstantBox({
   const [whatsAppModalOpen, setWhatsAppModalOpen] = useState<boolean>(false);
   const [freeLetterAudioOpen, setFreeLetterAudioOpen] = useState(false);
   const [hasUserSelectedOption, setHasUserSelectedOption] = useState<boolean>(false);
-  const [isCheckoutInView, setIsCheckoutInView] = useState<boolean>(false);
-  const [checkoutPosition, setCheckoutPosition] = useState<"above" | "below">("below");
   const [physicalLetterRequested, setPhysicalLetterRequested] = useState(() => {
     if (typeof window === "undefined") return false;
     const storedPreference = sessionStorage.getItem("templodeluz:physical-letter-selected");
@@ -927,47 +977,10 @@ function PixInstantBox({
   const physicalLetterFee = physicalLetterRequested && activeAmount < 40 ? 15 : 0;
   const checkoutAmount = activeAmount + physicalLetterFee;
   const impact = getDonationPsychologicalImpact(activeAmount, primeiroEnte, primeiroNome);
-
-  useEffect(() => {
-    const getCheckoutTarget = () =>
-      document.getElementById("botao-pagamento-checkout") ||
-      document.querySelector<HTMLElement>("#area-pagamento-pix button.utmify-initiate-checkout") ||
-      document.getElementById("area-pagamento-pix");
-
-    let rafId: number | null = null;
-
-    const checkPosition = () => {
-      const el = getCheckoutTarget();
-      if (!el) return;
-
-      const rect = el.getBoundingClientRect();
-      const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-
-      const inView = rect.top < viewportHeight - 50 && rect.bottom > 50;
-      setIsCheckoutInView(inView);
-
-      if (rect.top < 0) {
-        setCheckoutPosition("above");
-      } else {
-        setCheckoutPosition("below");
-      }
-    };
-
-    const handleScrollOrResize = () => {
-      if (rafId !== null) cancelAnimationFrame(rafId);
-      rafId = window.requestAnimationFrame(checkPosition);
-    };
-
-    checkPosition();
-    window.addEventListener("scroll", handleScrollOrResize, { passive: true });
-    window.addEventListener("resize", handleScrollOrResize, { passive: true });
-
-    return () => {
-      if (rafId !== null) cancelAnimationFrame(rafId);
-      window.removeEventListener("scroll", handleScrollOrResize);
-      window.removeEventListener("resize", handleScrollOrResize);
-    };
-  }, [impact.isValid, hasUserSelectedOption]);
+  const { isCheckoutInView, checkoutPosition } = useCheckoutPosition(impact.isValid, hasUserSelectedOption);
+  const physicalLetterDescription = resolvePhysicalLetterDescription(physicalLetterRequested, physicalLetterFee);
+  const physicalLetterBadge =
+    physicalLetterRequested && physicalLetterFee === 0 ? "INCLUÍDA NO VALOR" : "+ R$ 15 ENTREGA";
 
   const scrollToCheckout = () => {
     const payBtn =
@@ -983,18 +996,6 @@ function PixInstantBox({
       }, 1600);
     }
   };
-
-  const physicalLetterBadge =
-    physicalLetterRequested && physicalLetterFee === 0 ? "INCLUÍDA NO VALOR" : "+ R$ 15 ENTREGA";
-
-  let physicalLetterDescription =
-    "Marque esta opção para incluir R$15 de envio e receber a carta física pelos Correios.";
-  if (physicalLetterRequested) {
-    physicalLetterDescription =
-      physicalLetterFee === 0
-        ? "A taxa já está incluída neste valor. Na próxima página, você informa apenas o endereço."
-        : "R$15 serão incluídos automaticamente no total do PIX/cartão. Na próxima página, você informa apenas o endereço de entrega.";
-  }
 
   const handleCustomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIsCustom(true);
@@ -2292,7 +2293,7 @@ function Result({
                 </div>
                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/25 border border-emerald-400/50 px-2 py-0.5 text-[9.5px] font-extrabold text-emerald-200">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Horário Reservado
+                  <span>Horário Reservado</span>
                 </span>
               </div>
 

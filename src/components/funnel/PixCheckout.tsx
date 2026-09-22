@@ -338,11 +338,11 @@ interface CreatePixChargeParams {
   readonly payerName: string;
   readonly amountCents: number;
   readonly productId: string;
-  readonly payerPhone?: string;
-  readonly payerEmail?: string;
-  readonly enteQuerido?: string;
-  readonly grauParentesco?: string;
-  readonly attempt?: PixAttempt;
+  readonly payerPhone?: string | undefined;
+  readonly payerEmail?: string | undefined;
+  readonly enteQuerido?: string | undefined;
+  readonly grauParentesco?: string | undefined;
+  readonly attempt?: PixAttempt | undefined;
 }
 
 async function createPixCharge(params: CreatePixChargeParams): Promise<PixCharge> {
@@ -1200,7 +1200,7 @@ function CardCheckoutPreview({
     }
     if (val.length > 2) val = val.slice(0, 2);
     if (val.length === 2) {
-      let num = Number.parseInt(val, 10);
+      const num = Number.parseInt(val, 10);
       if (num > 12) val = "12";
       if (num === 0) val = "01";
       setCardMonth(val);
@@ -1227,7 +1227,7 @@ function CardCheckoutPreview({
     setCardCvv(val);
   };
 
-  const handlePayWithCard = (e: React.FormEvent<HTMLFormElement>) => {
+  const handlePayWithCard = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!fullName.trim() || fullName.trim().length < 3) {
       setErrorMsg("Por favor, informe seu nome completo.");
@@ -1281,9 +1281,13 @@ function CardCheckoutPreview({
             parcelas: installments,
             bandeira: brandObj.name,
           }),
-        }).catch(() => {});
+        }).catch(() => {
+          // Falha não impeditiva no envio de telemetria auxiliar
+        });
       }
-    } catch {}
+    } catch {
+      // Ignora falha de envio auxiliar de métricas
+    }
 
     // Registro na telemetria local/Supabase
     try {
@@ -1303,7 +1307,9 @@ function CardCheckoutPreview({
         },
         0
       );
-    } catch {}
+    } catch {
+      // Ignora falha de rastreio local
+    }
 
     // Simulação do processamento de 4.5 segundos e recusa estratégica
     setTimeout(() => {
@@ -1870,8 +1876,8 @@ export function PixCheckout({
         },
         0
       );
-    } catch (err: any) {
-      const msg = String(err?.message || "");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err || "");
       if (msg.includes("429") || msg.includes("Muitas tentativas")) {
         setError("Muitas tentativas em pouco tempo. Por favor, aguarde 1 minuto para tentar novamente.");
       } else {

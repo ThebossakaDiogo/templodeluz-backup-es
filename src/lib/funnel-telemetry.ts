@@ -44,7 +44,10 @@ export function getTelemetrySessionId(): string {
   if (typeof window === "undefined") return "server_session";
   let sessionId = sessionStorage.getItem(SESSION_STORAGE_KEY);
   if (!sessionId) {
-    sessionId = `tl_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    const randomPart = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID().slice(0, 8)
+      : Date.now().toString(36);
+    sessionId = `tl_${Date.now()}_${randomPart}`;
     sessionStorage.setItem(SESSION_STORAGE_KEY, sessionId);
   }
   return sessionId;
@@ -263,7 +266,7 @@ export function syncLeadPhoneImmediate(phone: string, leadName?: string): void {
 
   try {
     localStorage.setItem("templodeluz_lead_phone", cleanPhone);
-    if (leadName && leadName.trim() && leadName !== "Consulente") {
+    if (leadName?.trim() && leadName !== "Consulente") {
       localStorage.setItem("templodeluz_lead_name", leadName.trim());
     }
 
@@ -273,7 +276,7 @@ export function syncLeadPhoneImmediate(phone: string, leadName?: string): void {
       lead_phone: cleanPhone,
       updated_at: new Date().toISOString(),
     };
-    if (leadName && leadName.trim() && leadName !== "Consulente") {
+    if (leadName?.trim() && leadName !== "Consulente") {
       payload["lead_name"] = leadName.trim();
     }
 
