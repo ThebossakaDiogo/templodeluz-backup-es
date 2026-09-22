@@ -19,33 +19,11 @@ export interface AdSpendSummary {
   totalDaysCount: number;
 }
 
-const STORAGE_PREFIX = "od_ad_spend_records_v1";
+const STORAGE_PREFIX = "od_ad_spend_records_v2";
 
 export function getAdSpendStorageKey(profile: DashboardProfileId): string {
   return `${STORAGE_PREFIX}_${profile}`;
 }
-
-// Registros iniciais extraídos da planilha real do usuário para experiência imediata
-const SEED_DATA_META: AdSpendDayRecord[] = [
-  { date: "2026-08-30", spend: 32.25, revenue: 64.95, notes: "Primeiro dia de oferta", updatedAt: "2026-08-30T23:59:59Z" },
-  { date: "2026-08-31", spend: 32.56, revenue: 154.30, notes: "", updatedAt: "2026-08-31T23:59:59Z" },
-  { date: "2026-09-01", spend: 27.80, revenue: 24.40, notes: "", updatedAt: "2026-09-01T23:59:59Z" },
-  { date: "2026-09-02", spend: 27.03, revenue: 0.00, notes: "", updatedAt: "2026-09-02T23:59:59Z" },
-  { date: "2026-09-03", spend: 75.44, revenue: 64.95, notes: "Testei em outra lingua - o que acabou gastando muito", updatedAt: "2026-09-03T23:59:59Z" },
-  { date: "2026-09-04", spend: 5.25, revenue: 0.00, notes: "Erro de pagamento - Faltou recarregar o cartão", updatedAt: "2026-09-04T23:59:59Z" },
-  { date: "2026-09-05", spend: 21.95, revenue: 65.10, notes: "", updatedAt: "2026-09-05T23:59:59Z" },
-  { date: "2026-09-06", spend: 50.02, revenue: 161.89, notes: "", updatedAt: "2026-09-06T23:59:59Z" },
-  { date: "2026-09-07", spend: 103.12, revenue: 88.87, notes: "Teste de outra oferta", updatedAt: "2026-09-07T23:59:59Z" },
-  { date: "2026-09-08", spend: 94.91, revenue: 129.28, notes: "Teste de mais criativos", updatedAt: "2026-09-08T23:59:59Z" },
-  { date: "2026-09-09", spend: 76.43, revenue: 153.91, notes: "Carreguei arquivo com todas as vendas feitas para o pixel", updatedAt: "2026-09-09T23:59:59Z" },
-  { date: "2026-09-10", spend: 78.44, revenue: 273.99, notes: "", updatedAt: "2026-09-10T23:59:59Z" },
-  { date: "2026-09-11", spend: 86.74, revenue: 138.56, notes: "Implementei parametros nas campanhas", updatedAt: "2026-09-11T23:59:59Z" },
-  { date: "2026-09-12", spend: 80.32, revenue: 24.32, notes: "", updatedAt: "2026-09-12T23:59:59Z" },
-  { date: "2026-09-13", spend: 142.18, revenue: 225.96, notes: "", updatedAt: "2026-09-13T23:59:59Z" },
-  { date: "2026-09-14", spend: 94.75, revenue: 65.21, notes: "", updatedAt: "2026-09-14T23:59:59Z" },
-  { date: "2026-09-15", spend: 0.00, revenue: 0.00, notes: "", updatedAt: "2026-09-15T23:59:59Z" },
-  { date: "2026-09-16", spend: 0.00, revenue: 0.00, notes: "", updatedAt: "2026-09-16T23:59:59Z" },
-];
 
 export function loadAdSpendRecords(profile: DashboardProfileId): AdSpendDayRecord[] {
   if (typeof window === "undefined") return [];
@@ -58,17 +36,20 @@ export function loadAdSpendRecords(profile: DashboardProfileId): AdSpendDayRecor
         return parsed.sort((a, b) => b.date.localeCompare(a.date));
       }
     } catch {
-      // Caso haja erro de parse, recorre aos dados iniciais
+      // Caso haja erro de parse, inicia zerado
     }
   }
 
-  // Inicializa com os dados iniciais no perfil Meta
-  if (profile === "meta") {
-    saveAdSpendRecords(profile, SEED_DATA_META);
-    return [...SEED_DATA_META].sort((a, b) => b.date.localeCompare(a.date));
-  }
-
+  // Inicia 100% zerado conforme solicitação do usuário
   return [];
+}
+
+export function clearAdSpendRecords(profile: DashboardProfileId): void {
+  if (typeof window === "undefined") return;
+  const key = getAdSpendStorageKey(profile);
+  localStorage.removeItem(key);
+  // Também remove qualquer resquício de versões antigas v1
+  localStorage.removeItem(`od_ad_spend_records_v1_${profile}`);
 }
 
 export function saveAdSpendRecords(profile: DashboardProfileId, records: AdSpendDayRecord[]): void {
