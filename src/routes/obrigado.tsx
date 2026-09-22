@@ -41,7 +41,8 @@ function generateSecureOrderCode(): string {
   if (typeof window !== "undefined" && window.crypto?.getRandomValues) {
     const array = new Uint32Array(1);
     window.crypto.getRandomValues(array);
-    return `TL-${100000 + (array[0] % 900000)}`;
+    const rand = array[0] ?? 0;
+    return `TL-${100000 + (rand % 900000)}`;
   }
   return `TL-${Date.now().toString().slice(-6)}`;
 }
@@ -119,6 +120,55 @@ interface ResolvedObrigadoData {
   deliveryTime: string;
 }
 
+function resolveSavedQuizData(): { name: string; ente: string } {
+  try {
+    const raw = localStorage.getItem("templodeluz_quiz_state");
+    if (raw) {
+      const quiz = JSON.parse(raw);
+      return {
+        name: typeof quiz.nome === "string" ? quiz.nome : "",
+        ente: typeof quiz.ente === "string" ? quiz.ente : "",
+      };
+    }
+  } catch {
+    // ignore
+  }
+  return { name: "", ente: "" };
+}
+
+function resolveConsulenteName(paramName: string, quizName: string): string {
+  if (paramName) return paramName;
+  if (quizName) return quizName;
+  try {
+    const lead = localStorage.getItem("templodeluz_lead_name");
+    if (lead) return lead;
+  } catch {
+    // ignore
+  }
+  return extractNameFromLogs();
+}
+
+function resolveEnteName(paramEnte: string, quizEnte: string): string {
+  if (paramEnte) return paramEnte;
+  if (quizEnte) return quizEnte;
+  try {
+    return localStorage.getItem("templodeluz_ente_querido") || "";
+  } catch {
+    return "";
+  }
+}
+
+function resolveDonationAmount(paramAmount: string): string {
+  if (paramAmount) return parseCurrency(paramAmount);
+  try {
+    const stored = localStorage.getItem("templodeluz_last_donation_amount");
+    if (stored) return parseCurrency(stored);
+  } catch {
+    // ignore
+  }
+  return "R$ 35,00";
+}
+
 function resolveObrigadoState(): ResolvedObrigadoData {
   if (typeof window === "undefined") {
     return {
@@ -131,36 +181,23 @@ function resolveObrigadoState(): ResolvedObrigadoData {
   }
 
   const urlParams = new URLSearchParams(window.location.search);
-  const paramName = urlParams.get("name") || urlParams.get("cliente");
-  const paramEnte = urlParams.get("ente") || urlParams.get("ente_querido");
-  const paramAmount = urlParams.get("amount") || urlParams.get("valor");
+  const paramName = urlParams.get("name") || urlParams.get("cliente") || "";
+  const paramEnte = urlParams.get("ente") || urlParams.get("ente_querido") || "";
+  const paramAmount = urlParams.get("amount") || urlParams.get("valor") || "";
   const paramOrderId =
-    urlParams.get("orderId") || urlParams.get("order_id") || urlParams.get("session_id");
+    urlParams.get("orderId") || urlParams.get("order_id") || urlParams.get("session_id") || "";
 
-  let resolvedName = paramName || "";
-  let resolvedEnte = paramEnte || "";
-  let resolvedAmount = paramAmount || "";
+  const savedQuiz = resolveSavedQuizData();
+  const rawName = resolveConsulenteName(paramName, savedQuiz.name);
+  const rawEnte = resolveEnteName(paramEnte, savedQuiz.ente);
 
-  try {
-    const quizStateRaw = localStorage.getItem("templodeluz_quiz_state");
-    if (quizStateRaw) {
-      const quiz = JSON.parse(quizStateRaw);
-      if (!resolvedName && quiz.nome) resolvedName = quiz.nome;
-      if (!resolvedEnte && quiz.ente) resolvedEnte = quiz.ente;
-    }
-
-    if (!resolvedName) resolvedName = localStorage.getItem("templodeluz_lead_name") || "";
-    if (!resolvedEnte) resolvedEnte = localStorage.getItem("templodeluz_ente_querido") || "";
-    if (!resolvedAmount) resolvedAmount = localStorage.getItem("templodeluz_last_donation_amount") || "";
-    if (!resolvedName) resolvedName = extractNameFromLogs();
-  } catch {
-    // ignore
-  }
+  const firstName = rawName.trim().split(" ")[0];
+  const firstEnte = rawEnte.trim().split(" ")[0];
 
   return {
-    userName: resolvedName ? resolvedName.trim().split(" ")[0] || resolvedName : "Consulente",
-    enteName: resolvedEnte ? resolvedEnte.trim().split(" ")[0] || resolvedEnte : "seu ente querido",
-    donationAmount: resolvedAmount ? parseCurrency(resolvedAmount) : "R$ 35,00",
+    userName: firstName || "Consulente",
+    enteName: firstEnte || "seu ente querido",
+    donationAmount: resolveDonationAmount(paramAmount),
     orderId: paramOrderId ? paramOrderId.slice(0, 10) : generateSecureOrderCode(),
     deliveryTime: resolveDeliveryEstimate(),
   };
