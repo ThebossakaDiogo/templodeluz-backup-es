@@ -806,6 +806,10 @@ function TelemetryPaginationBar({
 
         {pageNumbers.map((p) => {
           const active = p === currentPage;
+          let buttonBg = isTop ? "var(--surface-card)" : "var(--surface-1)";
+          if (active) {
+            buttonBg = "var(--accent-strong)";
+          }
           return (
             <button
               key={p}
@@ -817,7 +821,7 @@ function TelemetryPaginationBar({
                 fontWeight: active ? 800 : 500,
                 borderRadius: "7px",
                 border: active ? "1px solid var(--accent-strong)" : "1px solid var(--border-subtle)",
-                background: active ? "var(--accent-strong)" : isTop ? "var(--surface-card)" : "var(--surface-1)",
+                background: buttonBg,
                 color: active ? "#FFFFFF" : "var(--text-secondary)",
                 cursor: "pointer",
                 transition: "all 0.12s ease",
