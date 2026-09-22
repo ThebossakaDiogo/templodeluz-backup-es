@@ -84,8 +84,11 @@ function resolveDeliveryEstimate(): string {
     // ignore
   }
 
-  const d = new Date();
-  d.setMinutes(d.getMinutes() + 75);
+  // Horário oficial de Brasília e São Paulo (America/Sao_Paulo) - 2 horas à frente (120 minutos)
+  const now = new Date();
+  const spString = now.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" });
+  const d = new Date(spString);
+  d.setMinutes(d.getMinutes() + 120);
   const rem = d.getMinutes() % 5;
   if (rem !== 0) d.setMinutes(d.getMinutes() + (5 - rem));
   return `${String(d.getHours()).padStart(2, "0")}h${String(d.getMinutes()).padStart(2, "0")}`;
@@ -198,7 +201,7 @@ function ObrigadoPage() {
 
             <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-[11px] font-semibold text-emerald-300 bg-emerald-950/40 border border-emerald-500/30 px-3.5 py-1.5 rounded-full">
               <CheckCircle2 size={13} className="text-emerald-400" />
-              <span>Horário reservado com Milena: <strong>Hoje às {deliveryTime}</strong> para acolher <strong>{enteName}</strong></span>
+              <span>Horário reservado com Milena: <strong>Hoje às {deliveryTime} (Horário de Brasília)</strong> para acolher <strong>{enteName}</strong></span>
             </div>
           </div>
         </header>
@@ -246,7 +249,7 @@ function ObrigadoPage() {
               <div className="col-span-2 pt-2 border-t border-[#ebdff5] flex items-center justify-between">
                 <span className="text-[#87729f] text-[10.5px]">Previsão de Entrega da Carta:</span>
                 <strong className="text-amber-800 text-[11.5px] font-black bg-amber-100/90 px-2 py-0.5 rounded border border-amber-300/60">
-                  Hoje às {deliveryTime}
+                  Hoje às {deliveryTime} (Horário de Brasília)
                 </strong>
               </div>
             </div>

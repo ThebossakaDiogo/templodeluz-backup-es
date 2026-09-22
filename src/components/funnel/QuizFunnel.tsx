@@ -68,16 +68,28 @@ function horarioAgendamento(): string {
       const stored =
         sessionStorage.getItem("templodeluz_horario_entrega") ||
         localStorage.getItem("templodeluz_horario_entrega");
-      if (stored && stored.trim().length >= 4) {
-        return stored.trim();
+      const storedTimestamp =
+        sessionStorage.getItem("templodeluz_horario_entrega_ts") ||
+        localStorage.getItem("templodeluz_horario_entrega_ts");
+
+      if (stored && stored.includes("h") && storedTimestamp) {
+        const diffMinutes = (Date.now() - Number(storedTimestamp)) / 60000;
+        if (diffMinutes < 100) {
+          return stored.trim();
+        }
       }
     } catch {
       // ignore
     }
   }
 
-  const d = new Date();
-  d.setMinutes(d.getMinutes() + 75);
+  // Horário oficial de Brasília e São Paulo (America/Sao_Paulo)
+  const now = new Date();
+  const spString = now.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" });
+  const d = new Date(spString);
+
+  // Sempre 2 horas à frente (120 minutos)
+  d.setMinutes(d.getMinutes() + 120);
   const rem = d.getMinutes() % 5;
   if (rem !== 0) {
     d.setMinutes(d.getMinutes() + (5 - rem));
@@ -88,6 +100,8 @@ function horarioAgendamento(): string {
     try {
       sessionStorage.setItem("templodeluz_horario_entrega", formatted);
       localStorage.setItem("templodeluz_horario_entrega", formatted);
+      sessionStorage.setItem("templodeluz_horario_entrega_ts", String(Date.now()));
+      localStorage.setItem("templodeluz_horario_entrega_ts", String(Date.now()));
     } catch {
       // ignore
     }
@@ -1065,7 +1079,7 @@ function PixInstantBox({
             casa na sessão de {primeiroEnte}.
           </p>
           <div className="mt-3 inline-flex items-center gap-2 rounded-xl bg-amber-400/15 border border-amber-300/30 px-3 py-1.5 text-[11.5px] font-semibold text-amber-200">
-            <span>⏱️ Previsão de recebimento: <strong>Hoje às {horario || "18h00"}</strong></span>
+            <span>⏱️ Previsão de recebimento: <strong>Hoje às {horario || "18h00"} (Horário de Brasília)</strong></span>
           </div>
         </div>
       </div>
@@ -1386,7 +1400,7 @@ function PixInstantBox({
           </p>
 
           <div className="mt-2.5 inline-flex items-center gap-2 rounded-xl bg-[#f2eef8] border border-[#d8cae5] px-3 py-1.5 text-[11.5px] font-semibold text-[#5d4786]">
-            <span>⏱️ Previsão de entrega da carta: <strong>Hoje às {horario || "18h00"}</strong></span>
+            <span>⏱️ Previsão de entrega da carta: <strong>Hoje às {horario || "18h00"} (Horário de Brasília)</strong></span>
           </div>
 
           <div className="mt-3.5 space-y-2">
@@ -2265,10 +2279,13 @@ function Result({
                 <span className="text-[17px] sm:text-[19px] font-black text-amber-300 tracking-tight">
                   Hoje às {horarioExibicao}
                 </span>
+                <span className="text-[10px] sm:text-[10.5px] font-bold text-amber-200/90 uppercase tracking-wide">
+                  (Horário de Brasília)
+                </span>
               </div>
 
               <p className="mt-1 text-[11px] leading-relaxed text-zinc-300/90">
-                A sessão de oração e acolhimento para <strong>{nomeEnteCompleto}</strong> está agendada no oratório. A mensagem será liberada para você até este horário.
+                A sessão de oração e acolhimento para <strong>{nomeEnteCompleto}</strong> está agendada no oratório. Sua carta tem entrega estimada em 1h30 a 2h (até às {horarioExibicao}, horário oficial de Brasília e São Paulo).
               </p>
             </div>
 
@@ -2369,10 +2386,10 @@ function Result({
                 </span>
                 <div className="min-w-0">
                   <h3 className="text-[14px] font-bold text-slate-900 leading-tight">
-                    Recebimento previsto para hoje às {horarioExibicao}
+                    Recebimento previsto para hoje às {horarioExibicao} (Horário de Brasília)
                   </h3>
                   <p className="mt-1 text-[12px] leading-relaxed text-slate-600">
-                    Sua sessão foi acolhida no oratório com previsão de entrega <strong className="text-[#2b1747]">hoje, até às {horarioExibicao}</strong>. Você poderá ler a mensagem e acompanhar todas as orientações espirituais.
+                    Sua sessão foi acolhida no oratório com previsão de entrega em aproximadamente 1h30 a 2h (<strong className="text-[#2b1747]">hoje, até às {horarioExibicao}, horário oficial de Brasília e São Paulo</strong>). Você poderá ler a mensagem e acompanhar todas as orientações espirituais.
                   </p>
                 </div>
               </div>
@@ -2628,7 +2645,7 @@ function Result({
               Seu pedido para {nomeEnteCompleto} já foi recebido 🕊️
             </h2>
             <div className="inline-flex items-center gap-2 mt-2.5 px-3.5 py-1 rounded-full bg-amber-100 border border-amber-300 text-amber-950 text-xs font-black shadow-2xs">
-              <span>⏱️ Horário estimado de entrega: <strong>Hoje às {horarioExibicao}</strong></span>
+              <span>⏱️ Horário estimado de entrega: <strong>Hoje às {horarioExibicao} (Horário de Brasília)</strong></span>
             </div>
             <p className="mx-auto mt-2 max-w-md text-[13.5px] text-[#5e4b73] leading-relaxed">
               Você não precisa decidir com pressa. Revise as opções acima e escolha o caminho que
