@@ -31,38 +31,122 @@ function NotFoundComponent() {
   );
 }
 
+const WHATSAPP_SUPPORT_NUMBER = "5511960746285";
+const ERROR_REDIRECT_SECONDS = 9;
+
+interface QuizRecoveryData {
+  readonly nome: string;
+  readonly ente: string;
+  readonly intencao: string;
+}
+
+const EMPTY_RECOVERY_DATA: QuizRecoveryData = {
+  nome: "",
+  ente: "",
+  intencao: "",
+};
+
+function readQuizRecoveryData(): QuizRecoveryData {
+  if (typeof window === "undefined") return EMPTY_RECOVERY_DATA;
+  try {
+    const quiz = JSON.parse(localStorage.getItem("templodeluz_quiz_state") || "{}") as Record<string, unknown>;
+    return {
+      nome: typeof quiz.nome === "string" ? quiz.nome.trim().slice(0, 120) : "",
+      ente: typeof quiz.ente === "string" ? quiz.ente.trim().slice(0, 120) : "",
+      intencao: typeof quiz.dorPrincipal === "string" ? quiz.dorPrincipal.trim().slice(0, 280) : "",
+    };
+  } catch {
+    return EMPTY_RECOVERY_DATA;
+  }
+}
+
+function buildErrorRecoveryMessage(data: QuizRecoveryData): string {
+  const details = [
+    data.nome ? `• Meu nome: ${data.nome}` : "",
+    data.ente ? `• Ente querido: ${data.ente}` : "",
+    data.intencao ? `• Intenção registrada: ${data.intencao}` : "",
+  ].filter(Boolean);
+
+  return [
+    "Olá, equipe do Templo de Luz.",
+    "",
+    "Encontrei uma dificuldade técnica ao continuar meu pedido e preciso de ajuda para concluir o atendimento.",
+    ...(details.length ? ["", "Dados que consegui preencher:", ...details] : []),
+    "",
+    "Por favor, podem me orientar por aqui?",
+  ].join("\n");
+}
+
 function ErrorComponent({ error, reset }: { readonly error: Error; readonly reset: () => void }) {
   console.error(error);
   const router = useRouter();
+  const [recoveryData, setRecoveryData] = useState<QuizRecoveryData>(EMPTY_RECOVERY_DATA);
+  const [secondsRemaining, setSecondsRemaining] = useState(ERROR_REDIRECT_SECONDS);
+
+  const whatsappUrl = `https://api.whatsapp.com/send?phone=${WHATSAPP_SUPPORT_NUMBER}&text=${encodeURIComponent(
+    buildErrorRecoveryMessage(recoveryData),
+  )}`;
+
+  useEffect(() => {
+    setRecoveryData(readQuizRecoveryData());
+  }, []);
+
+  useEffect(() => {
+    const countdown = window.setInterval(() => {
+      setSecondsRemaining((seconds) => Math.max(0, seconds - 1));
+    }, 1_000);
+    const redirect = window.setTimeout(() => {
+      window.location.assign(whatsappUrl);
+    }, ERROR_REDIRECT_SECONDS * 1_000);
+
+    return () => {
+      window.clearInterval(countdown);
+      window.clearTimeout(redirect);
+    };
+  }, [whatsappUrl]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
-        </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
+    <main className="flex min-h-screen items-center justify-center bg-[#171025] px-4 py-8 text-[#1f1035]">
+      <section className="w-full max-w-[460px] overflow-hidden rounded-[30px] border border-[#f5d285]/35 bg-[#fffdf8] shadow-[0_28px_70px_-28px_rgba(0,0,0,0.75)]">
+        <header className="bg-gradient-to-b from-[#2d144d] to-[#181025] px-6 py-8 text-center text-white">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-[#f5d285]/55 bg-[#f5d285]/15 text-2xl">
+            🕊️
+          </div>
+          <p className="mt-4 text-[11px] font-black uppercase tracking-[0.18em] text-[#f5d285]">Seu pedido continua importante</p>
+          <h1 className="mt-2 font-display text-[25px] font-black leading-tight">Vamos continuar pelo WhatsApp</h1>
+        </header>
+
+        <div className="p-6 text-center">
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-left text-sm leading-relaxed text-amber-950">
+            <strong className="block">Encontramos uma dificuldade técnica nesta página.</strong>
+            Seus dados preenchidos permanecem no seu dispositivo. Nossa equipe pode orientar você a concluir o atendimento pelo WhatsApp.
+          </div>
+
+          <a
+            href={whatsappUrl}
+            className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#25D366] px-5 py-4 text-sm font-black text-white shadow-lg shadow-emerald-700/25 transition hover:bg-[#1fb85b] focus:outline-none focus:ring-4 focus:ring-emerald-300"
+          >
+            <span className="text-lg" aria-hidden="true">💬</span>
+            Falar com a equipe no WhatsApp
+          </a>
+
+          <p className="mt-3 text-xs leading-relaxed text-[#6d5488]">
+            O WhatsApp será aberto automaticamente em <strong>{secondsRemaining} segundos</strong> para que seu atendimento não seja perdido.
+          </p>
+
           <button
+            type="button"
             onClick={() => {
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="mt-5 text-xs font-bold text-[#5d4786] underline decoration-[#c49a52] underline-offset-4 transition hover:text-[#2d144d]"
           >
-            Try again
+            Tentar carregar esta página novamente
           </button>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-          >
-            Go home
-          </a>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
 
