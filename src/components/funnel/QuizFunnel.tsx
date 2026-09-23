@@ -2165,6 +2165,7 @@ function Result({
   nome = "",
   ente = "",
   relacao = "",
+  tempo = "",
   dorPrincipal = "",
   horario = "",
   mensagem = "",
@@ -2173,6 +2174,7 @@ function Result({
   readonly nome?: string;
   readonly ente?: string;
   readonly relacao?: string;
+  readonly tempo?: string;
   readonly dorPrincipal?: string;
   readonly horario?: string;
   readonly mensagem?: string;
