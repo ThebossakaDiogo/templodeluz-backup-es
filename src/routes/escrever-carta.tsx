@@ -17,6 +17,14 @@ export const Route = createFileRoute("/escrever-carta")({
           "Escolha os temas sagrados ou escreva sua mensagem livre no pergaminho. Visualize a caligrafia e envie diretamente para a médium Milena Medeiros.",
       },
     ],
+    links: [
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Dancing+Script:wght@400;600;700&display=swap",
+      },
+    ],
   }),
   component: EscreverCartaPage,
 });
@@ -416,7 +424,7 @@ function EscreverCartaPage() {
        `• *Modalidade:* ${modalidadeTexto}\n` +
        `• *Temas selecionados:* ${selectedThemeLabels || "Não informado"}\n` +
        `• *Formato solicitado:* ${isPhysicalLetter ? "📮 CARTA DIGITAL + ENVIO DE CARTA FÍSICA" : "📱 CARTA DIGITAL"}\n` +
-       `• *Contribuição realizada:* ${paymentStatus === "paid" ? "SIM ✅" : "NÃO"}\n` +
+        `• *Status da contribuição:* ${paymentStatus === "paid" ? "CONFIRMADA ✅" : "NÃO CONFIRMADA"}\n` +
        (paymentStatus === "paid" ? `• *Forma de pagamento:* ${paymentMethod === "credit_card" ? "Cartão" : "PIX"}\n` : "") +
        `━━━━━━━━━━━━━━━━━━━━\n\n` +
        `📜 *CONTEÚDO DA CARTA EM PERGAMINHO:*\n` +

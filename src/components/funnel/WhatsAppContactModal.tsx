@@ -12,6 +12,8 @@ export interface WhatsAppContactModalProps {
   readonly nomeConsulente?: string | undefined;
   readonly nomeEnte?: string | undefined;
   readonly grauParentesco?: string | undefined;
+  readonly tempoPassagem?: string | undefined;
+  readonly intencaoPrincipal?: string | undefined;
   readonly mensagemPreview?: string | undefined;
   readonly temas?: string[] | undefined;
   readonly horario?: string | undefined;
@@ -25,6 +27,8 @@ export function WhatsAppContactModal({
   nomeConsulente = "Consulente",
   nomeEnte = "Ente Querido",
   grauParentesco = "Familiar",
+  tempoPassagem,
+  intencaoPrincipal,
   mensagemPreview,
   temas = [],
   horario,
@@ -46,8 +50,11 @@ export function WhatsAppContactModal({
 
   // Montagem do texto personalizado para o WhatsApp
   const buildWhatsAppMessage = (): string => {
-    const realizouContribuicao = donationChoice === "already_donated";
-    const statusTexto = `• *Contribuição realizada:* ${realizouContribuicao ? "SIM ✅" : "NÃO"}`;
+    const contributionStatus = {
+      already_donated: "INFORMADA COMO REALIZADA — aguarda conferência do comprovante",
+      want_to_donate: "AINDA NÃO REALIZADA — deseja orientação para contribuir",
+      free_charity: "NÃO REALIZADA — solicita acolhimento sem contribuir agora",
+    }[donationChoice];
 
     const temasTexto = temas && temas.length > 0 ? `\n• *Intenções da Carta:* ${temas.join(", ")}` : "";
     const mensagemTexto = mensagemPreview ? `\n\n📜 *Mensagem do Coração:*\n"${mensagemPreview}"` : "";
@@ -58,12 +65,14 @@ export function WhatsAppContactModal({
       `Gostaria de solicitar a sessão de psicografia e acolhimento espiritual para o meu pedido:\n\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `👤 *DADOS DO PEDIDO*\n` +
-      `• *Consulente:* ${nomeConsulente}\n` +
-      `• *Ente Querido:* ${nomeEnte}\n` +
-      `• *Vínculo de Amor:* ${grauParentesco}\n` +
-      `• *Data:* ${dataAtual}\n` +
-      (horario ? `• *Previsão no Oratório:* ${horario}\n` : "") +
-      `${statusTexto}\n` +
+       `• *Consulente:* ${nomeConsulente}\n` +
+       `• *Ente Querido:* ${nomeEnte}\n` +
+       `• *Vínculo de Amor:* ${grauParentesco}\n` +
+       (tempoPassagem ? `• *Tempo de passagem:* ${tempoPassagem}\n` : "") +
+       (intencaoPrincipal ? `• *Intenção principal:* ${intencaoPrincipal}\n` : "") +
+       `• *Data:* ${dataAtual}\n` +
+       (horario ? `• *Previsão no Oratório:* ${horario}\n` : "") +
+       `• *Status da contribuição:* ${contributionStatus}\n` +
       `${temasTexto}` +
       `━━━━━━━━━━━━━━━━━━━━` +
       `${mensagemTexto}\n\n` +
@@ -75,21 +84,17 @@ export function WhatsAppContactModal({
     const textToSend = buildWhatsAppMessage();
 
     // Registra telemetria de WhatsApp
-    let paymentStatus: "paid" | "pending" | "none" = "pending";
-    if (donationChoice === "already_donated") {
-      paymentStatus = "paid";
-    } else if (donationChoice === "free_charity") {
-      paymentStatus = "none";
-    }
+    // A escolha no modal é apenas uma declaração. A equipe confirma pagamentos pelo pedido.
+    const paymentStatus = donationChoice === "free_charity" ? "none" : "pending";
 
     void trackWhatsAppEvent({
       customerName: nomeConsulente,
       enteQuerido: nomeEnte,
       grauParentesco,
-      paymentMethod: donationChoice === "already_donated" ? "pix" : "pending",
-      paymentStatus: paymentStatus === "paid" ? "paid" : "pending",
-      amountCents: donationChoice === "already_donated" ? 2000 : 0,
-      sourcePage: `quiz_contact_popup_${quizOrigin}`,
+      paymentMethod: donationChoice === "free_charity" ? "none" : "pending",
+      paymentStatus,
+      amountCents: 0,
+      sourcePage: `quiz_contact_popup_${quizOrigin}_${donationChoice}`,
       ...(mensagemPreview ? { messagePreview: mensagemPreview.slice(0, 300) } : {}),
     });
 

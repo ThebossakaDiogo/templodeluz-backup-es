@@ -41,8 +41,8 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --font-display: "Satoshi", "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
-  --font-sans: "Satoshi", "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  --font-display: "Satoshi", system-ui, sans-serif;
+  --font-sans: "Satoshi", system-ui, sans-serif;
   --font-handwriting: "Caveat", cursive;
   --font-cursive: "Dancing Script", cursive;
 }
@@ -162,11 +162,11 @@ body [class*="text-[12px]"] { font-size: 0.9rem !important; }
 }
 
 .jungle-intro {
-  font-family: "Satoshi", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "Satoshi", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: radial-gradient(ellipse at 50% 0%, #26163b 0%, #150d22 100%);
 }
 
-.jungle-intro .font-display { font-family: "Satoshi", "Plus Jakarta Sans", sans-serif; }
+.jungle-intro .font-display { font-family: "Satoshi", system-ui, sans-serif; }
 
 .jungle-quiz.quiz-modern {
   background: radial-gradient(ellipse at 50% 0%, #221535 0%, #140c20 100%);

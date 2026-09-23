@@ -27,6 +27,18 @@ export const Route = createFileRoute("/chamada-ao-vivo-milena")({
 
 type Step = "offer" | "contract" | "payment" | "scheduling" | "confirmed";
 type PeriodPreference = "day" | "night";
+type QuizSource = "paid" | "skipped";
+type LiveCallPaymentMethod = "pix" | "credit_card" | null;
+
+interface QuizProfile {
+  nome?: string;
+  ente?: string;
+  relacao?: string;
+  tempo?: string;
+  dorPrincipal?: string;
+  mensagem?: string;
+  temasEscolhidos?: string[];
+}
 const LIVE_CALL_PACKAGES = [
   {
     id: "chamada_2h",
@@ -81,6 +93,26 @@ Todo o conteudo da sessao e sigiloso. A medium respeita o segredo e a intimidade
 7. DO ACEITE
 Ao marcar esta opcao, o participante declara estar ciente e de acordo com todos os termos acima.`;
 
+function compactWhatsAppText(value: string | undefined, maxLength = 700): string {
+  return (value ?? "").trim().replace(/\s+/g, " ").slice(0, maxLength);
+}
+
+function quizSummaryLines(profile: QuizProfile): string[] {
+  const lines = [
+    profile.nome ? `• *Consulente:* ${compactWhatsAppText(profile.nome, 120)}` : "",
+    profile.ente ? `• *Ente querido:* ${compactWhatsAppText(profile.ente, 120)}` : "",
+    profile.relacao ? `• *Vínculo:* ${compactWhatsAppText(profile.relacao, 120)}` : "",
+    profile.tempo ? `• *Tempo de passagem:* ${compactWhatsAppText(profile.tempo, 120)}` : "",
+    profile.dorPrincipal ? `• *Intenção principal:* ${compactWhatsAppText(profile.dorPrincipal, 220)}` : "",
+    profile.temasEscolhidos?.length
+      ? `• *Temas escolhidos:* ${profile.temasEscolhidos.map((tema) => compactWhatsAppText(tema, 100)).join(", ")}`
+      : "",
+    profile.mensagem ? `• *Mensagem do coração:* ${compactWhatsAppText(profile.mensagem)}` : "",
+  ].filter(Boolean);
+
+  return lines.length ? lines : ["• Não foi possível recuperar as respostas anteriores do quiz."];
+}
+
 function ChamadaAoVivoMilenaPage() {
   const [step, setStep] = useState<Step>("offer");
   const [contractAccepted, setContractAccepted] = useState(false);
@@ -90,10 +122,11 @@ function ChamadaAoVivoMilenaPage() {
   const [selectedDateKey, setSelectedDateKey] = useState("");
   const [selectedSlot, setSelectedSlot] = useState<string>("");
   const [nextPath, setNextPath] = useState("/escrever-carta");
-  const [source, setSource] = useState("skipped");
+  const [source, setSource] = useState<QuizSource>("skipped");
   const [isVerifyingCardPayment, setIsVerifyingCardPayment] = useState(false);
   const [cardPaymentError, setCardPaymentError] = useState("");
-  const [quizProfile, setQuizProfile] = useState<{ nome?: string; ente?: string; relacao?: string; dorPrincipal?: string }>({});
+  const [quizProfile, setQuizProfile] = useState<QuizProfile>({});
+  const [liveCallPaymentMethod, setLiveCallPaymentMethod] = useState<LiveCallPaymentMethod>(null);
   const selectedPackage = LIVE_CALL_PACKAGES.find((item) => item.id === selectedPackageId) ?? LIVE_CALL_PACKAGES[0];
   const callAmountCents = selectedPackage.amountCents;
 
@@ -110,8 +143,18 @@ function ChamadaAoVivoMilenaPage() {
         sessionStorage.getItem("templodeluz:chamada-contract") || "null",
       ) as { signer?: string } | null;
       if (storedContract?.signer) setContractSigner(storedContract.signer);
-      const profile = JSON.parse(localStorage.getItem("templodeluz_quiz_state") || "{}") as { nome?: string; ente?: string; relacao?: string; dorPrincipal?: string };
-      setQuizProfile(profile);
+      const profile = JSON.parse(localStorage.getItem("templodeluz_quiz_state") || "{}") as QuizProfile;
+      setQuizProfile({
+        nome: compactWhatsAppText(profile.nome, 120),
+        ente: compactWhatsAppText(profile.ente, 120),
+        relacao: compactWhatsAppText(profile.relacao, 120),
+        tempo: compactWhatsAppText(profile.tempo, 120),
+        dorPrincipal: compactWhatsAppText(profile.dorPrincipal, 220),
+        mensagem: compactWhatsAppText(profile.mensagem),
+        temasEscolhidos: Array.isArray(profile.temasEscolhidos)
+          ? profile.temasEscolhidos.filter((tema): tema is string => typeof tema === "string")
+          : [],
+      });
     } catch {
       // Mantém o campo vazio se o armazenamento estiver indisponível ou corrompido.
     }
@@ -132,6 +175,7 @@ function ChamadaAoVivoMilenaPage() {
     }
 
     if (pixSuccess) {
+      setLiveCallPaymentMethod("pix");
       setStep(selectedSlot ? "confirmed" : "scheduling");
     }
 
@@ -145,7 +189,10 @@ function ChamadaAoVivoMilenaPage() {
         amountCents: callAmountCents,
       })
         .then((paid) => {
-          if (paid) setStep(selectedSlot ? "confirmed" : "scheduling");
+          if (paid) {
+            setLiveCallPaymentMethod("credit_card");
+            setStep(selectedSlot ? "confirmed" : "scheduling");
+          }
           else setCardPaymentError("O pagamento por cartão ainda não foi confirmado pela Stripe.");
         })
         .catch((error: unknown) => {
@@ -230,13 +277,44 @@ function ChamadaAoVivoMilenaPage() {
   if (quizFirstName && quizProfile.ente) {
     personalizedOffer = `${quizFirstName}, pelo que você compartilhou sobre ${quizProfile.ente}${relacaoText}, escolha o formato de conversa que mais respeita o seu momento.`;
   }
-  const whatsappConfirmationUrl = `https://api.whatsapp.com/send?phone=5511960746285&text=${encodeURIComponent(
-     `Olá, sou ${contractSigner}. Contratei ${selectedPackage.title} e indiquei ${selectedDate} (horário de São Paulo) como preferência. Gostaria de confirmar o agendamento.`,
-   )}`;
-  const userGreeting = quizFirstName ? `Sou ${quizFirstName} e ` : "";
-  const enteContext = quizProfile.ente ? `Meu pedido está relacionado a ${quizProfile.ente}. ` : "";
+  const fullName = compactWhatsAppText(contractSigner || quizProfile.nome, 120) || "Consulente";
   const formattedCallAmount = (callAmountCents / 100).toFixed(2).replace(".", ",");
-  const whatsappCheckoutMsg = `Olá! ${userGreeting}gostaria de finalizar pelo WhatsApp o atendimento “${selectedPackage.heading}” no valor de R$ ${formattedCallAmount}. ${enteContext}Gostaria de receber orientação para escolher data e horário.`;
+  const mainContributionStatus = source === "paid" ? "CONFIRMADA ✅" : "NÃO REALIZADA";
+  const quizLines = quizSummaryLines(quizProfile).join("\n");
+  const whatsappCheckoutMsg = [
+    "🕊️ *TEMPLO DE LUZ — PEDIDO DE ATENDIMENTO PELO WHATSAPP*",
+    "",
+    `Olá, meu nome é ${fullName}. Gostaria de receber orientação para continuar meu atendimento.`,
+    "",
+    "*RESPOSTAS DO QUIZ*",
+    quizLines,
+    "",
+    "*ATENDIMENTO ESCOLHIDO*",
+    `• *Chamada ao vivo:* ${selectedPackage.heading}`,
+    `• *Valor da chamada:* R$ ${formattedCallAmount}`,
+    "• *Pagamento da chamada:* AINDA NÃO REALIZADO — a pessoa escolheu finalizar pelo WhatsApp.",
+    `• *Contribuição da carta:* ${mainContributionStatus}`,
+    "",
+    "Peço orientação para confirmar a disponibilidade e escolher data e horário.",
+  ].join("\n");
+  const whatsappConfirmationMsg = [
+    "🕊️ *TEMPLO DE LUZ — CONFIRMAÇÃO DE HORÁRIO*",
+    "",
+    `Olá, meu nome é ${fullName}. Já concluí o pagamento da chamada e gostaria de confirmar meu horário.`,
+    "",
+    "*RESPOSTAS DO QUIZ*",
+    quizLines,
+    "",
+    "*ATENDIMENTO CONFIRMADO*",
+    `• *Chamada ao vivo:* ${selectedPackage.heading}`,
+    `• *Valor:* R$ ${formattedCallAmount}`,
+    `• *Pagamento da chamada:* CONFIRMADO ✅${liveCallPaymentMethod === "credit_card" ? " via cartão" : " via PIX"}`,
+    `• *Contribuição da carta:* ${mainContributionStatus}`,
+    `• *Preferência de horário:* ${selectedDate || "A definir"} (horário de São Paulo)`,
+    "",
+    "Gostaria de confirmar a disponibilidade e receber o link de acesso.",
+  ].join("\n");
+  const whatsappConfirmationUrl = `https://api.whatsapp.com/send?phone=5511960746285&text=${encodeURIComponent(whatsappConfirmationMsg)}`;
   const whatsappCheckoutUrl = `https://api.whatsapp.com/send?phone=5511960746285&text=${encodeURIComponent(whatsappCheckoutMsg)}`;
 
   return (

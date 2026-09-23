@@ -209,6 +209,7 @@ function Field({
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && onEnter?.()}
           aria-label={label}
+          autoFocus={autoFocus}
           className={`${shared} ${borderStyle}`}
         />
       )}
@@ -936,6 +937,8 @@ function PixInstantBox({
   nomeCompleto,
   enteCompleto,
   relacao,
+  tempoPassagem,
+  intencaoPrincipal,
   mensagem,
   temas = [],
   horario,
@@ -945,6 +948,8 @@ function PixInstantBox({
   readonly nomeCompleto?: string;
   readonly enteCompleto?: string;
   readonly relacao?: string;
+  readonly tempoPassagem?: string;
+  readonly intencaoPrincipal?: string;
   readonly mensagem?: string;
   readonly temas?: string[];
   readonly horario?: string;
@@ -1368,6 +1373,8 @@ function PixInstantBox({
           nomeConsulente={nomeCompleto || primeiroNome}
           nomeEnte={enteCompleto || primeiroEnte}
           grauParentesco={relacao}
+          tempoPassagem={tempoPassagem}
+          intencaoPrincipal={intencaoPrincipal}
           mensagemPreview={mensagem}
           temas={temas}
           horario={horario}
@@ -1707,7 +1714,7 @@ function Intro({
 
       <div className="flex flex-col items-center px-4 pt-6 pb-10 sm:px-6">
         {/* Formulário + CTA imediatamente (micro-compromisso acima da dobra) */}
-        <Reveal className="w-full">
+        <div className="w-full">
           <div className="rounded-[26px] border border-[#f0d79b] bg-[#fffdf8] p-6 shadow-[0_26px_55px_-30px_rgba(0,0,0,0.72)]">
             <div className="text-center mb-5">
               <span className="inline-flex rounded-full bg-[#f6ead0] px-3 py-1 text-[10px] font-black uppercase tracking-[0.13em] text-[#7b5717]">
@@ -1730,6 +1737,7 @@ function Intro({
                 placeholder="Digite seu nome completo"
                 error={error}
                 onEnter={next}
+                autoFocus
                 highlight
                 theme="light"
               />
@@ -1752,7 +1760,7 @@ function Intro({
               <span>💬 Atendimento humano</span>
             </div>
           </div>
-        </Reveal>
+        </div>
 
         {/* Depoimento curto */}
         <Reveal delay={80} className="mt-6 w-full">
@@ -1785,13 +1793,15 @@ function Intro({
           </button>
         </Reveal>
 
-        <Suspense fallback={null}>
-          <LetterZoomModal
-            isOpen={letterModalOpen}
-            onClose={() => setLetterModalOpen(false)}
-            onCtaClick={next}
-          />
-        </Suspense>
+        {letterModalOpen && (
+          <Suspense fallback={null}>
+            <LetterZoomModal
+              isOpen={letterModalOpen}
+              onClose={() => setLetterModalOpen(false)}
+              onCtaClick={next}
+            />
+          </Suspense>
+        )}
 
         {/* Como funciona */}
         <Reveal className="mt-10 w-full">
@@ -2619,6 +2629,8 @@ function Result({
               nomeCompleto={nome}
               enteCompleto={ente}
               relacao={relacao}
+              tempoPassagem={tempo}
+              intencaoPrincipal={dorPrincipal}
               mensagem={mensagem}
               temas={temasEscolhidos}
               horario={horarioExibicao}
@@ -2679,102 +2691,69 @@ type Step = "intro" | "ente" | "relacao" | "tempo" | "mensagem" | "confirma" | "
 
 const QUIZ_STORAGE_KEY = "templodeluz_quiz_state";
 
+interface StoredQuizDraft {
+  nome: string;
+  ente: string;
+  relacao: string;
+  tempo: string;
+  dorPrincipal: string;
+  mensagem: string;
+  modoMensagem: "temas" | "livre";
+  temasEscolhidos: string[];
+  horario: string;
+}
+
+const EMPTY_QUIZ_DRAFT: StoredQuizDraft = {
+  nome: "",
+  ente: "",
+  relacao: "",
+  tempo: "",
+  dorPrincipal: "",
+  mensagem: "",
+  modoMensagem: "temas",
+  temasEscolhidos: [],
+  horario: "",
+};
+
+function readStoredQuizDraft(): StoredQuizDraft {
+  if (typeof window === "undefined") return EMPTY_QUIZ_DRAFT;
+  try {
+    const value = JSON.parse(localStorage.getItem(QUIZ_STORAGE_KEY) || "{}") as Partial<StoredQuizDraft>;
+    return {
+      nome: typeof value.nome === "string" ? value.nome : "",
+      ente: typeof value.ente === "string" ? value.ente : "",
+      relacao: typeof value.relacao === "string" ? value.relacao : "",
+      tempo: typeof value.tempo === "string" ? value.tempo : "",
+      dorPrincipal: typeof value.dorPrincipal === "string" ? value.dorPrincipal : "",
+      mensagem: typeof value.mensagem === "string" ? value.mensagem : "",
+      modoMensagem: value.modoMensagem === "livre" ? "livre" : "temas",
+      temasEscolhidos: Array.isArray(value.temasEscolhidos)
+        ? value.temasEscolhidos.filter((item): item is string => typeof item === "string")
+        : [],
+      horario: typeof value.horario === "string" ? value.horario : "",
+    };
+  } catch {
+    return EMPTY_QUIZ_DRAFT;
+  }
+}
+
 export function QuizFunnel() {
   const search = useSearch({ from: "/" });
   const navigate = useNavigate({ from: "/" });
   const [step, setStep] = useState<Step>((search.step as Step) || "intro");
   const trackedStepsRef = useRef(new Set<Step>());
   const telemetrySnapshotRef = useRef<Record<string, unknown>>({});
+  const [storedDraft] = useState(readStoredQuizDraft);
 
-  const [nome, setNome] = useState<string>(() => {
-    if (typeof window === "undefined") return "";
-    try {
-      const saved = localStorage.getItem(QUIZ_STORAGE_KEY);
-      return saved ? JSON.parse(saved).nome || "" : "";
-    } catch {
-      return "";
-    }
-  });
-
-  const [ente, setEnte] = useState<string>(() => {
-    if (typeof window === "undefined") return "";
-    try {
-      const saved = localStorage.getItem(QUIZ_STORAGE_KEY);
-      return saved ? JSON.parse(saved).ente || "" : "";
-    } catch {
-      return "";
-    }
-  });
-
-  const [relacao, setRelacao] = useState<string>(() => {
-    if (typeof window === "undefined") return "";
-    try {
-      const saved = localStorage.getItem(QUIZ_STORAGE_KEY);
-      return saved ? JSON.parse(saved).relacao || "" : "";
-    } catch {
-      return "";
-    }
-  });
-
-  const [tempo, setTempo] = useState<string>(() => {
-    if (typeof window === "undefined") return "";
-    try {
-      const saved = localStorage.getItem(QUIZ_STORAGE_KEY);
-      return saved ? JSON.parse(saved).tempo || "" : "";
-    } catch {
-      return "";
-    }
-  });
-
-  const [dorPrincipal, setDorPrincipal] = useState<string>(() => {
-    if (typeof window === "undefined") return "";
-    try {
-      const saved = localStorage.getItem(QUIZ_STORAGE_KEY);
-      return saved ? JSON.parse(saved).dorPrincipal || "" : "";
-    } catch {
-      return "";
-    }
-  });
-
-  const [mensagem, setMensagem] = useState<string>(() => {
-    if (typeof window === "undefined") return "";
-    try {
-      const saved = localStorage.getItem(QUIZ_STORAGE_KEY);
-      return saved ? JSON.parse(saved).mensagem || "" : "";
-    } catch {
-      return "";
-    }
-  });
-
-  const [modoMensagem, setModoMensagem] = useState<"temas" | "livre">(() => {
-    if (typeof window === "undefined") return "temas";
-    try {
-      const saved = localStorage.getItem(QUIZ_STORAGE_KEY);
-      return saved ? JSON.parse(saved).modoMensagem || "temas" : "temas";
-    } catch {
-      return "temas";
-    }
-  });
-
-  const [temasEscolhidos, setTemasEscolhidos] = useState<string[]>(() => {
-    if (typeof window === "undefined") return [];
-    try {
-      const saved = localStorage.getItem(QUIZ_STORAGE_KEY);
-      return saved ? JSON.parse(saved).temasEscolhidos || [] : [];
-    } catch {
-      return [];
-    }
-  });
-
-  const [horario, setHorario] = useState<string>(() => {
-    if (typeof window === "undefined") return "";
-    try {
-      const saved = localStorage.getItem(QUIZ_STORAGE_KEY);
-      return saved ? JSON.parse(saved).horario || "" : "";
-    } catch {
-      return "";
-    }
-  });
+  const [nome, setNome] = useState(storedDraft.nome);
+  const [ente, setEnte] = useState(storedDraft.ente);
+  const [relacao, setRelacao] = useState(storedDraft.relacao);
+  const [tempo, setTempo] = useState(storedDraft.tempo);
+  const [dorPrincipal, setDorPrincipal] = useState(storedDraft.dorPrincipal);
+  const [mensagem, setMensagem] = useState(storedDraft.mensagem);
+  const [modoMensagem, setModoMensagem] = useState<"temas" | "livre">(storedDraft.modoMensagem);
+  const [temasEscolhidos, setTemasEscolhidos] = useState<string[]>(storedDraft.temasEscolhidos);
+  const [horario, setHorario] = useState(storedDraft.horario);
 
   const [erroNome, setErroNome] = useState<string>();
   const [erroEnte, setErroEnte] = useState<string>();

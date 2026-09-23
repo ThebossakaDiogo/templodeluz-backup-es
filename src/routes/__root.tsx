@@ -5,7 +5,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { type ReactNode } from "react";
+import { lazy, Suspense, type ReactNode, useEffect, useState } from "react";
 
 import appCss from "../styles.css?url";
 
@@ -112,13 +112,7 @@ export const Route = createRootRouteWithContext<Record<string, never>>()({
       { rel: "preconnect", href: "https://opftmzegcvfyoinjfmcj.supabase.co", crossOrigin: "anonymous" },
       { rel: "dns-prefetch", href: "https://opftmzegcvfyoinjfmcj.supabase.co" },
       { rel: "dns-prefetch", href: "https://connect.facebook.net" },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "preconnect", href: "https://api.fontshare.com" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Dancing+Script:wght@400;600;700&family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap",
-      },
       {
         rel: "stylesheet",
         href: "https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap",
@@ -167,10 +161,14 @@ export const Route = createRootRouteWithContext<Record<string, never>>()({
   errorComponent: ErrorComponent,
 });
 
-import { LiveActivityToast } from "@/components/funnel/LiveActivityToast";
 import { captureAndStoreUtms } from "@/lib/utmify";
 import { getMetaBrowserAttribution } from "@/lib/metaPixel";
-import { useEffect } from "react";
+
+const LiveActivityToast = lazy(() =>
+  import("@/components/funnel/LiveActivityToast").then(
+    ({ LiveActivityToast: Component }) => ({ default: Component }),
+  ),
+);
 
 function RootShell({ children }: { readonly children: ReactNode }) {
   return (
@@ -228,6 +226,8 @@ function RootShell({ children }: { readonly children: ReactNode }) {
 }
 
 function RootComponent() {
+  const [showLiveActivity, setShowLiveActivity] = useState(false);
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const source = (params.get("utm_source") || "").toLowerCase();
@@ -237,11 +237,29 @@ function RootComponent() {
     getMetaBrowserAttribution();
   }, []);
 
+  useEffect(() => {
+    const show = () => setShowLiveActivity(true);
+    const browser = window as Window & {
+      requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
+      cancelIdleCallback?: (handle: number) => void;
+    };
+    if (browser.requestIdleCallback && browser.cancelIdleCallback) {
+      const idleHandle = browser.requestIdleCallback(show, { timeout: 6_000 });
+      return () => browser.cancelIdleCallback?.(idleHandle);
+    }
+    const timeout = window.setTimeout(show, 4_000);
+    return () => window.clearTimeout(timeout);
+  }, []);
+
   return (
     <>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
-      <LiveActivityToast />
+      {showLiveActivity && (
+        <Suspense fallback={null}>
+          <LiveActivityToast />
+        </Suspense>
+      )}
     </>
   );
 }
