@@ -11,23 +11,11 @@ import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Página não encontrada</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          A página que você está procurando não existe ou foi movida.
-        </p>
-        <div className="mt-6">
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Voltar ao Início
-          </a>
-        </div>
-      </div>
-    </div>
+    <RecoveryScreen
+      eyebrow="Página não encontrada"
+      title="Vamos continuar pelo WhatsApp"
+      description="Este endereço não está disponível, mas nossa equipe pode orientar você a retomar seu pedido sem perder o que já foi preenchido."
+    />
   );
 }
 
@@ -77,9 +65,14 @@ function buildErrorRecoveryMessage(data: QuizRecoveryData): string {
   ].join("\n");
 }
 
-function ErrorComponent({ error, reset }: { readonly error: Error; readonly reset: () => void }) {
-  console.error(error);
-  const router = useRouter();
+interface RecoveryScreenProps {
+  readonly eyebrow: string;
+  readonly title: string;
+  readonly description: string;
+  readonly onRetry?: (() => void) | undefined;
+}
+
+function RecoveryScreen({ eyebrow, title, description, onRetry }: RecoveryScreenProps) {
   const [recoveryData, setRecoveryData] = useState<QuizRecoveryData>(EMPTY_RECOVERY_DATA);
   const [secondsRemaining, setSecondsRemaining] = useState(ERROR_REDIRECT_SECONDS);
 
@@ -112,14 +105,14 @@ function ErrorComponent({ error, reset }: { readonly error: Error; readonly rese
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-[#f5d285]/55 bg-[#f5d285]/15 text-2xl">
             🕊️
           </div>
-          <p className="mt-4 text-[11px] font-black uppercase tracking-[0.18em] text-[#f5d285]">Seu pedido continua importante</p>
-          <h1 className="mt-2 font-display text-[25px] font-black leading-tight">Vamos continuar pelo WhatsApp</h1>
+          <p className="mt-4 text-[11px] font-black uppercase tracking-[0.18em] text-[#f5d285]">{eyebrow}</p>
+          <h1 className="mt-2 font-display text-[25px] font-black leading-tight">{title}</h1>
         </header>
 
         <div className="p-6 text-center">
           <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-left text-sm leading-relaxed text-amber-950">
-            <strong className="block">Encontramos uma dificuldade técnica nesta página.</strong>
-            Seus dados preenchidos permanecem no seu dispositivo. Nossa equipe pode orientar você a concluir o atendimento pelo WhatsApp.
+            <strong className="block">Seu pedido continua importante.</strong>
+            {description}
           </div>
 
           <a
@@ -134,19 +127,35 @@ function ErrorComponent({ error, reset }: { readonly error: Error; readonly rese
             O WhatsApp será aberto automaticamente em <strong>{secondsRemaining} segundos</strong> para que seu atendimento não seja perdido.
           </p>
 
-          <button
-            type="button"
-            onClick={() => {
-              router.invalidate();
-              reset();
-            }}
-            className="mt-5 text-xs font-bold text-[#5d4786] underline decoration-[#c49a52] underline-offset-4 transition hover:text-[#2d144d]"
-          >
-            Tentar carregar esta página novamente
-          </button>
+          {onRetry && (
+            <button
+              type="button"
+              onClick={onRetry}
+              className="mt-5 text-xs font-bold text-[#5d4786] underline decoration-[#c49a52] underline-offset-4 transition hover:text-[#2d144d]"
+            >
+              Tentar carregar esta página novamente
+            </button>
+          )}
         </div>
       </section>
     </main>
+  );
+}
+
+function ErrorComponent({ error, reset }: { readonly error: Error; readonly reset: () => void }) {
+  console.error(error);
+  const router = useRouter();
+
+  return (
+    <RecoveryScreen
+      eyebrow="Recuperação do atendimento"
+      title="Vamos continuar pelo WhatsApp"
+      description="Encontramos uma dificuldade técnica nesta página. Seus dados preenchidos permanecem no seu dispositivo e nossa equipe pode orientar você a concluir o atendimento."
+      onRetry={() => {
+        router.invalidate();
+        reset();
+      }}
+    />
   );
 }
 
