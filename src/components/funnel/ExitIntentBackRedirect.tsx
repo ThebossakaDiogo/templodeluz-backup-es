@@ -9,6 +9,7 @@ import { AnimatePresence, motion } from "framer-motion";
  */
 
 const SESSION_FLAG_KEY = "templodeluz:exit-intent:shown";
+const HISTORY_GUARD_KEY = "templodeluz:exit-intent:guard";
 
 interface ExitIntentBackRedirectProps {
   readonly stayTitle?: string;
@@ -19,10 +20,10 @@ interface ExitIntentBackRedirectProps {
 }
 
 export function ExitIntentBackRedirect({
-  stayTitle = "Sua intenção ficou salva",
-  stayBody = "Você pode continuar agora ou voltar mais tarde neste mesmo aparelho. Seus dados do quiz permanecem disponíveis para revisão.",
-  stayCta = "Continuar com minha intenção",
-  leaveLabel = "Fechar por enquanto",
+  stayTitle = "Antes de sair, sua intenção pode continuar daqui",
+  stayBody = "Você já deu o primeiro passo. As próximas perguntas são rápidas e você revisa tudo antes de decidir como seguir.",
+  stayCta = "Continuar de onde parei",
+  leaveLabel = "Sair mesmo assim",
   enabled = true,
 }: Readonly<ExitIntentBackRedirectProps>) {
   const [visible, setVisible] = useState(false);
@@ -55,7 +56,29 @@ export function ExitIntentBackRedirect({
     };
   }, [enabled, trigger]);
 
-  const close = useCallback(() => setVisible(false), []);
+  useEffect(() => {
+    if (!enabled || typeof window === "undefined") return;
+
+    // Uma única proteção do botão Voltar: após fechar o aviso, a próxima saída é livre.
+    const guardState = { ...(window.history.state ?? {}), [HISTORY_GUARD_KEY]: true };
+    window.history.replaceState(guardState, "", window.location.href);
+    window.history.pushState(guardState, "", window.location.href);
+
+    const onPopState = () => {
+      if (triggeredRef.current) return;
+      window.history.pushState(guardState, "", window.location.href);
+      trigger();
+    };
+
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [enabled, trigger]);
+
+  const close = useCallback(() => {
+    setVisible(false);
+    // Remove a entrada de proteção para a próxima ação Voltar sair normalmente.
+    if (triggeredRef.current && typeof window !== "undefined") window.history.back();
+  }, []);
 
   if (!enabled) return null;
 
@@ -84,7 +107,7 @@ export function ExitIntentBackRedirect({
           >
             <div className="flex items-center justify-center gap-2 bg-gradient-to-r from-[#2b2340] via-[#211a35] to-[#171225] px-4 py-2.5 text-[11px] font-bold tracking-widest text-[#e9ddf5] uppercase">
               <span className="h-2 w-2 rounded-full bg-[#6da296]" />
-              Progresso salvo com segurança
+              Seu progresso continua salvo
             </div>
 
             <div className="flex flex-col items-center gap-3 px-6 py-7 text-center">

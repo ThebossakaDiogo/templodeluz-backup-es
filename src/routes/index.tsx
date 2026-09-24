@@ -20,10 +20,10 @@ function QuizPage() {
     const load = () => setLoadExitIntent(true);
     const win = typeof window !== "undefined" ? (window as unknown as { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number; cancelIdleCallback?: (id: number) => void }) : null;
     if (win?.requestIdleCallback && win?.cancelIdleCallback) {
-      const idleId = win.requestIdleCallback(load, { timeout: 4000 });
+      const idleId = win.requestIdleCallback(load, { timeout: 1200 });
       return () => win.cancelIdleCallback?.(idleId);
     }
-    const timeoutId = setTimeout(load, 2500);
+    const timeoutId = setTimeout(load, 1000);
     return () => clearTimeout(timeoutId);
   }, []);
 

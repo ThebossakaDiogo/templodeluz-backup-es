@@ -1690,13 +1690,13 @@ function Intro({
               Templo de Luz · Acolhimento privado
             </span>
             <h1 className="font-display text-[25px] sm:text-[32px] leading-[1.12] font-medium text-white tracking-[-0.03em]">
-              Há algo que ficou guardado no seu coração?{" "}
+              O que você ainda gostaria de dizer a quem ama?{" "}
               <span className="text-[#f7dfa3] underline decoration-[#f5d285] decoration-2 underline-offset-4">
-                Comece a colocar isso em palavras
+                Comece por uma resposta simples
               </span>
             </h1>
             <p className="mt-3 text-[14px] leading-relaxed text-[#ecdff8] font-normal">
-              Em poucos passos, você organiza sua intenção para quem ama e vê com clareza como deseja seguir.
+              Você não precisa saber o que escrever agora. Responda com calma e organize sua intenção antes de decidir como seguir.
             </p>
           </div>
         </div>
@@ -1717,13 +1717,13 @@ function Intro({
           <div className="rounded-[26px] border border-[#f0d79b] bg-[#fffdf8] p-6 shadow-[0_26px_55px_-30px_rgba(0,0,0,0.72)]">
             <div className="text-center mb-5">
               <span className="inline-flex rounded-full bg-[#f6ead0] px-3 py-1 text-[10px] font-black uppercase tracking-[0.13em] text-[#7b5717]">
-                Poucas perguntas · no seu ritmo
+                Poucos minutos · no seu ritmo
               </span>
               <h2 className="mt-3 font-display text-[22px] font-bold text-[#171225] leading-snug">
-                Vamos começar pelo seu nome
+                Comece com uma resposta simples
               </h2>
               <p className="mt-2 text-[13px] leading-relaxed text-[#5a5263] font-normal">
-                Assim podemos personalizar sua experiência. Você verá cada etapa antes de decidir como continuar.
+                Primeiro, diga como podemos chamar você. Depois, mostramos cada etapa com clareza para você seguir no seu tempo.
               </p>
             </div>
 
@@ -1748,7 +1748,7 @@ function Intro({
                 </span>
               </div>
               <Cta onClick={next} tone="green" pulse>
-                Continuar para a próxima pergunta →
+                Começar minha intenção agora →
               </Cta>
             </div>
 

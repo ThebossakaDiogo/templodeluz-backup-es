@@ -6,6 +6,7 @@ import { PixCheckout } from "@/components/funnel/PixCheckout";
 import { CustomAudioPlayer } from "@/components/funnel/CustomAudioPlayer";
 import { recordInput } from "@/lib/auto-capture";
 import { verifyStripeCheckoutSession } from "@/lib/stripe";
+import { UNPAID_WHATSAPP_MESSAGE } from "@/lib/whatsapp-message";
 import milenaLiveCallImage from "../assets/images/quiz/medium-milena-BduzfpAk.webp_202609071752.jpeg";
 import milenaLiveCallAudio from "../assets/media/audio/milena-chamada-convite.mp3";
 import feedbackOne from "../assets/media/feedbacks/Feedback.webp";
@@ -282,7 +283,7 @@ function ChamadaAoVivoMilenaPage() {
   const mainContributionStatus = source === "paid" ? "CONFIRMADA ✅" : "NÃO REALIZADA";
   const quizLines = quizSummaryLines(quizProfile).join("\n");
   // Sem pagamento confirmado, o WhatsApp recebe somente o pedido de orientação.
-  const whatsappCheckoutMsg = "Olá, gostaria de receber orientação para continuar meu atendimento pelo WhatsApp.";
+  const whatsappCheckoutMsg = UNPAID_WHATSAPP_MESSAGE;
   const whatsappConfirmationMsg = [
     "🕊️ *TEMPLO DE LUZ — CONFIRMAÇÃO DE HORÁRIO*",
     "",

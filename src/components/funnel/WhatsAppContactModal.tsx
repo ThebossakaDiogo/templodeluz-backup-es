@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { trackWhatsAppEvent } from "@/lib/whatsapp-telemetry";
+import { UNPAID_WHATSAPP_MESSAGE } from "@/lib/whatsapp-message";
 
 const WHATSAPP_NUMBER = "5511960746285"; // Médium Milena Medeiros - Templo de Luz
 
@@ -40,7 +41,7 @@ export function WhatsAppContactModal({
 
   // Sem pagamento confirmado, o pedido chega sem detalhes pessoais ao WhatsApp.
   const buildWhatsAppMessage = (): string => {
-    return "Olá, gostaria de receber orientação para continuar meu atendimento pelo WhatsApp.";
+    return UNPAID_WHATSAPP_MESSAGE;
   };
 
   const handleOpenWhatsApp = () => {

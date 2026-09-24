@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { recordInput } from "@/lib/auto-capture";
 import { trackWhatsAppEvent } from "@/lib/whatsapp-telemetry";
+import { UNPAID_WHATSAPP_MESSAGE } from "@/lib/whatsapp-message";
 import { PixCheckout } from "@/components/funnel/PixCheckout";
 import { CustomAudioPlayer } from "@/components/funnel/CustomAudioPlayer";
 import correiosLogo from "@/assets/images/quiz/correios-logo.png";
@@ -446,7 +447,7 @@ function EscreverCartaPage() {
     // Dados da carta, endereço e intenção só seguem ao WhatsApp após pagamento confirmado.
     const textToSend = paymentStatus === "paid"
       ? detailedMessage
-      : "Olá, gostaria de receber orientação para continuar meu atendimento pelo WhatsApp.";
+      : UNPAID_WHATSAPP_MESSAGE;
 
     const encoded = encodeURIComponent(textToSend);
     const targetUrl = `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encoded}`;
