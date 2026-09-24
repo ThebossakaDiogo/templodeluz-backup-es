@@ -46,3 +46,9 @@ test('mantem o session ID da Stripe como identificador UTMIFY', () => {
   const payload = buildMetaUtmifyPayload({ ...order, stripe_session_id: 'cs_test_123' }, 'paid');
   assert.equal(payload.orderId, 'cs_test_123');
 });
+
+test('usa datas atuais apenas no backfill recusado pela UTMIFY', () => {
+  const payload = buildMetaUtmifyPayload({ ...order, created_at: '2020-01-01T00:00:00.000Z' }, 'paid', true);
+  assert.notEqual(payload.createdAt, '2020-01-01 00:00:00');
+  assert.ok(payload.approvedDate);
+});

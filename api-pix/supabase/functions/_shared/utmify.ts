@@ -32,18 +32,24 @@ export function utmifyStatusForOrder(order: Record<string, any>): UtmifyOrderSta
   }
 }
 
-export function buildMetaUtmifyPayload(order: Record<string, any>, status: UtmifyOrderStatus) {
+export function buildMetaUtmifyPayload(
+  order: Record<string, any>,
+  status: UtmifyOrderStatus,
+  useCurrentDates = false,
+) {
   const isPaid = status === 'paid';
   const isReversed = status === 'refunded' || status === 'chargedback';
+  const createdAt = useCurrentDates ? formatDate() : formatDate(order.created_at);
+  const terminalDate = useCurrentDates ? formatDate() : formatDate(order.fulfilled_at || order.updated_at);
   return {
     // A Stripe inicia o pedido na UTMIFY com o session ID; os demais gateways usam o UUID interno.
     orderId: String(order.stripe_session_id || order.id),
     platform: 'TemploDeLuzMeta',
     paymentMethod: order.payment_method === 'credit_card' ? 'credit_card' : 'pix',
     status,
-    createdAt: formatDate(order.created_at),
-    approvedDate: isPaid || isReversed ? formatDate(order.fulfilled_at || order.updated_at) : null,
-    refundedAt: isReversed ? formatDate(order.updated_at) : null,
+    createdAt,
+    approvedDate: isPaid || isReversed ? terminalDate : null,
+    refundedAt: isReversed ? terminalDate : null,
     customer: {
       name: String(order.customer_name || 'Consulente Templo de Luz'),
       email: String(order.customer_email || 'contato@templodeluz.com'),
@@ -80,13 +86,11 @@ export function buildMetaUtmifyPayload(order: Record<string, any>, status: Utmif
 
 async function deliverMetaUtmifyOrder(supabase: any, order: Record<string, any>, eventStatus: UtmifyOrderStatus) {
   if (!isMetaOrder(order)) return { delivered: false, skipped: true };
-  // Stripe usa o session ID diretamente no webhook para manter pending/paid no mesmo pedido UTMIFY.
-  if (order.gateway === 'stripe') return { delivered: false, skipped: true };
 
   const token = Deno.env.get('UTMIFY_API_TOKEN');
   if (!token) throw new Error('UTMIFY_CONFIGURATION_MISSING');
 
-  const payload = buildMetaUtmifyPayload(order, eventStatus);
+  let payload = buildMetaUtmifyPayload(order, eventStatus);
 
   const { data: claimed, error: claimError } = await supabase.rpc('claim_utmify_delivery', {
     p_order_id: order.id,
@@ -108,6 +112,31 @@ async function deliverMetaUtmifyOrder(supabase: any, order: Record<string, any>,
       body: JSON.stringify(payload),
     });
     responseBody = await response.text();
+    // A UTMIFY limita datas antigas. Apenas reimportações rejeitadas recebem
+    // timestamps atuais, preservando as datas originais em pedidos normais.
+    if (
+      response.status === 400
+      && responseBody.includes('createdAt lower than the minimum accepted')
+    ) {
+      payload = buildMetaUtmifyPayload(order, eventStatus, true);
+      response = await fetch(UTMIFY_ENDPOINT, {
+        method: 'POST',
+        signal: AbortSignal.timeout(10_000),
+        headers: { 'Content-Type': 'application/json', 'x-api-token': token },
+        body: JSON.stringify(payload),
+      });
+      responseBody = await response.text();
+      if (response.ok) {
+        const { error: payloadUpdateError } = await supabase
+          .from('utmify_deliveries')
+          .update({ payload })
+          .eq('order_id', order.id)
+          .eq('destination', 'meta')
+          .eq('event_status', eventStatus)
+          .eq('delivery_status', 'processing');
+        if (payloadUpdateError) console.warn('UTMIFY_BACKFILL_PAYLOAD_AUDIT_FAILED', payloadUpdateError.message);
+      }
+    }
     if (!response.ok) throw new Error(`UTMIFY_HTTP_${response.status}`);
   } catch (error) {
     deliveryError = error;
