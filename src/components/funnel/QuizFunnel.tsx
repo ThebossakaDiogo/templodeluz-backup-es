@@ -1690,14 +1690,13 @@ function Intro({
               Templo de Luz · Acolhimento privado
             </span>
             <h1 className="font-display text-[25px] sm:text-[32px] leading-[1.12] font-medium text-white tracking-[-0.03em]">
-              Organize uma intenção de carta para quem você ama,{" "}
+              Há algo que ficou guardado no seu coração?{" "}
               <span className="text-[#f7dfa3] underline decoration-[#f5d285] decoration-2 underline-offset-4">
-                com acolhimento da médium Milena
+                Comece a colocar isso em palavras
               </span>
             </h1>
             <p className="mt-3 text-[14px] leading-relaxed text-[#ecdff8] font-normal">
-              Um espaço de acolhimento para registrar sua história, sua saudade e o que deseja
-              expressar.
+              Em poucos passos, você organiza sua intenção para quem ama e vê com clareza como deseja seguir.
             </p>
           </div>
         </div>
@@ -1718,23 +1717,22 @@ function Intro({
           <div className="rounded-[26px] border border-[#f0d79b] bg-[#fffdf8] p-6 shadow-[0_26px_55px_-30px_rgba(0,0,0,0.72)]">
             <div className="text-center mb-5">
               <span className="inline-flex rounded-full bg-[#f6ead0] px-3 py-1 text-[10px] font-black uppercase tracking-[0.13em] text-[#7b5717]">
-                Seu pedido começa aqui
+                Poucas perguntas · no seu ritmo
               </span>
               <h2 className="mt-3 font-display text-[22px] font-bold text-[#171225] leading-snug">
-                Comece pelo que você deseja guardar nesta carta
+                Vamos começar pelo seu nome
               </h2>
               <p className="mt-2 text-[13px] leading-relaxed text-[#5a5263] font-normal">
-                Responda a poucas perguntas, no seu ritmo. Você poderá revisar sua intenção antes de
-                seguir para o atendimento.
+                Assim podemos personalizar sua experiência. Você verá cada etapa antes de decidir como continuar.
               </p>
             </div>
 
             <div id="intro-name-field" className="relative">
               <Field
-                label="Como podemos chamar você? (Seu nome)"
+                label="Qual é o seu nome?"
                 value={nome}
                 onChange={setNome}
-                placeholder="Digite seu nome completo"
+                placeholder="Ex.: Maria Aparecida Silva"
                 error={error}
                 onEnter={next}
                 autoFocus
@@ -1746,17 +1744,17 @@ function Intro({
             <div className="mt-5">
               <div className="mb-2 flex justify-center">
                 <span className="rounded-full border border-[#39776c]/20 bg-[#e7f5ef] px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-[#286254]">
-                  Etapa 1 de 6 · leva poucos segundos
+                  Etapa 1 de 6 · sem pagamento agora
                 </span>
               </div>
               <Cta onClick={next} tone="green" pulse>
-                💫 Começar meu pedido
+                Continuar para a próxima pergunta →
               </Cta>
             </div>
 
             <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-[11.5px] font-medium text-[#5a5263]">
               <span>🔒 Privacidade</span>
-              <span>↩️ Você pode revisar</span>
+              <span>↩️ Você revisa antes de seguir</span>
               <span>💬 Atendimento humano</span>
             </div>
           </div>
