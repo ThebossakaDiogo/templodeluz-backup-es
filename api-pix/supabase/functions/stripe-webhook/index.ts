@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { deliverMetaPurchase, runInBackground } from '../_shared/meta-conversions.ts';
+import { deliverMetaUtmifyPaidOrder } from '../_shared/utmify.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -60,11 +61,6 @@ function productName(productId: string, catalogName: unknown) {
 
 function catalogProductId(productId: string) {
   return productId === 'chamada_ao_vivo_milena' ? 'carta_sagrada' : productId;
-}
-
-function formatUtmifyDate(date = new Date()) {
-  const pad = (value: number) => String(value).padStart(2, '0');
-  return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}:${pad(date.getUTCSeconds())}`;
 }
 
 Deno.serve(async (req) => {
@@ -166,7 +162,17 @@ Deno.serve(async (req) => {
       .eq('idempotency_key', idempotencyKey)
       .maybeSingle();
     if (orderForDeliveryError || !orderForDelivery) throw orderForDeliveryError ?? new Error('STRIPE_ORDER_NOT_FOUND');
-    runInBackground(deliverMetaPurchase(supabase, orderForDelivery), 'STRIPE META PURCHASE DELIVERY');
+    runInBackground(
+      Promise.allSettled([
+        deliverMetaPurchase(supabase, orderForDelivery),
+        deliverMetaUtmifyPaidOrder(supabase, orderForDelivery),
+      ]).then((deliveries) => deliveries.forEach((delivery) => {
+        if (delivery.status === 'rejected') {
+          console.warn('[STRIPE WEBHOOK DELIVERY WARN]', delivery.reason);
+        }
+      })),
+      'STRIPE PAID DELIVERIES',
+    );
 
     const telemetrySessionId = cleanString(session?.metadata?.telemetrySessionId || session?.client_reference_id, 120);
     if (telemetrySessionId) {
@@ -180,33 +186,6 @@ Deno.serve(async (req) => {
         })
         .eq('session_id', telemetrySessionId);
       if (leadError) console.warn('[STRIPE WEBHOOK] Lead telemetry update failed', leadError.code);
-    }
-
-    const utmifyToken = Deno.env.get('UTMIFY_API_TOKEN');
-    if (utmifyToken) {
-      const now = formatUtmifyDate();
-      const trackingParameters = Object.fromEntries(
-        ['src', 'sck', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term']
-          .map((key) => [key, cleanString(session?.metadata?.[key], 500) || null]),
-      );
-      const utmifyResponse = await fetch('https://api.utmify.com.br/api-credentials/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-api-token': utmifyToken },
-        body: JSON.stringify({
-          orderId: stripeSessionId,
-          platform: 'TemploDeLuzMeta',
-          paymentMethod: 'credit_card',
-          status: 'paid',
-          createdAt: now,
-          approvedDate: now,
-          customer: { name: customerName, email: customerEmail, phone: customerPhone, document: customerCpf, country: 'BR' },
-          products: [{ id: productId, name: productName(productId, product.name), planId: 'plano_unico', planName: 'Pagamento Único', quantity: 1, priceInCents: amountCents }],
-          trackingParameters,
-          commission: { totalPriceInCents: amountCents, gatewayFeeInCents: 0, userCommissionInCents: amountCents, currency: 'BRL' },
-          isTest: false,
-        }),
-      });
-      if (!utmifyResponse.ok) console.warn('[STRIPE WEBHOOK] UTMify delivery failed', utmifyResponse.status);
     }
 
     return Response.json({ received: true, eventId: event.id }, { headers: corsHeaders });

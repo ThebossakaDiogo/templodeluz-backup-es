@@ -5,6 +5,7 @@ export type PixStatus =
   | 'failed'
   | 'expired'
   | 'in_dispute'
+  | 'refunded'
   | 'chargeback';
 
 export function digits(value: unknown) {
@@ -41,6 +42,9 @@ export function normalizeConnectPayStatus(value: unknown): PixStatus {
       return 'expired';
     case 'IN_DISPUTE':
       return 'in_dispute';
+    case 'REFUND':
+    case 'REFUNDED':
+      return 'refunded';
     case 'CHARGEBACK':
       return 'chargeback';
     default:

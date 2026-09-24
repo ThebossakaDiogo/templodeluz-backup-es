@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { amountToCents, isUuid, normalizeConnectPayStatus } from '../_shared/pix.ts';
-import { deliverMetaUtmifyPaidOrder } from '../_shared/utmify.ts';
+import { deliverMetaUtmifyCurrentOrder } from '../_shared/utmify.ts';
 import { deliverMetaPurchase, runInBackground } from '../_shared/meta-conversions.ts';
 
 const QUIZ_ORIGIN = 'original';
@@ -122,13 +122,13 @@ Deno.serve(async (req) => {
     const first = await readStatus();
     if (!first) return json(origin, { error: 'Cobranca PIX nao encontrada.' }, 404);
 
-    const terminalStatuses = new Set(['paid', 'failed', 'expired', 'in_dispute', 'chargeback']);
+    const terminalStatuses = new Set(['paid', 'failed', 'expired', 'in_dispute', 'refunded', 'chargeback']);
 
-    const schedulePaidDeliveries = (order: Record<string, any>) => {
-      runInBackground(Promise.allSettled([
-        deliverMetaUtmifyPaidOrder(supabase, order),
-        deliverMetaPurchase(supabase, order),
-      ]).then((deliveries) => deliveries.forEach((delivery) => {
+    const scheduleTerminalDeliveries = (order: Record<string, any>) => {
+      const deliveriesToSend = order.status === 'paid'
+        ? [deliverMetaUtmifyCurrentOrder(supabase, order), deliverMetaPurchase(supabase, order)]
+        : [deliverMetaUtmifyCurrentOrder(supabase, order)];
+      runInBackground(Promise.allSettled(deliveriesToSend).then((deliveries) => deliveries.forEach((delivery) => {
         if (delivery.status === 'rejected') {
           console.warn('Paid order delivery failed', delivery.reason instanceof Error ? delivery.reason.message : delivery.reason);
         }
@@ -137,7 +137,7 @@ Deno.serve(async (req) => {
 
     const reconcileWithGateway = async (currentOrder: Record<string, any>) => {
       if (terminalStatuses.has(currentOrder.status) || !currentOrder.connectpay_transaction_id) {
-        if (currentOrder.status === 'paid') schedulePaidDeliveries(currentOrder);
+        scheduleTerminalDeliveries(currentOrder);
         return currentOrder;
       }
 
@@ -178,8 +178,8 @@ Deno.serve(async (req) => {
       }).eq('order_id', currentOrder.id).eq('connectpay_transaction_id', verifiedTransactionId).eq('status', verifiedStatus);
 
       const refreshed = await readStatus();
-      if (refreshed && normalizeConnectPayStatus(verifiedStatus) === 'paid') {
-        schedulePaidDeliveries(refreshed);
+      if (refreshed && terminalStatuses.has(refreshed.status)) {
+        scheduleTerminalDeliveries(refreshed);
       }
       return refreshed ?? currentOrder;
     };

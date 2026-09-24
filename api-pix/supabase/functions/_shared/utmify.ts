@@ -15,18 +15,35 @@ function formatDate(value: string | Date | null | undefined) {
   return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}:${pad(date.getUTCSeconds())}`;
 }
 
-type UtmifyOrderStatus = 'waiting_payment' | 'paid';
+export type UtmifyOrderStatus = 'waiting_payment' | 'paid' | 'refunded' | 'chargedback';
+
+export function utmifyStatusForOrder(order: Record<string, any>): UtmifyOrderStatus | null {
+  switch (String(order.status ?? '').trim().toLowerCase()) {
+    case 'pending':
+      return 'waiting_payment';
+    case 'paid':
+      return 'paid';
+    case 'refunded':
+      return 'refunded';
+    case 'chargeback':
+      return 'chargedback';
+    default:
+      return null;
+  }
+}
 
 export function buildMetaUtmifyPayload(order: Record<string, any>, status: UtmifyOrderStatus) {
   const isPaid = status === 'paid';
+  const isReversed = status === 'refunded' || status === 'chargedback';
   return {
-    orderId: String(order.id),
+    // A Stripe inicia o pedido na UTMIFY com o session ID; os demais gateways usam o UUID interno.
+    orderId: String(order.stripe_session_id || order.id),
     platform: 'TemploDeLuzMeta',
     paymentMethod: order.payment_method === 'credit_card' ? 'credit_card' : 'pix',
     status,
     createdAt: formatDate(order.created_at),
-    approvedDate: isPaid ? formatDate(order.fulfilled_at || order.updated_at) : null,
-    refundedAt: null,
+    approvedDate: isPaid || isReversed ? formatDate(order.fulfilled_at || order.updated_at) : null,
+    refundedAt: isReversed ? formatDate(order.updated_at) : null,
     customer: {
       name: String(order.customer_name || 'Consulente Templo de Luz'),
       email: String(order.customer_email || 'contato@templodeluz.com'),
@@ -119,6 +136,13 @@ export function deliverMetaUtmifyPaidOrder(supabase: any, order: Record<string, 
   return deliverMetaUtmifyOrder(supabase, order, 'paid');
 }
 
+export function deliverMetaUtmifyCurrentOrder(supabase: any, order: Record<string, any>) {
+  const status = utmifyStatusForOrder(order);
+  return status
+    ? deliverMetaUtmifyOrder(supabase, order, status)
+    : Promise.resolve({ delivered: false, skipped: true });
+}
+
 export function runUtmifyInBackground(promise: Promise<unknown>, label: string) {
   const tracked = promise.catch((error) => {
     console.error(label, error instanceof Error ? error.message : error);
@@ -132,20 +156,41 @@ export async function processMetaUtmifyOrders(supabase: any, limit = 100) {
   const { data: orders, error } = await supabase
     .from('pix_orders')
     .select('*')
-    .in('status', ['pending', 'paid'])
+    .in('status', ['pending', 'paid', 'refunded', 'chargeback'])
     .eq('quiz_origin', QUIZ_ORIGIN)
     .order('updated_at', { ascending: false })
     .limit(Math.max(1, Math.min(100, limit)));
   if (error) throw error;
 
   const results = await Promise.allSettled(
-    (orders ?? []).map((order: Record<string, any>) => order.status === 'paid'
-      ? deliverMetaUtmifyPaidOrder(supabase, order)
-      : deliverMetaUtmifyWaitingPaymentOrder(supabase, order)),
+    (orders ?? []).map((order: Record<string, any>) => deliverMetaUtmifyCurrentOrder(supabase, order)),
   );
   return {
     inspected: results.length,
     delivered: results.filter((result) => result.status === 'fulfilled' && result.value.delivered).length,
+    rejected: results.filter((result) => result.status === 'rejected').length,
+  };
+}
+
+export async function recoverMetaUtmifyOrders(supabase: any, days = 30, limit = 500) {
+  const since = new Date(Date.now() - Math.max(1, Math.min(90, days)) * 86_400_000).toISOString();
+  const { data: orders, error } = await supabase
+    .from('pix_orders')
+    .select('*')
+    .eq('quiz_origin', QUIZ_ORIGIN)
+    .in('status', ['pending', 'paid', 'refunded', 'chargeback'])
+    .gte('updated_at', since)
+    .order('updated_at', { ascending: false })
+    .limit(Math.max(1, Math.min(500, limit)));
+  if (error) throw error;
+
+  const results = await Promise.allSettled(
+    (orders ?? []).map((order: Record<string, any>) => deliverMetaUtmifyCurrentOrder(supabase, order)),
+  );
+  return {
+    inspected: results.length,
+    delivered: results.filter((result) => result.status === 'fulfilled' && result.value.delivered).length,
+    duplicates: results.filter((result) => result.status === 'fulfilled' && result.value.duplicate).length,
     rejected: results.filter((result) => result.status === 'rejected').length,
   };
 }

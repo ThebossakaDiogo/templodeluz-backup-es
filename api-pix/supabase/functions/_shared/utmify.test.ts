@@ -34,3 +34,15 @@ test('atualiza o mesmo pedido UTMIFY para pago', () => {
   assert.equal(paid.status, 'paid');
   assert.ok(paid.approvedDate);
 });
+
+test('envia chargeback como chargedback com data de reversao', () => {
+  const payload = buildMetaUtmifyPayload(order, 'chargedback');
+  assert.equal(payload.status, 'chargedback');
+  assert.ok(payload.approvedDate);
+  assert.ok(payload.refundedAt);
+});
+
+test('mantem o session ID da Stripe como identificador UTMIFY', () => {
+  const payload = buildMetaUtmifyPayload({ ...order, stripe_session_id: 'cs_test_123' }, 'paid');
+  assert.equal(payload.orderId, 'cs_test_123');
+});

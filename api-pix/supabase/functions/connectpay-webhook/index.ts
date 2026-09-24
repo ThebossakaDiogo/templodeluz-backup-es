@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { amountToCents, isUuid, normalizeConnectPayStatus } from '../_shared/pix.ts';
-import { deliverMetaUtmifyPaidOrder } from '../_shared/utmify.ts';
+import { deliverMetaUtmifyCurrentOrder } from '../_shared/utmify.ts';
 import { deliverMetaPurchase, runInBackground } from '../_shared/meta-conversions.ts';
 
 const QUIZ_ORIGIN = 'original';
@@ -114,7 +114,8 @@ Deno.serve(async (req) => {
 
     // O pagamento e a outbox ja estao persistidos. Sincronizacoes externas rodam
     // fora do ACK para a ConnectPay nunca repetir um pagamento por falha de marketing.
-    if (normalizeConnectPayStatus(verifiedStatus) === 'paid') {
+    const normalizedOrderStatus = normalizeConnectPayStatus(verifiedStatus);
+    if (['paid', 'refunded', 'chargeback'].includes(normalizedOrderStatus)) {
       runInBackground((async () => {
         const { data: orderData, error: orderDataError } = await supabase
           .from('pix_orders')
@@ -123,56 +124,46 @@ Deno.serve(async (req) => {
           .maybeSingle();
         if (orderDataError || !orderData) throw orderDataError ?? new Error('ORDER_NOT_FOUND');
 
-        // 1. Sincronização em Cascata: atualiza quiz_funnel_leads
-        const safeUpdate = async (label: string, promise: PromiseLike<unknown>) => {
-          try {
-            const result = await promise as { error?: unknown };
-            if (result?.error) throw result.error;
-          } catch (err) {
-            console.warn(`[CONNECTPAY WEBHOOK SYNC WARN] ${label}`, err instanceof Error ? err.message : err);
+        // Somente uma aprovação confirmada marca o lead como pago. Reversões são
+        // enviadas à UTMIFY sem reabrir a conversão no Meta.
+        if (normalizedOrderStatus === 'paid') {
+          const safeUpdate = async (label: string, promise: PromiseLike<unknown>) => {
+            try {
+              const result = await promise as { error?: unknown };
+              if (result?.error) throw result.error;
+            } catch (err) {
+              console.warn(`[CONNECTPAY WEBHOOK SYNC WARN] ${label}`, err instanceof Error ? err.message : err);
+            }
+          };
+
+          if (orderData?.session_id) {
+            await safeUpdate('leads_by_session', supabase.from('quiz_funnel_leads').update({
+              payment_status: 'paid', checkout_status: 'paid', completed: true,
+              last_amount_cents: amountCents, updated_at: new Date().toISOString(),
+            }).eq('session_id', orderData.session_id));
           }
-        };
-
-        if (orderData?.session_id) {
-          await safeUpdate('leads_by_session', supabase.from('quiz_funnel_leads').update({
-            payment_status: 'paid',
-            checkout_status: 'paid',
-            completed: true,
-            last_amount_cents: amountCents,
-            updated_at: new Date().toISOString(),
-          }).eq('session_id', orderData.session_id));
+          if (orderData?.customer_phone) {
+            await safeUpdate('leads_by_phone', supabase.from('quiz_funnel_leads').update({
+              payment_status: 'paid', checkout_status: 'paid', completed: true,
+              last_amount_cents: amountCents, updated_at: new Date().toISOString(),
+            }).eq('lead_phone', orderData.customer_phone));
+            await safeUpdate('whatsapp_by_phone', supabase.from('whatsapp_conversations').update({
+              payment_status: 'paid', payment_method: 'pix', amount_cents: amountCents,
+            }).eq('customer_phone', orderData.customer_phone));
+          }
+          if (orderData?.customer_email) {
+            await safeUpdate('leads_by_email', supabase.from('quiz_funnel_leads').update({
+              payment_status: 'paid', checkout_status: 'paid', completed: true,
+              last_amount_cents: amountCents, updated_at: new Date().toISOString(),
+            }).eq('lead_email', orderData.customer_email));
+          }
         }
 
-        if (orderData?.customer_phone) {
-          await safeUpdate('leads_by_phone', supabase.from('quiz_funnel_leads').update({
-            payment_status: 'paid',
-            checkout_status: 'paid',
-            completed: true,
-            last_amount_cents: amountCents,
-            updated_at: new Date().toISOString(),
-          }).eq('lead_phone', orderData.customer_phone));
-
-          await safeUpdate('whatsapp_by_phone', supabase.from('whatsapp_conversations').update({
-            payment_status: 'paid',
-            payment_method: 'pix',
-            amount_cents: amountCents,
-          }).eq('customer_phone', orderData.customer_phone));
-        }
-
-        if (orderData?.customer_email) {
-          await safeUpdate('leads_by_email', supabase.from('quiz_funnel_leads').update({
-            payment_status: 'paid',
-            checkout_status: 'paid',
-            completed: true,
-            last_amount_cents: amountCents,
-            updated_at: new Date().toISOString(),
-          }).eq('lead_email', orderData.customer_email));
-        }
-
-        const deliveries = await Promise.allSettled([
-          deliverMetaUtmifyPaidOrder(supabase, orderData),
-          deliverMetaPurchase(supabase, orderData),
-        ]);
+        const deliveries = await Promise.allSettled(
+          normalizedOrderStatus === 'paid'
+            ? [deliverMetaUtmifyCurrentOrder(supabase, orderData), deliverMetaPurchase(supabase, orderData)]
+            : [deliverMetaUtmifyCurrentOrder(supabase, orderData)],
+        );
         deliveries.forEach((delivery) => {
           if (delivery.status === 'rejected') {
             console.warn('[CONNECTPAY WEBHOOK DELIVERY WARN]', delivery.reason);
