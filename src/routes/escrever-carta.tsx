@@ -410,7 +410,7 @@ function EscreverCartaPage() {
     });
 
     const modalidadeTexto = mode === "guiada" ? "Intenções Guiadas" : "Mensagem Livre";
-    const textToSend =
+    const detailedMessage =
       `🕊️ *TEMPLO DE LUZ — CARTA PSICOGRAFADA*\n` +
       `_Destinatária: Médium Milena Medeiros_\n\n` +
       `Olá, Médium Milena! Que a paz e a luz divina estejam com você. 🙏✨\n\n` +
@@ -442,6 +442,11 @@ function EscreverCartaPage() {
          : "") +
        `━━━━━━━━━━━━━━━━━━━━\n` +
        `🤍 _Aguardo as orientações para prosseguir pelo WhatsApp. Obrigado(a) pelo acolhimento._`;
+
+    // Dados da carta, endereço e intenção só seguem ao WhatsApp após pagamento confirmado.
+    const textToSend = paymentStatus === "paid"
+      ? detailedMessage
+      : "Olá, gostaria de receber orientação para continuar meu atendimento pelo WhatsApp.";
 
     const encoded = encodeURIComponent(textToSend);
     const targetUrl = `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encoded}`;

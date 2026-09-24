@@ -27,11 +27,7 @@ export function WhatsAppContactModal({
   nomeConsulente = "Consulente",
   nomeEnte = "Ente Querido",
   grauParentesco = "Familiar",
-  tempoPassagem,
-  intencaoPrincipal,
   mensagemPreview,
-  temas = [],
-  horario,
   onSelectDonateNow,
   quizOrigin = "original",
 }: WhatsAppContactModalProps) {
@@ -39,45 +35,12 @@ export function WhatsAppContactModal({
 
   if (!isOpen) return null;
 
-  const dataAtual = new Date().toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
-
   const primeiroNome = nomeConsulente?.trim() ? nomeConsulente.trim().split(" ")[0] : "Consulente";
   const primeiroEnte = nomeEnte?.trim() ? nomeEnte.trim().split(" ")[0] : "Ente Querido";
 
-  // Montagem do texto personalizado para o WhatsApp
+  // Sem pagamento confirmado, o pedido chega sem detalhes pessoais ao WhatsApp.
   const buildWhatsAppMessage = (): string => {
-    const contributionStatus = {
-      already_donated: "INFORMADA COMO REALIZADA — aguarda conferência do comprovante",
-      want_to_donate: "AINDA NÃO REALIZADA — deseja orientação para contribuir",
-      free_charity: "NÃO REALIZADA — solicita acolhimento sem contribuir agora",
-    }[donationChoice];
-
-    const temasTexto = temas && temas.length > 0 ? `\n• *Intenções da Carta:* ${temas.join(", ")}` : "";
-    const mensagemTexto = mensagemPreview ? `\n\n📜 *Mensagem do Coração:*\n"${mensagemPreview}"` : "";
-
-    return (
-      `🕊️ *TEMPLO DE LUZ — ATENDIMENTO COM A MÉDIUM MILENA*\n\n` +
-      `Olá, Médium Milena! Que a paz e as bênçãos da espiritualidade estejam com você. 🙏✨\n\n` +
-      `Gostaria de solicitar a sessão de psicografia e acolhimento espiritual para o meu pedido:\n\n` +
-      `━━━━━━━━━━━━━━━━━━━━\n` +
-      `👤 *DADOS DO PEDIDO*\n` +
-       `• *Consulente:* ${nomeConsulente}\n` +
-       `• *Ente Querido:* ${nomeEnte}\n` +
-       `• *Vínculo de Amor:* ${grauParentesco}\n` +
-       (tempoPassagem ? `• *Tempo de passagem:* ${tempoPassagem}\n` : "") +
-       (intencaoPrincipal ? `• *Intenção principal:* ${intencaoPrincipal}\n` : "") +
-       `• *Data:* ${dataAtual}\n` +
-       (horario ? `• *Previsão no Oratório:* ${horario}\n` : "") +
-       `• *Status da contribuição:* ${contributionStatus}\n` +
-      `${temasTexto}` +
-      `━━━━━━━━━━━━━━━━━━━━` +
-      `${mensagemTexto}\n\n` +
-      `Agradeço de todo o coração pela sua dedicação e pelo consolo espiritual. Fico no aguardo do acolhimento. Amém!`
-    );
+    return "Olá, gostaria de receber orientação para continuar meu atendimento pelo WhatsApp.";
   };
 
   const handleOpenWhatsApp = () => {
@@ -285,7 +248,7 @@ export function WhatsAppContactModal({
             <span className="text-emerald-700 font-bold">100% Automática</span>
           </div>
           <div className="rounded-xl bg-stone-50 p-2.5 text-[11px] font-mono text-stone-700 leading-relaxed max-h-24 overflow-y-auto border border-stone-100">
-            {buildWhatsAppMessage().slice(0, 180)}...
+            {buildWhatsAppMessage()}
           </div>
         </div>
 

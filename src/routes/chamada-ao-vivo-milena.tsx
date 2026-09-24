@@ -281,22 +281,8 @@ function ChamadaAoVivoMilenaPage() {
   const formattedCallAmount = (callAmountCents / 100).toFixed(2).replace(".", ",");
   const mainContributionStatus = source === "paid" ? "CONFIRMADA ✅" : "NÃO REALIZADA";
   const quizLines = quizSummaryLines(quizProfile).join("\n");
-  const whatsappCheckoutMsg = [
-    "🕊️ *TEMPLO DE LUZ — PEDIDO DE ATENDIMENTO PELO WHATSAPP*",
-    "",
-    `Olá, meu nome é ${fullName}. Gostaria de receber orientação para continuar meu atendimento.`,
-    "",
-    "*RESPOSTAS DO QUIZ*",
-    quizLines,
-    "",
-    "*ATENDIMENTO ESCOLHIDO*",
-    `• *Chamada ao vivo:* ${selectedPackage.heading}`,
-    `• *Valor da chamada:* R$ ${formattedCallAmount}`,
-    "• *Pagamento da chamada:* AINDA NÃO REALIZADO — a pessoa escolheu finalizar pelo WhatsApp.",
-    `• *Contribuição da carta:* ${mainContributionStatus}`,
-    "",
-    "Peço orientação para confirmar a disponibilidade e escolher data e horário.",
-  ].join("\n");
+  // Sem pagamento confirmado, o WhatsApp recebe somente o pedido de orientação.
+  const whatsappCheckoutMsg = "Olá, gostaria de receber orientação para continuar meu atendimento pelo WhatsApp.";
   const whatsappConfirmationMsg = [
     "🕊️ *TEMPLO DE LUZ — CONFIRMAÇÃO DE HORÁRIO*",
     "",
