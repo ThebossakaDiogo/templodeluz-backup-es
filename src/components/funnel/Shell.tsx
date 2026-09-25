@@ -81,7 +81,7 @@ export function Card({ children, className = "" }: Readonly<{ children: ReactNod
 
 export function SectionLabel({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <p className="mb-2 text-[11px] font-bold tracking-[0.16em] text-[#5d4786] uppercase">
+    <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.16em] text-[#d9be82]">
       {children}
     </p>
   );
@@ -89,46 +89,46 @@ export function SectionLabel({ children }: Readonly<{ children: ReactNode }>) {
 
 export function Footer() {
   return (
-    <footer className="mt-0 border-t border-slate-200 bg-white px-6 py-9 text-center text-[12px] leading-relaxed text-slate-500 font-normal">
-      <div className="font-display text-base text-slate-900 font-bold tracking-tight">
+    <footer className="mt-0 border-t border-[#352a43] bg-[#0d0814] px-6 py-9 text-center text-[12px] font-normal leading-relaxed text-[#91829c]">
+      <div className="font-display text-base font-bold tracking-tight text-[#f2e9f7]">
         🕊️ Templo de Luz
       </div>
-      <p className="mt-2.5 max-w-[360px] mx-auto text-slate-500 leading-relaxed">
+      <p className="mx-auto mt-2.5 max-w-[360px] leading-relaxed text-[#91829c]">
         Templo de Luz é um projeto de Centro Espírita Casa Nova — associação privada sem fins
         lucrativos.
       </p>
-      <div className="mt-2 text-[11.5px] text-slate-500 font-medium space-y-0.5">
+      <div className="mt-2 space-y-0.5 text-[11.5px] font-medium text-[#887995]">
         <p>CNPJ 61.566.220/0001-71</p>
         <p>Rua José Gonçalves Gomide, 144 — Vila Guilherme, São Paulo/SP — CEP 02075-001</p>
       </div>
 
-      <div className="mx-auto my-4 h-px w-20 bg-slate-200" />
+      <div className="mx-auto my-4 h-px w-20 bg-[#352a43]" />
 
-      <p className="text-[12px] text-slate-500">
+      <p className="text-[12px] text-[#91829c]">
         Contato:{" "}
         <a
-          className="font-semibold text-[#5d4786] hover:underline"
+          className="font-semibold text-[#d9be82] hover:underline"
           href="mailto:tempodaluz@gmail.com"
         >
           tempodaluz@gmail.com
         </a>{" "}
         ·{" "}
-        <a className="font-semibold text-[#5d4786] hover:underline" href="tel:+5511960746285">
+        <a className="font-semibold text-[#d9be82] hover:underline" href="tel:+5511960746285">
           (11) 96074-6285
         </a>
       </p>
 
-      <div className="mt-4 flex justify-center items-center gap-4 text-[12px] text-slate-500 font-medium">
+      <div className="mt-4 flex items-center justify-center gap-4 text-[12px] font-medium text-[#91829c]">
         <Link
           to="/privacidade"
-          className="hover:text-[#2d144d] underline decoration-[#d8caea] underline-offset-4 transition-colors"
+          className="underline decoration-[#5b476a] underline-offset-4 transition-colors hover:text-[#d9be82]"
         >
           Política de Privacidade
         </Link>
         <span>•</span>
         <Link
           to="/termos"
-          className="hover:text-[#2d144d] underline decoration-[#d8caea] underline-offset-4 transition-colors"
+          className="underline decoration-[#5b476a] underline-offset-4 transition-colors hover:text-[#d9be82]"
         >
           Termos de Uso
         </Link>

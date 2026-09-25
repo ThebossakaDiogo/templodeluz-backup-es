@@ -58,14 +58,14 @@ export function SocialProofSection() {
 
   return (
     <Reveal className="mb-7">
-      <section className="overflow-hidden rounded-3xl border border-[#e5daf0] bg-white shadow-[0_24px_70px_-36px_rgba(45,20,77,0.42)]">
-        <div className="bg-gradient-to-br from-[#2d144d] via-[#3b1c63] to-[#171020] px-5 py-6 text-center text-white sm:px-7 sm:py-7">
-          <span className="inline-flex items-center gap-2 rounded-full border border-amber-300/30 bg-white/10 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.16em] text-amber-200">Relatos recebidos pelo Templo</span>
-          <h2 className="mx-auto mt-3 max-w-[390px] font-display text-[24px] font-black leading-tight sm:text-[28px]">Histórias compartilhadas por famílias acolhidas</h2>
-          <p className="mx-auto mt-2 max-w-[430px] text-[13px] leading-relaxed text-[#e8dff4] sm:text-sm">Arraste para o lado e conheça relatos recebidos após os atendimentos.</p>
+      <section className="overflow-hidden rounded-3xl border border-[#493859] bg-[#171021] shadow-[0_24px_70px_-36px_rgba(0,0,0,0.9)]">
+        <div className="bg-gradient-to-br from-[#2d144d] via-[#3b1c63] to-[#171020] px-5 py-7 text-center text-white sm:px-7 sm:py-8">
+          <span className="inline-flex items-center gap-2 rounded-full border border-amber-300/35 bg-white/10 px-3.5 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.14em] text-amber-200">Relatos recebidos pelo Templo</span>
+          <h2 className="mx-auto mt-4 max-w-[410px] font-display text-[26px] font-black leading-[1.15] sm:text-[30px]">Histórias compartilhadas por famílias acolhidas</h2>
+          <p className="mx-auto mt-3 max-w-[430px] text-[14px] leading-relaxed text-[#e8dff4] sm:text-[15px]">Veja um relato por vez. Deslize para o lado ou use os botões abaixo.</p>
         </div>
 
-        <div className="p-4 sm:p-6">
+        <div className="p-3.5 sm:p-6">
           <div
             ref={railRef}
             onScroll={handleRailScroll}
@@ -74,15 +74,15 @@ export function SocialProofSection() {
             onPointerCancel={() => setPaused(false)}
             onMouseEnter={() => setPaused(true)}
             onMouseLeave={() => setPaused(false)}
-            className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex snap-x snap-mandatory gap-3 overflow-x-auto px-0.5 pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {testimonials.map((testimonial, index) => (
-              <article data-testimonial-card key={testimonial.src} className="min-w-[250px] snap-center overflow-hidden rounded-2xl border border-[#e5daf0] bg-[#f8f6fa] shadow-sm sm:min-w-[270px]">
-                <div className="flex items-center justify-between border-b border-[#ece4f4] bg-white px-3 py-2.5">
-                  <span className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#5d4786]">{testimonial.title}</span>
-                  <span className="rounded-full bg-[#f2eef8] px-2 py-0.5 text-[8.5px] font-bold text-[#5d4786]">{index + 1} de {testimonials.length}</span>
+              <article data-testimonial-card key={testimonial.src} className="min-w-[calc(100%-4px)] snap-center overflow-hidden rounded-2xl border border-[#59436b] bg-[#100a18] shadow-lg sm:min-w-[calc(100%-4px)]">
+                <div className="flex min-h-12 items-center justify-between border-b border-[#493859] bg-[#21172e] px-4 py-3">
+                  <span className="text-[12px] font-extrabold uppercase tracking-[0.1em] text-[#f0cf7b]">{testimonial.title}</span>
+                  <span className="rounded-full border border-[#59436b] bg-[#2b2039] px-2.5 py-1 text-[10px] font-bold text-[#ddd0e6]">{index + 1} de {testimonials.length}</span>
                 </div>
-                <div className="aspect-[3/4] bg-[#171020] p-2">
+                <div className="aspect-[4/5] bg-[#171020] p-2.5 sm:aspect-[3/4]">
                   {testimonial.kind === "video" ? (
                     <video controls playsInline preload="none" poster={testimonial.poster} controlsList="nodownload" aria-label={testimonial.alt} className="h-full w-full rounded-xl bg-black object-cover">
                       <source src={testimonial.src} type="video/mp4" />
@@ -97,15 +97,20 @@ export function SocialProofSection() {
           </div>
 
           <div className="mt-1 flex items-center justify-between gap-3 px-1">
-            <span className="text-[10.5px] font-semibold text-[#6d5488]">Deslize para ver mais relatos</span>
+            <button type="button" onClick={() => scrollToIndex(activeIndex - 1)} className="rounded-xl border border-[#59436b] bg-[#21172e] px-3 py-2 text-[12px] font-bold text-[#e7dced] transition-colors hover:border-[#8c6da1] hover:bg-[#2b2039]" aria-label="Ver relato anterior">
+              ← Anterior
+            </button>
             <div className="flex gap-1.5" aria-label="Navegação dos relatos">
               {testimonials.map((testimonial, index) => (
-                <button key={testimonial.src} type="button" onClick={() => scrollToIndex(index)} aria-label={`Ver relato ${index + 1}`} className={`h-2 rounded-full transition-all ${activeIndex === index ? "w-5 bg-[#5d4786]" : "w-2 bg-[#d8cae5]"}`} />
+                <button key={testimonial.src} type="button" onClick={() => scrollToIndex(index)} aria-label={`Ver relato ${index + 1}`} className={`h-2 rounded-full transition-all ${activeIndex === index ? "w-5 bg-[#d9be82]" : "w-2 bg-[#4a3859]"}`} />
               ))}
             </div>
+            <button type="button" onClick={() => scrollToIndex(activeIndex + 1)} className="rounded-xl border border-[#59436b] bg-[#21172e] px-3 py-2 text-[12px] font-bold text-[#e7dced] transition-colors hover:border-[#8c6da1] hover:bg-[#2b2039]" aria-label="Ver próximo relato">
+              Próximo →
+            </button>
           </div>
 
-          <p className="mt-4 text-center text-[10.5px] leading-relaxed text-[#6d5488]">Relatos são experiências pessoais compartilhadas pelas famílias e não representam promessa de resultado.</p>
+          <p className="mt-4 text-center text-[12px] leading-relaxed text-[#a998b7]">Relatos são experiências pessoais compartilhadas pelas famílias e não representam promessa de resultado.</p>
         </div>
       </section>
     </Reveal>
