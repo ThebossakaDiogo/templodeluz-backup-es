@@ -5,7 +5,7 @@ import { trackWhatsAppEvent } from "@/lib/whatsapp-telemetry";
 import { UNPAID_WHATSAPP_MESSAGE } from "@/lib/whatsapp-message";
 import { PixCheckout } from "@/components/funnel/PixCheckout";
 import { CustomAudioPlayer } from "@/components/funnel/CustomAudioPlayer";
-import correiosLogo from "@/assets/images/quiz/correios-logo.png";
+import correiosLogo from "@/assets/images/quiz/correios-logo.webp";
 import cartaGratuitaAudio from "@/assets/media/audio/milena-carta-gratuita.mp3";
 
 export const Route = createFileRoute("/escrever-carta")({

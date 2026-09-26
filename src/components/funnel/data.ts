@@ -1,23 +1,17 @@
 import cartaExemplo from "@/assets/images/quiz/carta-psicografada.webp";
-import logoTemplo from "@/assets/logo-templo-de-luz.png";
-import mediumMilena from "@/assets/medium-milena.jpeg";
+import mediumMilena from "@/assets/medium-milena.webp";
 import milenaEmocionada from "@/assets/milena.webp";
-import heroTemplo from "@/assets/templodeluz-hero.webp";
-import seloCheckout from "@/assets/checkout-selo.png";
-import seloPomba from "@/assets/pomba-seguro.png";
-import heroBgImage from "@/assets/hero-image.jpeg";
-import milenaOratorioImg from "@/assets/milena-oratorio.jpeg";
-import mediumMilenaPssImg from "@/assets/medium-milena-pss.jpeg";
+import seloCheckout from "@/assets/checkout-selo.webp";
+import seloPomba from "@/assets/pomba-seguro.webp";
+import milenaOratorioImg from "@/assets/milena-oratorio.webp";
+import mediumMilenaPssImg from "@/assets/medium-milena-pss.webp";
 
 export const IMAGES = {
-  hero: heroTemplo,
-  logo: logoTemplo,
   carta: cartaExemplo,
   medium: mediumMilena,
   milenaCatarata: milenaEmocionada,
   seloCheckout: seloCheckout,
   seloPomba: seloPomba,
-  heroBg: heroBgImage,
   milenaOratorio: milenaOratorioImg,
   milenaPss: mediumMilenaPssImg,
 };
