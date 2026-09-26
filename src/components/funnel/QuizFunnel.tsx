@@ -956,26 +956,35 @@ function PixInstantBox({
   readonly temas?: string[];
   readonly horario?: string;
 }) {
-  const [selectedAmount, setSelectedAmount] = useState<number>(35);
+  const [selectedAmount, setSelectedAmount] = useState<number>(40);
   const [customInput, setCustomInput] = useState<string>("");
   const [isCustom, setIsCustom] = useState<boolean>(false);
   const [whatsAppModalOpen, setWhatsAppModalOpen] = useState<boolean>(false);
   const [freeLetterAudioOpen, setFreeLetterAudioOpen] = useState(false);
   const [hasUserSelectedOption, setHasUserSelectedOption] = useState<boolean>(false);
-  const [physicalLetterRequested, setPhysicalLetterRequested] = useState(() => {
-    if (typeof window === "undefined") return false;
-    const storedPreference = sessionStorage.getItem("templodeluz:physical-letter-selected");
-    return storedPreference === "true";
-  });
+  const [physicalLetterRequested, setPhysicalLetterRequested] = useState(true);
 
   const activeAmount = isCustom ? parseBrazilianCurrency(customInput) : selectedAmount;
-  const physicalLetterFee = physicalLetterRequested && activeAmount < 40 ? 15 : 0;
+  const physicalLetterIncluded = activeAmount >= 40;
+  const shouldReceivePhysicalLetter = physicalLetterIncluded || physicalLetterRequested;
+  const physicalLetterFee = shouldReceivePhysicalLetter && !physicalLetterIncluded ? 15 : 0;
   const checkoutAmount = activeAmount + physicalLetterFee;
   const impact = getDonationPsychologicalImpact(activeAmount, primeiroEnte);
   const { isCheckoutInView, checkoutPosition } = useCheckoutPosition(impact.isValid, hasUserSelectedOption);
-  const physicalLetterDescription = resolvePhysicalLetterDescription(physicalLetterRequested, physicalLetterFee);
+  const physicalLetterDescription = resolvePhysicalLetterDescription(shouldReceivePhysicalLetter, physicalLetterFee);
   const physicalLetterBadge =
-    physicalLetterRequested && physicalLetterFee === 0 ? "INCLUÍDA NO VALOR" : "+ R$ 15 ENTREGA";
+    shouldReceivePhysicalLetter && physicalLetterFee === 0 ? "SEM CUSTO ADICIONAL" : "+ R$ 15 ENTREGA";
+
+  useEffect(() => {
+    if (!physicalLetterIncluded) return;
+    setPhysicalLetterRequested(true);
+    try {
+      sessionStorage.setItem("templodeluz:physical-letter-selected", "true");
+      sessionStorage.setItem("templodeluz:physical-letter-fee-included", "true");
+    } catch {
+      // A inclusão automática continua válida durante a sessão atual.
+    }
+  }, [physicalLetterIncluded]);
 
   const scrollToCheckout = () => {
     const payBtn =
@@ -996,6 +1005,7 @@ function PixInstantBox({
     setIsCustom(true);
     const nextValue = sanitizeBrazilianCurrencyInput(e.target.value);
     setCustomInput(nextValue);
+    handlePhysicalLetterPreference(parseBrazilianCurrency(nextValue) >= 40);
     setHasUserSelectedOption(true);
   };
 
@@ -1015,11 +1025,11 @@ function PixInstantBox({
     }
   };
 
-  const handleSelectPreset = (val: number, includesPhysical = false) => {
+  const handleSelectPreset = (val: number) => {
     setSelectedAmount(val);
     setIsCustom(false);
     setCustomInput("");
-    handlePhysicalLetterPreference(includesPhysical);
+    handlePhysicalLetterPreference(val >= 40);
     setHasUserSelectedOption(true);
   };
 
@@ -1076,18 +1086,17 @@ function PixInstantBox({
       val: 35,
       label: "R$ 35",
       tag: "Ajuda ampliada aos materiais",
-      highlight: true,
     },
     {
       val: 40,
       label: "R$ 40",
       tag: "Materiais + carta física incluída",
-      physicalIncluded: true,
+      highlight: true,
     },
     {
       val: 60,
       label: "R$ 60",
-      tag: "Materiais + apoio às ações fraternas",
+      tag: "Carta física + apoio às ações fraternas",
     },
   ];
 
@@ -1149,7 +1158,7 @@ function PixInstantBox({
                 Ou escolha outro valor
               </span>
               <span className="mt-0.5 block text-[11.5px] leading-relaxed text-[#716777]">
-                A partir de R$ 15 para os materiais da vela e do pergaminho.
+                A partir de R$ 40, a carta física e o envio já ficam incluídos no valor.
               </span>
             </label>
             <div className="relative mt-3 w-full">
@@ -1163,6 +1172,7 @@ function PixInstantBox({
                 value={customInput}
                 onFocus={() => {
                   setIsCustom(true);
+                  handlePhysicalLetterPreference(false);
                   setHasUserSelectedOption(true);
                 }}
                 onChange={handleCustomChange}
@@ -1187,7 +1197,7 @@ function PixInstantBox({
                 <button
                   key={item.val}
                   type="button"
-                  onClick={() => handleSelectPreset(item.val, Boolean(item.physicalIncluded))}
+                  onClick={() => handleSelectPreset(item.val)}
                   className={`group relative flex min-h-[112px] flex-col justify-center overflow-hidden rounded-2xl text-left transition-all duration-200 cursor-pointer ${item.highlight ? "col-span-2 min-h-[132px]" : ""} ${
                     isSelected
                       ? "border-2 border-[#8a729d] bg-[#f0e9f5] text-[#342b3e] shadow-[0_18px_40px_-18px_rgba(111,90,136,0.35)] ring-4 ring-[#8a729d]/10"
@@ -1220,17 +1230,18 @@ function PixInstantBox({
       </div>
 
       <label
-        className={`mt-4 flex cursor-pointer items-start gap-3 rounded-2xl border p-4 text-left transition-all ${physicalLetterRequested ? "border-[#8a729d] bg-[#f0e9f5] ring-4 ring-[#8a729d]/10" : "border-[#ddd3e5] bg-white hover:border-[#b6a5c2]"}`}
+        className={`mt-4 flex items-start gap-3 rounded-2xl border p-4 text-left transition-all ${physicalLetterIncluded ? "cursor-default" : "cursor-pointer"} ${shouldReceivePhysicalLetter ? "border-[#8a729d] bg-[#f0e9f5] ring-4 ring-[#8a729d]/10" : "border-[#ddd3e5] bg-white hover:border-[#b6a5c2]"}`}
       >
         <input
           type="checkbox"
-          checked={physicalLetterRequested}
+          checked={shouldReceivePhysicalLetter}
+          disabled={physicalLetterIncluded}
           onChange={(event) => handlePhysicalLetterPreference(event.target.checked)}
           className="mt-0.5 h-5 w-5 shrink-0 accent-[#789c90]"
         />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 text-[14px] font-extrabold text-[#3b3244]">
-            <span>Quero receber a carta física</span>
+            <span>{physicalLetterIncluded ? "Carta física incluída no valor" : "Quero receber a carta física"}</span>
             <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-black text-[#705b80] ring-1 ring-[#d8cce2]">
               {physicalLetterBadge}
             </span>
@@ -1238,7 +1249,7 @@ function PixInstantBox({
           <p className="mt-1 text-[11.5px] leading-relaxed text-[#716777]">
             {physicalLetterDescription}
           </p>
-          {physicalLetterRequested && (
+          {shouldReceivePhysicalLetter && (
             <div className="mt-4 border-t border-[#d8cce2] pt-4">
               <div className="flex h-20 justify-center overflow-hidden rounded-2xl bg-white px-5 shadow-sm ring-1 ring-[#5b476a]">
                 <img
@@ -1263,7 +1274,7 @@ function PixInstantBox({
         </div>
       </label>
 
-      {physicalLetterRequested && impact.isValid && (
+      {shouldReceivePhysicalLetter && impact.isValid && (
         <div className="mt-3 rounded-2xl border border-[#d8cce2] bg-[#f8f4fa] p-3 text-left">
           <div className="flex items-center justify-between gap-3">
             <span className="text-[12px] font-bold text-[#655a70]">Total para confirmar</span>
@@ -1272,8 +1283,9 @@ function PixInstantBox({
             </span>
           </div>
           <p className="mt-1 text-[11px] leading-relaxed text-[#766d7d]">
-            R$ {activeAmount.toFixed(2).replace(".", ",")} de contribuição + R$ 15,00 da taxa de
-            envio físico.
+            {physicalLetterFee > 0
+              ? `R$ ${activeAmount.toFixed(2).replace(".", ",")} de contribuição + R$ 15,00 da taxa de envio físico.`
+              : `R$ ${activeAmount.toFixed(2).replace(".", ",")} de contribuição, com carta física e envio incluídos.`}
           </p>
         </div>
       )}
@@ -1317,10 +1329,10 @@ function PixInstantBox({
               successPath="/chamada-ao-vivo-milena?source=paid&next=%2Fobrigado"
               includePaymentParams={false}
               displayProductName={
-                physicalLetterRequested ? "Contribuição + envio de carta física" : undefined
+                shouldReceivePhysicalLetter ? "Contribuição + envio de carta física" : undefined
               }
               onPaymentConfirmed={(receipt) => {
-                if (physicalLetterRequested && receipt.orderId) {
+                if (shouldReceivePhysicalLetter && receipt.orderId) {
                   sessionStorage.setItem(
                     "templodeluz:physical-letter-fee-receipt",
                     JSON.stringify({
@@ -1517,7 +1529,7 @@ function PixInstantBox({
             <div className="mx-auto flex max-w-[480px] items-center justify-between gap-3">
               <div className="min-w-0 flex-1 text-left">
                 <span className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 truncate">
-                  {physicalLetterRequested ? "Total com envio:" : "Valor selecionado:"}
+                  {shouldReceivePhysicalLetter ? "Total com carta física:" : "Valor selecionado:"}
                 </span>
                 <div className="flex items-baseline gap-1.5">
                   <span className="font-display text-[21px] sm:text-[24px] font-black text-[#2e1d4a] leading-none">
