@@ -14,7 +14,7 @@ const transcript = [
 
 export function MilenaAudioMessage() {
   return (
-    <section className="mt-7 overflow-hidden rounded-3xl border border-amber-300/30 bg-gradient-to-br from-[#211a25] via-[#171021] to-[#21172e] shadow-xl shadow-black/30">
+    <section className="mt-7 overflow-hidden rounded-3xl border border-[#e2d2af] bg-gradient-to-br from-[#fff9ea] via-[#fffefd] to-[#f3edf8] shadow-xl shadow-[#7e6b91]/10">
       <div className="p-4 sm:p-5">
         <div className="flex items-start gap-3 text-left">
           <img
@@ -25,13 +25,13 @@ export function MilenaAudioMessage() {
             decoding="async"
           />
           <div className="min-w-0 flex-1">
-            <span className="inline-flex rounded-full bg-amber-400/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-amber-200 ring-1 ring-amber-300/30">
+            <span className="inline-flex rounded-full bg-[#f8eac9] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#7c5c1f] ring-1 ring-[#e4cf9f]">
               Ouça antes de escolher
             </span>
-            <h3 className="mt-2 font-display text-[20px] font-extrabold leading-tight text-[#fffafd]">
+            <h3 className="mt-2 font-display text-[20px] font-extrabold leading-tight text-[#342b3e]">
               Uma mensagem da Milena para você
             </h3>
-            <p className="mt-1 text-[12.5px] font-medium leading-relaxed text-[#b6a5c2]">
+            <p className="mt-1 text-[12.5px] font-medium leading-relaxed text-[#655a70]">
               Ela explica, com calma, por que a vela e os materiais do oratório são importantes para manter este acolhimento.
             </p>
           </div>
@@ -48,11 +48,11 @@ export function MilenaAudioMessage() {
           />
         </div>
 
-        <details className="mt-3 rounded-2xl border border-amber-300/25 bg-[#100a18]/70 px-3 py-2 text-left">
-          <summary className="cursor-pointer text-[12px] font-extrabold text-amber-200">
+        <details className="mt-3 rounded-2xl border border-[#e4d7bd] bg-white/80 px-3 py-2 text-left">
+          <summary className="cursor-pointer text-[12px] font-extrabold text-[#765a24]">
             Ler a mensagem do áudio
           </summary>
-          <div className="mt-3 space-y-2 text-[12.5px] leading-relaxed text-[#b6a5c2]">
+          <div className="mt-3 space-y-2 text-[12.5px] leading-relaxed text-[#5f5569]">
             {transcript.map((paragraph) => (
               <p key={paragraph}>{paragraph}</p>
             ))}

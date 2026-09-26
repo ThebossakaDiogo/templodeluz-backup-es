@@ -176,10 +176,10 @@ function Field({
 }) {
   const shared = `w-full rounded-[14px] border px-4 py-4 text-[15.5px] font-medium leading-relaxed shadow-sm outline-none transition-all duration-200 ${
     theme === "dark"
-      ? "bg-[#120c1d] text-[#f7f0ff] placeholder:text-[#80728f] focus:border-[#c5a565] focus:ring-4 focus:ring-[#c5a565]/10"
+      ? "bg-white text-[#342b3e] placeholder:text-[#a399aa] focus:border-[#8a729d] focus:ring-4 focus:ring-[#8a729d]/10"
       : "bg-white text-[#272039] placeholder:text-[#a89fb4] focus:border-[#6f5aa0] focus:ring-4 focus:ring-[#6f5aa0]/10"
   }`;
-  let borderStyle = theme === "dark" ? "border-[#433653]" : "border-slate-200";
+  let borderStyle = theme === "dark" ? "border-[#d9cee2]" : "border-slate-200";
   if (error) {
     borderStyle = "border-destructive ring-1 ring-destructive";
   } else if (highlight) {
@@ -234,7 +234,7 @@ function Progress({
 }) {
   const pct = (step / total) * 100;
   return (
-    <div className="sticky top-0 z-30 border-b border-[#352a43] bg-[#120c1d]/95 px-4 pt-3.5 pb-3 text-white backdrop-blur-xl shadow-[0_12px_34px_-24px_rgba(0,0,0,0.9)] sm:px-6">
+    <div className="sticky top-0 z-30 border-b border-[#ddd3e5] bg-[#fbf8fd]/95 px-4 pt-3.5 pb-3 text-[#3b3244] backdrop-blur-xl shadow-[0_12px_34px_-24px_rgba(82,67,99,0.3)] sm:px-6">
       <div className="mb-2 flex items-center justify-between text-xs">
         <div className="flex min-w-0 items-center gap-2">
           {onBack && (
@@ -242,27 +242,27 @@ function Progress({
               type="button"
               onClick={onBack}
               aria-label="Voltar para a etapa anterior"
-              className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-[#4e3f61] bg-[#20172f] text-base font-black text-[#eadcf5] transition-colors hover:border-[#c5a565] hover:bg-[#2c203e]"
+              className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-[#d6c9df] bg-white text-base font-black text-[#6d587c] transition-colors hover:border-[#aa96b8] hover:bg-[#f3edf7]"
             >
               ‹
             </button>
           )}
-          <span className="flex min-w-0 items-center gap-1.5 truncate font-bold text-[#e9def3]">
-            <span className="h-2 w-2 shrink-0 rounded-full bg-[#c5a565] shadow-[0_0_10px_rgba(197,165,101,0.7)]" />
+          <span className="flex min-w-0 items-center gap-1.5 truncate font-bold text-[#574c60]">
+            <span className="h-2 w-2 shrink-0 rounded-full bg-[#82a99b] shadow-[0_0_8px_rgba(130,169,155,0.4)]" />
             Sala reservada · {caption}
           </span>
         </div>
-        <span className="rounded-full border border-[#4e3f61] bg-[#20172f] px-2.5 py-0.5 text-[11px] font-bold text-[#cdbedf]">
+        <span className="rounded-full border border-[#d6c9df] bg-white px-2.5 py-0.5 text-[11px] font-bold text-[#6d6077]">
           Etapa {step} de {total}
         </span>
       </div>
-      <div className="h-2 overflow-hidden rounded-full border border-[#3d304d] bg-[#0c0813] p-0.5">
+      <div className="h-2 overflow-hidden rounded-full border border-[#ddd3e5] bg-[#eee8f2] p-0.5">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-[#8f72b5] via-[#b18bc7] to-[#d2b26e] shadow-[0_0_10px_rgba(197,165,101,0.35)] transition-[width] duration-500 ease-out"
+          className="h-full rounded-full bg-gradient-to-r from-[#86aa9d] via-[#8d79a0] to-[#c6a866] transition-[width] duration-500 ease-out"
           style={{ width: `${pct}%` }}
         />
       </div>
-      <p className="mt-2 text-center text-[11px] font-medium text-[#9e8caf]">
+      <p className="mt-2 text-center text-[11px] font-medium text-[#766b7e]">
         {step < total
           ? "Suas respostas ficam salvas neste aparelho. Você pode voltar e ajustar quando quiser."
           : "Revise com calma: seu pedido será encaminhado somente no próximo passo."}
@@ -282,14 +282,14 @@ function QuestionHead({
 }) {
   return (
     <div className="px-5 pb-4 pt-8 sm:px-7">
-      <span className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-[#5d4770] bg-[#251a35] px-3 py-1 text-[10.5px] font-bold uppercase tracking-[0.12em] text-[#d9be82]">
+      <span className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-[#d8cce2] bg-[#f2ecf6] px-3 py-1 text-[10.5px] font-bold uppercase tracking-[0.12em] text-[#725b83]">
         {eyebrow}
       </span>
-      <h2 className="font-display text-[26px] font-extrabold leading-[1.18] tracking-tight text-[#fffafd]">
+      <h2 className="font-display text-[26px] font-extrabold leading-[1.18] tracking-tight text-[#342b3e]">
         {title}
       </h2>
       {subtitle && (
-        <p className="mt-3 text-[14px] font-normal leading-relaxed text-[#bbaac8]">{subtitle}</p>
+        <p className="mt-3 text-[14px] font-normal leading-relaxed text-[#6b6173]">{subtitle}</p>
       )}
     </div>
   );
@@ -323,11 +323,11 @@ function ComfortNote({ step }: { readonly step: string }) {
   const note = COMFORT_PHRASES[step];
   if (!note) return null;
   return (
-    <div className="animate-rise-in mx-5 mb-5 flex items-center gap-3 rounded-2xl border border-[#443553] bg-[#1d1429] px-4 py-3.5 shadow-[0_18px_40px_-30px_rgba(0,0,0,0.9)] sm:mx-7">
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#4f3d60] bg-[#120c1d] text-xl shadow-sm">
+    <div className="animate-rise-in mx-5 mb-5 flex items-center gap-3 rounded-2xl border border-[#d8cfe0] bg-[#f8f4fa] px-4 py-3.5 shadow-[0_18px_40px_-30px_rgba(82,67,99,0.3)] sm:mx-7">
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#ddd3e5] bg-white text-xl shadow-sm">
         {note.icon}
       </span>
-      <p className="text-[13px] font-medium leading-relaxed text-[#c6b6d1]">{note.text}</p>
+      <p className="text-[13px] font-medium leading-relaxed text-[#665b6f]">{note.text}</p>
     </div>
   );
 }
@@ -351,17 +351,17 @@ function Option({
       onClick={onClick}
       className={`group relative flex w-full cursor-pointer items-center gap-3.5 rounded-2xl border px-4 py-4 text-left transition-all duration-200 sm:gap-4 ${
         selected
-          ? "border-[#c5a565] bg-[#2b2039] shadow-[0_16px_34px_-22px_rgba(197,165,101,0.55)] ring-4 ring-[#c5a565]/10"
-          : "border-[#40324f] bg-[#1a1225] shadow-sm hover:-translate-y-0.5 hover:border-[#76608a] hover:bg-[#21172e] hover:shadow-md"
+          ? "border-[#8a729d] bg-[#f1eaf6] shadow-[0_16px_34px_-22px_rgba(111,90,136,0.35)] ring-4 ring-[#8a729d]/10"
+          : "border-[#ddd3e5] bg-white shadow-sm hover:-translate-y-0.5 hover:border-[#b9a8c6] hover:bg-[#faf7fc] hover:shadow-md"
       }`}
     >
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#493859] bg-[#100a18] text-2xl transition-colors group-hover:bg-[#2b2039]">
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#e1d9e7] bg-[#f8f4fa] text-2xl transition-colors group-hover:bg-[#f1eaf6]">
         {emoji}
       </div>
       <div className="flex-1">
-        <span className="block text-[15px] font-bold leading-snug text-[#f7f0fb]">{label}</span>
+        <span className="block text-[15px] font-bold leading-snug text-[#3b3244]">{label}</span>
         {hint ? (
-          <span className="mt-1 block text-[12.5px] font-normal leading-normal text-[#a998b7]">
+          <span className="mt-1 block text-[12.5px] font-normal leading-normal text-[#716777]">
             {hint}
           </span>
         ) : null}
@@ -369,8 +369,8 @@ function Option({
       <div
         className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-[12px] font-extrabold transition-colors ${
           selected
-            ? "border-[#d4b46d] bg-[#d4b46d] text-[#1a1025] shadow-xs"
-            : "border-[#5b496b] text-transparent group-hover:border-[#a388b7]"
+            ? "border-[#789c90] bg-[#789c90] text-white shadow-xs"
+            : "border-[#c9bdcf] text-transparent group-hover:border-[#9a83aa]"
         }`}
       >
         ✓
@@ -389,13 +389,13 @@ function ObjectionBuster({
   readonly text: string;
 }) {
   return (
-    <div className="mx-5 mt-6 flex items-start gap-3.5 rounded-2xl border border-[#40324f] bg-[#171021] p-4 text-left shadow-sm sm:mx-7">
-      <span className="shrink-0 rounded-xl border border-[#4b3a5a] bg-[#100a18] p-2 text-xl">
+    <div className="mx-5 mt-6 flex items-start gap-3.5 rounded-2xl border border-[#ddd3e5] bg-white p-4 text-left shadow-sm sm:mx-7">
+      <span className="shrink-0 rounded-xl border border-[#e1d9e7] bg-[#f8f4fa] p-2 text-xl">
         {icon}
       </span>
       <div>
-        <strong className="block text-[13px] font-bold text-[#eadff1]">{title}</strong>
-        <p className="mt-1 text-[12.5px] font-normal leading-relaxed text-[#a998b7]">{text}</p>
+        <strong className="block text-[13px] font-bold text-[#44394c]">{title}</strong>
+        <p className="mt-1 text-[12.5px] font-normal leading-relaxed text-[#716777]">{text}</p>
       </div>
     </div>
   );
@@ -514,8 +514,8 @@ function getDonationPsychologicalImpact(
       badge: "Apoio essencial",
       title: `Ajuda com a vela de 7 dias para ${primeiroEnte}`,
       description: "Contribui para a vela utilizada no período de oração e acolhimento no oratório.",
-      badgeColor: "bg-amber-400/15 text-amber-200 border-amber-400/35",
-      cardBorder: "border-amber-400/30 bg-[#20172d]",
+      badgeColor: "bg-amber-50 text-amber-800 border-amber-200",
+      cardBorder: "border-amber-200 bg-amber-50/50",
       isValid: true,
     };
   }
@@ -526,8 +526,8 @@ function getDonationPsychologicalImpact(
       badge: "Materiais do pedido",
       title: `Ajuda com vela e pergaminho para ${primeiroEnte}`,
       description: "Contribui para os principais materiais usados no registro e na preparação do pedido.",
-      badgeColor: "bg-[#8f72b5]/20 text-[#e0cff0] border-[#8f72b5]/40",
-      cardBorder: "border-[#6a527d] bg-[#21172e]",
+      badgeColor: "bg-[#f1eaf6] text-[#705b80] border-[#d7c9e1]",
+      cardBorder: "border-[#d7c9e1] bg-[#f8f4fa]",
       isValid: true,
     };
   }
@@ -538,8 +538,8 @@ function getDonationPsychologicalImpact(
       badge: "Escolha mais completa",
       title: `Materiais + carta física para ${primeiroEnte}`,
       description: "Ajuda com vela, pergaminho e preparação do pedido. A carta física pode ser incluída conforme o valor escolhido.",
-      badgeColor: "bg-amber-400/15 text-amber-200 border-amber-400/40",
-      cardBorder: "border-amber-400/40 bg-[#241a2d]",
+      badgeColor: "bg-amber-50 text-amber-800 border-amber-200",
+      cardBorder: "border-amber-200 bg-[#fffaf0]",
       isValid: true,
     };
   }
@@ -550,8 +550,8 @@ function getDonationPsychologicalImpact(
       badge: "Apoio ampliado",
       title: "Materiais e ações fraternas da casa",
       description: `Além dos materiais relacionados a ${primeiroEnte}, ajuda nas atividades de acolhimento e assistência informadas pela instituição.`,
-      badgeColor: "bg-purple-400/15 text-purple-200 border-purple-400/35",
-      cardBorder: "border-purple-400/30 bg-[#21172e]",
+      badgeColor: "bg-purple-50 text-purple-800 border-purple-200",
+      cardBorder: "border-purple-200 bg-purple-50/50",
       isValid: true,
     };
   }
@@ -562,8 +562,8 @@ function getDonationPsychologicalImpact(
       badge: "Apoio solidário",
       title: "Ajuda ampliada à manutenção da casa",
       description: `Apoia os materiais de ${primeiroEnte} e amplia a contribuição para as atividades fraternas mantidas pela instituição.`,
-      badgeColor: "bg-emerald-400/15 text-emerald-200 border-emerald-400/35",
-      cardBorder: "border-emerald-400/30 bg-[#17251f]",
+      badgeColor: "bg-emerald-50 text-emerald-800 border-emerald-200",
+      cardBorder: "border-emerald-200 bg-emerald-50/50",
       isValid: true,
     };
   }
@@ -574,8 +574,8 @@ function getDonationPsychologicalImpact(
     badge: "Apoio extraordinário",
     title: "Contribuição ampliada aos materiais e à obra fraterna",
     description: `Ajuda a manter os materiais de ${primeiroEnte}, o acolhimento da casa e as ações assistenciais informadas pela instituição.`,
-    badgeColor: "bg-amber-400/15 text-amber-200 border-amber-400/40",
-    cardBorder: "border-amber-400/40 bg-gradient-to-br from-[#271d30] via-[#21172e] to-[#2b241a]",
+    badgeColor: "bg-amber-50 text-amber-800 border-amber-200",
+    cardBorder: "border-amber-200 bg-gradient-to-br from-[#fffdf7] via-[#fffaf0] to-[#f8f1df]",
     isValid: true,
   };
 }
@@ -709,8 +709,8 @@ function MilenaSupportPrompt({
           ✕
         </button>
 
-        <header className="shrink-0 border-b border-[#3d3152] bg-[#211a35]">
-          <div className="h-[104px] w-full bg-[#171225] p-2 sm:h-[122px]">
+        <header className="shrink-0 border-b border-[#ddd3e5] bg-[#f3edf7]">
+          <div className="h-[104px] w-full bg-[#ebe3f1] p-2 sm:h-[122px]">
             <img
               src={IMAGES.milenaCatarata}
               alt="Milena Medeiros"
@@ -719,16 +719,16 @@ function MilenaSupportPrompt({
             />
           </div>
           <div className="px-4 pb-3 pt-2 text-left sm:px-5 sm:pb-4 sm:pt-3">
-            <span className="text-[10px] font-black uppercase tracking-[0.14em] text-[#eadcf5]">
+            <span className="text-[10px] font-black uppercase tracking-[0.14em] text-[#705b80]">
               Antes de continuar
             </span>
             <h3
               id="milena-support-title"
-              className="mt-1 max-w-[380px] font-display text-[18px] font-black leading-tight text-white sm:text-[20px]"
+              className="mt-1 max-w-[380px] font-display text-[18px] font-black leading-tight text-[#342b3e] sm:text-[20px]"
             >
               Se quiser, amplie seu gesto de apoio
             </h3>
-            <p className="mt-1 text-[11px] leading-relaxed text-[#cec1db]">
+            <p className="mt-1 text-[11px] leading-relaxed text-[#716777]">
               Escolha opcional para apoiar o tratamento oftalmológico da Milena.
             </p>
           </div>
@@ -1092,38 +1092,38 @@ function PixInstantBox({
   ];
 
   return (
-    <div className="mt-4 overflow-hidden rounded-[30px] border border-[#443454] bg-[#100a18] text-center shadow-[0_28px_80px_-36px_rgba(0,0,0,0.95)]">
-      <div className="relative overflow-hidden border-b border-[#443454] bg-[#1b1128] px-5 py-7 text-left text-white sm:px-7">
+    <div className="mt-4 overflow-hidden rounded-[30px] border border-[#d9cee2] bg-[#fffefd] text-center shadow-[0_28px_80px_-36px_rgba(82,67,99,0.35)]">
+      <div className="relative overflow-hidden border-b border-[#ddd3e5] bg-gradient-to-br from-[#eee6f4] via-[#f7f2fa] to-[#fff9ed] px-5 py-7 text-left text-[#342b3e] sm:px-7">
         <div className="pointer-events-none absolute -right-12 -top-16 h-44 w-44 rounded-full bg-[#9d82c4]/20 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-20 -left-10 h-40 w-40 rounded-full bg-[#c49a52]/15 blur-3xl" />
         <div className="relative">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-400/15 px-3 py-1 text-[10.5px] font-extrabold uppercase tracking-[0.12em] text-amber-200 backdrop-blur-sm">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#d7c9e1] bg-white/80 px-3 py-1 text-[10.5px] font-extrabold uppercase tracking-[0.12em] text-[#705b80] backdrop-blur-sm">
             Contribuição voluntária
           </span>
-          <h3 className="mt-3 max-w-[360px] font-display text-[22px] font-extrabold leading-[1.2] text-white">
+          <h3 className="mt-3 max-w-[360px] font-display text-[22px] font-extrabold leading-[1.2] text-[#342b3e]">
             {primeiroNome}, escolha como deseja apoiar os materiais de {primeiroEnte}
           </h3>
-          <p className="mt-2 max-w-[390px] text-[13px] leading-relaxed text-[#c9bad3]">
+          <p className="mt-2 max-w-[390px] text-[13px] leading-relaxed text-[#665b70]">
             Cada valor mostra de forma simples o que sua contribuição ajuda a manter. A psicografia continua sem cobrança.
           </p>
-          <div className="mt-3 inline-flex items-center gap-2 rounded-xl bg-amber-400/15 border border-amber-300/30 px-3 py-1.5 text-[11.5px] font-semibold text-amber-200">
+          <div className="mt-3 inline-flex items-center gap-2 rounded-xl border border-[#e2cf9f] bg-[#fff7df] px-3 py-1.5 text-[11.5px] font-semibold text-[#765a24]">
             <span>⏱️ Previsão de recebimento: <strong>Hoje às {horario || "18h00"} (Horário de Brasília)</strong></span>
           </div>
         </div>
       </div>
 
       <div className="p-4 sm:p-6">
-        <div className="grid grid-cols-3 gap-2 rounded-2xl border border-[#40324f] bg-[#171021] p-3 text-center shadow-sm">
+        <div className="grid grid-cols-3 gap-2 rounded-2xl border border-[#e1d8e7] bg-[#f8f4fa] p-3 text-center shadow-sm">
           {[
             ["1", "Escolha o valor"],
             ["2", "PIX ou cartão"],
             ["3", "Confirmação"],
           ].map(([step, label]) => (
             <div key={step} className="min-w-0">
-              <span className="mx-auto flex h-6 w-6 items-center justify-center rounded-full border border-[#6d557e] bg-[#2b2039] text-[10px] font-black text-[#f1e8f6]">
+              <span className="mx-auto flex h-6 w-6 items-center justify-center rounded-full border border-[#cdbfda] bg-white text-[10px] font-black text-[#705b80]">
                 {step}
               </span>
-              <span className="mt-1.5 block text-[10.5px] font-bold leading-tight text-[#a998b7]">
+              <span className="mt-1.5 block text-[10.5px] font-bold leading-tight text-[#716777]">
                 {label}
               </span>
             </div>
@@ -1132,28 +1132,28 @@ function PixInstantBox({
 
         <div className="mt-5 text-left">
           <div className="mb-3 flex items-center justify-between gap-3 px-1">
-            <span className="text-[12px] font-extrabold uppercase tracking-[0.08em] text-[#dbc9e5]">
+            <span className="text-[12px] font-extrabold uppercase tracking-[0.08em] text-[#554a5e]">
               Escolha o seu gesto
             </span>
-            <span className="text-[10.5px] font-semibold text-[#92819f]">Você decide o valor</span>
+            <span className="text-[10.5px] font-semibold text-[#817687]">Você decide o valor</span>
           </div>
 
           <div
-            className={`mb-5 rounded-2xl border-2 bg-[#171021] p-4 shadow-[0_14px_28px_-20px_rgba(0,0,0,0.9)] transition-all ${isCustom ? "border-[#c5a565] ring-4 ring-[#c5a565]/10" : "border-[#40324f]"}`}
+            className={`mb-5 rounded-2xl border-2 bg-white p-4 shadow-[0_14px_28px_-20px_rgba(82,67,99,0.25)] transition-all ${isCustom ? "border-[#8a729d] ring-4 ring-[#8a729d]/10" : "border-[#e1d8e7]"}`}
           >
             <label htmlFor="custom-donation-input" className="block">
-              <span className="inline-flex rounded-full border border-[#584668] bg-[#251a35] px-2 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-[#d9be82]">
+              <span className="inline-flex rounded-full border border-[#d8cce2] bg-[#f3edf7] px-2 py-0.5 text-[9.5px] font-black uppercase tracking-[0.1em] text-[#705b80]">
                 Valor livre
               </span>
-              <span className="mt-2 block text-[15px] font-extrabold text-[#f7f0fb]">
+              <span className="mt-2 block text-[15px] font-extrabold text-[#3b3244]">
                 Ou escolha outro valor
               </span>
-              <span className="mt-0.5 block text-[11.5px] leading-relaxed text-[#a998b7]">
+              <span className="mt-0.5 block text-[11.5px] leading-relaxed text-[#716777]">
                 A partir de R$ 15 para os materiais da vela e do pergaminho.
               </span>
             </label>
             <div className="relative mt-3 w-full">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[14px] font-black text-[#d9be82]">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[14px] font-black text-[#705b80]">
                 R$
               </span>
               <input
@@ -1167,7 +1167,7 @@ function PixInstantBox({
                 }}
                 onChange={handleCustomChange}
                 placeholder="Ex.: 50,00"
-                className="w-full rounded-xl border border-[#493859] bg-[#0d0814] py-4 pl-12 pr-4 text-[22px] font-black text-[#fffafd] outline-none transition-all placeholder:text-[#645570] focus:border-[#c5a565]"
+                className="w-full rounded-xl border border-[#d9cee2] bg-[#fbf9fc] py-4 pl-12 pr-4 text-[22px] font-black text-[#342b3e] outline-none transition-all placeholder:text-[#aaa0b0] focus:border-[#8a729d] focus:bg-white"
               />
             </div>
             {isCustom && customInput.length > 0 && activeAmount < 15 && (
@@ -1177,7 +1177,7 @@ function PixInstantBox({
             )}
           </div>
 
-          <div className="mb-3 px-1 text-[11px] font-extrabold uppercase tracking-[0.08em] text-[#a998b7]">
+          <div className="mb-3 px-1 text-[11px] font-extrabold uppercase tracking-[0.08em] text-[#716777]">
             Veja o que cada valor ajuda a manter
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -1190,8 +1190,8 @@ function PixInstantBox({
                   onClick={() => handleSelectPreset(item.val, Boolean(item.physicalIncluded))}
                   className={`group relative flex min-h-[112px] flex-col justify-center overflow-hidden rounded-2xl text-left transition-all duration-200 cursor-pointer ${item.highlight ? "col-span-2 min-h-[132px]" : ""} ${
                     isSelected
-                      ? "border-2 border-[#d0ad63] bg-[#2a2033] text-white shadow-[0_18px_40px_-18px_rgba(197,165,101,0.55)] ring-4 ring-[#c5a565]/10"
-                      : "border border-[#40324f] bg-[#171021] text-white shadow-sm hover:border-[#7b628e] hover:bg-[#21172e]"
+                      ? "border-2 border-[#8a729d] bg-[#f0e9f5] text-[#342b3e] shadow-[0_18px_40px_-18px_rgba(111,90,136,0.35)] ring-4 ring-[#8a729d]/10"
+                      : "border border-[#ddd3e5] bg-white text-[#342b3e] shadow-sm hover:border-[#b6a5c2] hover:bg-[#faf7fc]"
                   }`}
                 >
                   {item.highlight && (
@@ -1200,14 +1200,14 @@ function PixInstantBox({
                     </span>
                   )}
                   <div className="flex flex-1 flex-col justify-center p-4">
-                    <span className={`block font-black leading-tight tracking-tight text-[#f8e7b9] ${item.highlight ? "text-[28px]" : "text-[21px]"}`}>
+                    <span className={`block font-black leading-tight tracking-tight text-[#6c557d] ${item.highlight ? "text-[28px]" : "text-[21px]"}`}>
                       {item.label}
                     </span>
-                    <span className={`mt-1 block font-semibold leading-snug ${item.highlight ? "text-[13px]" : "text-[11.5px]"} ${isSelected ? "text-[#ead6a6]" : "text-[#b8a8c3]"}`}>
+                    <span className={`mt-1 block font-semibold leading-snug ${item.highlight ? "text-[13px]" : "text-[11.5px]"} ${isSelected ? "text-[#655470]" : "text-[#766d7d]"}`}>
                       {item.tag}
                     </span>
                     {isSelected && (
-                      <span className="mt-2 inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-[0.12em] text-[#d8b96f]">
+                      <span className="mt-2 inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-[0.12em] text-[#55796e]">
                         <span>✓</span> Escolhido
                       </span>
                     )}
@@ -1220,26 +1220,26 @@ function PixInstantBox({
       </div>
 
       <label
-        className={`mt-4 flex cursor-pointer items-start gap-3 rounded-2xl border p-4 text-left transition-all ${physicalLetterRequested ? "border-[#c5a565] bg-[#2a2033] ring-4 ring-[#c5a565]/10" : "border-[#40324f] bg-[#171021] hover:border-[#76608a]"}`}
+        className={`mt-4 flex cursor-pointer items-start gap-3 rounded-2xl border p-4 text-left transition-all ${physicalLetterRequested ? "border-[#8a729d] bg-[#f0e9f5] ring-4 ring-[#8a729d]/10" : "border-[#ddd3e5] bg-white hover:border-[#b6a5c2]"}`}
       >
         <input
           type="checkbox"
           checked={physicalLetterRequested}
           onChange={(event) => handlePhysicalLetterPreference(event.target.checked)}
-          className="mt-0.5 h-5 w-5 shrink-0 accent-[#c5a565]"
+          className="mt-0.5 h-5 w-5 shrink-0 accent-[#789c90]"
         />
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2 text-[14px] font-extrabold text-[#f7f0fb]">
+          <div className="flex flex-wrap items-center gap-2 text-[14px] font-extrabold text-[#3b3244]">
             <span>Quero receber a carta física</span>
-            <span className="rounded-full bg-[#100a18] px-2 py-0.5 text-[10px] font-black text-[#d9be82] ring-1 ring-[#5b476a]">
+            <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-black text-[#705b80] ring-1 ring-[#d8cce2]">
               {physicalLetterBadge}
             </span>
           </div>
-          <p className="mt-1 text-[11.5px] leading-relaxed text-[#a998b7]">
+          <p className="mt-1 text-[11.5px] leading-relaxed text-[#716777]">
             {physicalLetterDescription}
           </p>
           {physicalLetterRequested && (
-            <div className="mt-4 border-t border-[#4f3d60] pt-4">
+            <div className="mt-4 border-t border-[#d8cce2] pt-4">
               <div className="flex h-20 justify-center overflow-hidden rounded-2xl bg-white px-5 shadow-sm ring-1 ring-[#5b476a]">
                 <img
                   src={correiosLogo}
@@ -1250,10 +1250,10 @@ function PixInstantBox({
                 />
               </div>
               <div className="mt-3 text-left">
-                <span className="block text-[12px] font-black text-[#eadff1]">
+                <span className="block text-[12px] font-black text-[#44394c]">
                   Envio pelos Correios
                 </span>
-                <span className="mt-1 block text-[11px] leading-relaxed text-[#a998b7]">
+                <span className="mt-1 block text-[11px] leading-relaxed text-[#716777]">
                   Postagem estimada em 2–3 dias úteis após confirmar o endereço. O prazo final
                   depende do CEP.
                 </span>
@@ -1264,14 +1264,14 @@ function PixInstantBox({
       </label>
 
       {physicalLetterRequested && impact.isValid && (
-        <div className="mt-3 rounded-2xl border border-[#51405f] bg-[#1a1225] p-3 text-left">
+        <div className="mt-3 rounded-2xl border border-[#d8cce2] bg-[#f8f4fa] p-3 text-left">
           <div className="flex items-center justify-between gap-3">
-            <span className="text-[12px] font-bold text-[#c6b6d1]">Total para confirmar</span>
-            <span className="text-[18px] font-black text-[#e8c979]">
+            <span className="text-[12px] font-bold text-[#655a70]">Total para confirmar</span>
+            <span className="text-[18px] font-black text-[#705b80]">
               R$ {checkoutAmount.toFixed(2).replace(".", ",")}
             </span>
           </div>
-          <p className="mt-1 text-[11px] leading-relaxed text-[#9f8ead]">
+          <p className="mt-1 text-[11px] leading-relaxed text-[#766d7d]">
             R$ {activeAmount.toFixed(2).replace(".", ",")} de contribuição + R$ 15,00 da taxa de
             envio físico.
           </p>
@@ -1289,13 +1289,13 @@ function PixInstantBox({
             <span>{impact.icon}</span>
             {impact.badge}
           </span>
-          <span className="text-[13px] font-black text-[#f4e5bb]">
+          <span className="text-[13px] font-black text-[#6c557d]">
             R$ {activeAmount > 0 ? activeAmount.toFixed(2).replace(".", ",") : "0,00"}
           </span>
         </div>
 
-        <h4 className="text-[13.5px] font-extrabold leading-snug text-[#f7f0fb]">{impact.title}</h4>
-        <p className="mt-1 text-[12px] leading-relaxed text-[#b6a5c2]">{impact.description}</p>
+        <h4 className="text-[13.5px] font-extrabold leading-snug text-[#3b3244]">{impact.title}</h4>
+        <p className="mt-1 text-[12px] leading-relaxed text-[#716777]">{impact.description}</p>
 
         {activeAmount < 15 && (
           <div className="mt-2.5 p-2.5 rounded-xl bg-red-100/80 border border-red-200 text-red-900 text-[11.5px] font-bold leading-tight">
@@ -1341,8 +1341,8 @@ function PixInstantBox({
       </div>
 
       {/* Continuidade após o pagamento */}
-      <div className="mt-4 border-t border-[#352a43] pt-3">
-        <p className="text-center text-[11.5px] leading-relaxed text-[#a998b7]">
+      <div className="mt-4 border-t border-[#e3dbe9] pt-3">
+        <p className="text-center text-[11.5px] leading-relaxed text-[#766d7d]">
           Após confirmar a contribuição via PIX ou cartão, você será redirecionado(a) automaticamente.
         </p>
       </div>
@@ -1409,9 +1409,9 @@ function PixInstantBox({
       </Suspense>
 
       {/* A alternativa gratuita permanece disponível, sem disputar o foco da contribuição. */}
-      <div className="mt-7 border-t border-[#352a43] pt-5">
-        <div className="rounded-2xl border border-[#342a40] bg-[#0d0814] p-4 text-center shadow-xs">
-          <p className="text-[11.5px] leading-relaxed text-[#887894]">
+      <div className="mt-7 border-t border-[#e3dbe9] pt-5">
+        <div className="rounded-2xl border border-[#e1d8e7] bg-[#f8f4fa] p-4 text-center shadow-xs">
+          <p className="text-[11.5px] leading-relaxed text-[#766d7d]">
             A contribuição é voluntária. Se este não for o seu momento, você ainda pode seguir para o pergaminho.
           </p>
 
@@ -1419,7 +1419,7 @@ function PixInstantBox({
             <button
               type="button"
               onClick={handleIrParaPergaminho}
-              className="w-full cursor-pointer rounded-xl border border-[#544263] bg-transparent px-4 py-3 text-[11.5px] font-bold text-[#b6a5c2] transition-colors hover:border-[#7b628e] hover:bg-[#1a1225] hover:text-[#eadff1]"
+              className="w-full cursor-pointer rounded-xl border border-[#cfc3d8] bg-white px-4 py-3 text-[11.5px] font-bold text-[#655470] transition-colors hover:border-[#aa96b8] hover:bg-[#f3edf7] hover:text-[#4f405a]"
             >
               Seguir sem contribuir neste momento
             </button>
@@ -1559,20 +1559,20 @@ function PixInstantBox({
 
 function SecurityGuaranteeSeal() {
   return (
-    <div className="mt-7 space-y-3.5 border-t border-[#352a43] pt-5 text-left">
+    <div className="mt-7 space-y-3.5 border-t border-[#e3dbe9] pt-5 text-left">
       {/* Título da Seção dos Selos */}
       <div className="text-center">
         <span className="text-[10.5px] font-extrabold uppercase tracking-[0.18em] text-[#b45309]">
           ✦ Atendimento e segurança ✦
         </span>
-        <h3 className="font-display mt-0.5 text-[16px] font-extrabold text-[#fffafd]">
+        <h3 className="font-display mt-0.5 text-[16px] font-extrabold text-[#342b3e]">
           Transparência em cada etapa
         </h3>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
         {/* Card 1: Selo da Paz */}
-        <div className="flex flex-col items-center rounded-2xl border border-amber-300/30 bg-gradient-to-b from-[#211a25] to-[#171021] p-4 text-center shadow-xs transition-transform duration-300 hover:scale-[1.01]">
+        <div className="flex flex-col items-center rounded-2xl border border-[#ead9b0] bg-gradient-to-b from-[#fffdf8] to-[#fff8e9] p-4 text-center shadow-xs transition-transform duration-300 hover:scale-[1.01]">
           <div className="relative mb-2 flex items-center justify-center">
             <img
               src={IMAGES.seloPomba}
@@ -1585,16 +1585,16 @@ function SecurityGuaranteeSeal() {
           <span className="text-[9.5px] font-black uppercase tracking-widest text-[#b45309] block">
             Paz & Acolhimento
           </span>
-          <h4 className="font-display mt-0.5 text-[14.5px] font-extrabold leading-tight text-[#fffafd]">
+          <h4 className="font-display mt-0.5 text-[14.5px] font-extrabold leading-tight text-[#3b3244]">
             Selo de Paz Espiritual
           </h4>
-          <p className="mt-1 text-[11.5px] leading-relaxed text-[#bbaa9d]">
+          <p className="mt-1 text-[11.5px] leading-relaxed text-[#746956]">
             Sua intenção é registrada com cuidado para o atendimento e a oração da casa.
           </p>
         </div>
 
         {/* Card 2: Selo de Garantia */}
-        <div className="flex flex-col items-center rounded-2xl border border-[#554166] bg-gradient-to-b from-[#21172e] to-[#171021] p-4 text-center shadow-xs transition-transform duration-300 hover:scale-[1.01]">
+        <div className="flex flex-col items-center rounded-2xl border border-[#ddd3e5] bg-gradient-to-b from-white to-[#f5f0f8] p-4 text-center shadow-xs transition-transform duration-300 hover:scale-[1.01]">
           <div className="relative mb-2 flex items-center justify-center">
             <img
               src={IMAGES.seloCheckout}
@@ -1607,10 +1607,10 @@ function SecurityGuaranteeSeal() {
           <span className="text-[9.5px] font-black uppercase tracking-widest text-[#5d4786] block">
             Pagamento seguro
           </span>
-          <h4 className="font-display mt-0.5 text-[14.5px] font-extrabold leading-tight text-[#fffafd]">
+          <h4 className="font-display mt-0.5 text-[14.5px] font-extrabold leading-tight text-[#3b3244]">
             Processamento protegido
           </h4>
-          <p className="mt-1 text-[11.5px] leading-relaxed text-[#b6a5c2]">
+          <p className="mt-1 text-[11.5px] leading-relaxed text-[#716777]">
             PIX e cartão são processados por provedores de pagamento; você vê o método antes de
             confirmar.
           </p>
@@ -1636,8 +1636,8 @@ function Intro({
   const [letterModalOpen, setLetterModalOpen] = useState(false);
 
   return (
-    <div className="jungle-intro animate-rise-in min-h-screen bg-[#181024]">
-      <header className="overflow-hidden bg-[#181024]">
+    <div className="jungle-intro animate-rise-in min-h-screen bg-[#f5f1f8]">
+      <header className="overflow-hidden bg-gradient-to-b from-[#ede5f3] to-[#f8f4fa]">
         <div className="w-full p-3 sm:p-4">
           <img
             src={milenaCartaImage}
@@ -1649,18 +1649,18 @@ function Intro({
         </div>
 
         <div className="px-4 pb-6 pt-5">
-          <div className="mx-auto max-w-[680px] rounded-[26px] border border-[#d8be7c]/35 bg-[#241739] p-5 shadow-[0_24px_56px_-28px_rgba(0,0,0,0.9)] text-center sm:p-7">
+          <div className="mx-auto max-w-[680px] rounded-[26px] border border-[#d8cce2] bg-white/90 p-5 text-center shadow-[0_24px_56px_-28px_rgba(82,67,99,0.35)] sm:p-7">
             <Stars className="mb-3" />
-            <span className="mb-3 inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-[#e6efff]">
+            <span className="mb-3 inline-flex rounded-full border border-[#d9cee2] bg-[#f4eff7] px-3 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-[#6e5a7e]">
               Templo de Luz · Acolhimento privado
             </span>
-            <h1 className="font-display text-[25px] sm:text-[32px] leading-[1.12] font-medium text-white tracking-[-0.03em]">
+            <h1 className="font-display text-[25px] font-medium leading-[1.12] tracking-[-0.03em] text-[#342b3e] sm:text-[32px]">
               O que você ainda gostaria de dizer a quem ama?{" "}
-              <span className="text-[#f7dfa3] underline decoration-[#f5d285] decoration-2 underline-offset-4">
+              <span className="text-[#745b86] underline decoration-[#cbb39b] decoration-2 underline-offset-4">
                 Comece por uma resposta simples
               </span>
             </h1>
-            <p className="mt-3 text-[14px] leading-relaxed text-[#ecdff8] font-normal">
+            <p className="mt-3 text-[14px] font-normal leading-relaxed text-[#665c70]">
               Você não precisa saber o que escrever agora. Responda com calma e organize sua intenção antes de decidir como seguir.
             </p>
           </div>
@@ -1668,26 +1668,26 @@ function Intro({
       </header>
 
       {/* Faixa de Prova Social */}
-      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 border-y border-white/10 bg-[#1e1330] px-4 py-3 text-[11.5px] text-[#f4ebfb] sm:text-[12.5px]">
+      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 border-y border-[#ddd3e5] bg-[#eee8f3] px-4 py-3 text-[11.5px] text-[#554a5e] sm:text-[12.5px]">
         <span className="font-bold">💌 Atendimento acolhedor</span>
-        <span className="h-3 w-px bg-white/20" />
+        <span className="h-3 w-px bg-[#cfc3d8]" />
         <span className="font-bold">✍️ Carta e pergaminho</span>
-        <span className="h-3 w-px bg-white/20" />
-        <span className="text-[#f5d285] font-extrabold">🔒 Dados protegidos</span>
+        <span className="h-3 w-px bg-[#cfc3d8]" />
+        <span className="font-extrabold text-[#55796e]">🔒 Dados protegidos</span>
       </div>
 
       <div className="flex flex-col items-center px-4 pt-6 pb-10 sm:px-6">
         {/* Formulário + CTA imediatamente (micro-compromisso acima da dobra) */}
         <div className="w-full">
-          <div className="rounded-[26px] border border-[#5c476d] bg-[#171021] p-6 shadow-[0_26px_55px_-30px_rgba(0,0,0,0.9)]">
+          <div className="rounded-[26px] border border-[#ddd3e5] bg-[#fffefd] p-6 shadow-[0_26px_55px_-30px_rgba(82,67,99,0.35)]">
             <div className="text-center mb-5">
-              <span className="inline-flex rounded-full border border-[#6b547b] bg-[#2b2039] px-3 py-1 text-[10px] font-black uppercase tracking-[0.13em] text-[#e3c77f]">
+              <span className="inline-flex rounded-full border border-[#d9cee2] bg-[#f3edf7] px-3 py-1 text-[10px] font-black uppercase tracking-[0.13em] text-[#705b80]">
                 Poucos minutos · no seu ritmo
               </span>
-              <h2 className="mt-3 font-display text-[22px] font-bold leading-snug text-[#fffafd]">
+              <h2 className="mt-3 font-display text-[22px] font-bold leading-snug text-[#342b3e]">
                 Comece com uma resposta simples
               </h2>
-              <p className="mt-2 text-[13px] font-normal leading-relaxed text-[#b9a9c5]">
+              <p className="mt-2 text-[13px] font-normal leading-relaxed text-[#675d70]">
                 Primeiro, diga como podemos chamar você. Depois, mostramos cada etapa com clareza para você seguir no seu tempo.
               </p>
             </div>
@@ -1717,7 +1717,7 @@ function Intro({
               </Cta>
             </div>
 
-            <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-[11.5px] font-medium text-[#a998b7]">
+            <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-[11.5px] font-medium text-[#716777]">
               <span>🔒 Privacidade</span>
               <span>↩️ Você revisa antes de seguir</span>
               <span>💬 Atendimento humano</span>
@@ -1727,7 +1727,7 @@ function Intro({
 
         {/* Depoimento curto */}
         <Reveal delay={80} className="mt-6 w-full">
-          <p className="font-display mx-auto max-w-[310px] text-center text-[14px] italic text-[#e9e0f1] leading-relaxed font-medium">
+          <p className="font-display mx-auto max-w-[310px] text-center text-[14px] font-medium italic leading-relaxed text-[#675d70]">
             “Pude colocar em palavras o que estava guardado no coração e fui acolhida com muito
             respeito.”
           </p>
@@ -1739,9 +1739,9 @@ function Intro({
             type="button"
             onClick={() => setLetterModalOpen(true)}
             aria-label="Toque para ampliar exemplo de carta psicografada"
-            className="group relative mx-auto block w-full max-w-[300px] cursor-zoom-in overflow-hidden rounded-2xl border border-[#7a6039] bg-[#171021] text-left shadow-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl"
+            className="group relative mx-auto block w-full max-w-[300px] cursor-zoom-in overflow-hidden rounded-2xl border border-[#dfcfa9] bg-[#fffefd] text-left shadow-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl"
           >
-            <div className="relative bg-[#0d0814] p-2">
+            <div className="relative bg-white p-2">
               <img
                 src={IMAGES.carta}
                 alt="Exemplo real de carta psicografada manuscrita"
@@ -1750,7 +1750,7 @@ function Intro({
                 decoding="async"
               />
             </div>
-            <div className="flex items-center justify-center gap-2 border-t border-[#6c5335] bg-[#21172e] px-3 py-3 text-center text-[11.5px] font-black text-[#e3c77f]">
+            <div className="flex items-center justify-center gap-2 border-t border-[#eadbb8] bg-[#fff8e8] px-3 py-3 text-center text-[11.5px] font-black text-[#765a24]">
               <span>🔍</span> Ver exemplo real
             </div>
           </button>
@@ -1775,16 +1775,16 @@ function Intro({
             {STEPS_HOW.map((s, i) => (
               <div
                 key={s.title}
-                className="flex items-start gap-4 rounded-2xl border border-[#443553] bg-[#171021] p-4 shadow-[0_14px_28px_-22px_rgba(0,0,0,0.9)]"
+                className="flex items-start gap-4 rounded-2xl border border-[#ddd3e5] bg-white p-4 shadow-[0_14px_28px_-22px_rgba(82,67,99,0.3)]"
               >
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#5c476d] bg-[#100a18] text-xl shadow-sm">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#e0d6e7] bg-[#f6f1f9] text-xl shadow-sm">
                   {s.icon}
                 </span>
                 <div>
-                  <span className="block text-[14.5px] font-bold text-[#f2e9f7]">
+                  <span className="block text-[14.5px] font-bold text-[#44394c]">
                     {i + 1}. {s.title}
                   </span>
-                  <span className="mt-0.5 block text-[13px] font-normal leading-relaxed text-[#a998b7]">
+                  <span className="mt-0.5 block text-[13px] font-normal leading-relaxed text-[#716777]">
                     {s.text}
                   </span>
                 </div>
@@ -1812,38 +1812,38 @@ function getLoadingCurrentStageText(pct: number): string {
 
 function getStageCardClass(isCompleted: boolean, isActive: boolean): string {
   if (isCompleted) {
-    return "border-emerald-500/40 bg-gradient-to-r from-emerald-950/30 to-[#120a1c] shadow-[0_0_15px_rgba(16,185,129,0.08)]";
+    return "border-emerald-200 bg-gradient-to-r from-emerald-50 to-white shadow-sm";
   }
   if (isActive) {
-    return "border-amber-400/60 bg-gradient-to-r from-amber-500/[0.08] to-purple-500/[0.06] shadow-[0_0_20px_rgba(245,158,11,0.15)] ring-1 ring-amber-400/30";
+    return "border-amber-300 bg-gradient-to-r from-amber-50 to-[#f8f3fb] shadow-sm ring-1 ring-amber-200";
   }
-  return "border-white/8 bg-white/[0.02] opacity-60";
+  return "border-[#e3dbe9] bg-white/70 opacity-70";
 }
 
 function getStageIconClass(isCompleted: boolean, isActive: boolean): string {
   if (isCompleted) {
-    return "border-emerald-500/50 bg-emerald-500/20 text-emerald-300";
+    return "border-emerald-300 bg-emerald-50 text-emerald-700";
   }
   if (isActive) {
-    return "border-amber-400/50 bg-amber-500/20 text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.3)]";
+    return "border-amber-300 bg-amber-50 text-amber-700";
   }
-  return "border-white/10 bg-white/5 text-stone-500";
+  return "border-[#ddd3e5] bg-[#f5f1f8] text-stone-500";
 }
 
 function getStageTitleClass(isCompleted: boolean, isActive: boolean): string {
-  if (isCompleted) return "text-emerald-200";
-  if (isActive) return "text-white";
-  return "text-stone-400";
+  if (isCompleted) return "text-emerald-800";
+  if (isActive) return "text-[#3b3244]";
+  return "text-stone-500";
 }
 
 function getStageBadgeClass(isCompleted: boolean, isActive: boolean): string {
   if (isCompleted) {
-    return "border border-emerald-500/40 bg-emerald-500/15 text-emerald-300";
+    return "border border-emerald-200 bg-emerald-50 text-emerald-700";
   }
   if (isActive) {
-    return "border border-amber-400/40 bg-amber-500/15 text-amber-300 animate-pulse";
+    return "border border-amber-200 bg-amber-50 text-amber-700 animate-pulse";
   }
-  return "border border-white/5 bg-white/5 text-stone-500";
+  return "border border-[#e3dbe9] bg-[#f5f1f8] text-stone-500";
 }
 
 function getStageBadgeText(
@@ -1936,7 +1936,7 @@ function Loading({
   const currentStageText = getLoadingCurrentStageText(pct);
 
   return (
-    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-gradient-to-b from-[#140e22] via-[#0f0a1b] to-[#080510] px-4 py-8 text-center text-white sm:px-6">
+    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-gradient-to-b from-[#eee7f3] via-[#f8f4fa] to-[#fffaf1] px-4 py-8 text-center text-[#342b3e] sm:px-6">
       {/* Luz ambiente e aura sagrada de fundo */}
       <div
         className="pointer-events-none absolute -top-24 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-amber-500/10 blur-[120px]"
@@ -1947,10 +1947,10 @@ function Loading({
         aria-hidden="true"
       />
 
-      <div className="relative z-10 w-full max-w-[460px] rounded-[32px] border border-amber-500/25 bg-[#1a122c]/90 p-6 shadow-[0_24px_70px_-20px_rgba(0,0,0,0.85),0_0_40px_rgba(217,178,103,0.15)] backdrop-blur-2xl sm:p-8">
+      <div className="relative z-10 w-full max-w-[460px] rounded-[32px] border border-[#ded4e6] bg-white/90 p-6 shadow-[0_24px_70px_-20px_rgba(82,67,99,0.3)] backdrop-blur-2xl sm:p-8">
         {/* Badge Nobre Superior */}
         <div className="flex justify-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-gradient-to-r from-amber-500/10 via-purple-500/15 to-amber-500/10 px-4 py-1.5 text-[11.5px] font-bold uppercase tracking-[0.14em] text-amber-200 shadow-sm">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[#dccba5] bg-gradient-to-r from-[#fff6dd] via-[#f3edf7] to-[#fff6dd] px-4 py-1.5 text-[11.5px] font-bold uppercase tracking-[0.14em] text-[#705b80] shadow-sm">
             <Sparkles size={13} className="text-amber-400 animate-pulse" />
             <span>Templo de Luz • Oratório Sagrado</span>
           </span>
@@ -1973,7 +1973,7 @@ function Loading({
             </div>
 
             {/* Selo flutuante de acolhimento maternal */}
-            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 whitespace-nowrap rounded-full border border-amber-400/60 bg-[#1e1335]/95 px-4 py-1 text-xs font-extrabold text-amber-200 shadow-xl backdrop-blur-md">
+            <div className="absolute -bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-1.5 whitespace-nowrap rounded-full border border-[#d8c39a] bg-white/95 px-4 py-1 text-xs font-extrabold text-[#705b80] shadow-xl backdrop-blur-md">
               <Flame size={14} className="animate-pulse fill-amber-400 text-amber-300" />
               <span>Médium Milena Medeiros</span>
             </div>
@@ -1981,29 +1981,29 @@ function Loading({
         </div>
 
         {/* Títulos com Classe, Calor Humano e Serenidade */}
-        <h2 className="mt-6 font-display text-[22px] font-bold leading-tight text-white sm:text-[25px]">
-          Estamos preparando sua sessão, <span className="text-amber-300">{primeiroNome}</span>
+        <h2 className="mt-6 font-display text-[22px] font-bold leading-tight text-[#342b3e] sm:text-[25px]">
+          Estamos preparando sua sessão, <span className="text-[#705b80]">{primeiroNome}</span>
         </h2>
-        <p className="mt-2 text-[13.5px] italic leading-relaxed text-[#ded4eb]">
+        <p className="mt-2 text-[13.5px] italic leading-relaxed text-[#716777]">
           “Respire fundo e acalme seu coração. Já estou no oratório preparando a vela e o altar para
           acolher você e {primeiroEnte}.”
         </p>
 
         {/* Barra de Progresso Chamativa, Espiritual e Leve */}
-        <div className="mt-5 rounded-2xl border border-amber-400/25 bg-black/45 p-4 text-left shadow-lg backdrop-blur-sm">
+        <div className="mt-5 rounded-2xl border border-[#e3d4af] bg-[#fffaf0] p-4 text-left shadow-sm backdrop-blur-sm">
           <div className="flex items-center justify-between">
-            <span className="flex items-center gap-2 text-[12.5px] sm:text-[13px] font-bold text-amber-200">
+            <span className="flex items-center gap-2 text-[12.5px] font-bold text-[#765a24] sm:text-[13px]">
               <Sparkles className="h-3.5 w-3.5 text-amber-400 animate-spin" />
               {currentStageText}
             </span>
-            <span className="font-mono text-base sm:text-lg font-black text-amber-300 drop-shadow-[0_0_10px_rgba(251,191,36,0.6)]">
+            <span className="font-mono text-base font-black text-[#765a24] sm:text-lg">
               {pct}%
             </span>
           </div>
 
           <div
             aria-hidden="true"
-            className="relative mt-3 h-3.5 w-full overflow-hidden rounded-full border border-amber-400/35 bg-black/60 p-0.5 shadow-inner"
+            className="relative mt-3 h-3.5 w-full overflow-hidden rounded-full border border-[#e4d3ad] bg-[#eee5d2] p-0.5 shadow-inner"
           >
             <div
               className="relative h-full rounded-full bg-gradient-to-r from-amber-500 via-amber-300 to-amber-100 shadow-[0_0_18px_rgba(245,158,11,0.85)] transition-[width] duration-300 ease-out"
@@ -2035,7 +2035,7 @@ function Loading({
                   )}`}
                 >
                   {st.isCompleted && (
-                    <Check size={16} strokeWidth={2.5} className="text-emerald-300" />
+                    <Check size={16} strokeWidth={2.5} className="text-emerald-700" />
                   )}
                   {!st.isCompleted && st.isActive && (
                     <Loader2 size={16} className="animate-spin text-amber-400" />
@@ -2071,7 +2071,7 @@ function Loading({
                     </span>
                   </div>
 
-                  <p className="mt-0.5 text-[11px] leading-relaxed text-[#c7b7d7]">{st.detail}</p>
+                  <p className="mt-0.5 text-[11px] leading-relaxed text-[#716777]">{st.detail}</p>
                 </div>
               </div>
             );
@@ -2080,11 +2080,11 @@ function Loading({
 
         {/* Aviso de Conclusão ou Sigilo */}
         {pct >= 100 ? (
-          <div className="mt-4 rounded-xl border border-emerald-500/40 bg-emerald-950/40 p-2.5 text-center text-xs font-bold text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.2)] animate-pulse">
+          <div className="mt-4 animate-pulse rounded-xl border border-emerald-200 bg-emerald-50 p-2.5 text-center text-xs font-bold text-emerald-700 shadow-sm">
             ✨ Sessão consagrada com sucesso. Abrindo acolhimento...
           </div>
         ) : (
-          <p className="mt-4 flex items-center justify-center gap-1.5 text-[11px] font-medium text-[#b5a3c6]">
+          <p className="mt-4 flex items-center justify-center gap-1.5 text-[11px] font-medium text-[#766d7d]">
             <span>🔒</span>
             <span>Momento sagrado: Seus sentimentos e dados são guardados em sigilo fraterno.</span>
           </p>
@@ -2101,20 +2101,20 @@ function Faq() {
       {FAQ.map((item, i) => (
         <div
           key={item.q}
-          className="overflow-hidden rounded-2xl border border-[#40324f] bg-[#171021] shadow-sm"
+          className="overflow-hidden rounded-2xl border border-[#ddd3e5] bg-white shadow-sm"
         >
           <button
             type="button"
             onClick={() => setOpen(open === i ? null : i)}
-            className="flex w-full cursor-pointer items-center justify-between p-4 text-left text-[14px] font-bold text-[#f2e9f7]"
+            className="flex w-full cursor-pointer items-center justify-between p-4 text-left text-[14px] font-bold text-[#3b3244]"
           >
             <span>{item.q}</span>
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#59456a] bg-[#2b2039] text-base text-[#d9be82]">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#d8cce2] bg-[#f3edf7] text-base text-[#705b80]">
               {open === i ? "−" : "+"}
             </span>
           </button>
           {open === i ? (
-            <p className="animate-rise-in border-t border-[#352a43] px-4 pb-4 pt-3 text-[13px] leading-relaxed text-[#a998b7]">
+            <p className="animate-rise-in border-t border-[#ebe4ef] px-4 pb-4 pt-3 text-[13px] leading-relaxed text-[#716777]">
               {item.a}
             </p>
           ) : null}
@@ -2183,11 +2183,11 @@ function Result({
   };
 
   return (
-    <div className="animate-rise-in bg-[#0d0814] pb-12 text-[#f5edf9]">
+    <div className="animate-rise-in bg-[#f5f1f8] pb-12 text-[#342b3e]">
       {/* ── HEADER: CONFIRMAÇÃO ESPIRITUAL & ESCOLHA COM CALMA ── */}
-      <header className="relative bg-[#211a35] text-white overflow-hidden border-b border-[#ded8e7]">
+      <header className="relative overflow-hidden border-b border-[#ddd3e5] bg-gradient-to-b from-[#ebe3f1] to-[#f7f3fa] text-[#342b3e]">
         {/* Foto da médium escrevendo no oratório sagrado */}
-        <div className="w-full bg-[#171225] p-3 sm:p-4">
+        <div className="w-full bg-[#eee8f3] p-3 sm:p-4">
           <img
             src={milenaCartaImage}
             alt="Milena Medeiros escrevendo uma carta no oratório sagrado"
@@ -2199,80 +2199,80 @@ function Result({
 
         {/* Card Nobre com Resposta Imediata em Segundos */}
         <div className="relative z-10 px-4 pb-7 pt-4">
-          <div className="relative mx-auto max-w-[460px] overflow-hidden rounded-[26px] border border-white/15 bg-[#211a35] p-5 sm:p-6 shadow-2xl text-center">
-            <div className="pointer-events-none absolute -left-14 -top-12 h-32 w-44 rounded-full bg-white/20 blur-3xl" />
-            <div className="pointer-events-none absolute -right-16 bottom-0 h-28 w-52 rounded-full bg-white/15 blur-3xl" />
+          <div className="relative mx-auto max-w-[460px] overflow-hidden rounded-[26px] border border-[#d8cce2] bg-white/90 p-5 text-center shadow-[0_24px_60px_-30px_rgba(82,67,99,0.4)] sm:p-6">
+            <div className="pointer-events-none absolute -left-14 -top-12 h-32 w-44 rounded-full bg-[#ded0e8]/45 blur-3xl" />
+            <div className="pointer-events-none absolute -right-16 bottom-0 h-28 w-52 rounded-full bg-[#f2dfb9]/35 blur-3xl" />
             <div className="pointer-events-none absolute left-1/2 top-1/2 h-20 w-60 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#d9c9eb]/10 blur-2xl" />
 
             <div className="relative z-10 animate-float-soft text-[36px] mb-2">🕊️</div>
 
-            <h1 className="relative z-10 font-display text-[23px] sm:text-[26px] leading-snug font-extrabold text-white">
-              {primeiro}, seu pedido para <span className="text-amber-300">{nomeEnteCompleto}</span>{" "}
+            <h1 className="relative z-10 font-display text-[23px] font-extrabold leading-snug text-[#342b3e] sm:text-[26px]">
+              {primeiro}, seu pedido para <span className="text-[#705b80]">{nomeEnteCompleto}</span>{" "}
               foi recebido 🕊️
             </h1>
 
-            <h2 className="relative z-10 mt-2 text-[15px] sm:text-[16px] font-bold text-[#e0d3ee] leading-snug">
+            <h2 className="relative z-10 mt-2 text-[15px] font-bold leading-snug text-[#655a70] sm:text-[16px]">
               Agora você pode revisar sua intenção e escolher, com calma, como deseja continuar.
             </h2>
 
-            <div className="relative z-10 mt-3.5 rounded-2xl bg-white/[0.08] border border-white/10 p-3.5 text-left">
-              <p className="text-[12.5px] leading-relaxed text-zinc-200">
-                <strong className="text-amber-200 font-bold">A psicografia não é cobrada.</strong>{" "}
+            <div className="relative z-10 mt-3.5 rounded-2xl border border-[#e2d9e8] bg-[#faf7fc] p-3.5 text-left">
+              <p className="text-[12.5px] leading-relaxed text-[#655a70]">
+                <strong className="font-bold text-[#705b80]">A psicografia não é cobrada.</strong>{" "}
                 A seguir, você conhecerá os materiais usados e poderá escolher livremente se deseja apoiá-los.
               </p>
             </div>
 
             {/* Intenção Registrada */}
-            <div className="relative z-10 mt-4 rounded-xl bg-black/40 border border-white/10 p-3 text-left">
-              <span className="block text-[10px] font-black uppercase tracking-wider text-amber-300/90">
+            <div className="relative z-10 mt-4 rounded-xl border border-[#d9cee2] bg-[#f3edf7] p-3 text-left">
+              <span className="block text-[10px] font-black uppercase tracking-wider text-[#705b80]">
                 Sua intenção registrada:
               </span>
-              <p className="mt-1 text-[13px] italic text-zinc-100 font-medium">
+              <p className="mt-1 text-[13px] font-medium italic text-[#4f4558]">
                 "{dorPrincipal || "Lembrança e paz no coração"}"
               </p>
             </div>
 
             {/* Gatilho de Recebimento com Horário Confirmado */}
-            <div className="relative z-10 mt-3.5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-amber-400/20 to-amber-500/15 border border-amber-300/40 p-3.5 sm:p-4 text-left shadow-lg backdrop-blur-xs">
-              <div className="flex items-center justify-between gap-2 border-b border-amber-300/20 pb-2 mb-2">
+            <div className="relative z-10 mt-3.5 rounded-2xl border border-[#e6d3a4] bg-gradient-to-r from-[#fff9e9] via-[#fff4d7] to-[#fff9e9] p-3.5 text-left shadow-sm backdrop-blur-xs sm:p-4">
+              <div className="mb-2 flex items-center justify-between gap-2 border-b border-[#ead8ae] pb-2">
                 <div className="flex items-center gap-1.5">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-400/30 text-amber-200 text-[11px]">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#f3dfaa] text-[11px] text-[#765a24]">
                     ⏱️
                   </span>
-                  <span className="text-[10.5px] font-black uppercase tracking-wider text-amber-200">
+                  <span className="text-[10.5px] font-black uppercase tracking-wider text-[#765a24]">
                     Previsão de Recebimento
                   </span>
                 </div>
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/25 border border-emerald-400/50 px-2 py-0.5 text-[9.5px] font-extrabold text-emerald-200">
+                <span className="inline-flex items-center gap-1 rounded-full border border-[#b7d5cb] bg-[#e8f4ef] px-2 py-0.5 text-[9.5px] font-extrabold text-[#4e7166]">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   <span>Horário Reservado</span>
                 </span>
               </div>
 
               <div className="flex flex-wrap items-baseline gap-2">
-                <span className="text-[12px] text-zinc-200 font-medium">Horário previsto de entrega:</span>
-                <span className="text-[17px] sm:text-[19px] font-black text-amber-300 tracking-tight">
+                <span className="text-[12px] font-medium text-[#655a70]">Horário previsto de entrega:</span>
+                <span className="text-[17px] font-black tracking-tight text-[#765a24] sm:text-[19px]">
                   Hoje às {horarioExibicao}
                 </span>
-                <span className="text-[10px] sm:text-[10.5px] font-bold text-amber-200/90 uppercase tracking-wide">
+                <span className="text-[10px] font-bold uppercase tracking-wide text-[#887145] sm:text-[10.5px]">
                   (Horário de Brasília)
                 </span>
               </div>
 
-              <p className="mt-1 text-[11px] leading-relaxed text-zinc-300/90">
+              <p className="mt-1 text-[11px] leading-relaxed text-[#716777]">
                 A sessão de oração e acolhimento para <strong>{nomeEnteCompleto}</strong> está agendada no oratório. Sua carta tem entrega estimada em 1h30 a 2h (até às {horarioExibicao}, horário oficial de Brasília e São Paulo).
               </p>
             </div>
 
             {/* Três Passos Claros */}
             <div className="relative z-10 mt-4 grid grid-cols-3 gap-2 text-center text-[10.5px]">
-              <div className="rounded-lg bg-emerald-500/20 border border-emerald-400/40 p-2 text-emerald-200 font-bold">
+              <div className="rounded-lg border border-[#c8ddd6] bg-[#edf6f2] p-2 font-bold text-[#4e7166]">
                 ✓ Pedido recebido
               </div>
-              <div className="rounded-lg bg-amber-400/20 border border-amber-400/60 p-2 text-amber-200 font-extrabold shadow-xs">
+              <div className="rounded-lg border border-[#e5d1a0] bg-[#fff5dc] p-2 font-extrabold text-[#765a24] shadow-xs">
                 2. Escolha como continuar
               </div>
-              <div className="rounded-lg bg-amber-500/20 border border-amber-400/40 p-2 text-amber-200 font-bold">
+              <div className="rounded-lg border border-[#ddd3e5] bg-[#f3edf7] p-2 font-bold text-[#705b80]">
                 3. Receba às {horarioExibicao}
               </div>
             </div>
@@ -2288,7 +2288,7 @@ function Result({
                   <span>ESCOLHER COMO CONTINUAR ↓</span>
                 </span>
               </button>
-              <p className="mt-2 text-[11px] text-zinc-300/80 italic">
+              <p className="mt-2 text-[11px] italic text-[#766d7d]">
                 Nenhuma cobrança é feita ao tocar no botão.
               </p>
             </div>
@@ -2296,13 +2296,13 @@ function Result({
         </div>
       </header>
 
-      <div className="border-b border-[#3f304d] bg-[#171021] px-4 py-2.5 text-center">
-        <span className="text-[10px] font-black uppercase tracking-[0.14em] text-[#d8b96f]">
+      <div className="border-b border-[#ddd3e5] bg-[#eee8f3] px-4 py-2.5 text-center">
+        <span className="text-[10px] font-black uppercase tracking-[0.14em] text-[#705b80]">
           Uma mensagem para você
         </span>
         <p
           key={hopeMessageIndex}
-          className="mt-1 animate-rise-in text-[12.5px] font-semibold text-[#c4b4ce]"
+          className="mt-1 animate-rise-in text-[12.5px] font-semibold text-[#574c60]"
         >
           {hopeMessages[hopeMessageIndex]}
         </p>
@@ -2311,59 +2311,59 @@ function Result({
       <div className="px-4 pt-7 sm:px-6">
         {/* ── SEÇÃO: O QUE ACONTECE A PARTIR DAQUI? ── */}
         <Reveal>
-          <div className="rounded-[26px] border border-[#443553] bg-[#171021] p-5 text-left shadow-sm sm:p-7">
-            <span className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-[#634e73] bg-[#2b2039] px-3 py-1 text-[10.5px] font-extrabold uppercase tracking-wider text-[#d9be82]">
+          <div className="rounded-[26px] border border-[#ddd3e5] bg-white p-5 text-left shadow-sm sm:p-7">
+            <span className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-[#d8cce2] bg-[#f3edf7] px-3 py-1 text-[10.5px] font-extrabold uppercase tracking-wider text-[#705b80]">
               <span>✦</span>
               <span>Passo a Passo Transparente</span>
             </span>
 
-            <h2 className="font-display text-[22px] font-extrabold leading-snug text-[#fffafd] sm:text-[24px]">
+            <h2 className="font-display text-[22px] font-extrabold leading-snug text-[#342b3e] sm:text-[24px]">
               O que acontece a partir daqui?
             </h2>
-            <p className="mt-1 text-[13px] leading-relaxed text-[#b6a5c2]">
+            <p className="mt-1 text-[13px] leading-relaxed text-[#716777]">
               Queremos que você saiba exatamente o que está escolhendo antes de continuar.
             </p>
 
             <div className="mt-5 space-y-3.5">
-              <div className="flex items-start gap-3 rounded-2xl border border-[#40324f] bg-[#100a18] p-3.5">
+              <div className="flex items-start gap-3 rounded-2xl border border-[#e7e0ec] bg-[#faf7fc] p-3.5">
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#5d4786] text-xs font-black text-white">
                   1
                 </span>
                 <div className="min-w-0">
-                  <h3 className="text-[14px] font-bold leading-tight text-[#f2e9f7]">
+                  <h3 className="text-[14px] font-bold leading-tight text-[#3b3244]">
                     Seu pedido já foi registrado
                   </h3>
-                  <p className="mt-1 text-[12px] leading-relaxed text-[#a998b7]">
-                    O nome de <strong className="text-[#e3c77f]">{nomeEnteCompleto}</strong> e a
+                  <p className="mt-1 text-[12px] leading-relaxed text-[#716777]">
+                    O nome de <strong className="text-[#705b80]">{nomeEnteCompleto}</strong> e a
                     intenção que você informou foram recebidos para o acolhimento espiritual.
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 rounded-2xl border border-[#40324f] bg-[#100a18] p-3.5">
+              <div className="flex items-start gap-3 rounded-2xl border border-[#e7e0ec] bg-[#faf7fc] p-3.5">
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#5d4786] text-xs font-black text-white">
                   2
                 </span>
                 <div className="min-w-0">
-                  <h3 className="text-[14px] font-bold leading-tight text-[#f2e9f7]">
+                  <h3 className="text-[14px] font-bold leading-tight text-[#3b3244]">
                     Você escolhe como deseja prosseguir
                   </h3>
-                  <p className="mt-1 text-[12px] leading-relaxed text-[#a998b7]">
+                  <p className="mt-1 text-[12px] leading-relaxed text-[#716777]">
                     Você verá os materiais utilizados pela casa e poderá escolher um valor de contribuição voluntária.
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 rounded-2xl border border-[#40324f] bg-[#100a18] p-3.5">
+              <div className="flex items-start gap-3 rounded-2xl border border-[#e7e0ec] bg-[#faf7fc] p-3.5">
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#5d4786] text-xs font-black text-white">
                   3
                 </span>
                 <div className="min-w-0">
-                  <h3 className="text-[14px] font-bold leading-tight text-[#f2e9f7]">
+                  <h3 className="text-[14px] font-bold leading-tight text-[#3b3244]">
                     Recebimento previsto para hoje às {horarioExibicao} (Horário de Brasília)
                   </h3>
-                  <p className="mt-1 text-[12px] leading-relaxed text-[#a998b7]">
-                    Sua sessão foi acolhida no oratório com previsão de entrega em aproximadamente 1h30 a 2h (<strong className="text-[#e3c77f]">hoje, até às {horarioExibicao}, horário oficial de Brasília e São Paulo</strong>). Você poderá ler a mensagem e acompanhar todas as orientações espirituais.
+                  <p className="mt-1 text-[12px] leading-relaxed text-[#716777]">
+                    Sua sessão foi acolhida no oratório com previsão de entrega em aproximadamente 1h30 a 2h (<strong className="text-[#705b80]">hoje, até às {horarioExibicao}, horário oficial de Brasília e São Paulo</strong>). Você poderá ler a mensagem e acompanhar todas as orientações espirituais.
                   </p>
                 </div>
               </div>
@@ -2378,7 +2378,7 @@ function Result({
         {/* ── SEÇÃO: CONHEÇA QUEM REALIZARÁ O ATENDIMENTO ── */}
         <Reveal className="mt-8">
           <SectionLabel>Antes de escolher</SectionLabel>
-          <h2 className="font-display text-[25px] font-extrabold leading-tight text-[#fffafd] sm:text-[28px]">
+          <h2 className="font-display text-[25px] font-extrabold leading-tight text-[#342b3e] sm:text-[28px]">
             Conheça quem realizará o atendimento
           </h2>
         </Reveal>
@@ -2402,11 +2402,11 @@ function Result({
           </div>
 
           <div className="mt-3 max-w-[380px] px-2 z-10 text-center">
-            <h3 className="font-display text-[22px] font-bold text-[#fffafd]">Milena Medeiros</h3>
-            <span className="mt-1 inline-flex items-center gap-1.5 rounded-full border border-[#604c70] bg-[#21172e] px-3 py-1 text-[11px] font-extrabold uppercase text-[#d9be82] shadow-xs backdrop-blur-xs">
+            <h3 className="font-display text-[22px] font-bold text-[#342b3e]">Milena Medeiros</h3>
+            <span className="mt-1 inline-flex items-center gap-1.5 rounded-full border border-[#d8cce2] bg-white/90 px-3 py-1 text-[11px] font-extrabold uppercase text-[#705b80] shadow-xs backdrop-blur-xs">
               Médium titular da Casa Nova desde 1993
             </span>
-            <p className="mt-2.5 text-[13px] font-medium leading-relaxed text-[#b6a5c2]">
+            <p className="mt-2.5 text-[13px] font-medium leading-relaxed text-[#716777]">
               Há 33 anos dedicada às atividades mediúnicas e de acolhimento fraterno da casa. Milena
               jamais cobra por psicografia — o trabalho é realizado por amor e caridade pura.
             </p>
@@ -2422,12 +2422,12 @@ function Result({
           ].map((s) => (
             <div
               key={s.l}
-              className="rounded-2xl border border-[#443553] bg-[#171021] p-3 text-center shadow-sm"
+              className="rounded-2xl border border-[#ddd3e5] bg-white p-3 text-center shadow-sm"
             >
-              <span className="font-display block text-[17px] font-extrabold text-[#d9be82] sm:text-[20px]">
+              <span className="font-display block text-[17px] font-extrabold text-[#705b80] sm:text-[20px]">
                 {s.n}
               </span>
-              <span className="mt-0.5 block text-[11px] font-medium leading-tight text-[#a998b7]">
+              <span className="mt-0.5 block text-[11px] font-medium leading-tight text-[#716777]">
                 {s.l}
               </span>
             </div>
@@ -2444,7 +2444,7 @@ function Result({
         {/* ── SEÇÃO: FAMÍLIAS QUE JÁ PASSARAM PELO ATENDIMENTO ── */}
         <Reveal className="mt-8">
           <SectionLabel>Acolhimento real</SectionLabel>
-          <h2 className="font-display text-[23px] font-extrabold text-[#fffafd] sm:text-[25px]">
+          <h2 className="font-display text-[23px] font-extrabold text-[#342b3e] sm:text-[25px]">
             Famílias que já passaram pelo atendimento
           </h2>
           <p className="mt-2 text-[14.5px] leading-relaxed text-[#c7b8d1]">
@@ -2465,32 +2465,32 @@ function Result({
         <Reveal delay={130} className="mt-8">
           <div
             id="materiais-section"
-            className="scroll-mt-24 rounded-[26px] border border-[#4a3859] bg-gradient-to-b from-[#1d1429] to-[#100a18] p-5 text-left text-white shadow-[0_24px_60px_-34px_rgba(0,0,0,0.9)] sm:p-7"
+            className="scroll-mt-24 rounded-[26px] border border-[#ddd3e5] bg-gradient-to-b from-[#fffefd] to-[#f7f2fa] p-5 text-left text-[#342b3e] shadow-[0_24px_60px_-34px_rgba(82,67,99,0.32)] sm:p-7"
           >
-            <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-[#685077] bg-[#2b2039] px-3 py-1 text-[10.5px] font-extrabold uppercase tracking-wider text-[#d9be82]">
+            <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-[#d8cce2] bg-[#f3edf7] px-3 py-1 text-[10.5px] font-extrabold uppercase tracking-wider text-[#705b80]">
               <span>🕊️</span>
               <span>Transparência da Casa</span>
             </div>
 
-            <h2 className="font-display text-[21px] font-extrabold leading-snug text-[#fffafd] sm:text-[23px]">
+            <h2 className="font-display text-[21px] font-extrabold leading-snug text-[#342b3e] sm:text-[23px]">
               Veja onde sua contribuição faz diferença
             </h2>
-            <h3 className="font-display mt-0.5 text-[16px] font-bold text-[#d9be82] sm:text-[18px]">
+            <h3 className="font-display mt-0.5 text-[16px] font-bold text-[#705b80] sm:text-[18px]">
               A psicografia não é cobrada; o apoio é destinado aos materiais e atividades informadas.
             </h3>
 
-            <div className="mt-3 text-[13.5px] leading-relaxed text-[#c6b6d1]">
+            <div className="mt-3 text-[13.5px] leading-relaxed text-[#655b6e]">
               <p>
                 A contribuição apresentada nesta página é destinada aos materiais e às atividades da
                 casa informados abaixo. Ela{" "}
-                <strong className="font-extrabold text-[#f3dfac]">
+                <strong className="font-extrabold text-[#705b80]">
                   não é o preço da psicografia
                 </strong>.
               </p>
             </div>
 
             {/* Foto no Oratório com Vela e Pergaminho */}
-            <div className="my-5 overflow-hidden rounded-2xl border border-amber-300/35 bg-[#0d0814] shadow-xl">
+            <div className="my-5 overflow-hidden rounded-2xl border border-[#dfd1b2] bg-white shadow-xl">
               <img
                 src={IMAGES.milenaOratorio}
                 alt="Médium Milena Medeiros em recolhimento e oração no Templo de Luz"
@@ -2498,64 +2498,64 @@ function Result({
                 loading="lazy"
                 decoding="async"
               />
-              <div className="border-t border-amber-300/25 bg-[#171021] p-3 text-center">
-                <span className="text-[11px] font-bold italic text-[#d8c5e3]">
+              <div className="border-t border-[#eadfca] bg-[#fffaf0] p-3 text-center">
+                <span className="text-[11px] font-bold italic text-[#756a7e]">
                   O espaço onde os materiais do pedido são preparados
                 </span>
               </div>
             </div>
 
             {/* Os 3 Pilares de Materiais */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="overflow-hidden rounded-2xl border border-amber-300/30 bg-[#171021] shadow-sm">
+            <div className="space-y-3">
+              <div className="grid grid-cols-[112px_1fr] items-center overflow-hidden rounded-2xl border border-[#e5d7b7] bg-white shadow-sm sm:grid-cols-[136px_1fr]">
                 <img
                   src={insumoVelaImage}
                   alt="Vela de sete dias no altar"
-                  className="h-40 w-full object-cover sm:h-44"
+                  className="aspect-square h-auto w-full object-contain bg-[#fffaf0]"
                   loading="lazy"
                   decoding="async"
                 />
                 <div className="p-4">
-                  <h4 className="text-[14px] font-extrabold text-[#f3dfac]">🕯️ Vela de 7 dias</h4>
-                  <p className="mt-1 text-[12px] leading-relaxed text-[#b6a5c2]">
+                  <h4 className="text-[14px] font-extrabold text-[#5f4d38]">🕯️ Vela de 7 dias</h4>
+                  <p className="mt-1 text-[12px] leading-relaxed text-[#716777]">
                     Preparada com o nome informado para o período de oração e recolhimento da casa
                     diante do altar.
                   </p>
                 </div>
               </div>
 
-              <div className="overflow-hidden rounded-2xl border border-[#654c78] bg-[#171021] shadow-sm">
+              <div className="grid grid-cols-[112px_1fr] items-center overflow-hidden rounded-2xl border border-[#ddd3e5] bg-white shadow-sm sm:grid-cols-[136px_1fr]">
                 <img
                   src={insumoCartaImage}
                   alt="Papel e materiais da carta"
-                  className="h-40 w-full object-cover sm:h-44"
+                  className="aspect-square h-auto w-full object-contain bg-[#f8f4fa]"
                   loading="lazy"
                   decoding="async"
                 />
                 <div className="p-4">
-                  <h4 className="text-[14px] font-extrabold text-[#e6d8ef]">
+                  <h4 className="text-[14px] font-extrabold text-[#5f4d6b]">
                     📜 Papel e materiais da carta
                   </h4>
-                  <p className="mt-1 text-[12px] leading-relaxed text-[#b6a5c2]">
+                  <p className="mt-1 text-[12px] leading-relaxed text-[#716777]">
                     Materiais físicos utilizados na preparação e no registro manuscrito do
                     atendimento.
                   </p>
                 </div>
               </div>
 
-              <div className="overflow-hidden rounded-2xl border border-emerald-400/25 bg-[#142019] shadow-sm sm:col-span-2">
+              <div className="grid grid-cols-[112px_1fr] items-center overflow-hidden rounded-2xl border border-[#cfdfd8] bg-white shadow-sm sm:grid-cols-[136px_1fr]">
                 <img
                   src={insumoSopaImage}
                   alt="Manutenção e ações fraternas"
-                  className="h-44 w-full object-cover sm:h-52"
+                  className="aspect-square h-auto w-full object-contain bg-[#f0f7f4]"
                   loading="lazy"
                   decoding="async"
                 />
                 <div className="p-4">
-                  <h4 className="text-[14px] font-extrabold text-emerald-200">
+                  <h4 className="text-[14px] font-extrabold text-[#4e7166]">
                     🤍 Manutenção e ações fraternas
                   </h4>
-                  <p className="mt-1 text-[12px] leading-relaxed text-[#b6c8bd]">
+                  <p className="mt-1 text-[12px] leading-relaxed text-[#63746e]">
                     Parte da contribuição ajuda a sustentar as atividades e ações assistenciais
                     informadas pela instituição.
                   </p>
@@ -2563,7 +2563,7 @@ function Result({
               </div>
             </div>
 
-            <div className="mt-4 rounded-xl border border-amber-300/25 bg-amber-400/10 p-3 text-[12px] font-medium leading-relaxed text-[#dbcda9]">
+            <div className="mt-4 rounded-xl border border-[#e5d7b7] bg-[#fff8e8] p-3 text-[12px] font-medium leading-relaxed text-[#715d3b]">
               <strong>Importante:</strong> contribuir é uma escolha. Você encontrará abaixo uma
               opção para continuar sem realizar a contribuição neste momento.
             </div>
@@ -2574,13 +2574,13 @@ function Result({
         <div id="escolha-caminho" className="scroll-mt-12">
           <Reveal className="relative mt-8">
             <div className="text-center mb-3">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#634e73] bg-[#2b2039] px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-[#d9be82]">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#d8cce2] bg-[#f3edf7] px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-[#705b80]">
                 <span>✦</span> Decisão Tranquila
               </span>
-              <h2 className="font-display mt-2 text-[23px] font-extrabold leading-snug text-[#fffafd] sm:text-[26px]">
+              <h2 className="font-display mt-2 text-[23px] font-extrabold leading-snug text-[#342b3e] sm:text-[26px]">
                 Transforme sua intenção em cuidado concreto
               </h2>
-              <p className="mx-auto mt-1 max-w-md text-[13px] text-[#b6a5c2]">
+              <p className="mx-auto mt-1 max-w-md text-[13px] text-[#716777]">
                 Veja o que cada valor ajuda a manter e escolha o gesto que faz sentido para você.
               </p>
             </div>
@@ -2607,7 +2607,7 @@ function Result({
         {/* ── SEÇÃO DE DÚVIDAS FREQUENTES (FAQ) ── */}
         <Reveal className="mt-10">
           <SectionLabel>Ainda está em dúvida?</SectionLabel>
-          <h2 className="font-display mb-3 text-[22px] font-extrabold text-[#fffafd] sm:text-[24px]">
+          <h2 className="font-display mb-3 text-[22px] font-extrabold text-[#342b3e] sm:text-[24px]">
             Não há necessidade de decidir sem entender o atendimento
           </h2>
           <Faq />
@@ -2615,15 +2615,15 @@ function Result({
 
         {/* ── SEÇÃO FINAL: CONFIRMAÇÃO & RETORNO À ESCOLHA ── */}
         <Reveal className="mt-10 mb-6">
-          <div className="rounded-[28px] border border-amber-300/35 bg-gradient-to-b from-[#21172e] via-[#171021] to-[#100a18] p-6 text-center shadow-md sm:p-8">
+          <div className="rounded-[28px] border border-[#e5d7b7] bg-gradient-to-b from-[#fffefd] via-[#fffaf2] to-[#f6f0f8] p-6 text-center shadow-md sm:p-8">
             <div className="text-[32px] mb-1">🕊️</div>
-            <h2 className="font-display text-[22px] font-extrabold leading-snug text-[#fffafd] sm:text-[25px]">
+            <h2 className="font-display text-[22px] font-extrabold leading-snug text-[#342b3e] sm:text-[25px]">
               Seu pedido para {nomeEnteCompleto} já foi recebido 🕊️
             </h2>
-            <div className="mt-2.5 inline-flex items-center gap-2 rounded-full border border-amber-300/35 bg-amber-400/10 px-3.5 py-1 text-xs font-black text-amber-200 shadow-2xs">
+            <div className="mt-2.5 inline-flex items-center gap-2 rounded-full border border-[#e2cf9f] bg-[#fff3d3] px-3.5 py-1 text-xs font-black text-[#765a24] shadow-2xs">
               <span>⏱️ Horário estimado de entrega: <strong>Hoje às {horarioExibicao} (Horário de Brasília)</strong></span>
             </div>
-            <p className="mx-auto mt-2 max-w-md text-[13.5px] leading-relaxed text-[#b6a5c2]">
+            <p className="mx-auto mt-2 max-w-md text-[13.5px] leading-relaxed text-[#716777]">
               Você não precisa decidir com pressa. Revise as opções acima e escolha o caminho que
               fizer sentido para você.
             </p>
@@ -2638,7 +2638,7 @@ function Result({
               </button>
             </div>
 
-            <p className="mt-3 text-[11.5px] font-medium text-[#9f8ead]">
+            <p className="mt-3 text-[11.5px] font-medium text-[#817687]">
               Psicografia sem cobrança • Contribuição voluntária • Opção de continuar sem contribuir
             </p>
           </div>
@@ -2858,7 +2858,7 @@ export function QuizFunnel() {
   const primeiroNome = nome?.trim() ? nome.trim().split(" ")[0] : "você";
 
   return (
-    <div className="jungle-quiz quiz-modern relative isolate mx-auto flex min-h-screen w-full max-w-[520px] flex-col overflow-hidden bg-[#181024] text-[#272039] shadow-[0_0_70px_-30px_rgba(33,26,53,0.4)] border-x border-white/15">
+    <div className="jungle-quiz quiz-modern relative isolate mx-auto flex min-h-screen w-full max-w-[520px] flex-col overflow-hidden border-x border-[#e1d8e7] bg-[#f5f1f8] text-[#342b3e] shadow-[0_0_70px_-30px_rgba(82,67,99,0.3)]">
       <main className="relative z-10 flex flex-1 flex-col">
         {/* ETAPA 1: NOME */}
         {step === "intro" && (
@@ -3084,19 +3084,19 @@ export function QuizFunnel() {
 
             <div className="px-6 pb-16">
               {/* 2 Abas Modernas Luminous & Intuitive */}
-              <div className="mb-5 grid grid-cols-2 gap-1.5 rounded-2xl border border-[#40324f] bg-[#100a18] p-1.5">
+              <div className="mb-5 grid grid-cols-2 gap-1.5 rounded-2xl border border-[#ddd3e5] bg-[#eee8f3] p-1.5">
                 <button
                   type="button"
                   onClick={() => setModoMensagem("temas")}
                   className={`flex-1 py-3 px-2.5 rounded-xl text-[13.5px] transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
                     modoMensagem === "temas"
-                      ? "border border-[#665176] bg-[#2b2039] font-bold text-[#ead2a0] shadow-sm"
-                      : "font-medium text-[#93839f] hover:text-[#e7dced]"
+                      ? "border border-[#d6c9df] bg-white font-bold text-[#6d587c] shadow-sm"
+                      : "font-medium text-[#766d7d] hover:text-[#4d4257]"
                   }`}
                 >
                   <span>🕊️</span>
                   <span>Escolher Temas</span>
-                  <span className="rounded-full border border-[#675276] bg-[#160e21] px-1.5 py-0.5 text-[10px] font-bold text-[#cdbedf]">
+                  <span className="rounded-full border border-[#d8cce2] bg-[#f3edf7] px-1.5 py-0.5 text-[10px] font-bold text-[#705b80]">
                     Mais fácil
                   </span>
                 </button>
@@ -3106,8 +3106,8 @@ export function QuizFunnel() {
                   onClick={() => setModoMensagem("livre")}
                   className={`flex-1 py-3 px-2.5 rounded-xl text-[13.5px] transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
                     modoMensagem === "livre"
-                      ? "border border-[#665176] bg-[#2b2039] font-bold text-[#ead2a0] shadow-sm"
-                      : "font-medium text-[#93839f] hover:text-[#e7dced]"
+                      ? "border border-[#d6c9df] bg-white font-bold text-[#6d587c] shadow-sm"
+                      : "font-medium text-[#766d7d] hover:text-[#4d4257]"
                   }`}
                 >
                   <span>✍️</span>
@@ -3118,7 +3118,7 @@ export function QuizFunnel() {
               {/* MODO 1: ESCOLHER TEMAS SAGRADOS */}
               {modoMensagem === "temas" && (
                 <div className="space-y-2.5">
-                  <p className="mb-2 text-[13px] font-normal text-[#b6a5c2]">
+                  <p className="mb-2 text-[13px] font-normal text-[#6b6173]">
                     Toque nos pontos que você mais anseia ouvir de {primeiroEnte}:
                   </p>
                   {[
@@ -3178,26 +3178,26 @@ export function QuizFunnel() {
                         }}
                         className={`group relative flex w-full cursor-pointer items-center gap-3.5 rounded-2xl border px-4 py-3.5 text-left transition-all duration-200 ${
                           isSelected
-                            ? "border-[#c5a565] bg-[#2b2039] shadow-sm ring-4 ring-[#c5a565]/10"
-                            : "border-[#40324f] bg-[#1a1225] hover:border-[#76608a] hover:bg-[#21172e] hover:shadow-sm"
+                            ? "border-[#8a729d] bg-[#f1eaf6] shadow-sm ring-4 ring-[#8a729d]/10"
+                            : "border-[#ddd3e5] bg-white hover:border-[#b9a8c6] hover:bg-[#faf7fc] hover:shadow-sm"
                         }`}
                       >
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#493859] bg-[#100a18] text-xl transition-colors group-hover:bg-[#2b2039]">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#e1d9e7] bg-[#f8f4fa] text-xl transition-colors group-hover:bg-[#f1eaf6]">
                           {tema.emoji}
                         </div>
                         <div className="flex-1">
-                          <span className="block text-[14.5px] font-bold leading-snug text-[#f7f0fb]">
+                          <span className="block text-[14.5px] font-bold leading-snug text-[#3b3244]">
                             {tema.titulo}
                           </span>
-                          <span className="mt-0.5 block text-[12px] font-normal leading-normal text-[#a998b7]">
+                          <span className="mt-0.5 block text-[12px] font-normal leading-normal text-[#716777]">
                             {tema.desc}
                           </span>
                         </div>
                         <div
                           className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 text-[11px] font-extrabold ${
                             isSelected
-                              ? "border-[#d4b46d] bg-[#d4b46d] text-[#1a1025]"
-                              : "border-[#5b496b] text-transparent"
+                              ? "border-[#789c90] bg-[#789c90] text-white"
+                              : "border-[#c9bdcf] text-transparent"
                           }`}
                         >
                           ✓
@@ -3211,7 +3211,7 @@ export function QuizFunnel() {
               {/* MODO 2: ESCREVER LIVREMENTE */}
               {modoMensagem === "livre" && (
                 <div className="space-y-4">
-                  <p className="text-[13px] font-normal text-[#b6a5c2]">
+                  <p className="text-[13px] font-normal text-[#6b6173]">
                     Escreva como se estivesse conversando com {primeiroEnte}:
                   </p>
 
@@ -3240,7 +3240,7 @@ export function QuizFunnel() {
 
                   {/* Sugestões rápidas de toque único */}
                   <div>
-                    <span className="mb-2 block text-[11px] font-bold uppercase tracking-wider text-[#d9be82]">
+                    <span className="mb-2 block text-[11px] font-bold uppercase tracking-wider text-[#705b80]">
                       💡 Toque para adicionar inspirações à sua mensagem:
                     </span>
                     <div className="flex flex-wrap gap-1.5">
@@ -3258,7 +3258,7 @@ export function QuizFunnel() {
                             setMensagem(novo);
                             setDorPrincipal(novo);
                           }}
-                          className="rounded-full border border-[#51405f] bg-[#21172e] px-3 py-1 text-left text-[12px] font-medium text-[#cdbedf] transition-colors hover:border-[#8a6d9d] hover:bg-[#2b2039]"
+                          className="rounded-full border border-[#d8cce2] bg-[#f3edf7] px-3 py-1 text-left text-[12px] font-medium text-[#705b80] transition-colors hover:border-[#aa96b8] hover:bg-[#ebe3f1]"
                         >
                           + "{sug}"
                         </button>
@@ -3288,7 +3288,7 @@ export function QuizFunnel() {
                   setDorPrincipal("Canalização espontânea dos mentores de luz");
                   goto("confirma");
                 }}
-                className="mt-4 w-full cursor-pointer text-center text-[12.5px] font-medium text-[#a998b7] underline decoration-[#d9be82]/50 underline-offset-4 hover:text-[#eadff1]"
+                className="mt-4 w-full cursor-pointer text-center text-[12.5px] font-medium text-[#766d7d] underline decoration-[#b9a8c6] underline-offset-4 hover:text-[#5f4d6b]"
               >
                 Prefiro deixar a médium canalizar 100% livremente
               </button>

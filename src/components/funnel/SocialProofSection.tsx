@@ -58,11 +58,11 @@ export function SocialProofSection() {
 
   return (
     <Reveal className="mb-7">
-      <section className="overflow-hidden rounded-3xl border border-[#493859] bg-[#171021] shadow-[0_24px_70px_-36px_rgba(0,0,0,0.9)]">
-        <div className="bg-gradient-to-br from-[#2d144d] via-[#3b1c63] to-[#171020] px-5 py-7 text-center text-white sm:px-7 sm:py-8">
-          <span className="inline-flex items-center gap-2 rounded-full border border-amber-300/35 bg-white/10 px-3.5 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.14em] text-amber-200">Relatos recebidos pelo Templo</span>
+      <section className="overflow-hidden rounded-3xl border border-[#ddd2e7] bg-[#fffefd] shadow-[0_24px_70px_-36px_rgba(82,67,99,0.34)]">
+        <div className="bg-gradient-to-br from-[#e8def1] via-[#f6f1fa] to-[#fffaf1] px-5 py-7 text-center text-[#342b3e] sm:px-7 sm:py-8">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[#cdbfda] bg-white/80 px-3.5 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#69517d]">Relatos recebidos pelo Templo</span>
           <h2 className="mx-auto mt-4 max-w-[410px] font-display text-[26px] font-black leading-[1.15] sm:text-[30px]">Histórias compartilhadas por famílias acolhidas</h2>
-          <p className="mx-auto mt-3 max-w-[430px] text-[14px] leading-relaxed text-[#e8dff4] sm:text-[15px]">Veja um relato por vez. Deslize para o lado ou use os botões abaixo.</p>
+          <p className="mx-auto mt-3 max-w-[430px] text-[14px] leading-relaxed text-[#655a70] sm:text-[15px]">Veja um relato por vez. Deslize para o lado ou use os botões abaixo.</p>
         </div>
 
         <div className="p-3.5 sm:p-6">
@@ -77,10 +77,10 @@ export function SocialProofSection() {
             className="flex snap-x snap-mandatory gap-3 overflow-x-auto px-0.5 pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {testimonials.map((testimonial, index) => (
-              <article data-testimonial-card key={testimonial.src} className="min-w-[calc(100%-4px)] snap-center overflow-hidden rounded-2xl border border-[#59436b] bg-[#100a18] shadow-lg sm:min-w-[calc(100%-4px)]">
-                <div className="flex min-h-12 items-center justify-between border-b border-[#493859] bg-[#21172e] px-4 py-3">
-                  <span className="text-[12px] font-extrabold uppercase tracking-[0.1em] text-[#f0cf7b]">{testimonial.title}</span>
-                  <span className="rounded-full border border-[#59436b] bg-[#2b2039] px-2.5 py-1 text-[10px] font-bold text-[#ddd0e6]">{index + 1} de {testimonials.length}</span>
+              <article data-testimonial-card key={testimonial.src} className="min-w-[calc(100%-4px)] snap-center overflow-hidden rounded-2xl border border-[#ddd2e7] bg-white shadow-lg sm:min-w-[calc(100%-4px)]">
+                <div className="flex min-h-12 items-center justify-between border-b border-[#e8e0ee] bg-[#f7f3fa] px-4 py-3">
+                  <span className="text-[12px] font-extrabold uppercase tracking-[0.1em] text-[#69517d]">{testimonial.title}</span>
+                  <span className="rounded-full border border-[#d8cce2] bg-white px-2.5 py-1 text-[10px] font-bold text-[#766683]">{index + 1} de {testimonials.length}</span>
                 </div>
                 <div className="aspect-[4/5] bg-[#171020] p-2.5 sm:aspect-[3/4]">
                   {testimonial.kind === "video" ? (
@@ -97,20 +97,20 @@ export function SocialProofSection() {
           </div>
 
           <div className="mt-1 flex items-center justify-between gap-3 px-1">
-            <button type="button" onClick={() => scrollToIndex(activeIndex - 1)} className="rounded-xl border border-[#59436b] bg-[#21172e] px-3 py-2 text-[12px] font-bold text-[#e7dced] transition-colors hover:border-[#8c6da1] hover:bg-[#2b2039]" aria-label="Ver relato anterior">
+            <button type="button" onClick={() => scrollToIndex(activeIndex - 1)} className="rounded-xl border border-[#d5c9df] bg-white px-3 py-2 text-[12px] font-bold text-[#655470] transition-colors hover:border-[#aa96ba] hover:bg-[#f6f1f9]" aria-label="Ver relato anterior">
               ← Anterior
             </button>
             <div className="flex gap-1.5" aria-label="Navegação dos relatos">
               {testimonials.map((testimonial, index) => (
-                <button key={testimonial.src} type="button" onClick={() => scrollToIndex(index)} aria-label={`Ver relato ${index + 1}`} className={`h-2 rounded-full transition-all ${activeIndex === index ? "w-5 bg-[#d9be82]" : "w-2 bg-[#4a3859]"}`} />
+                <button key={testimonial.src} type="button" onClick={() => scrollToIndex(index)} aria-label={`Ver relato ${index + 1}`} className={`h-2 rounded-full transition-all ${activeIndex === index ? "w-5 bg-[#7d6690]" : "w-2 bg-[#d8cce2]"}`} />
               ))}
             </div>
-            <button type="button" onClick={() => scrollToIndex(activeIndex + 1)} className="rounded-xl border border-[#59436b] bg-[#21172e] px-3 py-2 text-[12px] font-bold text-[#e7dced] transition-colors hover:border-[#8c6da1] hover:bg-[#2b2039]" aria-label="Ver próximo relato">
+            <button type="button" onClick={() => scrollToIndex(activeIndex + 1)} className="rounded-xl border border-[#d5c9df] bg-white px-3 py-2 text-[12px] font-bold text-[#655470] transition-colors hover:border-[#aa96ba] hover:bg-[#f6f1f9]" aria-label="Ver próximo relato">
               Próximo →
             </button>
           </div>
 
-          <p className="mt-4 text-center text-[12px] leading-relaxed text-[#a998b7]">Relatos são experiências pessoais compartilhadas pelas famílias e não representam promessa de resultado.</p>
+          <p className="mt-4 text-center text-[12px] leading-relaxed text-[#756a7e]">Relatos são experiências pessoais compartilhadas pelas famílias e não representam promessa de resultado.</p>
         </div>
       </section>
     </Reveal>
