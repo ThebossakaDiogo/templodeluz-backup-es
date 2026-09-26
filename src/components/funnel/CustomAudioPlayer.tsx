@@ -129,11 +129,36 @@ export function CustomAudioPlayer({
     };
   }, [playerId, onPlay, onPause, onEnded]);
 
+  // Controla o autoplay em uma única instância e encerra o som ao desmontar.
+  // O atributo nativo `autoplay` pode iniciar antes dos listeners e sobreviver
+  // por alguns instantes à troca de rota, causando duas vozes simultâneas.
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (autoPlay) {
+      window.dispatchEvent(
+        new CustomEvent("templo:pause-other-audios", { detail: { id: playerId } }),
+      );
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          console.warn("[CustomAudioPlayer] Autoplay bloqueado:", err);
+        });
+      }
+    }
+
+    return () => {
+      audio.pause();
+      audio.currentTime = 0;
+    };
+  }, [autoPlay, playerId, src]);
+
   const togglePlay = () => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    if (isPlaying) {
+    if (!audio.paused) {
       audio.pause();
     } else {
       const playPromise = audio.play();
@@ -277,7 +302,6 @@ export function CustomAudioPlayer({
         ref={audioRef}
         src={src}
         preload="metadata"
-        autoPlay={autoPlay}
         aria-label={ariaLabel || title || "Áudio da Médium Milena"}
       >
         <track kind="captions" />
