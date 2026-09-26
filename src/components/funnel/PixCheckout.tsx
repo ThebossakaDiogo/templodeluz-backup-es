@@ -672,15 +672,15 @@ function PixFormView({
               type="button"
               disabled={loading || cleanPhone.length < 10}
               onClick={onSubmitPix}
-              className={`mt-3.5 w-full flex items-center justify-center gap-2 rounded-2xl py-3.5 px-4 text-white font-black text-xs sm:text-sm uppercase tracking-wider transition-all cursor-pointer shadow-md ${
+              className={`mt-3.5 w-full flex items-center justify-center gap-2 rounded-2xl py-4 px-4 text-white font-black text-sm sm:text-[15px] uppercase tracking-[0.08em] transition-all cursor-pointer shadow-lg ${
                 cleanPhone.length >= 10
-                  ? "bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 shadow-emerald-700/20 active:scale-[0.99]"
+                  ? "pix-generate-cta bg-gradient-to-r from-[#2f956f] via-[#27a978] to-[#218c68] border border-emerald-300/70 shadow-[0_16px_34px_-15px_rgba(33,140,104,0.75)] hover:brightness-105 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99]"
                   : "bg-slate-300 text-slate-500 cursor-not-allowed"
               }`}
             >
-              <PixIcon className="w-4 h-4 text-white" />
-              <span>{loading ? "Emitindo Chave PIX..." : `Gerar Código PIX (R$ ${formattedAmount})`}</span>
-              <span className="text-base">→</span>
+              <PixIcon className="relative z-10 h-5 w-5 text-white" />
+              <span className="relative z-10">{loading ? "Emitindo Chave PIX..." : `Gerar Código PIX (R$ ${formattedAmount})`}</span>
+              <span className="relative z-10 text-lg">→</span>
             </button>
           )}
 
@@ -2039,7 +2039,7 @@ export function PixCheckout({
             open
             aria-modal="true"
             aria-label={productId === "chamada_ao_vivo_milena" ? "Checkout da chamada ao vivo" : "Checkout da contribuição"}
-            className="fixed inset-0 z-[200] m-0 flex h-full max-h-none w-full max-w-none items-center justify-center border-none bg-black/75 p-3 backdrop-blur-sm sm:p-5"
+            className="fixed inset-0 z-[200] m-0 flex h-full max-h-none w-full max-w-none items-center justify-center border-none bg-[#e6ddeb]/88 p-3 backdrop-blur-sm sm:p-5"
           >
             <div className="fixed inset-0" onClick={() => setIsOpen(false)} aria-hidden="true" />
             <div className="relative z-10 max-h-[calc(100dvh-24px)] w-full overflow-y-auto overscroll-contain rounded-[26px] border border-[#e5daf0] bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] text-center shadow-2xl sm:max-w-[460px] sm:p-6">

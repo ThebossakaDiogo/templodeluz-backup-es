@@ -54,14 +54,14 @@ export function LetterZoomModal({ isOpen, onClose, onCtaClick }: LetterZoomModal
       role="dialog"
       aria-modal="true"
       aria-label="Visualizador da carta psicografada"
-      className="fixed inset-0 z-[300] grid h-[100dvh] w-screen grid-rows-[auto_minmax(0,1fr)_auto] gap-2 overflow-hidden bg-[#09090b]/98 p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] text-white backdrop-blur-md sm:gap-3 sm:p-3"
+      className="fixed inset-0 z-[300] grid h-[100dvh] w-screen grid-rows-[auto_minmax(0,1fr)_auto] gap-2 overflow-hidden bg-[#eee7f3]/98 p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] text-[#342b3e] backdrop-blur-md sm:gap-3 sm:p-3"
     >
-      <header className="mx-auto flex w-full max-w-[720px] items-center justify-between gap-3 rounded-2xl border border-white/15 bg-black/70 px-3 py-2.5 shadow-xl">
+      <header className="mx-auto flex w-full max-w-[720px] items-center justify-between gap-3 rounded-2xl border border-[#d8cce2] bg-white/90 px-3 py-2.5 shadow-xl">
         <div className="min-w-0 text-left">
-          <h3 className="truncate text-sm font-extrabold text-white sm:text-base">
+          <h3 className="truncate text-sm font-extrabold text-[#342b3e] sm:text-base">
             Carta Psicografada Manuscrita
           </h3>
-          <p className="hidden text-[11px] font-semibold text-amber-300 sm:block">
+          <p className="hidden text-[11px] font-semibold text-[#765a24] sm:block">
             Templo de Luz - Médium Milena Medeiros
           </p>
         </div>
@@ -70,14 +70,14 @@ export function LetterZoomModal({ isOpen, onClose, onCtaClick }: LetterZoomModal
           <button
             type="button"
             onClick={() => setIsZoomed((current) => !current)}
-            className="cursor-pointer rounded-xl border border-white/20 bg-white/15 px-3 py-2 text-xs font-extrabold text-white transition-colors hover:bg-white/25"
+            className="cursor-pointer rounded-xl border border-[#d8cce2] bg-[#f3edf7] px-3 py-2 text-xs font-extrabold text-[#655470] transition-colors hover:bg-[#ebe3f1]"
           >
             {isZoomed ? "Ajustar" : "Ampliar"}
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl bg-white/15 text-sm font-extrabold text-white transition-colors hover:bg-red-600"
+            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-[#e5d8e8] bg-[#fff8f8] text-sm font-extrabold text-[#8a5b62] transition-colors hover:bg-[#fdecec]"
             aria-label="Fechar visualizador"
           >
             X
@@ -119,8 +119,8 @@ export function LetterZoomModal({ isOpen, onClose, onCtaClick }: LetterZoomModal
         </div>
       </main>
 
-      <footer className="mx-auto w-full max-w-[720px] rounded-2xl border border-white/15 bg-black/75 px-2.5 py-2 text-center shadow-xl sm:px-4 sm:py-2.5">
-        <p className="hidden text-[11px] italic leading-tight text-amber-200 sm:block sm:text-xs">
+      <footer className="mx-auto w-full max-w-[720px] rounded-2xl border border-[#d8cce2] bg-white/90 px-2.5 py-2 text-center shadow-xl sm:px-4 sm:py-2.5">
+        <p className="hidden text-[11px] italic leading-tight text-[#765a24] sm:block sm:text-xs">
           O amor de mãe não morre, apenas se transforma. Sinto a sua presença a cada oração.
         </p>
         <div className="sm:mt-2">
@@ -139,7 +139,7 @@ export function LetterZoomModal({ isOpen, onClose, onCtaClick }: LetterZoomModal
             <button
               type="button"
               onClick={onClose}
-              className="w-full cursor-pointer rounded-xl bg-white/20 px-5 py-2.5 text-xs font-bold uppercase text-white transition-colors hover:bg-white/30 sm:w-auto"
+              className="w-full cursor-pointer rounded-xl border border-[#d8cce2] bg-[#f3edf7] px-5 py-2.5 text-xs font-bold uppercase text-[#655470] transition-colors hover:bg-[#ebe3f1] sm:w-auto"
             >
               Voltar ao quiz
             </button>

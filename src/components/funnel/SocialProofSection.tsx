@@ -82,9 +82,9 @@ export function SocialProofSection() {
                   <span className="text-[12px] font-extrabold uppercase tracking-[0.1em] text-[#69517d]">{testimonial.title}</span>
                   <span className="rounded-full border border-[#d8cce2] bg-white px-2.5 py-1 text-[10px] font-bold text-[#766683]">{index + 1} de {testimonials.length}</span>
                 </div>
-                <div className="aspect-[4/5] bg-[#171020] p-2.5 sm:aspect-[3/4]">
+                <div className="aspect-[4/5] bg-[#eee8f3] p-2.5 sm:aspect-[3/4]">
                   {testimonial.kind === "video" ? (
-                    <video controls playsInline preload="none" poster={testimonial.poster} controlsList="nodownload" aria-label={testimonial.alt} className="h-full w-full rounded-xl bg-black object-cover">
+                    <video controls playsInline preload="none" poster={testimonial.poster} controlsList="nodownload" aria-label={testimonial.alt} className="h-full w-full rounded-xl bg-white object-cover">
                       <source src={testimonial.src} type="video/mp4" />
                       Seu navegador não oferece suporte à reprodução deste vídeo.
                     </video>

@@ -87,7 +87,7 @@ export function ExitIntentBackRedirect({
       {visible && (
         <motion.div
           key="exit-intent"
-          className="fixed inset-0 z-[300] flex items-center justify-center bg-black/60 p-5 backdrop-blur-sm"
+          className="fixed inset-0 z-[300] flex items-center justify-center bg-[#e6ddeb]/85 p-5 backdrop-blur-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -105,7 +105,7 @@ export function ExitIntentBackRedirect({
             transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-center gap-2 bg-gradient-to-r from-[#2b2340] via-[#211a35] to-[#171225] px-4 py-2.5 text-[11px] font-bold tracking-widest text-[#e9ddf5] uppercase">
+            <div className="flex items-center justify-center gap-2 border-b border-[#ddd3e5] bg-gradient-to-r from-[#eee7f3] via-[#f8f4fa] to-[#fff8e8] px-4 py-2.5 text-[11px] font-bold uppercase tracking-widest text-[#655470]">
               <span className="h-2 w-2 rounded-full bg-[#6da296]" />
               Seu progresso continua salvo
             </div>

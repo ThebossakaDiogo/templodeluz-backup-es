@@ -90,7 +90,7 @@ export function WhatsAppContactModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-whatsapp-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-3.5 sm:p-4 bg-black/65 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#e6ddeb]/85 p-3.5 backdrop-blur-sm animate-fade-in sm:p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}

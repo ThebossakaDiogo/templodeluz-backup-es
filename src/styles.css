@@ -163,13 +163,18 @@ body [class*="text-[12px]"] { font-size: 0.9rem !important; }
 
 .jungle-intro {
   font-family: "Satoshi", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: radial-gradient(ellipse at 50% 0%, #26163b 0%, #150d22 100%);
+  background:
+    radial-gradient(circle at 50% 0%, rgb(232 222 241 / 0.72), transparent 34rem),
+    linear-gradient(180deg, #f8f4fa 0%, #fffdf8 100%);
 }
 
 .jungle-intro .font-display { font-family: "Satoshi", system-ui, sans-serif; }
 
 .jungle-quiz.quiz-modern {
-  background: radial-gradient(ellipse at 50% 0%, #221535 0%, #140c20 100%);
+  background:
+    radial-gradient(circle at 100% 0%, rgb(232 222 241 / 0.7), transparent 30rem),
+    radial-gradient(circle at 0% 45%, rgb(220 239 232 / 0.6), transparent 28rem),
+    #faf8f4;
 }
 .jungle-quiz main > .animate-rise-in:not(.jungle-intro) {
   background: #fdfbf8;
@@ -177,25 +182,6 @@ body [class*="text-[12px]"] { font-size: 0.9rem !important; }
 .jungle-quiz .animate-rise-in {
   animation: none;
 }
-
-/* Paleta sagrada e acolhedora: Violeta oratório nobre, dourado de vela e pergaminho puro */
-.jungle-quiz .bg-\[\#211a35\] { background-color: #211638 !important; }
-.jungle-quiz .bg-\[\#171225\] { background-color: #170e26 !important; }
-.jungle-quiz .bg-\[\#29213b\] { background-color: #2b1b42 !important; }
-.jungle-quiz .bg-\[\#2d144d\],
-.jungle-quiz .bg-\[\#5d4786\] { background-color: #5d3d82 !important; }
-.jungle-quiz .bg-\[\#f2eef8\],
-.jungle-quiz .bg-\[\#f6f0fc\],
-.jungle-quiz .bg-\[\#f5f1f8\] { background-color: #f7f2fc !important; }
-.jungle-quiz .text-\[\#5d4786\],
-.jungle-quiz .text-\[\#2d144d\] { color: #5d3d82 !important; }
-.jungle-quiz .text-\[\#d8c7e9\],
-.jungle-quiz .text-\[\#e9e0f1\],
-.jungle-quiz .text-\[\#d9cce7\] { color: #eedefc !important; }
-.jungle-quiz .border-\[\#d8c7e9\],
-.jungle-quiz .border-\[\#d8cae5\],
-.jungle-quiz .border-\[\#e1d8ec\],
-.jungle-quiz .border-\[\#ded8e7\] { border-color: #e4d7f0 !important; }
 
 .quiz-modern input,
 .quiz-modern textarea,
@@ -236,6 +222,32 @@ body [class*="text-[12px]"] { font-size: 0.9rem !important; }
 
 @media (prefers-reduced-motion: reduce) {
   .quiz-cta-pulse { animation: none; }
+}
+
+@keyframes pix-light-sweep {
+  0%, 16% { transform: translateX(-180%) skewX(-20deg); }
+  58%, 100% { transform: translateX(320%) skewX(-20deg); }
+}
+
+.pix-generate-cta {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.pix-generate-cta::after {
+  content: "";
+  position: absolute;
+  inset: -25% auto -25% 0;
+  width: 38%;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.68), transparent);
+  transform: translateX(-180%) skewX(-20deg);
+  animation: pix-light-sweep 2.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pix-generate-cta::after { animation: none; }
 }
 
 

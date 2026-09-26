@@ -300,7 +300,7 @@ export function MilenaCataractModal({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-[250] flex items-end justify-center bg-black/85 backdrop-blur-md sm:items-center sm:p-4 animate-fade-in"
+      className="fixed inset-0 z-[250] flex items-end justify-center bg-[#e6ddeb]/90 backdrop-blur-md sm:items-center sm:p-4 animate-fade-in"
     >
       <div className="fixed inset-0" onClick={onClose} aria-hidden="true" />
 
@@ -414,7 +414,7 @@ export function MilenaCataractModal({
                       onClick={() => handleSelectPreset(p.val)}
                       className={`relative flex flex-col items-center justify-center p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
                         isSelected
-                          ? "border-[#2d144d] bg-[#2d144d] text-white shadow-md scale-[1.02]"
+                          ? "border-[#8a729d] bg-[#f1eaf6] text-[#4f405a] shadow-md scale-[1.02]"
                           : p.highlight
                           ? "border-amber-400 bg-amber-50/50 text-stone-900 hover:bg-amber-100/60"
                           : "border-stone-200 bg-white text-stone-900 hover:border-purple-300 hover:bg-purple-50/40"
@@ -598,7 +598,7 @@ export function MilenaCataractModal({
                             className={`px-3.5 py-1.5 rounded-lg text-[10.5px] font-black shrink-0 transition-all cursor-pointer ${
                               copied
                                 ? "bg-emerald-600 text-white"
-                                : "bg-[#2d144d] text-white hover:bg-[#3d1868]"
+                                : "bg-[#f1eaf6] text-[#5f4d6b] hover:bg-[#e7dcef]"
                             }`}
                           >
                             {copied ? "Copiado!" : "Copiar"}
@@ -627,7 +627,7 @@ export function MilenaCataractModal({
                   <button
                     type="button"
                     onClick={() => setStripeOpen(true)}
-                    className="w-full py-3.5 px-4 rounded-2xl bg-[#2d144d] hover:bg-[#3d1868] text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-purple-950/20 active:scale-[0.99] transition-all cursor-pointer"
+                    className="w-full cursor-pointer rounded-2xl border border-[#bca8ca] bg-gradient-to-r from-[#8a729d] to-[#765f89] px-4 py-3.5 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-[#8a729d]/20 transition-all hover:brightness-105 active:scale-[0.99]"
                   >
                     Consagrar com Cartão (R$ {formattedAmount}) ›
                   </button>

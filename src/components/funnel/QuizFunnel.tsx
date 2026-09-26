@@ -190,7 +190,7 @@ function Field({
     <div className="w-full">
       {hideLabel ? null : (
         <label
-          className={`mb-2 block text-[12px] font-bold tracking-[0.1em] uppercase ${theme === "dark" ? "text-[#eee6f6]" : "text-slate-700"}`}
+          className={`mb-2 block text-[12px] font-bold tracking-[0.1em] uppercase ${theme === "dark" ? "text-[#655470]" : "text-slate-700"}`}
         >
           {label}
         </label>
@@ -689,7 +689,7 @@ function MilenaSupportPrompt({
 
   return (
     <div
-      className="fixed inset-0 z-[220] flex items-center justify-center bg-[#171225]/70 p-3 backdrop-blur-sm sm:p-5"
+      className="fixed inset-0 z-[220] flex items-center justify-center bg-[#e6ddeb]/88 p-3 backdrop-blur-sm sm:p-5"
       aria-modal="true"
       aria-labelledby="milena-support-title"
     >
@@ -704,7 +704,7 @@ function MilenaSupportPrompt({
           type="button"
           onClick={onClose}
           aria-label="Fechar janela"
-          className="absolute right-3 top-3 z-30 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-[#171225]/75 text-white backdrop-blur-md hover:bg-[#171225]"
+          className="absolute right-3 top-3 z-30 flex h-9 w-9 items-center justify-center rounded-full border border-[#d8cce2] bg-white/90 text-[#655470] backdrop-blur-md hover:bg-[#f3edf7]"
         >
           ✕
         </button>
@@ -1352,7 +1352,7 @@ function PixInstantBox({
         <button
           type="button"
           onClick={() => setWhatsAppModalOpen(true)}
-          className="group flex w-full cursor-pointer items-center justify-between gap-3 rounded-2xl border border-emerald-400/40 bg-gradient-to-r from-[#173b2d] via-[#164c36] to-[#123426] p-3 text-left shadow-[0_16px_34px_-22px_rgba(16,185,129,0.75)] transition-all hover:border-emerald-300/70 hover:brightness-110 sm:p-3.5"
+          className="group flex w-full cursor-pointer items-center justify-between gap-3 rounded-2xl border border-[#b9d9cd] bg-gradient-to-r from-[#eff8f4] via-[#e6f4ee] to-[#f7fbf9] p-3 text-left shadow-[0_16px_34px_-22px_rgba(58,126,101,0.3)] transition-all hover:border-[#8fc3af] hover:brightness-[1.02] sm:p-3.5"
         >
           <div className="flex items-center gap-3 min-w-0">
             <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#25D366] text-white shadow-xs">
@@ -1371,16 +1371,16 @@ function PixInstantBox({
                 <span className="rounded bg-emerald-200 px-1.5 py-0.5 text-[9.5px] font-extrabold uppercase tracking-wider text-emerald-950">
                   Suporte
                 </span>
-                <span className="text-[12px] font-bold leading-tight text-white">
+                <span className="text-[12px] font-bold leading-tight text-[#335f50]">
                   Dúvidas com seu pedido? Fale no WhatsApp
                 </span>
               </div>
-              <p className="mt-0.5 truncate text-[11px] leading-tight text-emerald-100/80">
+              <p className="mt-0.5 truncate text-[11px] leading-tight text-[#5f796f]">
                 Atendimento fraterno com a equipe da Médium Milena
               </p>
             </div>
           </div>
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-200 text-sm font-black text-emerald-950 shadow-sm transition-all group-hover:bg-white group-hover:text-emerald-800">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-sm font-black text-emerald-800 shadow-sm ring-1 ring-emerald-200 transition-all group-hover:bg-emerald-50">
             ›
           </span>
         </button>
@@ -1429,7 +1429,7 @@ function PixInstantBox({
             typeof document !== "undefined" &&
             createPortal(
               <div
-                className="free-letter-audio-backdrop fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-3 backdrop-blur-sm sm:p-5"
+                className="free-letter-audio-backdrop fixed inset-0 z-[9999] flex items-center justify-center bg-[#e6ddeb]/90 p-3 backdrop-blur-sm sm:p-5"
                 aria-modal="true"
                 aria-labelledby="free-letter-audio-title"
               >
@@ -1440,19 +1440,19 @@ function PixInstantBox({
                 />
                 <div className="free-letter-audio-card relative z-10 max-h-[calc(100dvh-24px)] w-full max-w-[420px] overflow-y-auto overscroll-contain rounded-[26px] border border-[#d8cae5] bg-[#fffefd] shadow-2xl text-center pb-2">
                   {/* Topo Elegante com Botão Fechar */}
-                  <div className="relative overflow-hidden bg-gradient-to-br from-[#182622] to-[#101916] px-5 pt-6 pb-5 text-center text-white">
+                  <div className="relative overflow-hidden border-b border-[#d5e5df] bg-gradient-to-br from-[#e9f5f0] via-[#f7fbf9] to-[#fff8e8] px-5 pb-5 pt-6 text-center text-[#342b3e]">
                     <button
                       type="button"
                       onClick={() => setFreeLetterAudioOpen(false)}
                       aria-label="Fechar"
-                      className="absolute top-3.5 right-3.5 z-20 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-white/20 text-white text-sm font-bold transition-all hover:bg-white/30 active:scale-95"
+                      className="absolute right-3.5 top-3.5 z-20 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-[#d8cce2] bg-white text-sm font-bold text-[#655470] transition-all hover:bg-[#f3edf7] active:scale-95"
                     >
                       ✕
                     </button>
                     <div className="pointer-events-none absolute -left-12 -top-12 h-28 w-28 rounded-full bg-[#a8d3c0]/20 blur-3xl" />
                     <div className="pointer-events-none absolute -right-10 bottom-0 h-24 w-24 rounded-full bg-[#c49a52]/20 blur-3xl" />
 
-                    <span className="relative inline-flex items-center gap-1 rounded-full border border-[#f5d285]/35 bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#f5d285]">
+                    <span className="relative inline-flex items-center gap-1 rounded-full border border-[#dec99a] bg-white/80 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#765a24]">
                       <span>🕊️</span> Mensagem da Milena
                     </span>
 
@@ -1462,7 +1462,7 @@ function PixInstantBox({
                     >
                       OUÇA ANTES DE SEGUIR PARA O PERGAMINHO
                     </h2>
-                    <p className="relative mt-1 text-[11.5px] leading-relaxed text-[#e0eee7]">
+                    <p className="relative mt-1 text-[11.5px] leading-relaxed text-[#63746e]">
                       Sua carta continua 100% gratuita. Ouça este breve recado especial da médium
                       antes de você redigir.
                     </p>
@@ -1682,19 +1682,19 @@ function Intro({
           <div className="rounded-[26px] border border-[#ddd3e5] bg-[#fffefd] p-6 shadow-[0_26px_55px_-30px_rgba(82,67,99,0.35)]">
             <div className="text-center mb-5">
               <span className="inline-flex rounded-full border border-[#d9cee2] bg-[#f3edf7] px-3 py-1 text-[10px] font-black uppercase tracking-[0.13em] text-[#705b80]">
-                Poucos minutos · no seu ritmo
+                Primeiro passo · leva poucos minutos
               </span>
               <h2 className="mt-3 font-display text-[22px] font-bold leading-snug text-[#342b3e]">
-                Comece com uma resposta simples
+                Vamos começar pelo seu nome
               </h2>
               <p className="mt-2 text-[13px] font-normal leading-relaxed text-[#675d70]">
-                Primeiro, diga como podemos chamar você. Depois, mostramos cada etapa com clareza para você seguir no seu tempo.
+                Seu nome deixa as próximas perguntas mais pessoais. Você responde no seu ritmo e pode revisar tudo antes de continuar.
               </p>
             </div>
 
             <div id="intro-name-field" className="relative">
               <Field
-                label="Qual é o seu nome?"
+                label="Como podemos chamar você?"
                 value={nome}
                 onChange={setNome}
                 placeholder="Ex.: Maria Aparecida Silva"
@@ -1708,19 +1708,19 @@ function Intro({
 
             <div className="mt-5">
               <div className="mb-2 flex justify-center">
-                <span className="rounded-full border border-emerald-400/25 bg-emerald-400/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-emerald-200">
-                  Etapa 1 de 6 · sem pagamento agora
+                <span className="rounded-full border border-[#c9ded6] bg-[#edf6f2] px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-[#4e7166]">
+                  Etapa 1 de 6 · seu progresso fica salvo
                 </span>
               </div>
               <Cta onClick={next} tone="green" pulse>
-                Começar minha intenção agora →
+                Continuar para a próxima pergunta →
               </Cta>
             </div>
 
             <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-[11.5px] font-medium text-[#716777]">
-              <span>🔒 Privacidade</span>
-              <span>↩️ Você revisa antes de seguir</span>
-              <span>💬 Atendimento humano</span>
+              <span>🔒 Dados protegidos</span>
+              <span>↩️ Respostas revisáveis</span>
+              <span>💬 Suporte humano</span>
             </div>
           </div>
         </div>
@@ -1768,7 +1768,7 @@ function Intro({
 
         {/* Como funciona */}
         <Reveal className="mt-10 w-full">
-          <p className="mb-3 text-[11px] font-black uppercase tracking-[0.16em] text-[#f5d285]">
+          <p className="mb-3 text-[11px] font-black uppercase tracking-[0.16em] text-[#705b80]">
             Como acontece o reencontro
           </p>
           <div className="flex flex-col gap-3.5">
