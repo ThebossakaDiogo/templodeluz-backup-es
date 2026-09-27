@@ -16,8 +16,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      VERCEL_ORG_ID: team_ESCf8BkZvs28GRR4N11BMG8I
-      VERCEL_PROJECT_ID: prj_UuXpcj4ebR55USUrLSQBLn06ePtj
+      VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID || 'team_ESCf8BkZvs28GRR4N11BMG8I' }}
+      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID || 'prj_UuXpcj4ebR55USUrLSQBLn06ePtj' }}
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
     steps:
       - name: Checkout
