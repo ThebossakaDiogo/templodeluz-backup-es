@@ -1,0 +1,4 @@
+project_id = "quiz-tarot-template"
+
+[functions.checkout-webhook]
+verify_jwt = false

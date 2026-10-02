@@ -1,81 +1,55 @@
-# Templo de Luz
+# Quiz Tarot - Template de implantacao
 
-Monorepositório operacional do Templo de Luz. O Git contém o frontend do quiz, dashboard OD Metrics, backend Supabase, migrations, Edge Functions, checkout auxiliar e assets necessários. Credenciais reais e arquivos locais permanecem fora do repositório.
+Template de quiz interativo com:
 
-## Módulos
+- checkout PIX via ConnectPay;
+- pedidos, leads, agendamentos e analytics no Supabase;
+- webhook validado diretamente na ConnectPay;
+- atendimento liberado somente depois do pagamento confirmado;
+- geracao de leituras pela OpenAI;
+- frontend Vite e APIs serverless para Vercel;
+- testes automatizados dos fluxos criticos.
 
-| Diretório | Responsabilidade | Stack |
-| --- | --- | --- |
-| `/` | Quiz, resultado, checkout PIX/cartão e páginas públicas | TanStack Start, React 19, Tailwind CSS 4 |
-| `dashboard/` | OD Metrics, funil, pedidos e WhatsApp Chat | React, Vite, Supabase |
-| `api-pix/` | Banco, migrations e Edge Functions | Supabase CLI, Deno, TypeScript |
-| `checkout-card/` | Referência auxiliar do checkout por cartão | HTML e Google Apps Script |
+## Configuracao completa
 
-## Requisitos
+Leia [`IMPLEMENTACAO.md`](IMPLEMENTACAO.md). O guia cobre:
 
-- Bun 1.3 ou Node.js 22+
-- Supabase CLI 2.39+
-- Docker apenas para executar o Supabase localmente
-- Uma conta Vercel para publicar o frontend e o dashboard
+1. criacao do projeto Supabase;
+2. aplicacao das migracoes;
+3. secrets e deploy da Edge Function;
+4. webhook da ConnectPay;
+5. variaveis da Vercel;
+6. OpenAI, dominio, SEO e tracking;
+7. testes antes e depois do deploy.
 
-## Frontend principal
-
-```bash
-bun install --frozen-lockfile
-bun run dev
-bun run build
-```
-
-Alternativa com npm:
+## Inicio rapido
 
 ```bash
-npm install
-npm run dev
-npm run build
-```
-
-## Dashboard
-
-```bash
-cd dashboard
-bun install --frozen-lockfile
-cp .env.example .env.local
-bun run build
-```
-
-## Backend Supabase
-
-```bash
-cd api-pix
 npm ci
-cp .env.example .env.local
 npm test
-npm run typecheck
+npm run dev
 ```
 
-Para criar um ambiente novo, siga `docs/LATAM-SETUP.md`. Não reutilize credenciais, webhooks ou contas de pagamento da produção em outro país ou operação.
+Para gerar a versao de producao:
 
-## Arquivos de ambiente
+```bash
+npm run build
+npm run preview
+```
 
-- `.env.example`: variáveis públicas opcionais do frontend.
-- `dashboard/.env.example`: conexões públicas do OD Metrics.
-- `api-pix/.env.example`: secrets usados pelas Edge Functions.
-- `.env`, `.env.local` e `.env.vercel`: sempre ignorados pelo Git.
+## Variaveis
 
-## Segurança
+Copie `.env.example` para `.env` e preencha somente no seu ambiente. Todos os campos do arquivo de exemplo estao vazios de proposito.
 
-- Chaves privadas nunca usam prefixo `VITE_`.
-- O navegador recebe somente chaves públicas/publishable.
-- Valores e produtos de pagamento são validados no backend.
-- O banco deve ser criado aplicando `api-pix/supabase/migrations/` na ordem registrada.
-- Cada nova operação deve ter seus próprios Supabase, Vercel, ConnectPay/Stripe, Meta, UTMIFY, Evolution e Gemini.
+O `.gitignore` impede o envio de `.env`, senhas, bancos locais, logs, builds e metadados da Vercel/Supabase.
 
-## Deploy
+## Estrutura principal
 
-O workflow `.github/workflows/deploy-production.yml` publica o frontend principal. Em outro repositório, configure:
+- `api/`: APIs serverless da Vercel.
+- `supabase/functions/`: webhook externo da ConnectPay.
+- `supabase/migrations/`: tabelas, indices e politicas RLS.
+- `js/`: fluxos do quiz, checkout e atendimento.
+- `tests/`: regressao de pagamento, seguranca e frontend.
+- `scripts/copy-dist.js`: prepara as paginas e rotas estaticas em `dist/`.
 
-- Secret `VERCEL_TOKEN`
-- Variable `VERCEL_ORG_ID`
-- Variable `VERCEL_PROJECT_ID`
-
-Sem essas configurações, não habilite o workflow no projeto novo.
+Nenhuma credencial ou identificador de projeto deve ser versionado neste repositorio.

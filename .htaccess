@@ -1,0 +1,73 @@
+Options -MultiViews
+DirectoryIndex index.html index.php
+
+<FilesMatch "^(data\.json|paid-orders\.json|connectpay-config\.php)$">
+  Order allow,deny
+  Deny from all
+  Require all denied
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Redireciona acessos diretos com .html para a URL limpa (301)
+  RewriteCond %{THE_REQUEST} /resultado\.html [NC]
+  RewriteRule ^resultado\.html$ /consulta-sagrada-revelacao-amorosa-v9b2 [R=301,L,QSA]
+  RewriteCond %{THE_REQUEST} /escrever-carta\.html [NC]
+  RewriteRule ^escrever-carta\.html$ /portal-sagrado-mapa-amoroso-inten-c84m [R=301,L,QSA]
+  RewriteCond %{THE_REQUEST} /chamada-ao-vivo-milena\.html [NC]
+  RewriteRule ^chamada-ao-vivo-milena\.html$ /sessao-individual-tarologa-milena-z61w [R=301,L,QSA]
+  RewriteCond %{THE_REQUEST} /obrigado\.html [NC]
+  RewriteRule ^obrigado\.html$ /confirmacao-atendimento-bencao-q39p [R=301,L,QSA]
+  RewriteCond %{THE_REQUEST} /privacidade\.html [NC]
+  RewriteRule ^privacidade\.html$ /politica-de-privacidade-sigilo-sagrado-p24 [R=301,L,QSA]
+  RewriteCond %{THE_REQUEST} /termos\.html [NC]
+  RewriteRule ^termos\.html$ /termos-de-uso-atendimento-espiritual-t18 [R=301,L,QSA]
+
+  # Se o arquivo ou diretório físico existe (ex: css, js, imagens, php), não reescreve
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Slugs com código de disfarce
+  RewriteRule ^consulta-sagrada-revelacao-amorosa.*$ resultado.html [L,QSA]
+  RewriteRule ^portal-sagrado-mapa-amoroso.*$ escrever-carta.html [L,QSA]
+  RewriteRule ^sessao-individual-tarologa-milena.*$ chamada-ao-vivo-milena.html [L,QSA]
+  RewriteRule ^confirmacao-atendimento-bencao.*$ obrigado.html [L,QSA]
+  RewriteRule ^politica-de-privacidade.*$ privacidade.html [L,QSA]
+  RewriteRule ^termos-de-uso.*$ termos.html [L,QSA]
+  RewriteRule ^canal-oficial-contato.*$ contato/index.html [L,QSA]
+
+  # Slugs curtas sem .html
+  RewriteRule ^resultado/?$ resultado.html [L,QSA]
+  RewriteRule ^escrever-carta/?$ escrever-carta.html [L,QSA]
+  RewriteRule ^chamada-ao-vivo-milena/?$ chamada-ao-vivo-milena.html [L,QSA]
+  RewriteRule ^obrigado/?$ obrigado.html [L,QSA]
+  RewriteRule ^privacidade/?$ privacidade.html [L,QSA]
+  RewriteRule ^termos/?$ termos.html [L,QSA]
+  RewriteRule ^contato/?$ contato/index.html [L,QSA]
+
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/html "access plus 0 seconds"
+  ExpiresByType text/css "access plus 0 seconds"
+  ExpiresByType application/javascript "access plus 0 seconds"
+  ExpiresByType text/javascript "access plus 0 seconds"
+  ExpiresByType image/jpeg "access plus 30 days"
+  ExpiresByType image/png "access plus 30 days"
+  ExpiresByType image/webp "access plus 30 days"
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0" "expr=%{REQUEST_URI} !~ m#^/contato/?#"
+  Header set Pragma "no-cache" "expr=%{REQUEST_URI} !~ m#^/contato/?#"
+  Header set Expires "0" "expr=%{REQUEST_URI} !~ m#^/contato/?#"
+
+  Header set Cache-Control "private, max-age=604800" "expr=%{REQUEST_URI} =~ m#^/contato/?#"
+  Header unset Pragma "expr=%{REQUEST_URI} =~ m#^/contato/?#"
+  Header unset Expires "expr=%{REQUEST_URI} =~ m#^/contato/?#"
+</IfModule>

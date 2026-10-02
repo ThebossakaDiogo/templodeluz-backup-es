@@ -1,4 +1,49 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "vite build"
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/create-pix.php", "destination": "/api/create-pix" },
+    { "source": "/checkout-webhook.php", "destination": "/api/checkout-webhook" },
+    { "source": "/check-purchase.php", "destination": "/api/check-purchase" },
+    { "source": "/save-quiz-lead.php", "destination": "/api/save-quiz-lead" },
+    { "source": "/analytics/api.php", "destination": "/api/analytics" },
+    { "source": "/contato/api.php", "destination": "/api/generate-reading" },
+    { "source": "/contato/api_oraculo.php", "destination": "/api/generate-reading" },
+    { "source": "/contato/api_resposta.php", "destination": "/api/generate-reading" },
+    { "source": "/contato/save-schedule.php", "destination": "/api/save-schedule" },
+
+    { "source": "/consulta-sagrada-revelacao-amorosa-v9b2", "destination": "/resultado.html" },
+    { "source": "/consulta-sagrada-revelacao-amorosa-:match(.*)", "destination": "/resultado.html" },
+    { "source": "/consulta-sagrada-revelacao-amorosa", "destination": "/resultado.html" },
+    { "source": "/consulta-sagrada-:match(.*)", "destination": "/resultado.html" },
+    { "source": "/consulta-sagrada", "destination": "/resultado.html" },
+    { "source": "/resultado", "destination": "/resultado.html" },
+
+    { "source": "/portal-sagrado-mapa-amoroso-inten-c84m", "destination": "/escrever-carta.html" },
+    { "source": "/portal-sagrado-mapa-amoroso-:match(.*)", "destination": "/escrever-carta.html" },
+    { "source": "/escrever-carta", "destination": "/escrever-carta.html" },
+
+    { "source": "/sessao-individual-tarologa-milena-z61w", "destination": "/chamada-ao-vivo-milena.html" },
+    { "source": "/sessao-individual-tarologa-milena-:match(.*)", "destination": "/chamada-ao-vivo-milena.html" },
+    { "source": "/chamada-ao-vivo-milena", "destination": "/chamada-ao-vivo-milena.html" },
+
+    { "source": "/confirmacao-atendimento-bencao-q39p", "destination": "/obrigado.html" },
+    { "source": "/confirmacao-atendimento-bencao-:match(.*)", "destination": "/obrigado.html" },
+    { "source": "/obrigado", "destination": "/obrigado.html" },
+
+    { "source": "/politica-de-privacidade-sigilo-sagrado-p24", "destination": "/privacidade.html" },
+    { "source": "/politica-de-privacidade-:match(.*)", "destination": "/privacidade.html" },
+    { "source": "/privacidade", "destination": "/privacidade.html" },
+
+    { "source": "/termos-de-uso-atendimento-espiritual-t18", "destination": "/termos.html" },
+    { "source": "/termos-de-uso-:match(.*)", "destination": "/termos.html" },
+    { "source": "/termos", "destination": "/termos.html" },
+
+    { "source": "/canal-oficial-contato-atendimento-c31", "destination": "/contato/index.html" },
+    { "source": "/canal-oficial-contato-:match(.*)", "destination": "/contato/index.html" },
+    { "source": "/contato", "destination": "/contato/index.html" }
+  ]
 }

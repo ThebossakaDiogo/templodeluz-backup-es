@@ -1,55 +1,40 @@
-import { defineConfig } from "vite";
-import { tanstackStart } from "@tanstack/react-start/plugin/vite";
-import viteReact from "@vitejs/plugin-react";
-import tailwindcss from "@tailwindcss/vite";
-import { nitro } from "nitro/vite";
+import { defineConfig, type Plugin } from "vite";
+import react from "@vitejs/plugin-react";
 
-export default defineConfig(({ command }) => ({
-  plugins: [
-    tanstackStart({
-      server: { entry: "server" },
-    }),
-    viteReact(),
-    tailwindcss(),
-    ...(command === "build"
-      ? [
-          nitro({
-            preset: process.env["NITRO_PRESET"] || "vercel",
-          }),
-        ]
-      : []),
-  ],
-  resolve: {
-    tsconfigPaths: true,
-    dedupe: [
-      "react",
-      "react-dom",
-      "react/jsx-runtime",
-      "react/jsx-dev-runtime",
-      "@tanstack/react-query",
-      "@tanstack/query-core",
-    ],
-  },
+function cleanDisguisedRoutesPlugin(): Plugin {
+  return {
+    name: "clean-disguised-routes-plugin",
+    configureServer(server) {
+      server.middlewares.use((req, _res, next) => {
+        if (!req.url) return next();
+        const [pathname, search] = req.url.split("?");
+        const query = search ? `?${search}` : "";
+
+        if (/^\/consulta-sagrada-revelacao-amorosa.*|^\/resultado(\.html)?$/.test(pathname)) {
+          req.url = `/resultado.html${query}`;
+        } else if (/^\/portal-sagrado-mapa-amoroso.*|^\/escrever-carta(\.html)?$/.test(pathname)) {
+          req.url = `/escrever-carta.html${query}`;
+        } else if (/^\/sessao-individual-tarologa-milena.*|^\/chamada-ao-vivo-milena(\.html)?$/.test(pathname)) {
+          req.url = `/chamada-ao-vivo-milena.html${query}`;
+        } else if (/^\/confirmacao-atendimento-bencao.*|^\/obrigado(\.html)?$/.test(pathname)) {
+          req.url = `/obrigado.html${query}`;
+        } else if (/^\/politica-de-privacidade.*|^\/privacidade(\.html)?$/.test(pathname)) {
+          req.url = `/privacidade.html${query}`;
+        } else if (/^\/termos-de-uso.*|^\/termos(\.html)?$/.test(pathname)) {
+          req.url = `/termos.html${query}`;
+        } else if (/^\/canal-oficial-contato.*|^\/contato(\.html)?$/.test(pathname)) {
+          req.url = `/contato/index.html${query}`;
+        }
+        next();
+      });
+    },
+  };
+}
+
+export default defineConfig({
+  plugins: [cleanDisguisedRoutesPlugin(), react()],
   build: {
     target: "es2022",
-    cssMinify: true,
     sourcemap: false,
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes("node_modules")) {
-            if (/react(-dom)?\//.test(id) || id.includes("/react/")) return "vendor-react";
-            if (id.includes("@tanstack/")) return "vendor-router";
-            if (id.includes("framer-motion")) return "vendor-motion";
-            if (id.includes("qrcode.react")) return "vendor-qr";
-            if (id.includes("lucide-react") || id.includes("@radix-ui/") || id.includes("sonner")) {
-              return "vendor-ui";
-            }
-            return "vendor";
-          }
-          return undefined;
-        },
-      },
-    },
   },
-}));
+});
